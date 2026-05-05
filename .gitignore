@@ -1,0 +1,43 @@
+# Data — never commit (474M of parquet)
+data/
+*.parquet
+*.csv
+*.h5
+*.feather
+*.pkl
+
+# Model artifacts
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.onnx
+checkpoints/
+runs/
+wandb/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.ipynb_checkpoints/
+*.egg-info/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Submission artifacts
+submission.zip
+submissions/
+
+# But DO commit example weights since they're small reference baselines
+!examples/example_official/best_val_model.pth
+!examples/mmpc_demo/best_model.pt
