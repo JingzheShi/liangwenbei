@@ -1,0 +1,71 @@
+{
+  "args": {
+    "held": 2,
+    "epochs": 6,
+    "batch_size": 1024,
+    "lr": 0.0005,
+    "weight_decay": 0.005,
+    "num_workers": 4,
+    "seed": 42,
+    "patience": 2,
+    "swa_topk": 1,
+    "label_smoothing": 0.1,
+    "aug_a_lo": 0.8,
+    "aug_a_hi": 1.2,
+    "warmup_steps": 100,
+    "data_dir": "/root/projects/liangwenbei_workdir/data",
+    "stats": "/root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/stats.npz",
+    "out_dir": "/root/projects/liangwenbei_workdir/experiments/T32_nn_h60",
+    "no_wandb": false,
+    "wandb_project": "liangwenbei",
+    "wandb_entity": "jingzheshi"
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.0824597961067843,
+      "val_h60_cum_pnl_argmax": -28.064722710489654,
+      "val_h60_cum_pnl_T045d010": -2.3374582119378386,
+      "val_h60_acc": 0.5162187839305103,
+      "val_loss_proxy": 1.0245779752731323
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.0710770698550678,
+      "val_h60_cum_pnl_argmax": -5.527260100692027,
+      "val_h60_cum_pnl_T045d010": 0.5860751928497387,
+      "val_h60_acc": 0.5285016286644951,
+      "val_loss_proxy": 1.00052011013031
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.0565426965882527,
+      "val_h60_cum_pnl_argmax": -12.194590962007572,
+      "val_h60_cum_pnl_T045d010": -1.718053966348784,
+      "val_h60_acc": 0.5207103352334419,
+      "val_loss_proxy": 1.0119165182113647
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.0342467358379546,
+      "val_h60_cum_pnl_argmax": -17.760445459754244,
+      "val_h60_cum_pnl_T045d010": -4.572686985780374,
+      "val_h60_acc": 0.5063831772529859,
+      "val_loss_proxy": 1.020228385925293
+    }
+  ],
+  "best_epoch": 2,
+  "best_val_h60_thr_pnl": 0.5860751928497387,
+  "swa_topk_pnls": [
+    0.5860751928497387
+  ],
+  "val_swa_argmax_pnl": -5.527260100692027,
+  "val_swa_thr_pnl": 0.5860751928497387,
+  "test_argmax_pnl": -13.97163189913518,
+  "test_thr_pnl": -1.272630372725685,
+  "test_argmax_dist": [
+    0,
+    1,
+    2
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "args": {
+    "held": 1,
+    "epochs": 6,
+    "batch_size": 1024,
+    "lr": 0.0005,
+    "weight_decay": 0.005,
+    "num_workers": 4,
+    "seed": 42,
+    "patience": 2,
+    "swa_topk": 1,
+    "label_smoothing": 0.1,
+    "aug_a_lo": 0.8,
+    "aug_a_hi": 1.2,
+    "warmup_steps": 100,
+    "data_dir": "/root/projects/liangwenbei_workdir/data",
+    "stats": "/root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/stats.npz",
+    "out_dir": "/root/projects/liangwenbei_workdir/experiments/T32_nn_h60",
+    "no_wandb": false,
+    "wandb_project": "liangwenbei",
+    "wandb_entity": "jingzheshi"
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.0802845527150131,
+      "val_h60_cum_pnl_argmax": -11.324134865931573,
+      "val_h60_cum_pnl_T045d010": -1.067619254983519,
+      "val_h60_acc": 0.5377010382736156,
+      "val_loss_proxy": 1.0048528909683228
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.0690643723170514,
+      "val_h60_cum_pnl_argmax": -11.999444762763975,
+      "val_h60_cum_pnl_T045d010": -1.9518444074305523,
+      "val_h60_acc": 0.5392703243756786,
+      "val_loss_proxy": 0.9949652552604675
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.058109928689554,
+      "val_h60_cum_pnl_argmax": -10.383108667826738,
+      "val_h60_cum_pnl_T045d010": 2.969188253545302,
+      "val_h60_acc": 0.520120792616721,
+      "val_loss_proxy": 1.0147011280059814
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.041470848198666,
+      "val_h60_cum_pnl_argmax": -5.351593261513175,
+      "val_h60_cum_pnl_T045d010": 2.3116627098457436,
+      "val_h60_acc": 0.5255836047774158,
+      "val_loss_proxy": 1.0035386085510254
+    },
+    {
+      "epoch": 5,
+      "train_loss": 1.0236441619907846,
+      "val_h60_cum_pnl_argmax": -8.023140217761654,
+      "val_h60_cum_pnl_T045d010": -0.9744751433169685,
+      "val_h60_acc": 0.5217791463083605,
+      "val_loss_proxy": 1.0061225891113281
+    }
+  ],
+  "best_epoch": 3,
+  "best_val_h60_thr_pnl": 2.969188253545302,
+  "swa_topk_pnls": [
+    2.969188253545302
+  ],
+  "val_swa_argmax_pnl": -10.383108667826738,
+  "val_swa_thr_pnl": 2.969188253545302,
+  "test_argmax_pnl": -20.94696625834172,
+  "test_thr_pnl": -10.8065452499845,
+  "test_argmax_dist": [
+    0,
+    1,
+    2
+  ]
+}

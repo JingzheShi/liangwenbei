@@ -1,0 +1,20 @@
+{
+  "task": "T32 NN h_60 + aug_a, NN+LGB ensemble — negative result",
+  "metrics": {
+    "nn_only_loso_sum_cum_pnl_T0.45_d0.10": -16.97,
+    "nn_only_loso_sum_argmax_cum_pnl": -46.45,
+    "nn_only_loso_sum_per_fold_thr": [0.32, -10.81, -1.27, 0.08, -5.29],
+    "nn_only_best_grid_T_d_label": "T=0.70, d=0.00, sum=-0.17 (only fold 1+2 active, total 609 trades)",
+    "lgb_5seed_loso_sum_cum_pnl_baseline": 11.46,
+    "best_ensemble_alpha": 0.0,
+    "best_ensemble_T": 0.45,
+    "best_ensemble_d": 0.10,
+    "best_ensemble_sum_cum_pnl": 11.46,
+    "delta_vs_lgb_only": 0.0,
+    "alpha_0.05_sum_cum_pnl": 10.71,
+    "alpha_0.10_sum_cum_pnl": 10.42,
+    "alpha_0.20_sum_cum_pnl": 9.18,
+    "iter_007_built": false
+  },
+  "notes": "Single-seed DeepLOB h_60 (single-head, dropout 0.4/0.5, wd=5e-3, label_smooth=0.1, aug_a in z-score space, swa_topk=1, patience=2). 5-fold LOSO OOF sums to -16.97 vs. iter_005b LGB +11.46. Combine sweep across alpha 0..1 monotonically degrades from +11.46; even alpha=0.05 drops to +10.71. NN argmax 91% class 1 (heavy neutral bias) and only 0.3% of rows hit max(p0,p2)>=0.45 vs LGB 3.8%. NN val/test OOD gap is much wider than LGB: e.g. fold 1 val=+2.97 -> test=-10.81. Decision: skip iter_007. iter_005b remains best."
+}

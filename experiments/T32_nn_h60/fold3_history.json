@@ -1,0 +1,63 @@
+{
+  "args": {
+    "held": 3,
+    "epochs": 6,
+    "batch_size": 1024,
+    "lr": 0.0005,
+    "weight_decay": 0.005,
+    "num_workers": 4,
+    "seed": 42,
+    "patience": 2,
+    "swa_topk": 1,
+    "label_smoothing": 0.1,
+    "aug_a_lo": 0.8,
+    "aug_a_hi": 1.2,
+    "warmup_steps": 100,
+    "data_dir": "/root/projects/liangwenbei_workdir/data",
+    "stats": "/root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/stats.npz",
+    "out_dir": "/root/projects/liangwenbei_workdir/experiments/T32_nn_h60",
+    "no_wandb": false,
+    "wandb_project": "liangwenbei",
+    "wandb_entity": "jingzheshi"
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.0820169310068484,
+      "val_h60_cum_pnl_argmax": -20.038880603779063,
+      "val_h60_cum_pnl_T045d010": -1.2228949662020394,
+      "val_h60_acc": 0.48132125407166126,
+      "val_loss_proxy": 1.038120985031128
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.0725695864207634,
+      "val_h60_cum_pnl_argmax": -19.481897287912254,
+      "val_h60_cum_pnl_T045d010": -4.915038114419511,
+      "val_h60_acc": 0.47432308631921827,
+      "val_loss_proxy": 1.0415244102478027
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.0619159789835237,
+      "val_h60_cum_pnl_argmax": -26.278637347627004,
+      "val_h60_cum_pnl_T045d010": -6.591372122568186,
+      "val_h60_acc": 0.4686142779587405,
+      "val_loss_proxy": 1.0466138124465942
+    }
+  ],
+  "best_epoch": 1,
+  "best_val_h60_thr_pnl": -1.2228949662020394,
+  "swa_topk_pnls": [
+    -1.2228949662020394
+  ],
+  "val_swa_argmax_pnl": -20.038880603779063,
+  "val_swa_thr_pnl": -1.2228949662020394,
+  "test_argmax_pnl": -0.33414287239561835,
+  "test_thr_pnl": 0.07650038517448463,
+  "test_argmax_dist": [
+    0,
+    1,
+    2
+  ]
+}
