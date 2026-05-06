@@ -1,0 +1,38 @@
+{
+  "task": "T3-features-v1: 5-class feature engineering module + 1200-file cache",
+  "metrics": {
+    "n_new_features": 72,
+    "n_mlofi_cols": 30,
+    "n_wmp_cols": 11,
+    "n_rv_cols": 4,
+    "n_ewma_cols": 24,
+    "n_time_cols": 3,
+    "n_sessions_cached": 1200,
+    "cache_size_gb": 1.54,
+    "build_time_s_8workers": 10.4,
+    "compute_time_per_session_ms": 22.5,
+    "unit_tests_passed": 8,
+    "unit_tests_total": 8,
+    "top1_pearson_label_5": 0.1293,
+    "top1_pearson_label_5_feature": "ewma_a0.5_mb_intst",
+    "top1_pearson_label_60": 0.0636,
+    "top1_pearson_label_60_feature": "ewma_a0.05_ca_intst"
+  },
+  "outputs": {
+    "code": [
+      "experiments/T3_features_v1/compute.py",
+      "experiments/T3_features_v1/build_cache.py",
+      "experiments/T3_features_v1/test_compute.py",
+      "experiments/T3_features_v1/analyze.py"
+    ],
+    "report": "experiments/T3_features_v1/report.md",
+    "figures": [
+      "experiments/T3_features_v1/figures/mlofi.png",
+      "experiments/T3_features_v1/figures/wmp.png",
+      "experiments/T3_features_v1/figures/rv.png",
+      "experiments/T3_features_v1/figures/ewma_intst.png"
+    ],
+    "cache": "data/features_v1/snapshot_sym{0..4}_date{0..119}_{am,pm}.parquet (1200 files, 1.54 GB, gitignored)"
+  },
+  "notes": "All 5 short-list features (MLOFI, WMP, RV, EWMA-intst, time-encoding) implemented vectorized, leakage-safe, cross-session-isolated. EWMA buy intensities (mb/lb) dominate short-horizon labels; MLOFI deep-level W=60 emerges for label_60. Cache is 235 cols x 2001 rows per file, ready for downstream LGBM/NN workers. WMP/RV did not crack top-20 in raw Pearson but should help via interactions and lags."
+}
