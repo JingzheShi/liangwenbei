@@ -16,6 +16,12 @@
 
 ## 规则
 - GPU 训练：先 `nvidia-smi` 找空闲 GPU，用 `CUDA_VISIBLE_DEVICES` 指定
+- **本地 LightGBM/CatBoost/XGBoost 训练默认用 GPU**（实测在 1.47M × 226 数据上 GPU 比 CPU 快 ~3.2x：38s → 12s）
+  - LightGBM: `params['device'] = 'gpu'; params['gpu_use_dp'] = False`
+  - CatBoost: `task_type='GPU'`（必须先安装 CatBoost-GPU 版本）
+  - XGBoost: `params['tree_method'] = 'gpu_hist'` 或 `device='cuda'`
+  - **注意**：提交包内 Predictor 仍用 CPU 推理（平台 CPU 模式 16 核够用，且 GPU LightGBM wheel 不通用）
+  - 训完后保存 model.txt，推理时无 device 限制（CPU/GPU 都能 load）
 - 特征构建：NumPy/Pandas 向量化，禁止 Python for 循环
 - 安装依赖前先检查：`python3 -c "import xxx" 2>/dev/null || pip install xxx -q`
 - 训练日志写入 workdir/train.log
