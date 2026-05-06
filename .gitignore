@@ -25,6 +25,11 @@ venv/
 .ipynb_checkpoints/
 *.egg-info/
 
+# Feature caches & experiment-internal heavy artifacts
+*.npz
+experiments/*/cache/
+data/features_v1/
+
 # OS / IDE
 .DS_Store
 .vscode/
