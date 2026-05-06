@@ -475,3 +475,63 @@ R13 关注**后处理与决策规则**（calibration、Bayes EV gating、z-score
 - 推理时改决策 → 更好地 exploit 训练后的 p̂（R13 D/E/F）
 
 **整合实施序列**：先 S1 (周一)，再 S2 (周二-三)，再 R13-D (周四)，再 S7 (周五-周一 meta-labeling)。每步独立 ablation。
+
+---
+
+## 10. R31 — 2024-2026 HFT/LOB SOTA 调研（2026-05-06，R31 worker）
+
+### 主交付物
+
+- [`r31_hft_2024_2026.md`](r31_hft_2024_2026.md) — **31 篇 2024-2026 paper survey** + Top 5 推荐 + 7-14 天实施 roadmap；**专注 R10/R11/R12/R13/R20 未覆盖的最新工作**
+
+### 关键 paper 摘要（`r31_papers/`）
+
+- `r31_papers/revol_lee_2025.md` — **ReVol** (2508.20108)，per-sample log-return / vol normalization；Top 1 推荐
+- `r31_papers/order_book_filtration_2025.md` — **Order Filtration** (2507.22712)，三套 stateless noise filter；Top 2 推荐
+- `r31_papers/crypto_lob_better_inputs_2025.md` — **"Better Inputs"** (2506.05764)，Savitzky-Golay 平滑 + XGBoost 超 DeepLOB；Top 3 推荐
+- `r31_papers/tradefm_2026.md` — **TradeFM** (2602.23784，J.P. Morgan AI 2026)，scale-invariant features + universal tokenization 思想 → 强烈支持我们 sym-agnostic 设计
+- `r31_papers/revisiting_tsfm_finance_2025.md` — **Re(Visiting) TSFMs in Finance** (2511.18578)，generic TSFM zero-shot 失败、CatBoost 优于 TimesFM；验证 GBDT 主路线
+- `r31_papers/tlob_mlplob_berti_2025.md` — **TLOB / MLPLOB** (2502.15757 v3)，MLPLOB 纯 MLP 达 LOB SOTA；NN-baseline 候选
+- `r31_papers/hybrid_var_fnn_ofi_2024.md` — **Hybrid VAR + FNN** (2411.08382)，linear backbone + GBDT-on-residual 思路
+- `r31_papers/lob_bench_2025.md` — **LOB-Bench** (2502.09172)，长 horizon "derailment" 警告 → h_60 增益预算 < h_10
+- `r31_papers/volatility_moe_2025.md` — **Volatility-Conditional MoE** (2508.02686)，可移植为 GBDT 双 model + soft gate
+
+### 核心 takeaways
+
+1. **2025 年金融 ML 大事件 — 通用 TSFM 在金融 zero-shot 失败**（P3 Re(Visiting)，CatBoost OOS R² > TimesFM 500M）。**直接证伪 "Chronos / TimesFM 拿来即用"** 的诱惑；**支持我们 LightGBM 主路线**。
+2. **2026 年 J.P. Morgan AI 推 TradeFM**（524M trade-flow foundation model on 9K equities），**核心是 scale-invariant features + universal tokenization** —— **与我们 sym-agnostic 硬约束高度对齐**。
+3. **如果只能跑 3 个新方案**（**与 R10/R11/R12/R13 互补，独立 ablation**）：
+   - 🥇 **ReVol normalization** (P17)：per-sample (μ̂, σ̂) GBM-启发 closed-form ε 变换；预期 LOSO h_10 +3~+8；0.5-1 day
+   - 🥈 **Order Book Filtration** (P16)：lifetime / modification-count / modification-time 三 filter 滤掉 fleeting/spoofing；预期 +1~+5；1 day
+   - 🥉 **Savitzky-Golay smoothing** (P10)：每条 LOB feature 加 SG-smooth 副本，0.5 day；预期 +1~+3
+4. **MLPLOB 颠覆"LOB 必须 conv+LSTM"**（P9 Berti 2025）：纯 MLP 在 FI-2010 / Tesla / Intel / 2023-BTC 全面达 SOTA。如果 GBDT 触底，**先试 MLPLOB（不是 TLOB）**。
+5. **长 horizon 难** — LOB-Bench (P5) 验证 generative 模型 horizon 延长后剧烈漂移。我们 **h_60 增益预算 < h_10**，凡 R31 lever 都先 h_10 ablate。
+6. **短链 hybrid backbone**（P14 VAR + FNN）— 思路可移植为 Ridge backbone + LightGBM-on-residual；LOSO 跨股 时线性结构更 invariant。
+7. **Volatility-conditional MoE**（P23）— 训 (lgb_low, lgb_high) 双 model + soft gate by realized_vol，stateless 兼容；与 R12 ensemble 正交可叠加。
+8. **不要做的事**：
+   - ❌ Chronos / TimesFM zero-shot
+   - ❌ 用 generative LOB model（LOBS5/RWKV/cGAN）当 directional 信号
+   - ❌ Sector embedding / sym embedding（违反硬约束 #3）
+   - ❌ Bidirectional Mamba / 双向 Transformer encoder（看未来，违反硬约束 #2）
+   - ❌ 在 h_60 上投太多增益预算（derailment 限制）
+
+### 与既有 R10/R11/R12/R13/R20 的关系
+
+| R31 lever | 与现有 R 报告关系 |
+|---|---|
+| ReVol | **正交并强化** R11 OOD（global normalization 的高阶版） |
+| Order Filtration | **正交** R11/R12/R13；纯 feature engineering |
+| Savitzky-Golay | **正交** R11/R12/R13；feature 输入侧的 smoothing |
+| Volatility MoE | 与 R12 ensemble **正交** 可叠加（R12 平均，本方案 switch） |
+| MLPLOB | 与 R12 NN ensemble 同路线；先做 baseline |
+| VAR-residual | 反向 R12 stacking（先 linear 再 boost） |
+| Multi-class isotonic NA-FIR (P26) | **直接补充** R13 D（calib 后再 z-gate） |
+
+### Kaggle Jane Street RTM 2024-2025 winners
+
+- 1st = Team **HAO LI**；2nd = **Patrick Yam**；8th = **Evgeniia Grigoreva**
+- Kaggle Discussion 暂未公开 1st 详细 writeup；只有 YouTube *Kaggle Winners Walkthroughs* 系列视频
+  - https://www.youtube.com/watch?v=gzgg6txCfd8 (HAO LI 1st)
+  - https://www.youtube.com/watch?v=26NozcM6X3k (Patrick Yam 2nd)
+  - https://www.youtube.com/watch?v=lXYC0c7wJFU (Evgeniia Grigoreva 8th)
+- 后续 worker 可手动看视频提取 trick
