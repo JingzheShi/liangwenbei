@@ -1,0 +1,73 @@
+{
+  "task": "T22 LOSO Scheme Ic",
+  "scheme": "Ic",
+  "n_features": 247,
+  "horizons": [
+    10
+  ],
+  "target_syms": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "results": [
+    {
+      "scheme": "Ic",
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 0,
+      "best_iter": 97,
+      "train_time_sec": 41.94621801376343,
+      "held_out_cum_pnl": -3.546882951504284,
+      "held_out_acc": 0.4062726203402099,
+      "held_out_n_active": 63238
+    },
+    {
+      "scheme": "Ic",
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 1,
+      "best_iter": 177,
+      "train_time_sec": 64.36455130577087,
+      "held_out_cum_pnl": -0.23160456728640266,
+      "held_out_acc": 0.3963083604777416,
+      "held_out_n_active": 79186
+    },
+    {
+      "scheme": "Ic",
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 2,
+      "best_iter": 185,
+      "train_time_sec": 65.66422414779663,
+      "held_out_cum_pnl": 2.937965747253725,
+      "held_out_acc": 0.6184287911690192,
+      "held_out_n_active": 40118
+    },
+    {
+      "scheme": "Ic",
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 3,
+      "best_iter": 242,
+      "train_time_sec": 73.66697216033936,
+      "held_out_cum_pnl": 2.123704118865862,
+      "held_out_acc": 0.88179741223308,
+      "held_out_n_active": 8873
+    },
+    {
+      "scheme": "Ic",
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 4,
+      "best_iter": 90,
+      "train_time_sec": 30.54013967514038,
+      "held_out_cum_pnl": 6.730827326943918,
+      "held_out_acc": 0.4973647303655447,
+      "held_out_n_active": 61864
+    }
+  ],
+  "elapsed_sec": 298.23807740211487
+}

@@ -1,0 +1,14 @@
+{
+  "status": "done",
+  "step": "T22 complete — report + results written, ready to commit",
+  "timestamp": "2026-05-06T17:23:00Z",
+  "task": "T22 Alpha101 + Alpha191 natural-fit subset",
+  "alpha101_implemented": 33,
+  "alpha191_implemented": 124,
+  "schemes_run": ["Ia", "Ib", "Ic"],
+  "best_loso_sum": 21.805,
+  "iter_002_baseline": 21.86,
+  "iter_003_baseline": 22.22,
+  "iter_004_decision": "no_iter_004",
+  "reason": "best Ic = +21.80 < +22.5 threshold; alphas in natural-fit form don't add signal beyond Scheme C 226d"
+}
