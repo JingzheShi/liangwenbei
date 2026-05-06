@@ -41,3 +41,14 @@ submissions/
 # But DO commit example weights since they're small reference baselines
 !examples/example_official/best_val_model.pth
 !examples/mmpc_demo/best_model.pt
+
+# DO commit the actual submission zip per iter as archived artifact (typically < 5MB)
+!submission/iter_*/submission.zip
+# 同样 commit iter_000 复用的 demo 权重，便于复现这个 baseline iter
+!submission/iter_000_mmpc_demo/best_model.pt
+
+# Worker progress / results JSON (regenerated on every worker run)
+worker-progress*.json
+results_*.json
+research_and_history/research_results.json
+research_and_history/results_*.json

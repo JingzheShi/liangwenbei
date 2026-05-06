@@ -54,6 +54,9 @@ pnl_single = [ (label−1)·(midprice_{t+n}−midprice_t)
 
 ## 3. 数据 schema（每 parquet 2001 行 × 163 列，无 NaN）
 
+> **完整字段权威说明 → [`docs/data_schema.md`](docs/data_schema.md)**（官方版，任何代码与之不一致以官方为准）。
+> 下面是速查版。
+
 ### 信息戳
 - `date`(0–119), `sym`(0–4), `time`(实际时间戳, 3s/档)
 - AM 09:40:00–11:20:00, PM 13:10:00–14:50:00（两端各剃掉 10 分钟）

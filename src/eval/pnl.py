@@ -1,9 +1,11 @@
 """
 本地 PnL 评测器 — 严格按"良文杯"官方评分公式实现。
 
-PDF 1.5:
+官方公式（平台网页 + PDF 1.5；网页与 PDF 仅在分子第二项的 |·| 写法上有差异，
+数学等价；本实现以网页版为准、含显式 abs）：
+
     pnl_single = [ (label_pred - 1) * (midprice_{t+n} - midprice_t)
-                   - fee_rate * |label_pred - 1| * ((midprice_{t+n}+1) + (midprice_t+1)) ]
+                   - fee_rate * |label_pred - 1| * | (midprice_{t+n}+1) + (midprice_t+1) | ]
                  / (midprice_t + 1)
 
 含义：
@@ -14,6 +16,9 @@ PDF 1.5:
 - 累计收益率 = sum(pnl_single) — 这是模型评分。
 - 单次收益率 = 累计 / (涨预测数 + 跌预测数)。
 - 5 个 horizon 各算一份分；最高的那个用于排名。
+
+注：在合法输入范围内 (midprice > -1)，(midprice_{t+n}+1)+(midprice_t+1) 恒 > 0，
+因此 abs 在数学上是多余的；保留 abs 仅为与官方文本逐字一致 + 边界鲁棒性。
 """
 from __future__ import annotations
 
@@ -64,11 +69,13 @@ def _per_horizon_metrics(
     mp_tn = midprice_tn_h.astype(np.float64)
     n_total = int(pred_h.shape[0])
 
-    # ---------- PnL (vectorized) ----------
+    # ---------- PnL (vectorized, 严格按官方网页公式 — 含显式 abs) ----------
     side = pred_h.astype(np.float64) - 1.0          # -1, 0, +1
     abs_side = np.abs(side)                          # 0 或 1
     diff = mp_tn - mp_t                              # (N,)
-    fee = fee_rate * abs_side * ((mp_tn + 1.0) + (mp_t + 1.0))
+    # fee 项 = 0.0001 * |label-1| * | (mp_tn+1) + (mp_t+1) |
+    # 在合法输入下 (midprice > -1) 内层和恒正，abs 数学多余但与官方文本逐字对齐
+    fee = fee_rate * abs_side * np.abs((mp_tn + 1.0) + (mp_t + 1.0))
     denom = mp_t + 1.0                               # > 0 (除非股价归零)
     # 安全：实际 midprice 是相对涨跌幅，>-1，所以 denom > 0
     pnl = (side * diff - fee) / denom                # (N,)
