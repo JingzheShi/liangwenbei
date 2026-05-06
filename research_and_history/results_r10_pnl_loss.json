@@ -1,0 +1,50 @@
+{
+  "task": "R10 — PnL-aware / utility-aware loss functions for LightGBM and NN",
+  "metrics": {
+    "n_websearches": 16,
+    "n_webfetches": 13,
+    "n_schemes_proposed": 10,
+    "n_paper_summaries": 10,
+    "expected_LOSO_h10_gain_top1": "+6 to +15 (S2: custom LightGBM PnL multiclass obj)",
+    "expected_LOSO_h10_gain_top2": "+3 to +6 (S1: |Delta_p| sample weight)",
+    "expected_LOSO_h10_gain_S7_metalabel": "+10 to +25 (Lopez de Prado meta-labeling)"
+  },
+  "deliverables": [
+    "research_and_history/r10_pnl_loss.md (10 schemes + Top-2 + code template)",
+    "research_and_history/r10_papers/finance_grounded_khubiyev_2025.md",
+    "research_and_history/r10_papers/stockloss_2025.md",
+    "research_and_history/r10_papers/return_weighted_ce_2502_2025.md",
+    "research_and_history/r10_papers/yirun_jane_street_2021.md",
+    "research_and_history/r10_papers/volkova_jane_street_2024.md",
+    "research_and_history/r10_papers/hyd_optiver_2023.md",
+    "research_and_history/r10_papers/lopez_de_prado_meta_labeling.md",
+    "research_and_history/r10_papers/moody_saffell_1998.md",
+    "research_and_history/r10_papers/lightgbm_custom_objective_howto.md",
+    "research_and_history/r10_papers/triple_barrier_lopez_de_prado.md",
+    "research_and_history/history_and_important_notes.md (R10 section appended)"
+  ],
+  "top_picks": {
+    "rank_1": "S2 — LightGBM custom multiclass PnL objective: softmax + per-class reward (r_k = (k-1)*Delta_p - 2*fee*1[k!=1]), loss = -E[reward] + entropy reg, closed-form gradient/hessian, CE-warmstart 50 rounds, drop-in iter_002 Scheme C",
+    "rank_2": "S1 — sample_weight = clip(|Delta_p|, q99) in lgb.Dataset (single line), composes with S2"
+  },
+  "ruled_out": [
+    "S5 differentiable Sharpe (wrong objective for raw cumulative PnL leaderboard)",
+    "S10 continuous bet sizing (platform requires discrete {0,1,2})",
+    "S3 cost matrix CE (mathematically same as S2 under our fee structure)"
+  ],
+  "key_findings": [
+    "Volkova (Jane Street 2024 1st) used weighted MSE NOT custom utility loss — argues for S1 first",
+    "Yirun (Jane Street 2021 1st) used utility-as-loss + SAE+MLP — validates S2/S4 in production",
+    "HYD (Optiver 2023 1st) used MAE regression — argues for S6 alternative",
+    "arxiv 2509.04541 (Khubiyev 2025): MSE Sharpe -0.46 -> MDDLoss Sharpe 1.76 on same LSTM",
+    "arxiv 2502.17493 (return-weighted CE): CNN 33.73% -> 61.73% annual return (this is exactly our S1)",
+    "Lopez de Prado meta-labeling generalizes our hand-coded threshold gate (T=0.55, delta=0.10)"
+  ],
+  "implementation_priority": [
+    "Day 1: ship S1 (sample weight) as low-risk improvement",
+    "Day 2-3: ship S2 (custom LGBM PnL obj) with CE warm-start + entropy reg",
+    "Day 4: stack S8 (isotonic + EV gating) on top",
+    "Day 5-7: explore S7 (meta-labeling) as biggest potential lever"
+  ],
+  "notes": "Strict adherence to CRITICAL_CONSTRAINTS.md: Delta_p used at training time only via cached midprice_diff_h, never seen by Predictor. All schemes are sym-agnostic. No platform contract change. CE warm-start + entropy regularizer are mandatory for S2 to avoid collapse. Hessian uses diagonal Newton approximation, standard for multiclass focal-loss type custom objectives."
+}

@@ -264,6 +264,11 @@ mmpc_demo（官方 demo）在平台 test 集上**全 5 horizon 都是负分**：
 | 日期 | 类别 | trick 名 | 来源 | 状态 | 效果 |
 |---|---|---|---|---|---|
 | 2026-05-06 | post-proc | 阈值后处理（pred=1 但 model logit 偏离很远时翻转） | 评测器 sanity check 副产品 | idea | — |
+| 2026-05-06 | loss | **S1: 用 \|Δp\| 作 sample_weight, CE 不变** | R10/arxiv 2502.17493、Volkova JS 2024 1st、HYD Optiver 2023 1st | idea | 文献：CE 33.73%→61.73% return; 我们：期望 +3~+6 LOSO h_10 |
+| 2026-05-06 | loss | **S2: LightGBM custom multiclass PnL objective** (softmax E[reward] maximization + entropy reg) | R10/arxiv 2509.04541 (Khubiyev 2025) + Yirun JS 2021 1st | idea | 文献：MSE Sharpe -0.46 → MDDLoss Sharpe 1.76; 我们：期望 +6~+15 LOSO h_10 |
+| 2026-05-06 | loss | S6: regression on signed Δp + threshold（替代 3-class） | R10/HYD Optiver 2023 1st (MAE) | idea | 期望 +3~+8 |
+| 2026-05-06 | loss/post-proc | **S7: meta-labelling**（M1 direction + M2 should-trade） | R10/Lopez de Prado Adv Fin ML Ch 3 + Hudson&Thames | idea | 文献：accuracy 17%→63% (mean reversion); 我们：期望 +10~+25 |
+| 2026-05-06 | post-proc | **S8: isotonic calibration + EV gating** | R10/sklearn + Lopez Ch 12 | idea | 期望 +2~+6, stacks with S1/S2/S7 |
 
 ---
 
@@ -287,7 +292,12 @@ mmpc_demo（官方 demo）在平台 test 集上**全 5 horizon 都是负分**：
 
 - [ ] **LightGBM/XGBoost vs 深度模型在我们数据上的实测**（理论上 GBDT 在 tabular feat 上很强；实证 by Worker C）
 - [ ] **多任务（5 horizon head）loss 加权**：均匀 vs 按 PnL upper bound 加权（label_60 上限最高）— 实验问题
-- [ ] **PnL-aware loss 设计**：直接优化 cumulative PnL；可参考 portfolio-aware loss（Zhang 2020）— 待实验
+- [x] **PnL-aware loss 设计** [R10 worker 已调研，2026-05-06] — 详见 [`r10_pnl_loss.md`](r10_pnl_loss.md) + [`r10_papers/`](r10_papers/)。10 个具体方案 + top-2 推荐：
+  - **🥇 S2: LightGBM custom multiclass objective**（per-class reward = (label-1)·Δp - 2·fee·1[label≠1]，softmax expected PnL maximization + entropy regularizer）— closed-form gradient/hessian，CE 50 轮 warm-start，期望 LOSO h_10 +21.86 → +30~+40。代码模板见 [`r10_papers/lightgbm_custom_objective_howto.md`](r10_papers/lightgbm_custom_objective_howto.md)
+  - **🥈 S1: 用 |Δp| 作 sample_weight**（CE 不变，1 行代码）— 来源 arxiv 2502.17493 (CNN: 33.73%→61.73% return)、Volkova/Jane Street 2024 1st、HYD/Optiver 2023 1st 都用此。期望 +3~+6
+  - 关键实证：Volkova（Jane Street 2024 1st）和 HYD（Optiver 2023 1st）**都没用 custom utility loss**——都是 weighted MSE/MAE。Yirun（Jane Street 2021 1st）才用了 utility-as-loss。**先 ship S1 再 try S2**
+  - 已 rule out：S5 differentiable Sharpe（错误目标，我们 metric 是 raw Σpnl），S10 continuous bet sizing（平台要求 {0,1,2}）
+  - Stack 推荐：**S1 + S2 + S8 (isotonic + EV gating)** 三层都能叠加
 - [ ] **Threshold 后处理**：评测器 sanity check 已发现潜力（见 §1 结论 4）— 待实验
 - [ ] **Ensemble 策略**：multi-arch (CNN + MLPLOB + Transformer + LightGBM) middle-60% averaging（Jane Street 1st 的 trick）— 待实验
 - [ ] **Cross-sym feature interaction**：5 sym 共动 / 反向有多强 — 需要 EDA
@@ -415,3 +425,53 @@ mmpc_demo（官方 demo）在平台 test 集上**全 5 horizon 都是负分**：
 5. **不推荐的方案**（违反硬约束）：online recalibration（stateless 限制）、per-sym calibration（test sym 可能新）、连续 Kelly 仓位（必须 0/1/2 离散）、cross-sample rank averaging（顺序被打乱）。
 6. **Scheme F (meta-labeling) 是 +5~+12 的最高潜力 lever**，但要 2-3 天 + 引入 M2 模型，建议在 D/E 触底后再做。
 
+
+
+---
+
+## 9. R10 — PnL-aware / utility-aware loss functions（2026-05-06，R10 worker）
+
+### 主交付物
+
+- `r10_pnl_loss.md` — **10 条 PnL-aware loss 方案 (S1-S10)**，每条含数学公式 / 在 LightGBM custom obj 还是 NN 中实现 / 来源 + 链接 / 实现复杂度 / 期望 LOSO 增益。末尾给"如果只能试 2 个方案"明确推荐 + 完整代码模板。
+
+### 关键 paper 摘要（`r10_papers/`）
+
+- `r10_papers/finance_grounded_khubiyev_2025.md` — arxiv 2509.04541，**PnLLoss = -α·r, SharpeLoss = E(pnl)/(Var(pnl)+ε)**。LSTM+MDDLoss Sharpe 1.76 vs MSE -0.46
+- `r10_papers/stockloss_2025.md` — arxiv 2507.19639，4 种 StockLoss-L1/L2/Max/Norm，Crossformer+L2 三年 51%/51%/49% return vs PPO 41%/2%/41%
+- `r10_papers/return_weighted_ce_2502_2025.md` — arxiv 2502.17493，**loss = CE · |r_cap|**。CNN 33.73%→61.73% return（最直接对应 S1）
+- `r10_papers/yirun_jane_street_2021.md` — Yirun Jane Street 2021 1st：utility-as-loss + SAE+MLP（验证 S2/S4 在 production 可行）
+- `r10_papers/volkova_jane_street_2024.md` — Volkova Jane Street 2024 1st：**weighted MSE + 多任务 + online learning**（不是 utility loss，简单方案胜出）
+- `r10_papers/hyd_optiver_2023.md` — HYD Optiver 2023 1st：MAE 回归 + CatBoost(0.5)+GRU(0.3)+Transformer(0.2)
+- `r10_papers/lopez_de_prado_meta_labeling.md` — LdP AFML Ch3 §3.5 元标记：M1 方向 + M2 是否交易，accuracy 17%→63%（mean rev）
+- `r10_papers/moody_saffell_1998.md` — NIPS 1998 differential Sharpe + RRL，奠基性 reward-based RL
+- `r10_papers/lightgbm_custom_objective_howto.md` — LightGBM multiclass custom obj 完整代码模板（softmax+expected reward+entropy reg + warm-start）
+- `r10_papers/triple_barrier_lopez_de_prado.md` — LdP AFML Ch3 三分位标签法（标签层 vol-normalized 的灵感）
+
+### 核心 takeaways
+
+1. **CE 与 leaderboard 不对齐**：CE 对每次错误均匀惩罚；leaderboard 对 |Δp| 大的样本错误代价远高于 |Δp| 小的样本；对 0/1 错（少 fee）远轻于 0/2 错（fee + 2|Δp|）。这是改 loss 的根本动机。
+2. **Top 2 推荐**：
+   - 🥇 **S2: LightGBM custom multiclass PnL objective** — softmax + per-class reward `r_k = (k-1)·Δp - 2·fee·1[k≠1]`, loss = -E[reward] + entropy reg。closed-form gradient/hessian, CE 50 轮 warm-start 起步，drop-in iter_002 Scheme C 训练。期望 LOSO h_10 +21.86 → **+30~+40**
+   - 🥈 **S1: 用 |Δp| 作 sample_weight** — 1 行代码 (`lgb.Dataset(weight=clip(|Δp|, 99th))`)，可与 S2 叠加。期望 +3~+6
+3. **行业实证 surprise**：Jane Street 2024 1st (Volkova) 和 Optiver 2023 1st (HYD) **都用 weighted MSE/MAE，不是 custom utility loss**。但 leaderboard 评分函数已含 sample weight。我们的评分是 raw Σpnl, **没有内置 weight，所以 S1 的相对价值更高**（更接近 weighted CE/MSE 形态）。
+4. **Stack 策略**：S1 + S2 + S8 (isotonic+EV gating, 来自 R13) 三层均可叠加，每层独立 ablation。
+5. **已 rule out**：
+   - **S5 differentiable Sharpe** — 错误目标 (我们 metric 是 raw Σpnl 不带 variance penalty)
+   - **S10 continuous bet sizing** — 平台要求 {0,1,2}
+   - **S3 (full cost matrix CE)** — 数学上等同 S2, 但实现更复杂；选 S2
+   - **DeepLOB / NN PnL loss** (S4) — 我们 NN baseline 还没打过 LightGBM, S4 单独不会赢
+6. **关键技术细节** (见 `r10_papers/lightgbm_custom_objective_howto.md`):
+   - `z_flat` 是 **F-ordered**, `reshape(N, K, order='F')`
+   - 必须 CE warm-start 50 轮 (init_score=ce_logits.flatten('F'))，否则 0 logits → softmax 均匀 → gradient 不稳定
+   - **必须加 entropy regularizer** `β=0.005` 防止 collapse to "always flat" (because r_1=0 是 safe action)
+   - hessian 用 diagonal Newton 近似 `h_k = p_k(1-p_k)·|r_k - E[r]|`
+   - `min_data_in_leaf >= 500` 防止单样本噪声 gradient overfitting
+
+### 与 R13 的关系
+
+R13 关注**后处理与决策规则**（calibration、Bayes EV gating、z-score sizing），R10 关注**训练时 loss 函数**。两者互补：
+- 训练时改 loss → 模型学到的 p̂ 本身更对齐 PnL（S1/S2/S4）
+- 推理时改决策 → 更好地 exploit 训练后的 p̂（R13 D/E/F）
+
+**整合实施序列**：先 S1 (周一)，再 S2 (周二-三)，再 R13-D (周四)，再 S7 (周五-周一 meta-labeling)。每步独立 ablation。
