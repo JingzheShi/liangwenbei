@@ -1,0 +1,191 @@
+{
+  "task": "Local PnL evaluator implementation (src/eval/)",
+  "test_pnl_passed": true,
+  "session_evaluated": "snapshot_sym0_date0_am.parquet",
+  "n_eval_points": 1842,
+  "valid_t_range": [
+    99,
+    1940
+  ],
+  "metrics": {
+    "perfect_cum_pnl_per_horizon": {
+      "label_5": 0.5675834450608849,
+      "label_10": 0.9672286067771697,
+      "label_20": 1.2162428573765853,
+      "label_40": 2.0648565701977715,
+      "label_60": 2.742762445112203
+    },
+    "perfect_single_pnl_per_horizon": {
+      "label_5": 0.0007527631897359216,
+      "label_10": 0.0009769985927042119,
+      "label_20": 0.0020169864964785828,
+      "label_40": 0.002341107222446453,
+      "label_60": 0.002670654766418893
+    },
+    "perfect_best_score": 2.742762445112203,
+    "perfect_best_horizon": "label_60",
+    "all_flat_cum_pnl_per_horizon": {
+      "label_5": 0.0,
+      "label_10": 0.0,
+      "label_20": 0.0,
+      "label_40": 0.0,
+      "label_60": 0.0
+    },
+    "all_long_cum_pnl_per_horizon": {
+      "label_5": -0.32830118182829704,
+      "label_10": -0.2955090452626079,
+      "label_20": -0.26375129045862306,
+      "label_40": -0.1696265702786544,
+      "label_60": -0.06160397998196454
+    },
+    "all_short_cum_pnl_per_horizon": {
+      "label_5": -0.40850683873739385,
+      "label_10": -0.4413055343863045,
+      "label_20": -0.47306964137646873,
+      "label_40": -0.5672131883831559,
+      "label_60": -0.6752573853585732
+    },
+    "random_cum_pnl_per_horizon": {
+      "label_5": -0.27219108508852663,
+      "label_10": -0.26109829054220635,
+      "label_20": -0.24952110334572047,
+      "label_40": -0.26682085990858423,
+      "label_60": -0.3680600311575953
+    }
+  },
+  "perfect_full_metrics": {
+    "label_5": {
+      "accuracy": 1.0,
+      "precision_up": 1.0,
+      "precision_down": 1.0,
+      "precision_macro": 1.0,
+      "recall_up": 1.0,
+      "recall_down": 1.0,
+      "recall_macro": 1.0,
+      "f0_5_up": 1.0,
+      "f0_5_down": 1.0,
+      "f0_5_macro": 1.0,
+      "cum_pnl": 0.5675834450608849,
+      "single_pnl": 0.0007527631897359216,
+      "n_predictions_active": 754,
+      "n_total": 1842,
+      "pred_distribution": {
+        "0": 377,
+        "1": 1088,
+        "2": 377
+      },
+      "label_distribution": {
+        "0": 377,
+        "1": 1088,
+        "2": 377
+      }
+    },
+    "label_10": {
+      "accuracy": 1.0,
+      "precision_up": 1.0,
+      "precision_down": 1.0,
+      "precision_macro": 1.0,
+      "recall_up": 1.0,
+      "recall_down": 1.0,
+      "recall_macro": 1.0,
+      "f0_5_up": 1.0,
+      "f0_5_down": 1.0,
+      "f0_5_macro": 1.0,
+      "cum_pnl": 0.9672286067771697,
+      "single_pnl": 0.0009769985927042119,
+      "n_predictions_active": 990,
+      "n_total": 1842,
+      "pred_distribution": {
+        "0": 501,
+        "1": 852,
+        "2": 489
+      },
+      "label_distribution": {
+        "0": 501,
+        "1": 852,
+        "2": 489
+      }
+    },
+    "label_20": {
+      "accuracy": 1.0,
+      "precision_up": 1.0,
+      "precision_down": 1.0,
+      "precision_macro": 1.0,
+      "recall_up": 1.0,
+      "recall_down": 1.0,
+      "recall_macro": 1.0,
+      "f0_5_up": 1.0,
+      "f0_5_down": 1.0,
+      "f0_5_macro": 1.0,
+      "cum_pnl": 1.2162428573765853,
+      "single_pnl": 0.0020169864964785828,
+      "n_predictions_active": 603,
+      "n_total": 1842,
+      "pred_distribution": {
+        "0": 280,
+        "1": 1239,
+        "2": 323
+      },
+      "label_distribution": {
+        "0": 280,
+        "1": 1239,
+        "2": 323
+      }
+    },
+    "label_40": {
+      "accuracy": 1.0,
+      "precision_up": 1.0,
+      "precision_down": 1.0,
+      "precision_macro": 1.0,
+      "recall_up": 1.0,
+      "recall_down": 1.0,
+      "recall_macro": 1.0,
+      "f0_5_up": 1.0,
+      "f0_5_down": 1.0,
+      "f0_5_macro": 1.0,
+      "cum_pnl": 2.0648565701977715,
+      "single_pnl": 0.002341107222446453,
+      "n_predictions_active": 882,
+      "n_total": 1842,
+      "pred_distribution": {
+        "0": 427,
+        "1": 960,
+        "2": 455
+      },
+      "label_distribution": {
+        "0": 427,
+        "1": 960,
+        "2": 455
+      }
+    },
+    "label_60": {
+      "accuracy": 1.0,
+      "precision_up": 1.0,
+      "precision_down": 1.0,
+      "precision_macro": 1.0,
+      "recall_up": 1.0,
+      "recall_down": 1.0,
+      "recall_macro": 1.0,
+      "f0_5_up": 1.0,
+      "f0_5_down": 1.0,
+      "f0_5_macro": 1.0,
+      "cum_pnl": 2.742762445112203,
+      "single_pnl": 0.002670654766418893,
+      "n_predictions_active": 1027,
+      "n_total": 1842,
+      "pred_distribution": {
+        "0": 501,
+        "1": 815,
+        "2": 526
+      },
+      "label_distribution": {
+        "0": 501,
+        "1": 815,
+        "2": 526
+      }
+    },
+    "best_score": 2.742762445112203,
+    "best_horizon": "label_60"
+  },
+  "notes": "本地 PnL 评测器已实现并通过 sanity check (5 cases / 6 assertions)。完美预测在 sym0_date0_am 一个 session (1842 个有效预测点) 上：label_60 累计收益率 2.7428，单次收益率 0.2671%。所有 trivial baseline (all-flat/long/short/random) 均严格劣于完美预测。注意完美预测 != 理论 PnL 上限 — 当 label=1 (|x|≤α) 但 |x|>2*fee 时，预测涨/跌可能比预测平更赚。"
+}

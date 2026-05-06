@@ -1,0 +1,12 @@
+{
+  "status": "completed",
+  "step": "all sanity checks done",
+  "metrics": {
+    "test_pnl_passed": true,
+    "perfect_label_60_cum_pnl": 2.742762445112203,
+    "perfect_label_60_single_pnl": 0.002670654766418893,
+    "perfect_best_score": 2.742762445112203,
+    "perfect_best_horizon": "label_60"
+  },
+  "timestamp": "2026-05-06T00:28:19"
+}
