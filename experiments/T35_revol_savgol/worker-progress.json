@@ -1,0 +1,11 @@
+{
+  "status": "running",
+  "step": "training",
+  "timestamp": "2026-05-06T22:27:44Z",
+  "horizon": 60,
+  "variant": "aug_a",
+  "seed": 42,
+  "held": 1,
+  "done": 2,
+  "total": 25
+}

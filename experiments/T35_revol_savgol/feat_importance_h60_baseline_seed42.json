@@ -1,0 +1,225 @@
+{
+  "variant": "baseline",
+  "seed": 42,
+  "horizon": 60,
+  "n_features": 255,
+  "top": [
+    {
+      "rank": 1,
+      "feature": "revol_wmp1_sigma_hat",
+      "mean_gain": 368784.30714035034,
+      "is_revol": true,
+      "is_sg": false
+    },
+    {
+      "rank": 2,
+      "feature": "totalasize",
+      "mean_gain": 106458.27643318176,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 3,
+      "feature": "rv_w50",
+      "mean_gain": 98924.44090652466,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 4,
+      "feature": "bsize1",
+      "mean_gain": 93038.12126731873,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 5,
+      "feature": "totalbsize",
+      "mean_gain": 90353.52127876281,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 6,
+      "feature": "revol_mid_sigma_hat",
+      "mean_gain": 88362.10347633362,
+      "is_revol": true,
+      "is_sg": false
+    },
+    {
+      "rank": 7,
+      "feature": "bsize_mean",
+      "mean_gain": 82804.7409160614,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 8,
+      "feature": "avgask",
+      "mean_gain": 77525.07452545167,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 9,
+      "feature": "asize1",
+      "mean_gain": 72899.86336097718,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 10,
+      "feature": "high",
+      "mean_gain": 70563.77903518677,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 11,
+      "feature": "ewma_a0.3_mb_intst",
+      "mean_gain": 69392.52510223389,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 12,
+      "feature": "ewma_a0.05_mb_intst",
+      "mean_gain": 67863.94694671631,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 13,
+      "feature": "avgbid",
+      "mean_gain": 66075.2841293335,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 14,
+      "feature": "open",
+      "mean_gain": 64595.682127761844,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 15,
+      "feature": "bid_mean",
+      "mean_gain": 63242.31643066406,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 16,
+      "feature": "low",
+      "mean_gain": 58821.42175064087,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 17,
+      "feature": "ask_mean",
+      "mean_gain": 52872.18012733459,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 18,
+      "feature": "asize10",
+      "mean_gain": 51657.29326744079,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 19,
+      "feature": "bsize3",
+      "mean_gain": 49954.571055984496,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 20,
+      "feature": "ma_intst",
+      "mean_gain": 49726.06530609131,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 21,
+      "feature": "bsize2",
+      "mean_gain": 48988.13963088989,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 22,
+      "feature": "ewma_a0.5_mb_intst",
+      "mean_gain": 46382.356282424924,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 23,
+      "feature": "asize_mean",
+      "mean_gain": 44202.25195922852,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 24,
+      "feature": "asize4",
+      "mean_gain": 41393.12522087097,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 25,
+      "feature": "bsize9",
+      "mean_gain": 41165.96442337036,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 26,
+      "feature": "bsize8",
+      "mean_gain": 41087.39239883423,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 27,
+      "feature": "bsize6",
+      "mean_gain": 40884.9322555542,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 28,
+      "feature": "asize3",
+      "mean_gain": 39937.23779144287,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 29,
+      "feature": "asize6",
+      "mean_gain": 39134.276147460936,
+      "is_revol": false,
+      "is_sg": false
+    },
+    {
+      "rank": 30,
+      "feature": "bsize7",
+      "mean_gain": 38420.130767440794,
+      "is_revol": false,
+      "is_sg": false
+    }
+  ],
+  "n_revol_in_top": 2,
+  "n_sg_in_top": 0,
+  "gain_share": {
+    "revol": 0.12631082587460332,
+    "sg": 0.012091410485449918,
+    "base": 0.8615977636399467
+  }
+}

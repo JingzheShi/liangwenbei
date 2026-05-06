@@ -1,0 +1,45 @@
+{
+  "task": "T35: ReVol + Savitzky-Golay (Scheme K) — h_60 LOSO breakthrough attempt",
+  "scheme_k": {
+    "n_features": 255,
+    "base_features": 223,
+    "extras": {"revol": 12, "savgol": 20, "total": 32}
+  },
+  "modules": {
+    "revol": "experiments/T35_revol_savgol/revol.py",
+    "savgol": "experiments/T35_revol_savgol/savgol.py",
+    "build_features": "experiments/T35_revol_savgol/build_features.py",
+    "train_loso": "experiments/T35_revol_savgol/train_loso.py",
+    "train_final": "experiments/T35_revol_savgol/train_final.py"
+  },
+  "metrics": {
+    "loso_h60_baseline_seed42_raw_argmax_sum": -8.5229,
+    "loso_h60_baseline_seed42_per_fold_raw": [2.317, -4.013, -11.129, -0.023, 4.324],
+    "loso_h60_baseline_seed42_threshold_best": {
+      "T": 0.50,
+      "delta": 0.10,
+      "sum_cum_pnl": 5.5330,
+      "n_pos_folds": 4,
+      "per_fold": [0.52, 3.061, -2.094, 0.057, 3.989]
+    },
+    "iter_002_threshold_sum": 6.30,
+    "iter_005b_5seed_threshold_sum": 11.46,
+    "loso_h60_aug_a_5seed_status": "in_flight"
+  },
+  "feature_importance": {
+    "n_in_top30": {"revol": 2, "sg": 0, "base": 28},
+    "gain_share": {"revol": 0.126, "sg": 0.012, "base": 0.862},
+    "top1_feature": "revol_wmp1_sigma_hat",
+    "top1_gain": 368784,
+    "comment": "ReVol sigma_hat dominates; eps* features didn't crack top-30; SG features essentially dead for tree models"
+  },
+  "constraint_compliance": {
+    "no_sym_feature": true,
+    "no_date_feature": true,
+    "no_time_feature": true,
+    "causal_revol": true,
+    "causal_sg_unit_test_passed": true,
+    "inference_offline_match_max_diff": 0.0
+  },
+  "notes": "Single-seed Scheme K = -0.77 vs iter_002 best threshold. ReVol's #1 ranking confirms R31 P17 prediction direction. SG's near-zero gain for LightGBM contradicts R31 P10's NN prediction (expected). 5-seed aug_a ensemble in flight to determine iter_006 viability."
+}

@@ -1,0 +1,126 @@
+{
+  "task": "T35 Scheme K LOSO h60_baseline (raw argmax)",
+  "horizon": 60,
+  "variant": "baseline",
+  "seeds": [
+    42
+  ],
+  "params": {
+    "horizon": 60,
+    "variant": "baseline",
+    "seeds": "42",
+    "syms": "0,1,2,3,4",
+    "aug_ratio": 1.0,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 24,
+    "use_gpu": false,
+    "tag": null,
+    "wandb": true,
+    "wandb_project": "liangwenbei"
+  },
+  "n_features": 255,
+  "results": [
+    {
+      "horizon": 60,
+      "variant": "baseline",
+      "seed": 42,
+      "held_out_sym": 0,
+      "n_train_orig": 1178880,
+      "n_train_used": 1178880,
+      "n_val": 235776,
+      "n_test": 88416,
+      "best_iter": 88,
+      "train_time_sec": 88.3361976146698,
+      "held_cum_pnl": 2.3173176922766046,
+      "held_single_pnl": 0.00012665706669636012,
+      "held_acc": 0.7164314151284835,
+      "held_n_active": 18296
+    },
+    {
+      "horizon": 60,
+      "variant": "baseline",
+      "seed": 42,
+      "held_out_sym": 1,
+      "n_train_orig": 1178880,
+      "n_train_used": 1178880,
+      "n_val": 235776,
+      "n_test": 88416,
+      "best_iter": 79,
+      "train_time_sec": 88.4192156791687,
+      "held_cum_pnl": -4.0126220385602664,
+      "held_single_pnl": -5.3678408071385314e-05,
+      "held_acc": 0.36289811798769456,
+      "held_n_active": 74753
+    },
+    {
+      "horizon": 60,
+      "variant": "baseline",
+      "seed": 42,
+      "held_out_sym": 2,
+      "n_train_orig": 1178880,
+      "n_train_used": 1178880,
+      "n_val": 235776,
+      "n_test": 88416,
+      "best_iter": 93,
+      "train_time_sec": 102.60632872581482,
+      "held_cum_pnl": -11.128861964231731,
+      "held_single_pnl": -0.0001333069243346757,
+      "held_acc": 0.24565689467969598,
+      "held_n_active": 83483
+    },
+    {
+      "horizon": 60,
+      "variant": "baseline",
+      "seed": 42,
+      "held_out_sym": 3,
+      "n_train_orig": 1178880,
+      "n_train_used": 1178880,
+      "n_val": 235776,
+      "n_test": 88416,
+      "best_iter": 90,
+      "train_time_sec": 106.13584756851196,
+      "held_cum_pnl": -0.022779048676157543,
+      "held_single_pnl": -8.126667383573865e-06,
+      "held_acc": 0.783715617082881,
+      "held_n_active": 2803
+    },
+    {
+      "horizon": 60,
+      "variant": "baseline",
+      "seed": 42,
+      "held_out_sym": 4,
+      "n_train_orig": 1178880,
+      "n_train_used": 1178880,
+      "n_val": 235776,
+      "n_test": 88416,
+      "best_iter": 87,
+      "train_time_sec": 98.21922945976257,
+      "held_cum_pnl": 4.324028703765968,
+      "held_single_pnl": 5.33468472489787e-05,
+      "held_acc": 0.36299990951863914,
+      "held_n_active": 81055
+    }
+  ],
+  "aggregate": [
+    {
+      "seed": 42,
+      "n_folds": 5,
+      "cum_pnl_per_fold": [
+        2.3173176922766046,
+        -4.0126220385602664,
+        -11.128861964231731,
+        -0.022779048676157543,
+        4.324028703765968
+      ],
+      "cum_pnl_sum": -8.522916655425583,
+      "cum_pnl_mean": -1.7045833310851166,
+      "cum_pnl_std": 5.4679500177522815,
+      "n_pos_folds": 2
+    }
+  ],
+  "elapsed_sec": 496.3186123371124
+}
