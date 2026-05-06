@@ -1,0 +1,37 @@
+{
+  "seeds": [
+    42,
+    1,
+    7,
+    13,
+    100
+  ],
+  "folds": [
+    {
+      "held": 0,
+      "n_rows": 88416,
+      "out": "experiments/T6_ensemble_multiseed/loso_pred_ensemble_held0.parquet"
+    },
+    {
+      "held": 1,
+      "n_rows": 88416,
+      "out": "experiments/T6_ensemble_multiseed/loso_pred_ensemble_held1.parquet"
+    },
+    {
+      "held": 2,
+      "n_rows": 88416,
+      "out": "experiments/T6_ensemble_multiseed/loso_pred_ensemble_held2.parquet"
+    },
+    {
+      "held": 3,
+      "n_rows": 88416,
+      "out": "experiments/T6_ensemble_multiseed/loso_pred_ensemble_held3.parquet"
+    },
+    {
+      "held": 4,
+      "n_rows": 88416,
+      "out": "experiments/T6_ensemble_multiseed/loso_pred_ensemble_held4.parquet"
+    }
+  ],
+  "status": "ok"
+}
