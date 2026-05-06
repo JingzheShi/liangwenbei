@@ -1,0 +1,21 @@
+{
+  "status": "iter_005a_built; iter_005b_loso_running",
+  "iter_005a": {
+    "submission_zip": "/root/projects/liangwenbei_workdir/submission_050624_iter005a.zip",
+    "submission_dir": "/root/projects/liangwenbei_workdir/submission/iter_005a_aug_a_h60",
+    "h60_model": "experiments/T27_iter005/final_model_h60_aug_a_seed42.txt",
+    "h60_threshold": {"T": 0.45, "delta": 0.10},
+    "h60_loso_aug_a_sum": 9.6720,
+    "h60_loso_aug_a_std": 3.0536,
+    "h60_loso_aug_a_pos_folds": 4,
+    "expected_platform_best_of_5": "+7.4 (LOSO 9.67 - 2.23 calibration gap from iter_002)",
+    "sanity": "22/22 OK, h_5/10/20 inactive",
+    "built_at": "2026-05-06T18:14Z"
+  },
+  "iter_005b": {
+    "loso_pid": 120709,
+    "loso_seeds": [1, 7, 13, 100],
+    "loso_log": "experiments/T27_iter005/train_5seed_aug_a.log",
+    "expected_run_time_min": 14
+  }
+}
