@@ -299,3 +299,32 @@ mmpc_demo（官方 demo）在平台 test 集上**全 5 horizon 都是负分**：
 - `model_ideas.md` — **40+ 条模型架构 + 训练 trick + 后处理 ideas，含 short list（核心交付物）**
 - `competition_insights_models.md` — Kaggle 4 大比赛 winner 模型选型 + 训练 + 后处理
 - `gbdt_vs_nn_for_lob.md` — GBDT vs NN 系统对比（决定建模路线优先级）
+
+---
+
+## 7. R12 — Ensemble & Stacking 调研（2026-05-06，R12 worker）
+
+### 主交付物
+
+- `r12_ensemble_stacking.md` — **12 条 ensemble/stacking 方案**（每条含实现、来源、复杂度、适配度、期望增益）+ 失败方案排除 + Top-3 优先级建议 + 一周实施顺序。
+
+### 关键 paper 摘要（`r12_papers/`）
+
+- `r12_papers/snapshot_ensembles_huang_2017.md` — Snapshot Ensembles (ICLR 2017)，cosine cyclic LR + M snapshot 平均
+- `r12_papers/swa_izmailov_2018.md` — Stochastic Weight Averaging (UAI 2018)，weight space averaging → flatter minima
+- `r12_papers/ngboost_duan_2020.md` — NGBoost (ICML 2020)，probabilistic gradient boosting + uncertainty
+- `r12_papers/stacking_bayesian_yao_2018.md` — Stacking > BMA in M-open (Bayesian Analysis 2018)，simplex-constrained meta
+- `r12_papers/purged_kfold_lopez_de_prado.md` — Purged K-Fold + Embargo + CPCV，对应我们 LOSO 协议
+
+### 核心 takeaways
+
+1. **T6b 失败 = base 太相关 (ρ > 0.97 simple seed-only)**：修复路径按多样性强度排序：换算法 > 换特征子空间 > 换 horizon > 换超参 > 换 seed。
+2. **Top-3 推荐方案**（已写入 r12_ensemble_stacking.md §4）：
+   - 🥇 **方案 2** Stacking with Ridge meta over LOSO-OOF（zero new training，期望 +3 ~ +8）
+   - 🥈 **方案 1** LightGBM + XGBoost + CatBoost simple mean（diversity 来自算法，期望 +2 ~ +6）
+   - 🥉 **方案 6** Multi-horizon stacking（iter_002 已有原料，零成本，期望 +1 ~ +4）
+3. **简单平均不够鲁棒**：Yirun Jane Street 1st 用 **middle-60% averaging**（trim outlier seeds），M. Kim Optiver 同样 trick；rank averaging 用于跨算法 calibration（但与我们 stateless 评测有兼容性问题）。
+4. **NN 路线"免费 ensemble"**：Snapshot Ensemble (Huang 2017) + SWA (Izmailov 2018) 几乎零成本，PyTorch 原生支持；但前提是 NN 主路线要先打过 GBDT base，否则不值得做。
+5. **不要用 BMA**：Yao et al. 2018 证明 M-open 下 stacking 严格优于 BMA；非负 simplex stacking 是首选。
+6. **OOF metric 应直接是 cum_pnl**：scipy.optimize.minimize (Nelder-Mead) 在 5-8 维 weight 空间优化 OOF PnL，配合 bootstrap 防过拟合（方案 10）。
+7. **不可用方案（违反硬约束）**：online learning、sliding-window retrain、sym embedding meta、跨 predict 调用维护 state、cross-sample rank averaging（test 顺序被打乱）。

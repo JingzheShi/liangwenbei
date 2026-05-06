@@ -1,0 +1,24 @@
+{
+  "task": "R12 ensemble & stacking 调研（tabular 高频金融）",
+  "deliverables": {
+    "main": "research_and_history/r12_ensemble_stacking.md",
+    "papers_dir": "research_and_history/r12_papers/",
+    "papers": [
+      "snapshot_ensembles_huang_2017.md",
+      "swa_izmailov_2018.md",
+      "ngboost_duan_2020.md",
+      "stacking_bayesian_yao_2018.md",
+      "purged_kfold_lopez_de_prado.md",
+      "optiver_jane_street_writeups.md"
+    ],
+    "history_index_updated": "research_and_history/history_and_important_notes.md §7"
+  },
+  "metrics": {
+    "schemes_listed": 12,
+    "papers_summarized": 6,
+    "websearches": 12,
+    "webfetches": 5,
+    "top3_recommendations": ["stacking with Ridge meta over LOSO-OOF", "LightGBM + XGBoost + CatBoost simple mean", "multi-horizon stacking"]
+  },
+  "notes": "12 ensemble/stacking 方案覆盖：cross-algo (LGBM+XGB+CatBoost)、stacking with linear meta on LOSO-OOF、hyperparam-diverse bag、snapshot ensemble、SWA、multi-horizon stacking、middle-60% trimmed mean (Jane Street 1st)、rank averaging、NGBoost uncertainty-gated thresholding、weight-optimized blend (Nelder-Mead on OOF PnL)、feature-bagging LightGBM、Bayesian hierarchical stacking. Top-3：stacking with Ridge → cross-algo simple mean → multi-horizon stacking. T6b 失败核心是 base ρ>0.97，修复路径：换算法 > 换特征子空间 > 换 horizon > 换超参 > 换 seed."
+}
