@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "task": "r30 — data characteristics deep dive (research-only, no training)",
+  "step": "All 6 dimensions analyzed; report + 21 figures + 8 CSVs delivered",
+  "metrics": {
+    "n_dimensions_done": 6,
+    "n_figures_png": 21,
+    "n_csv_summaries": 8,
+    "n_trick_candidates_proposed": 7,
+    "report_lines": 350
+  },
+  "deliverables": [
+    "research_and_history/r30_data_characteristics.md (core)",
+    "research_and_history/r30_figures/*.png (21 plots)",
+    "research_and_history/r30_figures/d*.csv (8 summary tables)",
+    "research_and_history/results_r30.json"
+  ],
+  "core_answer": "h_60 work because E[|Δmid|||active] ≈ 4×fee leaves alpha room; h_5/10/20 fail because E[|Δmid|||active] ≈ 1×fee — any model error ≥ kills net. aug_a works by suppressing scale-sensitive features (spread*/_mean) and forcing reliance on scale-invariant ratios; halves cross-sym prediction bias 0.21→0.10.",
+  "timestamp": "2026-05-06T00:00:00"
+}

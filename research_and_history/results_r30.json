@@ -1,0 +1,70 @@
+{
+  "task": "r30 — data characteristics deep dive: why h_60 work, h_5/10/20 fail",
+  "deliverables": {
+    "report": "research_and_history/r30_data_characteristics.md",
+    "figures_dir": "research_and_history/r30_figures/",
+    "n_figures_png": 21,
+    "csv_summaries": [
+      "research_and_history/r30_figures/d1_label_stats.csv",
+      "research_and_history/r30_figures/d1_label_autocorr.csv",
+      "research_and_history/r30_figures/d2_microstructure_summary.csv",
+      "research_and_history/r30_figures/d3_persym_summary.csv",
+      "research_and_history/r30_figures/d4_tod_summary.csv",
+      "research_and_history/r30_figures/d5_sym_horizon_summary.csv",
+      "research_and_history/r30_figures/d6_fi_diff.csv",
+      "research_and_history/r30_figures/d6_fi_by_category.csv"
+    ],
+    "scripts": "src/r30_analysis/d{1..6}_*.py"
+  },
+  "metrics": {
+    "fee_calibrated_one_side_bp": 0.65,
+    "cond_mean_active_bp": {"h_5": 1.02, "h_10": 1.19, "h_20": 2.04, "h_40": 2.33, "h_60": 2.56},
+    "cond_mean_vs_2x_fee_ratio": {"h_5": 0.78, "h_10": 0.92, "h_20": 1.57, "h_40": 1.79, "h_60": 1.97},
+    "lag1_mid_diff_AC_per_sym": {"sym_0": -0.10, "sym_1": -0.09, "sym_2": -0.05, "sym_3": -0.20, "sym_4": -0.10},
+    "spread_per_sym_bp": {"sym_0": 7.7, "sym_1": 7.3, "sym_2": 2.7, "sym_3": 23.4, "sym_4": 5.5},
+    "loso_per_sym_h60_per_trade": {"sym_0": 4.1e-5, "sym_1": -4e-6, "sym_2": -6.1e-5, "sym_3": -1.6e-5, "sym_4": 1.56e-4},
+    "platform_h60_per_trade_match": "sym_4 (1.56e-4) closest to platform 1.17e-4",
+    "aug_a_persym_pnl_uplift": {"sym_0": -0.22, "sym_1": 0.79, "sym_2": 1.98, "sym_3": 0.07, "sym_4": 2.03, "total": 4.65},
+    "aug_a_cross_sym_bias_range": {"baseline": 0.21, "aug_a": 0.10},
+    "aug_a_FI_category_shifts": {
+      "spread_lost": -0.0284,
+      "ask_price_lost": -0.0337,
+      "bid_price_lost": -0.0318,
+      "other_derived_gained": 0.0885,
+      "imbalance_gained": 0.0098
+    },
+    "tod_pnl_share_per_horizon_h60_LOSO": {"open": 2.46, "mid_morn": 3.46, "pm_open": 1.69, "pm_late": -1.23}
+  },
+  "core_findings": [
+    "Short horizon (h=5/10) failure root cause: E[|Δmid| | active] ≈ 1×fee, so even perfect direction prediction earns ~0 net; any model error → loss.",
+    "Long horizon (h=60) success: E[|Δmid| | active] ≈ 4×fee, leaves room for hit-rate < 100%.",
+    "All 5 syms show negative lag-1 mid-diff AC (bid-ask bounce); short horizon is dominated by bounce noise (var-ratio < 1), long horizon trends toward 1 (cleaner signal).",
+    "Per-sym microstructure profiles are extremely diverse: spread ranges 2.7bp (sym 2 = blue chip) to 23.4bp (sym 3 = small cap).",
+    "Platform unknown sym in h=60 best-matches sym 4 (mid-tier liquidity, σmid 2.97bp, spread 5.5bp).",
+    "aug_a uplift mechanism: kills FI weight on scale-sensitive features (spread*, *_mean), shifts to scale-invariant ratios (imbalance, rv, mlofi); halves cross-sym prediction bias (0.21 → 0.10).",
+    "iter_002 sym 2 contributes -4.75 to LOSO h_60 sum while sym 4 contributes +10.9; total +6.30 = sym4 dominance",
+    "TOD effect: mid_morn 10:00-11:20 contributes 35-50% of LOSO sum; pm_late × h_60 is actively negative."
+  ],
+  "trick_candidates_next_round": [
+    {"id": "H1", "name": "Aug_a Plus: wider scale [0.6,1.5] + extreme noise + spread feature drop", "expected_LOSO_uplift_h60": "+1~+3"},
+    {"id": "H2", "name": "Scale-invariant feature family: mid_returns/spread, rv/spread, imbalance ratios", "expected_LOSO_uplift_h60": "+0.5~+2"},
+    {"id": "H3", "name": "Time-of-day weighted training + flat-bias on pm_late × h60", "expected_LOSO_uplift_sum": "+1~+2"},
+    {"id": "H4", "name": "Spread-conditional dynamic thresholding (Predictor-only, no retrain)", "expected_LOSO_uplift_h60": "+1~+2"},
+    {"id": "H5", "name": "Cross-sym spread-quintile mixup (replace sym-id mixup)", "expected_LOSO_uplift_h60": "+1~+2"},
+    {"id": "H6", "name": "Drop scale-coupled features explicitly (226→211d)", "expected_LOSO_uplift_h60": "+0~+1"},
+    {"id": "H7", "name": "Microstructure-regime conditional ensemble (low priority)", "expected_LOSO_uplift_h60": "uncertain"}
+  ],
+  "execution_priority_for_pm": [
+    "H4 first (no retrain, 4h)",
+    "H6 next (30min, sanity)",
+    "H1 single worker (8h, T26 framework)",
+    "H2 + H3 + H5 in parallel after H1 confirms"
+  ],
+  "do_not_do": [
+    "Do not invest in optimizing h_5/h_10 per-trade pnl (math: signal ≤ fee, cannot produce positive alpha)",
+    "Do not use sym embedding or per-sym normalization (CRITICAL_CONSTRAINTS §1.3)",
+    "Do not use date features (CRITICAL_CONSTRAINTS §1.1)"
+  ],
+  "validation_rule": "Any new trick must show positive contribution on sym 4 LOSO h=60 specifically (platform sym_unknown ≈ sym 4 microstructure)",
+  "notes": "All 6 dimensions analyzed; 21 PNG figures + 8 CSV summaries; report includes 7 ranked trick candidates with formulas/implementation hints."
+}
