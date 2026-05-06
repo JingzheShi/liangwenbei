@@ -1,0 +1,73 @@
+{
+  "task": "T27 train final aug_a",
+  "horizons": [
+    60
+  ],
+  "seeds": [
+    1,
+    7,
+    13,
+    100
+  ],
+  "params": {
+    "horizons": "60",
+    "variant": "aug_a",
+    "seeds": "1,7,13,100",
+    "aug_ratio": 1.0,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "out_dir": "/root/projects/liangwenbei_workdir/experiments/T27_iter005"
+  },
+  "results": [
+    {
+      "horizon": 60,
+      "variant": "aug_a",
+      "seed": 1,
+      "best_iter": 134,
+      "train_time_sec": 60.98390221595764,
+      "n_tr_orig": 1768320,
+      "n_tr_used": 3536640,
+      "n_va": 442080,
+      "out_path": "/root/projects/liangwenbei_workdir/experiments/T27_iter005/final_model_h60_aug_a_seed1.txt"
+    },
+    {
+      "horizon": 60,
+      "variant": "aug_a",
+      "seed": 7,
+      "best_iter": 157,
+      "train_time_sec": 52.777339458465576,
+      "n_tr_orig": 1768320,
+      "n_tr_used": 3536640,
+      "n_va": 442080,
+      "out_path": "/root/projects/liangwenbei_workdir/experiments/T27_iter005/final_model_h60_aug_a_seed7.txt"
+    },
+    {
+      "horizon": 60,
+      "variant": "aug_a",
+      "seed": 13,
+      "best_iter": 90,
+      "train_time_sec": 63.27871060371399,
+      "n_tr_orig": 1768320,
+      "n_tr_used": 3536640,
+      "n_va": 442080,
+      "out_path": "/root/projects/liangwenbei_workdir/experiments/T27_iter005/final_model_h60_aug_a_seed13.txt"
+    },
+    {
+      "horizon": 60,
+      "variant": "aug_a",
+      "seed": 100,
+      "best_iter": 121,
+      "train_time_sec": 55.05993628501892,
+      "n_tr_orig": 1768320,
+      "n_tr_used": 3536640,
+      "n_va": 442080,
+      "out_path": "/root/projects/liangwenbei_workdir/experiments/T27_iter005/final_model_h60_aug_a_seed100.txt"
+    }
+  ],
+  "elapsed_sec": 252.39259314537048
+}

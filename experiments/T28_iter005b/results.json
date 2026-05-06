@@ -1,0 +1,54 @@
+{
+  "task": "T28 iter_005b: aug_a 5-seed ensemble h_60 submission package",
+  "horizon": 60,
+  "ensemble_seeds": [42, 1, 7, 13, 100],
+  "metrics": {
+    "5seed_oof_loso_sum_pnl": 11.4565,
+    "5seed_oof_loso_mean_pnl": 2.2913,
+    "5seed_oof_loso_std_pnl": 3.0674,
+    "5seed_oof_loso_pos_folds": 4,
+    "5seed_oof_loso_n_active": 100256,
+    "5seed_oof_per_fold_pnl": [1.2979, 2.1607, -0.2757, 0.0971, 8.1765],
+    "single_seed42_oof_loso_sum_pnl": 9.6720,
+    "uplift_vs_single_seed_loso": 1.7845,
+    "predicted_platform_h60": 9.2,
+    "predicted_platform_total": 11.2,
+    "iter_002_platform_total": 4.07
+  },
+  "thresholds": {
+    "h_60_T": 0.45,
+    "h_60_delta": 0.10,
+    "h_40_T": 0.50,
+    "h_40_delta": 0.00
+  },
+  "training": {
+    "seed42_best_iter": "from_T27",
+    "seed1_best_iter": 134,
+    "seed7_best_iter": 157,
+    "seed13_best_iter": 90,
+    "seed100_best_iter": 121,
+    "seed1_train_time_sec": 61.0,
+    "seed7_train_time_sec": 52.8,
+    "seed13_train_time_sec": 63.3,
+    "seed100_train_time_sec": 55.1,
+    "device": "GPU (RTX 3090)",
+    "n_train_used": 3536640,
+    "n_test_early_stop": 442080
+  },
+  "files": {
+    "submission_dir": "submission/iter_005b_aug_a_5seed_h60/",
+    "submission_zip": "submission_050626_iter005b.zip",
+    "submission_zip_bytes": 26314882,
+    "submission_dir_total_mb": 80.10,
+    "n_models_in_bundle": 9,
+    "h_60_models": 5,
+    "h_40_model": 1,
+    "h_5_h_10_h_20_models_inactive": 3
+  },
+  "sanity_check": {
+    "pass": 22,
+    "warn": 0,
+    "fail": 0
+  },
+  "notes": "5-seed ensemble lifts h_60 LOSO from +9.67 (single seed=42) to +11.46 (+1.78) and trims worst-fold from -1.54 to -0.28 — variance-reduction story holds. Platform prediction +9.2 = +11.46 - 2.23 (T22 calibration offset). Total platform +11.2 vs iter_002 +4.07 = +7.1 uplift. All 5 models GPU LightGBM, 223-d Scheme C, sym/date NEVER as feature, Predictor stateless."
+}
