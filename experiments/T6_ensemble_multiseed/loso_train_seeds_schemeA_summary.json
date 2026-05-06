@@ -1,0 +1,232 @@
+{
+  "scheme": "A",
+  "seeds": [
+    1,
+    7,
+    13,
+    100
+  ],
+  "results": [
+    {
+      "seed": 1,
+      "held_out_sym": 0,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 93,
+      "train_time_sec": 77.44842720031738,
+      "held_out_cum_pnl": -13.044719744655279,
+      "held_out_acc": 0.14809536735432502,
+      "held_out_n_active": 82906
+    },
+    {
+      "seed": 1,
+      "held_out_sym": 1,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 91,
+      "train_time_sec": 77.33296179771423,
+      "held_out_cum_pnl": -5.615600959107585,
+      "held_out_acc": 0.36924312341657617,
+      "held_out_n_active": 71257
+    },
+    {
+      "seed": 1,
+      "held_out_sym": 2,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 84,
+      "train_time_sec": 65.61719965934753,
+      "held_out_cum_pnl": -4.6686960737749,
+      "held_out_acc": 0.3857559717698154,
+      "held_out_n_active": 62501
+    },
+    {
+      "seed": 1,
+      "held_out_sym": 3,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 103,
+      "train_time_sec": 90.76455903053284,
+      "held_out_cum_pnl": -1.0277099536653604,
+      "held_out_acc": 0.658421552660152,
+      "held_out_n_active": 18852
+    },
+    {
+      "seed": 1,
+      "held_out_sym": 4,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 80,
+      "train_time_sec": 95.69023251533508,
+      "held_out_cum_pnl": 1.6168866307731458,
+      "held_out_acc": 0.31144815418023886,
+      "held_out_n_active": 88141
+    },
+    {
+      "seed": 7,
+      "held_out_sym": 0,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 83,
+      "train_time_sec": 101.66764378547668,
+      "held_out_cum_pnl": -12.435721335958696,
+      "held_out_acc": 0.14445349258052842,
+      "held_out_n_active": 82831
+    },
+    {
+      "seed": 7,
+      "held_out_sym": 1,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 92,
+      "train_time_sec": 103.09659218788147,
+      "held_out_cum_pnl": -3.826242493450614,
+      "held_out_acc": 0.3734844372059356,
+      "held_out_n_active": 70416
+    },
+    {
+      "seed": 7,
+      "held_out_sym": 2,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 83,
+      "train_time_sec": 96.53312587738037,
+      "held_out_cum_pnl": -3.756850917950559,
+      "held_out_acc": 0.38742987694534925,
+      "held_out_n_active": 62804
+    },
+    {
+      "seed": 7,
+      "held_out_sym": 3,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 79,
+      "train_time_sec": 98.84852957725525,
+      "held_out_cum_pnl": 0.14612589434573017,
+      "held_out_acc": 0.7806731813246471,
+      "held_out_n_active": 2568
+    },
+    {
+      "seed": 7,
+      "held_out_sym": 4,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 96,
+      "train_time_sec": 105.84534049034119,
+      "held_out_cum_pnl": -1.3102547275877714,
+      "held_out_acc": 0.3115499457111835,
+      "held_out_n_active": 88002
+    },
+    {
+      "seed": 13,
+      "held_out_sym": 0,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 70,
+      "train_time_sec": 87.12699604034424,
+      "held_out_cum_pnl": -11.461485124738369,
+      "held_out_acc": 0.15627262034020992,
+      "held_out_n_active": 82226
+    },
+    {
+      "seed": 13,
+      "held_out_sym": 1,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 72,
+      "train_time_sec": 91.64204359054565,
+      "held_out_cum_pnl": -4.890637319663658,
+      "held_out_acc": 0.3752148932319942,
+      "held_out_n_active": 69312
+    },
+    {
+      "seed": 13,
+      "held_out_sym": 2,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 105,
+      "train_time_sec": 89.539231300354,
+      "held_out_cum_pnl": -7.754821790124942,
+      "held_out_acc": 0.3271466702859211,
+      "held_out_n_active": 70796
+    },
+    {
+      "seed": 13,
+      "held_out_sym": 3,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 88,
+      "train_time_sec": 69.75198578834534,
+      "held_out_cum_pnl": 0.8018309948456981,
+      "held_out_acc": 0.7235568222946073,
+      "held_out_n_active": 11020
+    },
+    {
+      "seed": 13,
+      "held_out_sym": 4,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 102,
+      "train_time_sec": 65.76789879798889,
+      "held_out_cum_pnl": -1.9228584253773067,
+      "held_out_acc": 0.30669788273615634,
+      "held_out_n_active": 88151
+    },
+    {
+      "seed": 100,
+      "held_out_sym": 0,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 64,
+      "train_time_sec": 86.78109169006348,
+      "held_out_cum_pnl": -11.726203135528936,
+      "held_out_acc": 0.1277709916757148,
+      "held_out_n_active": 85391
+    },
+    {
+      "seed": 100,
+      "held_out_sym": 1,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 73,
+      "train_time_sec": 93.20972943305969,
+      "held_out_cum_pnl": -3.9195831946620445,
+      "held_out_acc": 0.3751357220412595,
+      "held_out_n_active": 70279
+    },
+    {
+      "seed": 100,
+      "held_out_sym": 2,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 118,
+      "train_time_sec": 90.61204314231873,
+      "held_out_cum_pnl": -6.414677075468074,
+      "held_out_acc": 0.38367490047050307,
+      "held_out_n_active": 62559
+    },
+    {
+      "seed": 100,
+      "held_out_sym": 3,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 78,
+      "train_time_sec": 73.35509395599365,
+      "held_out_cum_pnl": -0.6634320838501389,
+      "held_out_acc": 0.6509342200506696,
+      "held_out_n_active": 19323
+    },
+    {
+      "seed": 100,
+      "held_out_sym": 4,
+      "n_train": 1178880,
+      "n_test": 88416,
+      "best_iter": 93,
+      "train_time_sec": 74.46060490608215,
+      "held_out_cum_pnl": -1.0347933700203746,
+      "held_out_acc": 0.31136898298950416,
+      "held_out_n_active": 88151
+    }
+  ],
+  "elapsed_sec": 1754.3408689498901
+}

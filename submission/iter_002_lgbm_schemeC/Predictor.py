@@ -1,18 +1,21 @@
-"""Predictor for iter_002: LightGBM Scheme C1 (154 raw + 72 T3 features) multi-horizon.
+"""Predictor for iter_002: LightGBM Scheme C1 (154 raw + 69 T3 features = 223-d)
+multi-horizon.
 
 Compliance with platform contract (CRITICAL_CONSTRAINTS.md §1):
   - sym / date never enter the feature vector
   - No cross-call state held on `self` (per-call window only)
   - Model is sym-agnostic by construction
-  - T3 features (MLOFI / WMP / RV / EWMA / time) computed fresh per 100-row window
+  - T3 features (MLOFI / WMP / RV / EWMA) computed fresh per 100-row window
 
-config.feature includes 'time' so the platform forwards it for time-encoding.
-If 'time' parses fail (e.g. sanity_check passes random floats), time-encoding
-falls back to zeros so predict() never crashes.
+We DROPPED the 3 T3 time-encoding features (time_minutes_since_session_start,
+time_session_progress, time_is_pm) so that we don't need `time` in
+config.feature. The local validator coerces all feature columns to float32,
+which breaks on datetime.time. Without `time` in config.feature we keep the
+input fully numeric.
 
 Bundle:
   thresholds.json   per-horizon (T, delta) and active flag
-  model_h{H}.txt    LightGBM booster, 226-dim input (one per active horizon)
+  model_h{H}.txt    LightGBM booster, 223-d input (one per active horizon)
 """
 from __future__ import annotations
 
@@ -43,14 +46,14 @@ class Predictor:
     def __init__(self) -> None:
         here = os.path.dirname(os.path.abspath(__file__))
         self._t3 = _load_t3_module(here)
-        self._t3_feat_cols: List[str] = list(self._t3.feature_v1_columns())
+        # Drop the 3 time-encoding cols at the tail; keep the first 69 of 72 T3
+        all_t3_cols = list(self._t3.feature_v1_columns())
+        self._t3_feat_cols: List[str] = [c for c in all_t3_cols if not c.startswith("time_")]
 
         cfg_path = os.path.join(here, "config.json")
         with open(cfg_path) as f:
             cfg_main = json.load(f)
-        self._all_input_cols: List[str] = list(cfg_main["feature"])
-        # Raw model-input cols = 154 from default LOB feature set (drop 'time')
-        self._raw_feat_cols: List[str] = [c for c in self._all_input_cols if c != "time"]
+        self._raw_feat_cols: List[str] = list(cfg_main["feature"])
         try:
             self._amount_delta_idx = self._raw_feat_cols.index("amount_delta")
         except ValueError:
@@ -61,7 +64,6 @@ class Predictor:
             tcfg = json.load(f)
         self._horizons: List[Dict] = tcfg["horizons"]
 
-        # Load active boosters
         self._boosters: Dict[int, lgb.Booster] = {}
         for hcfg in self._horizons:
             if not hcfg.get("active", True):
@@ -72,34 +74,24 @@ class Predictor:
                 self._boosters[H] = lgb.Booster(model_file=mp)
 
     @staticmethod
-    def _threshold_predict(
-        probs: np.ndarray, T_thr: float, delta: float
-    ) -> np.ndarray:
+    def _threshold_predict(probs: np.ndarray, T_thr: float, delta: float) -> np.ndarray:
         p0 = probs[:, 0]; p1 = probs[:, 1]; p2 = probs[:, 2]
         side_max = np.maximum(p0, p2)
         take = (side_max >= T_thr) & (side_max > p1 + delta)
         side_pred = np.where(p2 > p0, 2, 0)
         return np.where(take, side_pred, 1).astype(np.int64)
 
-    def _compute_t3_safe(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Compute the 72 T3 features. Fall back to zeros for time encoding if parse fails."""
+    def _compute_t3_no_time(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Compute the 69 non-time T3 features (MLOFI + WMP + RV + EWMA)."""
         mlofi = self._t3.compute_mlofi(df)
         wmp = self._t3.compute_wmp(df)
         rv = self._t3.compute_rv(wmp["wmp_lvl1"])
         ewma = self._t3.compute_ewma_intst(df)
-        try:
-            timef = self._t3.compute_time_encoding(df)
-        except Exception:
-            timef = pd.DataFrame({
-                "time_minutes_since_session_start": np.zeros(len(df), dtype=np.int32),
-                "time_session_progress": np.zeros(len(df), dtype=np.float32),
-                "time_is_pm": np.zeros(len(df), dtype=np.int8),
-            }, index=df.index)
-        return pd.concat([mlofi, wmp, rv, ewma, timef], axis=1)
+        return pd.concat([mlofi, wmp, rv, ewma], axis=1)
 
     def _compute_window_features(self, df: pd.DataFrame) -> np.ndarray:
-        """Build 226-dim last-tick feature vector for one 100-row window."""
-        t3 = self._compute_t3_safe(df)
+        """Build 223-d last-tick feature vector for one 100-row window."""
+        t3 = self._compute_t3_no_time(df)
         raw_last = df[self._raw_feat_cols].iloc[-1].to_numpy(dtype=np.float32, copy=True)
         if self._amount_delta_idx >= 0:
             v = raw_last[self._amount_delta_idx]
@@ -133,8 +125,7 @@ class Predictor:
             T_thr = float(hcfg.get("T", 0.50))
             delta = float(hcfg.get("delta", 0.15))
             preds = self._threshold_predict(probs, T_thr, delta)
-            col_idx = HORIZON_TO_IDX[H]
-            out[:, col_idx] = preds
+            out[:, HORIZON_TO_IDX[H]] = preds
         return out.tolist()
 
 
