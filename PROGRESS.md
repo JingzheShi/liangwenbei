@@ -1,5 +1,15 @@
 # 第二届"良文杯"统计建模与 AI 预测挑战赛 — 项目进度
 
+## ⚠️ 评测协议硬约束（最重要！）
+
+完整说明见 [`CRITICAL_CONSTRAINTS.md`](CRITICAL_CONSTRAINTS.md)。**任何模型 / 特征 / Predictor 设计前必读**。
+3 条核心红线：
+1. **`date` 评测时被置 0**——不能当 feature
+2. **测试点顺序被打乱**——Predictor 不能维护跨调用 state
+3. **sym 0-4 但可能含训练外股票**——模型必须 sym-agnostic
+
+---
+
 ## 1. 赛题速览
 
 | 项 | 内容 |

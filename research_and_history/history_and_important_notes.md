@@ -3,6 +3,19 @@
 > 这是我们的"实验记忆"。每次试一个新 idea 都来这里登记：来源 → 实现 → 在本地 test set 上的效果。
 > 不要在 PROGRESS.md 里记这些；PROGRESS.md 是项目状态，这里是知识沉淀。
 
+## ⚠️ 评测硬约束（写代码前必读 → [`../CRITICAL_CONSTRAINTS.md`](../CRITICAL_CONSTRAINTS.md)）
+
+**任何 trick 设计、特征工程、模型架构必须遵守这 3 条红线，否则提交报错或拿 0 分**：
+
+1. **`date` 字段评测时被置 0**——禁止把 date 当 feature 或推理时段
+2. **评测程序打乱测试点顺序**——Predictor 必须每次 predict 调用完全独立，不能维护跨调用 state（hidden state / cache buffer / sym→映射）
+3. **sym 0-4 但可能含训练外股票**——模型必须 **sym-agnostic**：
+   - 禁 `nn.Embedding(num_sym, ...)` 用 sym ID
+   - 禁把 sym 加到 GBDT/树模型 feature
+   - 禁 per-sym 模型集合 / per-sym normalization
+   - 全局 normalization、不依赖 sym 的架构
+4. **可以用 `time`**（保留实际时间戳），但需要在 config.feature 列里显式 list 才会被送入 DataFrame；推荐在 build cache 阶段把 time-derived 列预算好
+
 ---
 
 ## 0. 文件组织
@@ -16,6 +29,116 @@
 - `competition_insights_models.md` — Kaggle 比赛 winner 模型选型 + 训练 trick + 后处理（R-model worker，模型侧）
 - `gbdt_vs_nn_for_lob.md` — GBDT vs NN 系统对比专题（R-model worker，决定建模路线）
 - `tracker.md` — 实验 tracker（一行一个尝试，含 PnL/acc/状态）
+
+---
+
+## 1.7 LOSO CV 验证 + Threshold post-processor（2026-05-06，T4 worker）
+
+### LOSO Scheme A 5 fold 结果（label_60，验证假设：T2 是 brittle 模型）
+
+| held-out sym | held-out cum_pnl (raw argmax) | held-out cum_pnl (T=0.5,δ=0.15) |
+|---|---|---|
+| 0 | -12.41 | -1.46 |
+| 1 | -3.77 | +3.26 |
+| 2 | -8.12 | +0.67 |
+| 3 | +0.45 | +0.21 |
+| 4 | +1.75 | +3.78 |
+| **sum** | **-22.10** | **+6.45** |
+| folds > 0 | 2/5 | **4/5** |
+
+**惊人发现**：raw argmax 的 LOSO sum **-22.10** 与 mmpc_demo 平台 **-23.13** **量级 + 符号完全吻合** → LOSO 是平台行为的可信代理。
+T2 IID（同 sym 训练 + 同 sym 测试）+19.25 → LOSO（跨 sym）-22.10 → **跨 sym 损失 41 分**。
+
+### 关键发现：高置信度 threshold post-processor 是当前最大 lever
+
+**机制**：默认 LightGBM argmax 在 ~34% prob 就出手 → OOD sym 上弱信号易翻面 → 手续费拖死。
+强制 max(prob_0, prob_2) > 0.5 且 > prob_1 + 0.15 才出手 → 出手量降 86%（320k→45k），但单笔 alpha 从 -7e-5 翻到 +1.4e-4 → cum_pnl 从 -22.10 → **+6.45**。
+
+**且不是只对 OOD 有效**：T2 Scheme B IID test cum_pnl 从 +9.36 → **+14.88**（同样 +59%）。
+说明 thresholding 是**通用增强**，不只是 OOD 救命。
+
+### iter_001 决策
+
+- ❌ **iter_001_lgbm_schemeB（raw argmax）** — 不要提，LOSO 预测是 -22
+- ✅ **iter_001c_lgbm_schemeB_thresh** — 推荐提交，预期 [-2, +6]
+
+**新硬约束（写到 trick 库）**：
+
+| 日期 | 类别 | trick 名 | 来源 | 状态 | 效果 |
+|---|---|---|---|---|---|
+| 2026-05-06 | post-proc | **高置信度阈值 gating (T=0.5, delta=0.15)** | T4 worker LOSO 验证 | **keep** | LOSO -22.10 → +6.45（label_60，5 fold sum）；IID +9.36 → +14.88（label_60）|
+| 2026-05-06 | val 策略 | **必须用 LOSO CV，不能信 IID** | T4 worker 验证 | **must do** | T2 IID +19 → LOSO -22；41 分跨 sym 损失 |
+
+---
+
+## 1.6 本地 Pipeline 完整性审计（2026-05-06，audit_pipeline.py）
+
+**结论：本地 pipeline (split / PnL / windowing) 100% 正确，没有 bug**：
+
+- **A. Split**：train(800)/val(160)/test(240) 三集合无重叠，date 范围正确
+- **B. PnL 公式**：手算与 `compute_pnl` 完全一致（pred=labels → 0；pred=2,真实=1 → -0.0002）
+- **C. Windowing**：`feat_df.iloc[t-99:t+1]` 与官方 `main.py` 的 `iloc[index:index+100]` byte-perfect 相同
+- **D. mmpc_demo 在单 session 上几乎全预测 1**（94-100%）—— 模型塌缩到多数类，PnL ≈ 0
+- **E. 240-session per-session 分布**：
+
+| horizon | sum | mean | pos/neg | mean_acc | mean_predflat |
+|---|---|---|---|---|---|
+| label_5 | +4.09 | +0.017 | 124/31 | 0.81 | **0.94** (94% 预测平) |
+| label_10 | +6.16 | +0.026 | 130/45 | 0.72 | 0.85 |
+| label_20 | +6.33 | +0.026 | 95/34 | 0.79 | **0.96** |
+| label_40 | +6.27 | +0.026 | 90/47 | 0.69 | 0.88 |
+| label_60 | +3.57 | +0.015 | 90/72 | 0.62 | 0.74 |
+
+按 sym 分（label_20）：sym=0 +0.62, sym=1 +1.59, sym=2 +0.74, sym=3 -0.008, sym=4 **+3.40**
+→ **5 个 sym 在本地全是非负**，但平台是 -7。
+
+**所以差距不是 bug，是 distribution shift**：
+- 本地：mmpc_demo 在 5 个训练 sym 的 date 96-119 上**绝大多数预测平** → cum_pnl 弱正
+- 平台：mmpc_demo 预测**主动**了很多（44-60% active vs 本地 6-26%） → 大量乱猜亏 fee
+
+**两种最可能的解释**：
+1. **跨股票泛化**：平台 sym=0..4 实际是不属于训练集的股票（赛题明文允许）
+2. **时间漂移**：平台 test 集是 date 119 之后的更新数据
+
+**T2 Scheme B 在 5 个本地 sym 上的表现**（label_60，**强烈不均匀**）：
+- sym=0: +2.96 (predflat 91%)
+- sym=1: **-0.96** (predflat 20%)
+- sym=2: +1.05 (predflat 57%)
+- sym=3: +3.36 (predflat 93%)
+- sym=4: **+12.84** (predflat 32%)
+
+→ T2 的 +19.25 总分 **67% 来自 sym=4**！如果平台没有类似 sym=4 的股票，T2 也可能是负分。
+
+**关键 takeaway / 后续硬约束**：
+- **任何"本地正分"都不能直接外推平台**——必须用 leave-one-sym-out CV 评估
+- **sym=4 在所有模型上都异常**（mmpc_demo 也是 +3.40 最高的 sym），可能是某只波动率 / 流动性显著不同的股票
+- **优先做 sym-robust 特征工程**：避开 per-sym 量级敏感的特征，多用 ratio / OFI normalized / 形状特征
+- **iter_001 候选**：T2 Scheme B 最强但 brittle；建议先做 LOSO CV 验证再提交，否则可能再吃一次 -7 ~ -23
+
+---
+
+## 1.5 已验证的事实（来自 iter_000 平台真实成绩，2026-05-06）
+
+mmpc_demo（官方 demo）在平台 test 集上**全 5 horizon 都是负分**：
+
+| label | platform cum_pnl | per-trade | n_active |
+|---|---|---|---|
+| label_5  | -9.079  | -0.000200 | ~45.4k |
+| label_10 | -13.319 | -0.000199 | ~66.9k |
+| label_20 | **-6.649** | -0.000134 | ~49.6k |
+| label_40 | -16.065 | -0.000212 | ~75.8k |
+| label_60 | -23.132 | -0.000184 | ~125.7k |
+
+**Best of 5 = -6.649 at label_20**（最不亏）。
+
+**关键 insight（指导后续训练）**：
+
+1. **per-trade ≈ -fee 完美吻合** → mmpc_demo 是真正零 alpha；任何随机预测都会得到这个数字
+2. **平台 test 集 ~210k 评测点**（用 label_60 active 数倒推），约为我们本地 240-session test 的一半
+3. **长 horizon (label_60) 在平台上是 worst，不是 best**——因为 p_flat 低 → 模型激活率高 → 乱猜更多 → 损失放大。**翻转了我们 sanity-check 阶段对 label_60 的预期**
+4. **本地 1-session 评测严重低估风险**——本地 sym0_date0_am 测得 ≈0 PnL（模型几乎全预测 1），但平台分布更广，模型乱预测 → 大额负 PnL。**强制要求：所有 iter 在本地必须跑 240-session 全 test 集评测**
+5. **任何"全预测 1（不交易）"baseline 都拿 0 分，胜过 mmpc_demo**——这是绝对底线，任何提交必须 > 0
+6. **5 horizon 中最容易学的可能是 label_20**（mmpc_demo 在 label_20 损失最少 = 平均预测错得最少）——可作为后续重点优化目标
 
 ---
 

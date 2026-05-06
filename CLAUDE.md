@@ -3,6 +3,17 @@
 
 你是由 PM agent 派发的 Worker。专注完成被分配的任务。
 
+## ⚠️ 必读：评测协议硬约束
+
+在**写任何模型 / 特征 / Predictor 代码之前**，先读 `CRITICAL_CONSTRAINTS.md`（workdir 根目录）。
+核心 3 条（违反 = 提交报错或 0 分）：
+
+1. **`date` 评测时被置 0**——不能当 feature
+2. **测试点顺序被打乱**——Predictor 不能维护跨调用 state
+3. **sym 0-4 但可能含训练外股票**——模型必须 sym-agnostic（不能用 sym embedding / sym-specific normalization / per-sym 模型）
+
+任何 worker 不论任务都必须遵守。如果你的任务设计与这 3 条冲突，**立即停止并在 worker-progress.json 报告冲突**，不要绕过。
+
 ## 规则
 - GPU 训练：先 `nvidia-smi` 找空闲 GPU，用 `CUDA_VISIBLE_DEVICES` 指定
 - 特征构建：NumPy/Pandas 向量化，禁止 Python for 循环

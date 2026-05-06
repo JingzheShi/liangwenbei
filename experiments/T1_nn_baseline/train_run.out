@@ -1,0 +1,143 @@
+[01:44:36] args: {'epochs': 5, 'batch_size': 1024, 'lr': 0.001, 'weight_decay': 0.0001, 'num_workers': 4, 'seed': 42, 'max_epochs_extended': 10, 'patience': 2, 'data_dir': '/root/projects/liangwenbei_workdir/data', 'stats': '/root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/stats.npz', 'out_dir': '/root/projects/liangwenbei_workdir/experiments/T1_nn_baseline', 'no_wandb': False, 'wandb_entity': 'jingzheshi', 'wandb_project': 'liangwenbei'}
+[01:44:36] device: cuda
+[01:44:36] gpu: NVIDIA GeForce RTX 3090
+[01:44:36] Loading stats from /root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/stats.npz
+[01:44:36] features: 154, log1p_cols: ['amount_delta']
+[01:44:36] splits: train=800 val=160 test=240
+[01:44:36] Loading train dataset (in-memory)
+[01:44:45]   train: 1473600 samples, 9.6s
+[01:44:45] Loading val dataset (in-memory, with midprices)
+[01:44:47]   val: 294720 samples, 1.7s
+[01:44:47] [class_weights] total label rows: 1600800
+[01:44:47] [class_weights] label_5: dist=['0.129', '0.750', '0.121'], weights=['2.584', '0.445', '2.749']
+[01:44:47] [class_weights] label_10: dist=['0.191', '0.634', '0.175'], weights=['1.746', '0.525', '1.908']
+[01:44:47] [class_weights] label_20: dist=['0.142', '0.723', '0.135'], weights=['2.354', '0.461', '2.467']
+[01:44:47] [class_weights] label_40: dist=['0.215', '0.590', '0.195'], weights=['1.552', '0.565', '1.707']
+[01:44:47] [class_weights] label_60: dist=['0.258', '0.512', '0.230'], weights=['1.294', '0.651', '1.448']
+[01:44:47] Normalizing train features...
+[01:44:47] [normalize] replaced 97704 non-finite values across 800 sessions
+[01:44:47] Normalizing val features...
+[01:44:47] [normalize] replaced 81296 non-finite values across 160 sessions
+/usr/local/lib/python3.12/dist-packages/torch/nn/modules/conv.py:549: UserWarning: Using padding='same' with even kernel lengths and odd dilation may require a zero-padded copy of the input be created (Triggered internally at ../aten/src/ATen/native/Convolution.cpp:1036.)
+  return F.conv2d(
+[01:44:48] model: DeepLOB, n_params=985023
+[01:44:49] scheduler: cosine over 14390 steps
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /root/.netrc.
+wandb: Currently logged in as: jingzheshi to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.26.1
+wandb: Run data is saved locally in /root/projects/liangwenbei_workdir/wandb/run-20260506_014450-zn0lx50a
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run T1-nn-baseline-20260506-014449
+wandb: ⭐️ View project at https://wandb.ai/jingzheshi/liangwenbei
+wandb: 🚀 View run at https://wandb.ai/jingzheshi/liangwenbei/runs/zn0lx50a
+[01:45:34]   epoch 1 step 200/1439: loss=5.4012 lr=1.00e-03
+[01:46:16]   epoch 1 step 400/1439: loss=5.2461 lr=9.98e-04
+[01:46:58]   epoch 1 step 600/1439: loss=5.1744 lr=9.96e-04
+[01:47:41]   epoch 1 step 800/1439: loss=5.1064 lr=9.92e-04
+[01:48:23]   epoch 1 step 1000/1439: loss=5.0464 lr=9.88e-04
+[01:49:05]   epoch 1 step 1200/1439: loss=4.9939 lr=9.83e-04
+[01:49:47]   epoch 1 step 1400/1439: loss=4.9479 lr=9.77e-04
+[01:49:56] epoch 1 train: total_loss=4.9395 per_head=['0.9510', '0.9724', '0.9855', '1.0089', '1.0216'] time=304.6s
+[01:50:09] epoch 1 val: loss=0.9518 cum_pnl_label60=0.9358 best_score=6.8506 (label_20) time=13.2s
+[01:50:09]   label_5: acc=0.577 prec_macro=0.2701832334956774 cum_pnl=-1.7414 pred_dist={0: 75707, 1: 138508, 2: 80505}
+[01:50:09]   label_10: acc=0.563 prec_macro=0.33591740396163217 cum_pnl=3.3038 pred_dist={0: 83556, 1: 127113, 2: 84051}
+[01:50:09]   label_20: acc=0.561 prec_macro=0.2513427730894947 cum_pnl=6.8506 pred_dist={0: 66367, 1: 146108, 2: 82245}
+[01:50:09]   label_40: acc=0.518 prec_macro=0.30524301311478264 cum_pnl=2.2313 pred_dist={0: 74849, 1: 130649, 2: 89222}
+[01:50:09]   label_60: acc=0.499 prec_macro=0.33138680239240603 cum_pnl=0.9358 pred_dist={0: 74320, 1: 131787, 2: 88613}
+[01:50:09]   -> NEW BEST val cum_pnl_label60=0.9358 at epoch 1
+[01:50:51]   epoch 2 step 200/1439: loss=4.5918 lr=9.68e-04
+[01:51:34]   epoch 2 step 400/1439: loss=4.5715 lr=9.60e-04
+[01:52:16]   epoch 2 step 600/1439: loss=4.5479 lr=9.51e-04
+[01:52:58]   epoch 2 step 800/1439: loss=4.5247 lr=9.41e-04
+[01:53:40]   epoch 2 step 1000/1439: loss=4.5021 lr=9.31e-04
+[01:54:22]   epoch 2 step 1200/1439: loss=4.4803 lr=9.19e-04
+[01:55:04]   epoch 2 step 1400/1439: loss=4.4580 lr=9.07e-04
+[01:55:12] epoch 2 train: total_loss=4.4536 per_head=['0.8467', '0.8872', '0.8777', '0.9130', '0.9290'] time=303.5s
+[01:55:25] epoch 2 val: loss=1.0198 cum_pnl_label60=-5.6985 best_score=1.4537 (label_10) time=12.4s
+[01:55:25]   label_5: acc=0.602 prec_macro=0.28450468355283903 cum_pnl=-1.8275 pred_dist={0: 53491, 1: 150987, 2: 90242}
+[01:55:25]   label_10: acc=0.572 prec_macro=0.3423325792573225 cum_pnl=1.4537 pred_dist={0: 62048, 1: 136600, 2: 96072}
+[01:55:25]   label_20: acc=0.551 prec_macro=0.23910183368037508 cum_pnl=0.2651 pred_dist={0: 64534, 1: 147282, 2: 82904}
+[01:55:25]   label_40: acc=0.497 prec_macro=0.2901926936444151 cum_pnl=-3.7574 pred_dist={0: 75472, 1: 127791, 2: 91457}
+[01:55:25]   label_60: acc=0.467 prec_macro=0.31255125254632643 cum_pnl=-5.6985 pred_dist={0: 80431, 1: 117460, 2: 96829}
+[01:55:25]   no improvement (1/2)
+[01:56:07]   epoch 3 step 200/1439: loss=4.2160 lr=8.91e-04
+[01:56:49]   epoch 3 step 400/1439: loss=4.1978 lr=8.77e-04
+[01:57:31]   epoch 3 step 600/1439: loss=4.1788 lr=8.63e-04
+[01:58:13]   epoch 3 step 800/1439: loss=4.1593 lr=8.47e-04
+[01:58:55]   epoch 3 step 1000/1439: loss=4.1382 lr=8.31e-04
+[01:59:37]   epoch 3 step 1200/1439: loss=4.1184 lr=8.15e-04
+[02:00:32]   epoch 3 step 1400/1439: loss=4.0997 lr=7.97e-04
+[02:00:43] epoch 3 train: total_loss=4.0954 per_head=['0.8169', '0.8447', '0.7896', '0.8119', '0.8324'] time=318.5s
+[02:00:59] epoch 3 val: loss=1.1073 cum_pnl_label60=-8.8072 best_score=-1.2302 (label_10) time=16.2s
+[02:00:59]   label_5: acc=0.599 prec_macro=0.2720212212047394 cum_pnl=-3.3379 pred_dist={0: 76327, 1: 149892, 2: 68501}
+[02:00:59]   label_10: acc=0.563 prec_macro=0.3284698927956322 cum_pnl=-1.2302 pred_dist={0: 87962, 1: 132373, 2: 74385}
+[02:00:59]   label_20: acc=0.549 prec_macro=0.2334479397849908 cum_pnl=-2.4358 pred_dist={0: 81597, 1: 147521, 2: 65602}
+[02:00:59]   label_40: acc=0.495 prec_macro=0.284843429390144 cum_pnl=-8.4499 pred_dist={0: 92218, 1: 129210, 2: 73292}
+[02:00:59]   label_60: acc=0.474 prec_macro=0.3127048799745334 cum_pnl=-8.8072 pred_dist={0: 92179, 1: 126397, 2: 76144}
+[02:00:59]   no improvement (2/2)
+[02:01:42]   epoch 4 step 200/1439: loss=3.8632 lr=7.76e-04
+[02:02:24]   epoch 4 step 400/1439: loss=3.8592 lr=7.57e-04
+[02:03:06]   epoch 4 step 600/1439: loss=3.8478 lr=7.39e-04
+[02:03:48]   epoch 4 step 800/1439: loss=3.8316 lr=7.19e-04
+[02:04:30]   epoch 4 step 1000/1439: loss=3.8157 lr=6.99e-04
+[02:05:12]   epoch 4 step 1200/1439: loss=3.8028 lr=6.79e-04
+[02:05:53]   epoch 4 step 1400/1439: loss=3.7876 lr=6.59e-04
+[02:06:02] epoch 4 train: total_loss=3.7843 per_head=['0.7930', '0.8084', '0.7126', '0.7224', '0.7480'] time=302.5s
+[02:06:14] epoch 4 val: loss=1.2276 cum_pnl_label60=-14.7235 best_score=-4.8286 (label_5) time=12.3s
+[02:06:14]   label_5: acc=0.621 prec_macro=0.2727920064115078 cum_pnl=-4.8286 pred_dist={0: 65824, 1: 163597, 2: 65299}
+[02:06:14]   label_10: acc=0.569 prec_macro=0.31985972084375425 cum_pnl=-5.3654 pred_dist={0: 78651, 1: 144268, 2: 71801}
+[02:06:14]   label_20: acc=0.553 prec_macro=0.22277811438915648 cum_pnl=-8.8034 pred_dist={0: 74485, 1: 155636, 2: 64599}
+[02:06:14]   label_40: acc=0.489 prec_macro=0.2748217128693552 cum_pnl=-13.0577 pred_dist={0: 85399, 1: 134690, 2: 74631}
+[02:06:14]   label_60: acc=0.449 prec_macro=0.2975708106024598 cum_pnl=-14.7235 pred_dist={0: 91609, 1: 118175, 2: 84936}
+[02:06:14]   no improvement (3/2)
+[02:06:56]   epoch 5 step 200/1439: loss=3.6064 lr=6.34e-04
+[02:07:38]   epoch 5 step 400/1439: loss=3.6006 lr=6.12e-04
+[02:08:20]   epoch 5 step 600/1439: loss=3.5908 lr=5.91e-04
+[02:09:02]   epoch 5 step 800/1439: loss=3.5814 lr=5.70e-04
+[02:09:44]   epoch 5 step 1000/1439: loss=3.5720 lr=5.48e-04
+[02:10:26]   epoch 5 step 1200/1439: loss=3.5621 lr=5.26e-04
+[02:11:08]   epoch 5 step 1400/1439: loss=3.5504 lr=5.04e-04
+[02:11:16] epoch 5 train: total_loss=3.5486 per_head=['0.7735', '0.7790', '0.6556', '0.6561', '0.6843'] time=302.2s
+[02:11:29] epoch 5 val: loss=1.3374 cum_pnl_label60=-15.6200 best_score=-7.7594 (label_5) time=12.4s
+[02:11:29]   label_5: acc=0.595 prec_macro=0.2570324595067267 cum_pnl=-7.7594 pred_dist={0: 72152, 1: 154044, 2: 68524}
+[02:11:29]   label_10: acc=0.549 prec_macro=0.30749065861701247 cum_pnl=-8.4798 pred_dist={0: 81756, 1: 135998, 2: 76966}
+[02:11:29]   label_20: acc=0.552 prec_macro=0.21897103530055773 cum_pnl=-10.5390 pred_dist={0: 72233, 1: 156781, 2: 65706}
+[02:11:29]   label_40: acc=0.478 prec_macro=0.27039186555021355 cum_pnl=-14.9253 pred_dist={0: 92134, 1: 130326, 2: 72260}
+[02:11:29]   label_60: acc=0.438 prec_macro=0.2911441596098069 cum_pnl=-15.6200 pred_dist={0: 104055, 1: 115324, 2: 75341}
+[02:11:29]   no improvement (4/2)
+[02:11:29] early stop at epoch 5 (no improvement for 4 epochs)
+[02:11:29] Saved best model -> /root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/best_model.pt
+wandb: updating run metadata
+wandb: uploading history steps 3-4, summary, console lines 68-76
+wandb: 
+wandb: Run history:
+wandb:                 epoch ▁▃▅▆█
+wandb:                    lr █▇▅▃▁
+wandb:   train/loss_label_10 █▅▃▂▁
+wandb:   train/loss_label_20 █▆▄▂▁
+wandb:   train/loss_label_40 █▆▄▂▁
+wandb:    train/loss_label_5 █▄▃▂▁
+wandb:   train/loss_label_60 █▆▄▂▁
+wandb:      train/total_loss █▆▄▂▁
+wandb: val/accuracy_label_10 ▅█▅▇▁
+wandb: val/accuracy_label_20 █▂▁▃▃
+wandb:                   +45 ...
+wandb: 
+wandb: Run summary:
+wandb:               best_epoch 1
+wandb: best_val_cum_pnl_label60 0.93581
+wandb:                    epoch 5
+wandb:                       lr 0.0005
+wandb:      train/loss_label_10 0.77902
+wandb:      train/loss_label_20 0.65563
+wandb:      train/loss_label_40 0.65612
+wandb:       train/loss_label_5 0.77354
+wandb:      train/loss_label_60 0.68425
+wandb:         train/total_loss 3.54856
+wandb:                      +47 ...
+wandb: 
+wandb: 🚀 View run T1-nn-baseline-20260506-014449 at: https://wandb.ai/jingzheshi/liangwenbei/runs/zn0lx50a
+wandb: ⭐️ View project at: https://wandb.ai/jingzheshi/liangwenbei
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260506_014450-zn0lx50a/logs
+[02:11:30] Training done.

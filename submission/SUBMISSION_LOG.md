@@ -11,7 +11,11 @@
 
 | iter | 日期 | 模型 | 关键 trick | 本地 PnL (best) | best horizon | 公榜 PnL | 单次收益 | F0.5 (best h) | 备注 |
 | ---- | ---- | ---- | ---------- | --------------- | ------------ | -------- | -------- | ------------- | ---- |
-| 000  | 2026-05-06 | mmpc_demo (DeepLOB 5-head, 142 features) | 无（直接用 examples/mmpc_demo 跑通流程） | **0.001119** | label_10 | _未提交_ | _未提交_ | 0.0469 | 走通流程；模型严重塌缩到 1（pred dist ≈ 全 1） |
+| 000  | 2026-05-06 | mmpc_demo (DeepLOB 5-head, 142 features) | 无（直接用 examples/mmpc_demo 跑通流程） | **0.001119** | label_10 | **-6.6492** (label_20, best of 5) | -0.000134~-0.000212 (≈ -fee 全 5 horizon) | 0.302 (label_60) | 平台跑通 ✓；**全 5 horizon 都是负分**，model 是 zero-alpha 乱猜（每笔 ≈ -fee 完美吻合）；label_60 最差 -23.13 因为长 horizon p_flat 更低 → 模型激活率更高 → 乱猜笔数更多 |
+| 001  | 2026-05-06 | LightGBM Scheme B (2002 features = 154 last-tick + 1848 rolling stats，label_60 only) | argmax 1/3 + 其他 4 horizon 全 1 | +19.25 (Scheme B IID) / **LOSO -22.10** | label_60 | _未提交（不推荐）_ | _LOSO -5e-5 ≈ -fee_ | 0.353 IID | **brittle**：LOSO 5 fold sum -22.10 完美匹配 mmpc_demo 平台 -23.13；不要单独提，用 iter_001c 替代 |
+| 001c | 2026-05-06 | LightGBM Scheme B + threshold post-proc (T=0.50, delta=0.15) | 高置信度 gating：argmax 改为只有 max(p0,p2)>0.5 且 > p1+0.15 才出手；其他 horizon 全 1 | LOSO **+6.45** (sum 5 fold) / Scheme B IID **+14.88** | label_60 | _待提交_ | LOSO +1.4e-04 / IID +0.000165 | LOSO 0.599 / IID 0.620 | **推荐提交**；4/5 folds 正分；最差 fold sym=0 -1.46 远好于 raw -12.41；`submission_050602_iter1c.zip` 1.60MB / 22 sanity ✓ |
+| 001  | 2026-05-06 | LightGBM Scheme B (last-tick + rolling{mean,std,min,max} W=5/20/60, 2002 dim, label_60 only; 其他 horizon=1 不出手) | 无（raw argmax） | +19.25 (IID) / **-22.10 (LOSO sum)** | label_60 | _未提交_ | _未提交_ | _未提交_ | 已打包 + 通过 sanity_check 19/19 + 契约校验。**T4 LOSO 显示 raw argmax 跨 sym 失败 sum=-22**（mean=-4.42，2/5 fold 正）→ **不建议提交**；改用 iter_001c。 |
+| 001c | 2026-05-06 | 同 iter_001 模型 | + 置信度阈值 (T=0.50, delta=0.15) 后处理：max(p0,p2)>T 且 >p1+δ 才出手 | LOSO OOF +6.45 (4/5 fold 正) / IID schemeA test +14.88 vs +9.36 baseline | label_60 | _未提交_ | _未提交_ | _未提交_ | T4 推荐提交。LightGBM model.txt 复用 iter_001 同一权重；sanity_check 19/19 + 契约校验通过。Scheme B IID 显示 T=0.50 偏严，可能 T=0.42-0.46 + δ=0.05 更优 — 待 LOSO B 完成后再 tune。 |
 
 ## 列含义
 
@@ -24,7 +28,34 @@
 
 ## 详细记录
 
-### iter_000_mmpc_demo — 走通流程基线
+### iter_000_mmpc_demo — 走通流程基线（已提交平台，5 horizon 全负）
+
+#### 平台公榜回填（任务 ID 2340）
+
+| label | accuracy | recall | F0.5 | cum_pnl (=模型评分) | single_pnl (per-trade) | n_active 推算 |
+|---|---|---|---|---|---|---|
+| label_5  | 0.306 | 0.155 | 0.256 | -9.079  | -0.000200 | ~45,400 |
+| label_10 | 0.336 | 0.171 | 0.282 | -13.319 | -0.000199 | ~66,930 |
+| label_20 | 0.314 | 0.139 | 0.251 | **-6.649** | -0.000134 | ~49,620 |
+| label_40 | 0.339 | 0.159 | 0.276 | -16.065 | -0.000212 | ~75,778 |
+| label_60 | 0.333 | 0.220 | 0.302 | -23.132 | -0.000184 | ~125,717 |
+
+**Best score (即排名分)** = max over 5 horizons = **-6.649 at label_20**（最不亏的那个）。
+
+**核心诊断（保存到 history_and_important_notes.md）**：
+1. **全 5 horizon 都是负分** — mmpc_demo 在平台上零 alpha
+2. **per-trade pnl 跨 horizon 都 ≈ -fee（-0.000134 到 -0.000212）** — 数学上完美吻合"随机预测期望损失 = fee"
+3. **label_60 最差不是最好**——长 horizon p_flat 更低（54% vs label_5 的 76%）→ 模型激活率更高（~60% vs ~22%）→ 乱猜笔数翻倍 → 总损失最大
+4. **平台 test set 推算 ~210k 评测点**（基于 label_60 ~125k active / ~60% rate）
+5. **本地 1-session 评测严重低估了模型 catastrophic 失败的风险**——本地 sym0_date0_am 几乎全预测 1（PnL≈0），但平台全集 test 下分布漂移大到模型乱预测
+
+**iter_000 教训**：
+- 不要再提交 mmpc_demo（任何路径都比这差）
+- 全预测 1（不交易）即可拿 0 分，已经胜过 mmpc_demo
+- 真正的 baseline 必须在我们 train 集上从头训练
+- 本地评测必须跑全 240-session test 集，不能只跑 1 session
+
+#### 原 iter_000 描述（保留）
 
 - **日期**：2026-05-06
 - **模型**：DeepLOB（多任务 5-head 三分类），142 个特征，100 行窗口，单 head 模型 ≈ 4MB。
