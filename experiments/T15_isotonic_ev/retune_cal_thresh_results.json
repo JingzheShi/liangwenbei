@@ -1,0 +1,32 @@
+{
+  "h_5": {
+    "best_T": 0.4,
+    "best_delta": 0.0,
+    "best_sum": 11.974452394045366,
+    "best_pos": 5
+  },
+  "h_10": {
+    "best_T": 0.45,
+    "best_delta": 0.0,
+    "best_sum": 15.802007744803568,
+    "best_pos": 5
+  },
+  "h_20": {
+    "best_T": 0.45,
+    "best_delta": 0.0,
+    "best_sum": 5.723033223432638,
+    "best_pos": 5
+  },
+  "h_40": {
+    "best_T": 0.45,
+    "best_delta": 0.0,
+    "best_sum": 4.027067672262018,
+    "best_pos": 5
+  },
+  "h_60": {
+    "best_T": 0.45,
+    "best_delta": 0.0,
+    "best_sum": 0.9942694811930727,
+    "best_pos": 4
+  }
+}

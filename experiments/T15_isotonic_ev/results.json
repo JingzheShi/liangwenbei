@@ -1,0 +1,43 @@
+{
+  "task": "T15: Isotonic calibration + EV gate post-process iter_002 (R13/R10)",
+  "outcome": "NEGATIVE — calibration + EV does not beat iter_002 baseline on any horizon",
+  "iter_008_built": false,
+  "metrics": {
+    "h_5_iter002_sum": 17.4917,
+    "h_5_cal_thresh_sum": 8.2002,
+    "h_5_cal_ev_best_sum": 16.9412,
+    "h_5_cal_ev_best_C": 1e-05,
+    "h_5_delta_vs_iter002": -0.5505,
+
+    "h_10_iter002_sum": 21.8595,
+    "h_10_cal_thresh_sum": 12.1301,
+    "h_10_cal_ev_best_sum": 20.8408,
+    "h_10_cal_ev_best_C": 5e-05,
+    "h_10_delta_vs_iter002": -1.0187,
+
+    "h_20_iter002_sum": 19.6999,
+    "h_20_cal_thresh_sum": 4.7922,
+    "h_20_cal_ev_best_sum": 19.4453,
+    "h_20_cal_ev_best_C": 5e-05,
+    "h_20_delta_vs_iter002": -0.2546,
+
+    "h_40_iter002_sum": 11.7051,
+    "h_40_cal_thresh_sum": 2.4971,
+    "h_40_cal_ev_best_sum": 7.5781,
+    "h_40_cal_ev_best_C": 2e-04,
+    "h_40_delta_vs_iter002": -4.1270,
+
+    "h_60_iter002_sum": 6.3002,
+    "h_60_cal_thresh_sum": 0.3286,
+    "h_60_cal_ev_best_sum": 0.6423,
+    "h_60_cal_ev_best_C": 5e-04,
+    "h_60_delta_vs_iter002": -5.6579,
+
+    "bce_h5_orig": 0.8244, "bce_h5_cal": 0.4863,
+    "bce_h10_orig": 0.9468, "bce_h10_cal": 0.6713,
+    "bce_h20_orig": 0.9182, "bce_h20_cal": 0.5686,
+    "bce_h40_orig": 0.9979, "bce_h40_cal": 0.7607,
+    "bce_h60_orig": 1.0161, "bce_h60_cal": 0.8538
+  },
+  "notes": "Isotonic calibration is technically correct (BCE drops 30-40% across horizons) but the EV-gate decision rule using global E[Δp] proxies cannot match the iter_002 (T, δ) gate that was sweep-tuned on the same OOF. Re-tuning (T, δ) on calibrated probs (e.g., h_10 best (T=0.45, δ=0.0) = +15.80) still loses ≥6 vs iter_002 +21.86 — the loss is intrinsic to the calibrated prob shape under the (T, δ) rule. Likely fix: regression-based E[Δp | features] for confidence-conditional EV (out of scope). Decision: keep iter_002, no iter_008."
+}
