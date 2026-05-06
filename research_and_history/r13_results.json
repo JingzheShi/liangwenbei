@@ -1,0 +1,36 @@
+{
+  "task": "T13 research: probability calibration + position sizing beyond T+delta gating",
+  "metrics": {
+    "schemes_listed": 10,
+    "papers_summarized": 6,
+    "websearches": 11,
+    "webfetches": 8
+  },
+  "deliverables": [
+    "research_and_history/r13_position_calibration.md",
+    "research_and_history/r13_papers/guo_temperature_scaling_2017.md",
+    "research_and_history/r13_papers/kull_beta_calibration_2017.md",
+    "research_and_history/r13_papers/lopez_de_prado_bet_sizing_ch10.md",
+    "research_and_history/r13_papers/duan_ngboost_2020.md",
+    "research_and_history/r13_papers/conformal_prediction_2024.md",
+    "research_and_history/r13_papers/cost_sensitive_threshold_tuning_2024.md",
+    "research_and_history/history_and_important_notes.md (appended R13 section)"
+  ],
+  "schemes": {
+    "A": "Temperature scaling (Guo 2017) — 1-param softmax rescale, preserves argmax; expected LOSO +1~+5",
+    "B": "Beta calibration (Kull 2017) per-class — 3-param logistic on (log(s), log(1-s)); +1~+4",
+    "C": "Isotonic OvR — non-parametric monotone fit; +0~+3 with mild overfit risk",
+    "D": "LdP z-score gating — m=side*(2*Phi(z)-1) with z=(p_top - 1/K)/sqrt(p(1-p)); +2~+6, NO RETRAIN",
+    "E": "Bayes EV with cost matrix — argmax over EV[a]=R[a,y]*p_y; +3~+8",
+    "F": "Meta-labeling (LdP) — secondary classifier on M1-profitability; +5~+12 (highest potential)",
+    "G": "Conformal prediction sets (Mondrian) — distribution-free abstain rule; +1~+5",
+    "H": "Multi-horizon agreement gating — trade only if h_5/10/20 agree; +2~+7",
+    "I": "Vol-regime adaptive threshold — sigma_window scales T; +0~+3",
+    "J": "Distributional regression head (NGBoost / quantile-LGBM) — direct P(Delta_mid > +alpha); +2~+8"
+  },
+  "top_2_recommendations": {
+    "1": "Scheme D (LdP z-score gating) — 1-day, no retrain, no risk; replaces (T, delta) with threshold_m",
+    "2": "Scheme E (Bayes EV decision rule) — 0.5-2 day depending on whether we add regression head; principled, fee-aware"
+  },
+  "notes": "Current T=0.55, delta=0.10 is empirically near Kelly-optimal hit rate given fee/avg_move ratio ~1.25. Further gains must come from (a) calibrating p so threshold has true meaning, or (b) replacing argmax-based rule with EV-based rule. Combining Scheme A (calibration) + Scheme D or E (decision rule) is the recommended fast path."
+}
