@@ -1,0 +1,67 @@
+{
+  "task": "T21 multi-seed LOSO Scheme H 291-d (R20 Top-15)",
+  "horizons": [
+    10
+  ],
+  "seeds": [
+    42
+  ],
+  "target_syms": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "seed_configs": {
+    "42": {
+      "seed": 42,
+      "feature_fraction": 0.8,
+      "bagging_fraction": 0.8,
+      "num_leaves": 127,
+      "lambda_l2": 1.0
+    }
+  },
+  "results": [
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 1,
+      "best_iter": 179,
+      "train_time_sec": 34.595624685287476,
+      "held_out_cum_pnl": -0.048590288418205785,
+      "held_out_acc": 0.40438382193268185,
+      "held_out_n_active": 76891
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 2,
+      "best_iter": 198,
+      "train_time_sec": 35.908087491989136,
+      "held_out_cum_pnl": 2.8211126641505864,
+      "held_out_acc": 0.6305646036916395,
+      "held_out_n_active": 38352
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 3,
+      "best_iter": 200,
+      "train_time_sec": 36.408140420913696,
+      "held_out_cum_pnl": 2.2271979898304717,
+      "held_out_acc": 0.863576728193992,
+      "held_out_n_active": 10880
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 4,
+      "best_iter": 190,
+      "train_time_sec": 35.08732485771179,
+      "held_out_cum_pnl": 6.604644599745294,
+      "held_out_acc": 0.4788386717336229,
+      "held_out_n_active": 63996
+    }
+  ],
+  "elapsed_sec": 147.53023958206177
+}

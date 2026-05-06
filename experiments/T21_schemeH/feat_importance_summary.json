@@ -1,0 +1,387 @@
+{
+  "n_features": 291,
+  "n_r20_new": 68,
+  "r20_in_top30": 10,
+  "r20_in_top50": 16,
+  "n_dead_features_gain_lt_1": 1,
+  "n_dead_r20": 0,
+  "top30": [
+    {
+      "rank": 1,
+      "feat_name": "mb_intst",
+      "gain_mean": 271712.81214103696,
+      "split_mean": 675.6,
+      "is_r20_new": false
+    },
+    {
+      "rank": 2,
+      "feat_name": "ma_intst",
+      "gain_mean": 251055.60211277008,
+      "split_mean": 700.8,
+      "is_r20_new": false
+    },
+    {
+      "rank": 3,
+      "feat_name": "rv_pos_W50",
+      "gain_mean": 240564.0651275635,
+      "split_mean": 565.4,
+      "is_r20_new": true
+    },
+    {
+      "rank": 4,
+      "feat_name": "bsize1",
+      "gain_mean": 220209.79749240875,
+      "split_mean": 875.8,
+      "is_r20_new": false
+    },
+    {
+      "rank": 5,
+      "feat_name": "rv_w20",
+      "gain_mean": 205309.1417980194,
+      "split_mean": 632.6,
+      "is_r20_new": false
+    },
+    {
+      "rank": 6,
+      "feat_name": "asize1",
+      "gain_mean": 196691.15833759308,
+      "split_mean": 947.6,
+      "is_r20_new": false
+    },
+    {
+      "rank": 7,
+      "feat_name": "book_slope_bid",
+      "gain_mean": 194010.98331184388,
+      "split_mean": 1118.8,
+      "is_r20_new": true
+    },
+    {
+      "rank": 8,
+      "feat_name": "ewma_a0.5_mb_intst",
+      "gain_mean": 172297.95270576476,
+      "split_mean": 641.4,
+      "is_r20_new": false
+    },
+    {
+      "rank": 9,
+      "feat_name": "ask_mean",
+      "gain_mean": 158030.43893203736,
+      "split_mean": 435.6,
+      "is_r20_new": false
+    },
+    {
+      "rank": 10,
+      "feat_name": "rv_w50",
+      "gain_mean": 134657.73781108856,
+      "split_mean": 911.4,
+      "is_r20_new": false
+    },
+    {
+      "rank": 11,
+      "feat_name": "ewma_a0.5_la_intst",
+      "gain_mean": 113938.51714458465,
+      "split_mean": 517.2,
+      "is_r20_new": false
+    },
+    {
+      "rank": 12,
+      "feat_name": "book_slope_ask",
+      "gain_mean": 99766.8018875122,
+      "split_mean": 870.2,
+      "is_r20_new": true
+    },
+    {
+      "rank": 13,
+      "feat_name": "ewma_a0.5_lb_intst",
+      "gain_mean": 98252.32116775513,
+      "split_mean": 490.2,
+      "is_r20_new": false
+    },
+    {
+      "rank": 14,
+      "feat_name": "la_intst",
+      "gain_mean": 96579.96103630067,
+      "split_mean": 362.4,
+      "is_r20_new": false
+    },
+    {
+      "rank": 15,
+      "feat_name": "pair_close_mid",
+      "gain_mean": 89638.53071460724,
+      "split_mean": 474.2,
+      "is_r20_new": true
+    },
+    {
+      "rank": 16,
+      "feat_name": "ewma_a0.5_ma_intst",
+      "gain_mean": 88627.95592842103,
+      "split_mean": 576.6,
+      "is_r20_new": false
+    },
+    {
+      "rank": 17,
+      "feat_name": "pair_a1_wmp",
+      "gain_mean": 88587.82076301574,
+      "split_mean": 511.8,
+      "is_r20_new": true
+    },
+    {
+      "rank": 18,
+      "feat_name": "bv_W50",
+      "gain_mean": 81113.44569740296,
+      "split_mean": 520.6,
+      "is_r20_new": true
+    },
+    {
+      "rank": 19,
+      "feat_name": "lb_intst",
+      "gain_mean": 79909.1158903122,
+      "split_mean": 295.0,
+      "is_r20_new": false
+    },
+    {
+      "rank": 20,
+      "feat_name": "ewma_a0.3_lb_intst",
+      "gain_mean": 73299.19197502136,
+      "split_mean": 590.2,
+      "is_r20_new": false
+    },
+    {
+      "rank": 21,
+      "feat_name": "ewma_a0.3_mb_intst",
+      "gain_mean": 69659.85264091492,
+      "split_mean": 619.4,
+      "is_r20_new": false
+    },
+    {
+      "rank": 22,
+      "feat_name": "stoikov_micro_gap_mid",
+      "gain_mean": 69445.85729293824,
+      "split_mean": 334.8,
+      "is_r20_new": true
+    },
+    {
+      "rank": 23,
+      "feat_name": "ewma_a0.05_mb_intst",
+      "gain_mean": 67122.60413894654,
+      "split_mean": 689.6,
+      "is_r20_new": false
+    },
+    {
+      "rank": 24,
+      "feat_name": "pair_wmp_mid",
+      "gain_mean": 61867.322869491574,
+      "split_mean": 305.0,
+      "is_r20_new": true
+    },
+    {
+      "rank": 25,
+      "feat_name": "pair_b1_wmp",
+      "gain_mean": 61352.47197532654,
+      "split_mean": 425.6,
+      "is_r20_new": true
+    },
+    {
+      "rank": 26,
+      "feat_name": "mlofi_W5_lvl1",
+      "gain_mean": 59664.84721221924,
+      "split_mean": 331.2,
+      "is_r20_new": false
+    },
+    {
+      "rank": 27,
+      "feat_name": "ewma_a0.3_ma_intst",
+      "gain_mean": 52703.79535236359,
+      "split_mean": 517.0,
+      "is_r20_new": false
+    },
+    {
+      "rank": 28,
+      "feat_name": "lb_ind",
+      "gain_mean": 51833.60719375611,
+      "split_mean": 68.8,
+      "is_r20_new": false
+    },
+    {
+      "rank": 29,
+      "feat_name": "bsize_mean",
+      "gain_mean": 51097.63662071228,
+      "split_mean": 574.8,
+      "is_r20_new": false
+    },
+    {
+      "rank": 30,
+      "feat_name": "rv_neg_W50",
+      "gain_mean": 50234.814935684204,
+      "split_mean": 570.6,
+      "is_r20_new": true
+    }
+  ],
+  "weak_r20_rank_gt100": [
+    {
+      "rank": 105,
+      "feat_name": "imb_lvl2",
+      "gain_mean": 14548.026987266541
+    },
+    {
+      "rank": 106,
+      "feat_name": "imb_lvl6",
+      "gain_mean": 14516.650068855286
+    },
+    {
+      "rank": 107,
+      "feat_name": "imb_lvl10",
+      "gain_mean": 14467.557022094727
+    },
+    {
+      "rank": 109,
+      "feat_name": "pair_b5_b10",
+      "gain_mean": 14239.028268051148
+    },
+    {
+      "rank": 111,
+      "feat_name": "ewma_ofi_total_a0.05",
+      "gain_mean": 14011.826629638672
+    },
+    {
+      "rank": 112,
+      "feat_name": "imb_lvl5",
+      "gain_mean": 13968.122960090637
+    },
+    {
+      "rank": 118,
+      "feat_name": "pair_b1_mid",
+      "gain_mean": 13363.811597633361
+    },
+    {
+      "rank": 119,
+      "feat_name": "imb_lvl9",
+      "gain_mean": 13165.078589057923
+    },
+    {
+      "rank": 121,
+      "feat_name": "bv_W20",
+      "gain_mean": 12838.374193954467
+    },
+    {
+      "rank": 122,
+      "feat_name": "rvs_signed_W50",
+      "gain_mean": 12810.007094192504
+    },
+    {
+      "rank": 123,
+      "feat_name": "roll_spread_W50",
+      "gain_mean": 12801.470344734193
+    },
+    {
+      "rank": 125,
+      "feat_name": "ewma_ofi_total_a0.1",
+      "gain_mean": 12199.939066314697
+    },
+    {
+      "rank": 129,
+      "feat_name": "tick_imb_W20",
+      "gain_mean": 11858.576046180726
+    },
+    {
+      "rank": 132,
+      "feat_name": "rvs_signed_W20",
+      "gain_mean": 11623.814349937438
+    },
+    {
+      "rank": 137,
+      "feat_name": "trip_a1_a5_a10",
+      "gain_mean": 11408.151563453674
+    },
+    {
+      "rank": 139,
+      "feat_name": "pair_open_mid",
+      "gain_mean": 10940.312043190002
+    },
+    {
+      "rank": 140,
+      "feat_name": "pair_b1_a1",
+      "gain_mean": 10840.00057888031
+    },
+    {
+      "rank": 141,
+      "feat_name": "ewma_ofi_total_a0.3",
+      "gain_mean": 10762.997987365723
+    },
+    {
+      "rank": 143,
+      "feat_name": "pair_b1_b10",
+      "gain_mean": 10530.596104812623
+    },
+    {
+      "rank": 144,
+      "feat_name": "tick_imb_W10",
+      "gain_mean": 10367.242045593262
+    },
+    {
+      "rank": 146,
+      "feat_name": "pair_a5_a10",
+      "gain_mean": 9866.545183372498
+    },
+    {
+      "rank": 147,
+      "feat_name": "gofi_W20",
+      "gain_mean": 9750.453157234191
+    },
+    {
+      "rank": 148,
+      "feat_name": "pair_wmp_vwap",
+      "gain_mean": 9734.278963470459
+    },
+    {
+      "rank": 149,
+      "feat_name": "bv_W10",
+      "gain_mean": 9706.88751411438
+    },
+    {
+      "rank": 153,
+      "feat_name": "roll_spread_W30",
+      "gain_mean": 9327.729145240784
+    },
+    {
+      "rank": 159,
+      "feat_name": "trip_b1_b5_b10",
+      "gain_mean": 8607.643735122681
+    },
+    {
+      "rank": 160,
+      "feat_name": "pair_open_close",
+      "gain_mean": 8580.437756156922
+    },
+    {
+      "rank": 166,
+      "feat_name": "r_skew_W20",
+      "gain_mean": 7985.286448287964
+    },
+    {
+      "rank": 167,
+      "feat_name": "pair_a1_a10",
+      "gain_mean": 7863.747606849671
+    },
+    {
+      "rank": 170,
+      "feat_name": "r_skew_W10",
+      "gain_mean": 7657.026617050171
+    },
+    {
+      "rank": 185,
+      "feat_name": "ewma_ofi_total_a0.5",
+      "gain_mean": 5922.652875900269
+    },
+    {
+      "rank": 190,
+      "feat_name": "roll_spread_W20",
+      "gain_mean": 5554.543334388733
+    },
+    {
+      "rank": 240,
+      "feat_name": "stoikov_micro",
+      "gain_mean": 1278.8013998031615
+    }
+  ]
+}

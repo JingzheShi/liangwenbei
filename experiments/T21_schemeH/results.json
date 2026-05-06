@@ -1,0 +1,39 @@
+{
+  "task": "T21b Scheme H 291-d single seed (seed=42) LOSO h=10 + threshold sweep + iter_004 decision",
+  "metrics": {
+    "loso_raw_argmax_sum": 5.8741,
+    "loso_best_thresholded_sum": 21.6981,
+    "best_T": 0.55,
+    "best_delta": 0.15,
+    "n_pos_folds": 5,
+    "mean_accuracy_at_best": 0.7044,
+    "n_active_at_best": 98691,
+    "iter_002_baseline": 21.86,
+    "iter_003_baseline": 22.22,
+    "diff_vs_iter_002": -0.1619,
+    "diff_vs_iter_003": -0.5219,
+    "n_features": 291,
+    "n_features_r20_new": 68,
+    "r20_in_top30": 10,
+    "r20_in_top50": 16,
+    "r20_dead_features": 0,
+    "r20_weak_rank_gt100": 33,
+    "T11_seed42_baseline_reference": 21.715
+  },
+  "per_fold_thresholded_pnl": [1.6377, 5.1832, 4.355, 1.7346, 8.7876],
+  "per_fold_raw_argmax_pnl": [-5.7303, -0.0486, 2.8211, 2.2272, 6.6046],
+  "decision": "NO iter_004 built (single-seed +21.70 < iter_002 +21.86 < iter_003 +22.22)",
+  "key_findings": [
+    "Adding 65 R20 Top-15 paper factors gives ~0 single-seed LOSO gain over 226d Scheme C (+21.70 vs T11 seed42 +21.715).",
+    "BUT 10/30 of top features are NEW R20 — strongest are rv_pos_W50 (#3), book_slope_bid (#7), book_slope_ask (#12), pair_close_mid (#15).",
+    "33 R20 features rank > 100 (mostly imb_lvl deep, ewma_ofi_total, pair within-side, roll_spread, r_skew, stoikov_micro) — candidates to prune for T22.",
+    "Path to > +22 is more model variance (5-seed ensemble or cross-algo), not more features. Confirmed by iter_003 +22.22 vs iter_002 +21.86 single-seed.",
+    "Per-fold thresholded PnL almost identical to T11 seed42 within sampling noise."
+  ],
+  "next_steps_recommendation": [
+    "T22 candidate: lean Scheme H = 226d + Top-32 R20 features (drop 33 rank>100) = 258d, retrain 5-seed ensemble.",
+    "Hypothesis: less noise allows ensemble to push >+22.22.",
+    "If T22 doesn't break through, return to cross-algo ensemble path (LGBM + XGB + CatBoost on 226d) — already partially explored in T17/T18."
+  ],
+  "notes": "Predictions saved at loso_pred_h10_seed42_held{0..4}.parquet. Models at loso_model_h10_seed42_held{0..4}.txt. Sweep csv at sweep_results_seed42_h10.csv. Feature importance at feat_importance_5fold.csv."
+}
