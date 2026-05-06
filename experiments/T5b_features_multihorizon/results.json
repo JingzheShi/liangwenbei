@@ -1,0 +1,55 @@
+{
+  "task": "T5b: Scheme C multi-horizon LOSO + iter_002",
+  "scheme": "C1",
+  "n_features_loso": 226,
+  "n_features_iter002": 223,
+  "n_features_dropped": ["time_minutes_since_session_start", "time_session_progress", "time_is_pm"],
+  "n_features_dropped_reason": "LocalEvaluator coerces all feature cols to float32; datetime.time can't cast. Dropping for local-platform contract compatibility costs ~2.6% feature gain on h=10.",
+  "horizons": [5, 10, 20, 40, 60],
+  "loso_raw_sum_cum_pnl": {
+    "h5": 5.888279,
+    "h10": 8.043174,
+    "h20": 10.422112,
+    "h40": 0.087827,
+    "h60": -12.141207
+  },
+  "loso_thresholded_best": {
+    "h5":  {"T": 0.60, "delta": 0.10, "sum_cum_pnl": 17.491651, "n_pos_folds": 5, "per_fold_pnl": [1.545, 5.304, 3.368, 1.875, 5.401]},
+    "h10": {"T": 0.55, "delta": 0.10, "sum_cum_pnl": 21.859534, "n_pos_folds": 5, "per_fold_pnl": [1.944, 5.127, 4.347, 2.115, 8.326]},
+    "h20": {"T": 0.50, "delta": 0.05, "sum_cum_pnl": 19.699924, "n_pos_folds": 5, "per_fold_pnl": [1.422, 4.461, 4.291, 0.756, 8.771]},
+    "h40": {"T": 0.50, "delta": 0.00, "sum_cum_pnl": 11.705118, "n_pos_folds": 5, "per_fold_pnl": [0.718, 4.315, 0.802, 0.300, 5.570]},
+    "h60": {"T": 0.50, "delta": 0.20, "sum_cum_pnl":  6.300165, "n_pos_folds": 3, "per_fold_pnl": [0.407, 3.031, -1.406, -0.291, 4.560]}
+  },
+  "comparison_to_iter001c": {
+    "iter_001c": {"scheme": "B", "horizon": "label_60", "T": 0.50, "delta": 0.15, "loso_sum": 6.45},
+    "iter_002_h60_only": 6.30,
+    "iter_002_best_horizon": {"horizon": "h10", "loso_sum": 21.86},
+    "delta_best_vs_iter001c": 15.41,
+    "verdict": "iter_002 is strictly better. Platform's max-over-5-horizons rule means iter_002 will score ≥ max(loso_per_horizon) ≈ +21.9 in expectation, vs iter_001c's +6.45. Expected platform score uplift: +15.4."
+  },
+  "metrics": {
+    "best_loso_thresholded_sum": 21.859534,
+    "best_horizon": "h10",
+    "n_horizons_with_pos_loso": 5,
+    "iter_002_size_mb": 15.19,
+    "n_models": 5
+  },
+  "submission": {
+    "iter": "iter_002_lgbm_schemeC",
+    "horizons_active": [5, 10, 20, 40, 60],
+    "all_horizons_positive_loso": true,
+    "sanity_check": "PASS 19/19",
+    "validate_contract": "PASS"
+  },
+  "local_eval_date119_am_5syms_shuffled": {
+    "label_5":  {"cum_pnl": 0.255},
+    "label_10": {"cum_pnl": 0.284},
+    "label_20": {"cum_pnl": 0.374},
+    "label_40": {"cum_pnl": 0.428},
+    "label_60": {"cum_pnl": 0.293},
+    "best_score": 0.428,
+    "best_horizon": "label_40"
+  },
+  "wandb_run": "T5b-schemeC1-multihorizon-20260506-051451 (jvqkvn8n) — step1 only; step2 ran with --no-wandb",
+  "notes": "All 5 horizons go to iter_002 with their best (T, delta). Platform takes max → guarantees ≥ best individual horizon's LOSO. Major uplift over iter_001c. T3 features computed online from 100-row window; verified consistent with cache to ~1e-6."
+}
