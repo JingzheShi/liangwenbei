@@ -32,6 +32,64 @@
 
 ---
 
+## 1.9 跨 sym OOD 鲁棒性方法调研（2026-05-06，R11 worker）
+
+**核心交付物**：[`r11_ood_cross_stock.md`](r11_ood_cross_stock.md) + 6 篇 paper summary in `r11_papers/`
+
+**TL;DR — Top 2 方案**（如果只能上 2 个）：
+
+| 优先级 | 方法 | 复杂度 | 预期 LOSO 增益 | 来源 |
+|---|---|---|---|---|
+| 🥇 #1 | **Group DRO via dynamic sample reweighting** (LightGBM-compatible) | 1 天 | +3 ~ +8 | Sagawa 2020 |
+| 🥈 #2 | **Cross-Sym Mixup** (training data augmentation) | 0.5 天 | +1 ~ +4 | Yirun 2021, Zhang 2018 |
+
+两个方案**互补**且都不破坏 sym-agnostic 推理路径。
+
+**调研覆盖的 12 条方法**（详见 r11 报告）：
+
+A. Group DRO — ✅ LightGBM 友好；最大 lever
+B. Cross-sym Mixup — ✅ LightGBM + NN；Jane Street 1st 验证
+C. V-REx — NN only；比 IRM 稳
+D. IRM — ❌ 5 个 env 太少（需要 envs > non-invariant dim）
+E. DANN — NN only；TS DG 中是 weak baseline
+F. CORAL — NN only；moment alignment
+G. TTA / Tent — 原版违反硬约束 #2；within-window 等价物 = T7 已做
+H. SWA — NN only；OOD generalization 自带改善
+I. LOSO Bootstrap Ensemble — 我们 T11 在做扩展
+J. Hash-trick stock embedding — ❌ 风险大于收益
+K. Quantile / Huber / Focal Loss — ✅ LightGBM 友好
+L. Per-sym standardization @ train + distill 到 sym-agnostic — 中等复杂度
+
+**Negative findings (不要做)**：
+
+| 不推荐方法 | 为什么 |
+|---|---|
+| Per-sym embedding | 违反硬约束 #3 |
+| Per-sym normalization at inference | 违反硬约束 #3 |
+| 原版 Tent (跨 batch BN running stats) | 违反硬约束 #2 |
+| Cross-sectional features 跨 sym 同时刻 | 评测 batch shuffle，无法保证多 sym 共存 |
+| DANN with 5-class sym discriminator (NN only) | TS DG benchmark 显示 DANN 是弱 baseline |
+| IRM | 5 个 env 不够 (linear theory needs envs > non-inv dim) |
+| Online live retraining | 评测无 retraining 接口 |
+
+**对应的 next worker tasks (T12 系列建议)**：
+
+- **T12-A**: Cross-Sym Mixup augmented LightGBM 重训 → LOSO 5-fold（半天）
+- **T12-B**: Group DRO via dynamic sample reweighting on LightGBM（1-2 天）
+- **T12-C** (备用): Focal loss 替代标准 cross-entropy
+
+**论文摘要目录** (`r11_papers/`)：
+
+- `group_dro_sagawa_2020.md` — min-max worst-group + 强正则要求
+- `v_rex_krueger_2021.md` — variance penalty across envs，比 IRM 稳
+- `dann_ganin_2016.md` — adversarial domain confusion + GRL
+- `tta_finmarkets_2026.md` — financial TTA 实证：BN-only 是 robust default，激进 TTA 有害
+- `janestreet_yirun_writeup.md` — Jane Street 1st 架构 + mixup + 4-fold day-iso CV
+- `mixup_for_finance.md` — mixup 在 stock prediction（LightGBM）全部 case 提升
+- `wildtime_ts_dg_benchmark.md` — TS DG benchmark：DANN 弱、ERM 难超越
+
+---
+
 ## 1.8 sym=2 brittleness 诊断（2026-05-06，T8 worker）
 
 **根因**：sym=2 看起来是 **大盘蓝筹/ETF**，与 sym {0,1,3,4} 的 distribution 显著不同：
@@ -328,3 +386,32 @@ mmpc_demo（官方 demo）在平台 test 集上**全 5 horizon 都是负分**：
 5. **不要用 BMA**：Yao et al. 2018 证明 M-open 下 stacking 严格优于 BMA；非负 simplex stacking 是首选。
 6. **OOF metric 应直接是 cum_pnl**：scipy.optimize.minimize (Nelder-Mead) 在 5-8 维 weight 空间优化 OOF PnL，配合 bootstrap 防过拟合（方案 10）。
 7. **不可用方案（违反硬约束）**：online learning、sliding-window retrain、sym embedding meta、跨 predict 调用维护 state、cross-sample rank averaging（test 顺序被打乱）。
+
+---
+
+## 8. R13 — Probability Calibration + Position Sizing 进阶（2026-05-06，T13 worker）
+
+### 主交付物
+
+- `r13_position_calibration.md` — **10 条进阶后处理方案 (A-J)**，每条含落地数学公式 / 在 LightGBM softmax 上能否直接用 / 来源 / 实现复杂度 / 期望 LOSO 增益；末尾给"如果只能跑 2 个方案"的明确 priority + 完整 7 天实施序列。
+
+### 关键 paper 摘要（`r13_papers/`）
+
+- `r13_papers/guo_temperature_scaling_2017.md` — Guo et al. 2017 (ICML)，T 单参 softmax 重缩放，**保 argmax 不变**；用 NLL 在 val 上拟合
+- `r13_papers/kull_beta_calibration_2017.md` — Kull et al. 2017 (AISTATS/EJS)，3-param beta 校准 = log(s) + log(1-s) 两特征 logistic 回归，扩展 Platt 到非 sigmoid 失真
+- `r13_papers/lopez_de_prado_bet_sizing_ch10.md` — AFML Ch10：z-score gating 公式 `z = (p - 1/K) / sqrt(p(1-p)); m = 2·Φ(z) - 1`；离散化；power form；meta-labeling
+- `r13_papers/duan_ngboost_2020.md` — NGBoost，GBDT 输出全分布 (μ̂, σ̂)，可直接算 P(Δmid > +α)
+- `r13_papers/conformal_prediction_2024.md` — Split conformal + Mondrian (group-conditional)，coverage 保证 1-α，3-class 自动产生 abstain 信号
+- `r13_papers/cost_sensitive_threshold_tuning_2024.md` — Bayes EV 决策规则 `argmax_a Σ R[a,y]·p_y`，用 reward matrix（fee 已知）替代 hand-tuned T
+
+### 核心 takeaways
+
+1. **当前 T=0.55, δ=0.10 是 4 个弱点的耦合**：(a) 未校准 p；(b) 忽略 class prior 偏移和 Bernoulli 方差；(c) 全样本同阈值；(d) 浪费 multi-horizon 信息。每条方案各击破其一。
+2. **Kelly 临界点 ≈ 当前 T**：fee/avg_move ≈ 1.25 → Kelly 阈值约 0.555；说明 grid-search 已 empirically 触底，进一步收益必须从 **校准 p 真实化** 或 **改换决策规则** 入手，不是再调 T。
+3. **如果只能跑 2 个方案**：
+   - 🥇 **Scheme D — LdP z-score gating**：`m = side·(2·Φ(z) - 1), z = (p_top - 1/3) / sqrt(p_top(1-p_top))`；20 行 patch，无需重训，**threshold_m 作为 1 hyper 替代 (T, δ)**。期望 LOSO h_10 +2 ~ +6。
+   - 🥈 **Scheme E — Bayes EV with reward matrix**：`EV[a] = Σ_y R[a,y]·p_y; pred = argmax`，用 fee + 训练集 conditional means 构造 R。最简版本是训练 µ̂ regression head，`pred = 2 if µ̂ > +fee else 0 if µ̂ < -fee else 1`。期望 +3 ~ +8。
+4. **推荐序列（7 天）**：A (temperature scale) → D (z-gate) → E (Bayes EV) → F (meta-labeling)。每步独立 ablation，可滚回。
+5. **不推荐的方案**（违反硬约束）：online recalibration（stateless 限制）、per-sym calibration（test sym 可能新）、连续 Kelly 仓位（必须 0/1/2 离散）、cross-sample rank averaging（顺序被打乱）。
+6. **Scheme F (meta-labeling) 是 +5~+12 的最高潜力 lever**，但要 2-3 天 + 引入 M2 模型，建议在 D/E 触底后再做。
+
