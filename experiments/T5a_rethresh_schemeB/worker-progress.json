@@ -1,0 +1,13 @@
+{
+  "status": "complete",
+  "step": "done",
+  "timestamp": "2026-05-06T05:13:00Z",
+  "decision": "build_iter001d",
+  "best_T": 0.45,
+  "best_delta": 0.05,
+  "best_sum_cum_pnl": 11.108623841552793,
+  "iter001c_sum_cum_pnl": 8.154718398809597,
+  "delta_vs_iter001c": 2.953905442743196,
+  "wandb_run": "https://wandb.ai/jingzheshi/liangwenbei/runs/m4clzawu",
+  "submission_zip": "submission_050603_iter1d.zip"
+}
