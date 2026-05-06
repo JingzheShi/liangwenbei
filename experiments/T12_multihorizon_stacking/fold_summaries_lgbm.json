@@ -1,0 +1,150 @@
+{
+  "task": "T12 LightGBM meta-learner for multi-horizon stacking",
+  "target_horizon": 10,
+  "feat_cols": [
+    "p0_h5",
+    "p1_h5",
+    "p2_h5",
+    "p0_h10",
+    "p1_h10",
+    "p2_h10",
+    "p0_h20",
+    "p1_h20",
+    "p2_h20",
+    "p0_h40",
+    "p1_h40",
+    "p2_h40",
+    "p0_h60",
+    "p1_h60",
+    "p2_h60"
+  ],
+  "fold_summaries": [
+    {
+      "fold": 0,
+      "best_name": "lgbm_7_3_150",
+      "best_logloss": 0.6035388576542662,
+      "best_iter": 55,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "name": "lgbm_7_3_150",
+          "logloss": 0.6035388576542662,
+          "best_iter": 55
+        },
+        {
+          "name": "lgbm_15_4_200",
+          "logloss": 0.6056747530235232,
+          "best_iter": 43
+        },
+        {
+          "name": "lgbm_31_5_300",
+          "logloss": 0.6122152019974213,
+          "best_iter": 64
+        }
+      ]
+    },
+    {
+      "fold": 1,
+      "best_name": "lgbm_31_5_300",
+      "best_logloss": 1.0340611624379819,
+      "best_iter": 54,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "name": "lgbm_31_5_300",
+          "logloss": 1.0340611624379819,
+          "best_iter": 54
+        },
+        {
+          "name": "lgbm_15_4_200",
+          "logloss": 1.0347544510438673,
+          "best_iter": 33
+        },
+        {
+          "name": "lgbm_7_3_150",
+          "logloss": 1.0361139697134376,
+          "best_iter": 39
+        }
+      ]
+    },
+    {
+      "fold": 2,
+      "best_name": "lgbm_7_3_150",
+      "best_logloss": 0.6324569122332748,
+      "best_iter": 47,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "name": "lgbm_7_3_150",
+          "logloss": 0.6324569122332748,
+          "best_iter": 47
+        },
+        {
+          "name": "lgbm_15_4_200",
+          "logloss": 0.6363249091426588,
+          "best_iter": 38
+        },
+        {
+          "name": "lgbm_31_5_300",
+          "logloss": 0.6375820416001876,
+          "best_iter": 71
+        }
+      ]
+    },
+    {
+      "fold": 3,
+      "best_name": "lgbm_7_3_150",
+      "best_logloss": 0.2905094778700623,
+      "best_iter": 48,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "name": "lgbm_7_3_150",
+          "logloss": 0.2905094778700623,
+          "best_iter": 48
+        },
+        {
+          "name": "lgbm_15_4_200",
+          "logloss": 0.30736596533869665,
+          "best_iter": 42
+        },
+        {
+          "name": "lgbm_31_5_300",
+          "logloss": 0.3291589543290504,
+          "best_iter": 61
+        }
+      ]
+    },
+    {
+      "fold": 4,
+      "best_name": "lgbm_15_4_200",
+      "best_logloss": 0.8134256623771624,
+      "best_iter": 138,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "name": "lgbm_15_4_200",
+          "logloss": 0.8134256623771624,
+          "best_iter": 138
+        },
+        {
+          "name": "lgbm_7_3_150",
+          "logloss": 0.813581026099613,
+          "best_iter": 119
+        },
+        {
+          "name": "lgbm_31_5_300",
+          "logloss": 0.8136084814371026,
+          "best_iter": 231
+        }
+      ]
+    }
+  ],
+  "raw_argmax_sum": 17.30864349280995,
+  "elapsed_sec": 102.08839416503906
+}

@@ -1,0 +1,325 @@
+{
+  "task": "T12 multi-horizon stacking with meta-learner",
+  "target_horizon": 10,
+  "feat_cols": [
+    "p0_h5",
+    "p1_h5",
+    "p2_h5",
+    "p0_h10",
+    "p1_h10",
+    "p2_h10",
+    "p0_h20",
+    "p1_h20",
+    "p2_h20",
+    "p0_h40",
+    "p1_h40",
+    "p2_h40",
+    "p0_h60",
+    "p1_h60",
+    "p2_h60"
+  ],
+  "n_total_rows": 442080,
+  "fold_summaries": [
+    {
+      "fold": 0,
+      "best_family": "LR",
+      "best_param": 2.0,
+      "best_logloss": 0.5757302509672966,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "family": "LR",
+          "param": 2.0,
+          "logloss": 0.5757302509672966
+        },
+        {
+          "family": "LR",
+          "param": 10.0,
+          "logloss": 0.5758042283719218
+        },
+        {
+          "family": "LR",
+          "param": 5.0,
+          "logloss": 0.5758158682302106
+        },
+        {
+          "family": "LR",
+          "param": 0.5,
+          "logloss": 0.5762016831878028
+        },
+        {
+          "family": "LR",
+          "param": 1.0,
+          "logloss": 0.5762352047162883
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 0.1,
+          "logloss": 0.8524697401942286
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 1.0,
+          "logloss": 0.8524706239155616
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 5.0,
+          "logloss": 0.8524736983960806
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 10.0,
+          "logloss": 0.8524773268118889
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 50.0,
+          "logloss": 0.8524996671101736
+        }
+      ]
+    },
+    {
+      "fold": 1,
+      "best_family": "RidgeSoftmax",
+      "best_param": 0.1,
+      "best_logloss": 1.0274124764755823,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "family": "RidgeSoftmax",
+          "param": 0.1,
+          "logloss": 1.0274124764755823
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 1.0,
+          "logloss": 1.0274129743821492
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 5.0,
+          "logloss": 1.0274151341251203
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 10.0,
+          "logloss": 1.0274178751986731
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 50.0,
+          "logloss": 1.0274409994063995
+        },
+        {
+          "family": "LR",
+          "param": 0.5,
+          "logloss": 1.0588477742273557
+        },
+        {
+          "family": "LR",
+          "param": 1.0,
+          "logloss": 1.059120729559591
+        },
+        {
+          "family": "LR",
+          "param": 2.0,
+          "logloss": 1.0591627797380665
+        },
+        {
+          "family": "LR",
+          "param": 5.0,
+          "logloss": 1.0591815168592265
+        },
+        {
+          "family": "LR",
+          "param": 10.0,
+          "logloss": 1.0591863396091494
+        }
+      ]
+    },
+    {
+      "fold": 2,
+      "best_family": "LR",
+      "best_param": 2.0,
+      "best_logloss": 0.6172859548240012,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "family": "LR",
+          "param": 2.0,
+          "logloss": 0.6172859548240012
+        },
+        {
+          "family": "LR",
+          "param": 10.0,
+          "logloss": 0.6174498169025396
+        },
+        {
+          "family": "LR",
+          "param": 0.5,
+          "logloss": 0.6178499455781555
+        },
+        {
+          "family": "LR",
+          "param": 5.0,
+          "logloss": 0.618026851195849
+        },
+        {
+          "family": "LR",
+          "param": 1.0,
+          "logloss": 0.6180731747619126
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 0.1,
+          "logloss": 0.8171135791196309
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 1.0,
+          "logloss": 0.817124992456084
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 5.0,
+          "logloss": 0.8171763652090268
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 10.0,
+          "logloss": 0.8172398969466881
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 50.0,
+          "logloss": 0.8177239888247738
+        }
+      ]
+    },
+    {
+      "fold": 3,
+      "best_family": "LR",
+      "best_param": 0.5,
+      "best_logloss": 0.274549766796785,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "family": "LR",
+          "param": 0.5,
+          "logloss": 0.274549766796785
+        },
+        {
+          "family": "LR",
+          "param": 1.0,
+          "logloss": 0.27467490425435936
+        },
+        {
+          "family": "LR",
+          "param": 2.0,
+          "logloss": 0.27493539232281583
+        },
+        {
+          "family": "LR",
+          "param": 5.0,
+          "logloss": 0.27502618860190425
+        },
+        {
+          "family": "LR",
+          "param": 10.0,
+          "logloss": 0.27515062280683233
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 0.1,
+          "logloss": 0.6482031474759318
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 1.0,
+          "logloss": 0.6482158865464589
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 5.0,
+          "logloss": 0.6482721976343471
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 10.0,
+          "logloss": 0.648342162784831
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 50.0,
+          "logloss": 0.6488813963111999
+        }
+      ]
+    },
+    {
+      "fold": 4,
+      "best_family": "LR",
+      "best_param": 1.0,
+      "best_logloss": 0.8132797535431657,
+      "n_train": 353664,
+      "n_val": 88416,
+      "all_results": [
+        {
+          "family": "LR",
+          "param": 1.0,
+          "logloss": 0.8132797535431657
+        },
+        {
+          "family": "LR",
+          "param": 5.0,
+          "logloss": 0.813303260762683
+        },
+        {
+          "family": "LR",
+          "param": 0.5,
+          "logloss": 0.8134254773749565
+        },
+        {
+          "family": "LR",
+          "param": 10.0,
+          "logloss": 0.8134448207016914
+        },
+        {
+          "family": "LR",
+          "param": 2.0,
+          "logloss": 0.81399611610635
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 50.0,
+          "logloss": 0.940180175713098
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 10.0,
+          "logloss": 0.9403387179379181
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 5.0,
+          "logloss": 0.940359553931885
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 1.0,
+          "logloss": 0.9403764208689838
+        },
+        {
+          "family": "RidgeSoftmax",
+          "param": 0.1,
+          "logloss": 0.9403802379160572
+        }
+      ]
+    }
+  ],
+  "elapsed_sec": 150.00529313087463
+}

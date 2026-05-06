@@ -1,0 +1,33 @@
+{
+  "task": "T12 multi-horizon stacking with meta-learner (Ridge / LR / LightGBM)",
+  "outcome": "negative",
+  "metrics": {
+    "iter002_h10_loso_sum": 21.859534071535453,
+    "meta_lr_h10_loso_sum_best": 17.969051,
+    "meta_lr_best_T": 0.35,
+    "meta_lr_best_delta": 0.0,
+    "meta_lgbm_h10_loso_sum_best": 17.462790,
+    "meta_lgbm_best_T": 0.40,
+    "meta_lgbm_best_delta": 0.0,
+    "meta_lr_n_pos_folds": 5,
+    "meta_lgbm_n_pos_folds": 5,
+    "delta_vs_iter002_lr": -3.890483,
+    "delta_vs_iter002_lgbm": -4.396744
+  },
+  "per_fold_pnl": {
+    "iter002": [1.9441, 5.1275, 4.3475, 2.1146, 8.3258],
+    "meta_lr_best":  [1.2700, 5.5499, 3.9790, 0.9486, 6.2215],
+    "meta_lgbm_best": [0.9215, 5.9140, 3.9097, 1.1882, 5.5293]
+  },
+  "diagnosis": {
+    "base_h10_take_rate_at_T0.55_d0.10": 0.2197,
+    "meta_lr_take_rate_at_T0.55_d0.10":  0.0247,
+    "meta_lgbm_take_rate_at_T0.55_d0.10": 0.0337,
+    "base_h10_mean_p1": 0.3711,
+    "meta_lr_mean_p1":  0.6794,
+    "meta_lgbm_mean_p1": 0.6803,
+    "explanation": "Meta absorbs class-1 (no-move) prior, becomes 6-10x more conservative than base; threshold cannot reach +21.86 because not enough confident predictions remain."
+  },
+  "iter_005_built": false,
+  "notes": "iter_002 base h_10 (T=0.55, d=0.10) +21.86 is uncatchable by post-softmax stacking. Meta loses 4-5 pnl mainly via conservatism on folds 0/3/4. Best meta strategy is essentially raw argmax (T=0.35 d=0). R12 'completely free' multi-horizon stacking does not transfer to this base model. Base h_10 trained on 223-d raw features is already exploitative enough that 15-d post-softmax meta cannot match."
+}
