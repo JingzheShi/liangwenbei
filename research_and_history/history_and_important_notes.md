@@ -32,6 +32,34 @@
 
 ---
 
+## 1.8 sym=2 brittleness 诊断（2026-05-06，T8 worker）
+
+**根因**：sym=2 看起来是 **大盘蓝筹/ETF**，与 sym {0,1,3,4} 的 distribution 显著不同：
+- amount_delta（CNY 量）+7.49 z-score（4-7× 其他 sym）
+- spread1 -2.33 z（最窄 spread）
+- mid_diff std (per-tick vol) -2.85 z（最低波动）
+- 深档量 +2.34 z（最深订单簿）
+
+**LOSO 模型训 {0,1,3,4} → 把 sym=2 normal state 误读为"买入压力"** → 预测 UP 62% vs 真实 18%。
+
+5 个 sym-agnostic feature 建议（按优先级）：
+
+| # | Feature | 公式 | Priority | 预期 LOSO 增益 |
+|---|---|---|---|---|
+| F1 | amount_delta within-window z-score | `(amount - rolling_mean_100) / rolling_std_100` | HIGH | **+3 ~ +5**（最大 bias 修） |
+| F2 | spread-normalized price moves | `Δmidprice / max(spread1+1, ε)` | HIGH | +1 ~ +3 |
+| F3 | relative vol quantile | `current_abs_move / std(Δmid_100t)` | MED | +2 |
+| F4 | order-flow imbalance ratios | `mb / (lb + mb)` 等 | MED | +1 |
+| F5 | class-prior calibration head | training-time prior 校正 | LOW | +0.5 ~ +1.5 |
+
+**总预期**：F1 + F2 + F3 三件套 → LOSO sum 提升 +6 ~ +10（主要修 sym=2，附带其他 sym 小升）。
+
+→ **下一个 worker 应该是 Scheme E = T2 features + F1/F2/F3 (+F4)**
+
+详见 `experiments/T8_sym2_diagnostic/report.md`。
+
+---
+
 ## 1.7 LOSO CV 验证 + Threshold post-processor（2026-05-06，T4 worker）
 
 ### LOSO Scheme A 5 fold 结果（label_60，验证假设：T2 是 brittle 模型）

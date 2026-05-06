@@ -1,0 +1,10 @@
+{
+  "_doc": "Per-horizon threshold config. Built by build_iter_002.py after LOSO sweep. 'active': true means this horizon's model is used; otherwise predictions for this horizon are flat (1).",
+  "horizons": [
+    {"h": 5,  "T": 0.50, "delta": 0.15, "active": false},
+    {"h": 10, "T": 0.50, "delta": 0.15, "active": false},
+    {"h": 20, "T": 0.50, "delta": 0.15, "active": false},
+    {"h": 40, "T": 0.50, "delta": 0.15, "active": false},
+    {"h": 60, "T": 0.50, "delta": 0.15, "active": false}
+  ]
+}
