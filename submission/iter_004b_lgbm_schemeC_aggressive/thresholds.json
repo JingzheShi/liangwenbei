@@ -1,0 +1,57 @@
+{
+  "_doc": "iter_004b (aggressive): stricter thresholds for h_5/h_10/h_20 — picked to maximise LOSO per-trade PnL while keeping all 5 folds positive. Goal: even after iter_002's OOD per-trade drift (LOSO -> platform pushes per-trade by ~-0.0007 on short h), iter_004b's LOSO per-trade ~+0.0006 should leave platform per-trade closer to neutral or positive. h_40 / h_60 unchanged from iter_002.",
+  "_source": "T24_iter004 sweep_aggressive_summary.json (T_grid 0.50-0.85, delta_grid 0.0-0.40).",
+  "horizons": [
+    {
+      "h": 5,
+      "T": 0.85,
+      "delta": 0.20,
+      "active": true,
+      "_reason": "iter_002 (T=0.60, d=0.10): LOSO sum +17.49, plat -7.68, per-trade -0.000099. iter_004b LOSO: sum +7.55, per-trade +0.000643, all 5 folds >0, n_active=11743 (vs 80454 in iter_002).",
+      "loso_best_sum": 7.554,
+      "loso_per_trade_pnl": 0.000643,
+      "loso_n_pos_folds": 5,
+      "loso_n_active": 11743
+    },
+    {
+      "h": 10,
+      "T": 0.80,
+      "delta": 0.20,
+      "active": true,
+      "_reason": "iter_002 (T=0.55, d=0.10): LOSO sum +21.86, plat -8.64, per-trade -0.000105. iter_004b LOSO: sum +6.46, per-trade +0.000702, all 5 folds >0, n_active=9198 (vs 97135 in iter_002).",
+      "loso_best_sum": 6.455,
+      "loso_per_trade_pnl": 0.000702,
+      "loso_n_pos_folds": 5,
+      "loso_n_active": 9198
+    },
+    {
+      "h": 20,
+      "T": 0.70,
+      "delta": 0.20,
+      "active": true,
+      "_reason": "iter_002 (T=0.50, d=0.05): LOSO sum +19.70, plat -5.09, per-trade -0.000053. iter_004b LOSO: sum +6.71, per-trade +0.000647, all 5 folds >0, n_active=10376 (vs 88106 in iter_002).",
+      "loso_best_sum": 6.712,
+      "loso_per_trade_pnl": 0.000647,
+      "loso_n_pos_folds": 5,
+      "loso_n_active": 10376
+    },
+    {
+      "h": 40,
+      "T": 0.5,
+      "delta": 0.0,
+      "active": true,
+      "_reason": "Same as iter_002. Platform +2.02 per-trade +0.000034 (already calibrated).",
+      "loso_best_sum": 11.705118204614314,
+      "loso_n_pos_folds": 5
+    },
+    {
+      "h": 60,
+      "T": 0.5,
+      "delta": 0.2,
+      "active": true,
+      "_reason": "Same as iter_002. Platform +4.07 per-trade +0.000117 (best calibrated).",
+      "loso_best_sum": 6.300164893731614,
+      "loso_n_pos_folds": 3
+    }
+  ]
+}

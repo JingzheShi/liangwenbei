@@ -1,0 +1,45 @@
+{
+  "task": "T24 iter_004 a/b: tighten short-horizon thresholds to address iter_002 platform per-trade ~ -fee on h_5/h_10/h_20",
+  "metrics": {
+    "iter_004a_safe": {
+      "h_5":  {"T": 0.99, "delta": 0.99, "active": false, "expected_platform": 0.0},
+      "h_10": {"T": 0.99, "delta": 0.99, "active": false, "expected_platform": 0.0},
+      "h_20": {"T": 0.99, "delta": 0.99, "active": false, "expected_platform": 0.0},
+      "h_40": {"T": 0.50, "delta": 0.00, "active": true,  "expected_platform": 2.02},
+      "h_60": {"T": 0.50, "delta": 0.20, "active": true,  "expected_platform": 4.07},
+      "expected_best_of_5_platform": 4.07
+    },
+    "iter_004b_aggressive": {
+      "h_5":  {"T": 0.85, "delta": 0.20, "active": true,
+               "loso_sum": 7.554, "loso_per_trade": 0.000643, "loso_n_active": 11743, "loso_n_pos_folds": 5},
+      "h_10": {"T": 0.80, "delta": 0.20, "active": true,
+               "loso_sum": 6.455, "loso_per_trade": 0.000702, "loso_n_active": 9198, "loso_n_pos_folds": 5},
+      "h_20": {"T": 0.70, "delta": 0.20, "active": true,
+               "loso_sum": 6.712, "loso_per_trade": 0.000647, "loso_n_active": 10376, "loso_n_pos_folds": 5},
+      "h_40": {"T": 0.50, "delta": 0.00, "active": true,
+               "loso_sum": 11.705, "loso_n_pos_folds": 5},
+      "h_60": {"T": 0.50, "delta": 0.20, "active": true,
+               "loso_sum": 6.300, "loso_n_pos_folds": 3},
+      "expected_best_of_5_platform_floor": 4.07,
+      "expected_best_of_5_platform_upside": "+4.07 to +6 if any short horizon clears +1 on platform"
+    },
+    "iter_002_baseline": {
+      "h_5_platform":  -7.68,
+      "h_10_platform": -8.64,
+      "h_20_platform": -5.09,
+      "h_40_platform":  2.02,
+      "h_60_platform":  4.07,
+      "best_of_5_platform": 4.07
+    }
+  },
+  "sanity_check": {
+    "iter_004a": "22/22 pass",
+    "iter_004b": "22/22 pass"
+  },
+  "artifacts": {
+    "iter_004a_zip": "submission_050622_iter004a_safe.zip (15.18 MB)",
+    "iter_004b_zip": "submission_050623_iter004b_aggressive.zip (15.18 MB)",
+    "report": "experiments/T24_iter004/report.md"
+  },
+  "notes": "Pure post-processing: same 5 LightGBM models as iter_002, only thresholds.json changed. iter_004a is a strict floor (best of 5 >= 4.07). iter_004b adds upside if aggressive thresholds on short horizons survive the LOSO->platform drift; floor still +4.07 from h_60."
+}
