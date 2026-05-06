@@ -1,0 +1,10 @@
+{
+  "task": "T7 final D1 model",
+  "best_iter": 100,
+  "train_time_sec": 213.9793243408203,
+  "n_features": 308,
+  "val_raw_cum_pnl": 13.042219016412638,
+  "val_thresh_cum_pnl": 16.843760688868823,
+  "thresh_T": 0.45,
+  "thresh_delta": 0.05
+}

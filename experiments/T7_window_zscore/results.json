@@ -1,0 +1,118 @@
+{
+  "task": "T7 window-zscore Scheme D1 LOSO + threshold sweep",
+  "scheme": "D1",
+  "n_oof_total": 442080,
+  "T_grid": [
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7
+  ],
+  "delta_grid": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25
+  ],
+  "baseline": {
+    "raw_argmax_sum_cum_pnl": -5.231245380245499,
+    "per_fold": [
+      {
+        "sym": 0,
+        "cum_pnl": -3.061110284351005,
+        "n_active": 57556,
+        "accuracy": 0.39370702135360114
+      },
+      {
+        "sym": 1,
+        "cum_pnl": -2.9401891209673314,
+        "n_active": 63065,
+        "accuracy": 0.39620656894679696
+      },
+      {
+        "sym": 2,
+        "cum_pnl": -3.9057468022405875,
+        "n_active": 65603,
+        "accuracy": 0.38791621425986245
+      },
+      {
+        "sym": 3,
+        "cum_pnl": 0.2744296456039468,
+        "n_active": 782,
+        "accuracy": 0.7941888346000724
+      },
+      {
+        "sym": 4,
+        "cum_pnl": 4.401371181709479,
+        "n_active": 82568,
+        "accuracy": 0.3520064241766196
+      }
+    ]
+  },
+  "best": {
+    "T": 0.45,
+    "delta": 0.05,
+    "sum_cum_pnl": 13.906928564772773,
+    "n_pos_folds": 5,
+    "mean_accuracy": 0.6149113282663772,
+    "sum_n_active": 79612,
+    "per_fold": [
+      {
+        "sym": 0,
+        "cum_pnl": 1.9066562245396619,
+        "single_pnl": 0.0005627674806787668,
+        "accuracy": 0.8070937386898299,
+        "n_active": 3388,
+        "f0_5_macro": 0.18251519016752982
+      },
+      {
+        "sym": 1,
+        "cum_pnl": 2.4307586695911825,
+        "single_pnl": 9.758164069013178e-05,
+        "accuracy": 0.437511310170105,
+        "n_active": 24910,
+        "f0_5_macro": 0.30711126706124414
+      },
+      {
+        "sym": 2,
+        "cum_pnl": 2.2392948765970875,
+        "single_pnl": 8.342814636552616e-05,
+        "accuracy": 0.5559174809989142,
+        "n_active": 26841,
+        "f0_5_macro": 0.2973015247621075
+      },
+      {
+        "sym": 3,
+        "cum_pnl": 0.16215541902754904,
+        "single_pnl": 0.0006959460044100817,
+        "accuracy": 0.7971407889974665,
+        "n_active": 233,
+        "f0_5_macro": 0.021709074898846357
+      },
+      {
+        "sym": 4,
+        "cum_pnl": 7.168063375017293,
+        "single_pnl": 0.00029571218543800713,
+        "accuracy": 0.47689332247557004,
+        "n_active": 24240,
+        "f0_5_macro": 0.3424916610089153
+      }
+    ]
+  },
+  "iter_001d_reference": {
+    "sum_cum_pnl": 11.11,
+    "T": 0.45,
+    "delta": 0.05
+  },
+  "delta_vs_iter001d": 2.7969285647727737,
+  "significance_threshold": 0.5,
+  "decision": "build_iter001f",
+  "decision_msg": "D1 best (0.45, 0.05) beats iter_001d by +2.7969 >= 0.5; build iter_001f",
+  "elapsed_sec": 1.4797935485839844
+}
