@@ -1,0 +1,79 @@
+{
+  "task": "T18 XGBoost LOSO Scheme C 223-d",
+  "horizons": [
+    10
+  ],
+  "seeds": [
+    42
+  ],
+  "target_syms": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "seed_configs": {
+    "42": {
+      "seed": 42,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "max_depth": 7,
+      "reg_lambda": 1.0,
+      "min_child_weight": 100
+    }
+  },
+  "results": [
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 0,
+      "best_iter": 362,
+      "train_time_sec": 794.9342329502106,
+      "held_out_cum_pnl": -4.151549011840709,
+      "held_out_acc": 0.3704872421281216,
+      "held_out_n_active": 66686
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 1,
+      "best_iter": 292,
+      "train_time_sec": 819.0234954357147,
+      "held_out_cum_pnl": -0.7926057457003791,
+      "held_out_acc": 0.3873620159247195,
+      "held_out_n_active": 80929
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 2,
+      "best_iter": 300,
+      "train_time_sec": 394.4269690513611,
+      "held_out_cum_pnl": 3.1142187320176666,
+      "held_out_acc": 0.6317182410423453,
+      "held_out_n_active": 38101
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 3,
+      "best_iter": 340,
+      "train_time_sec": 204.26065969467163,
+      "held_out_cum_pnl": 1.7652116862137726,
+      "held_out_acc": 0.9265743756786102,
+      "held_out_n_active": 3172
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 4,
+      "best_iter": 309,
+      "train_time_sec": 173.79011154174805,
+      "held_out_cum_pnl": 6.5108790206798925,
+      "held_out_acc": 0.47661056822294606,
+      "held_out_n_active": 63927
+    }
+  ],
+  "elapsed_sec": 2404.412832736969
+}

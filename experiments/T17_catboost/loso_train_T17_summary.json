@@ -1,0 +1,79 @@
+{
+  "task": "T17 CatBoost LOSO Scheme C 223-d",
+  "horizons": [
+    10
+  ],
+  "seeds": [
+    42
+  ],
+  "target_syms": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "seed_configs": {
+    "42": {
+      "seed": 42,
+      "depth": 6,
+      "l2_leaf_reg": 3.0,
+      "bagging_temperature": 0.0,
+      "random_strength": 1.0,
+      "border_count": 128
+    }
+  },
+  "results": [
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 0,
+      "best_iter": 697,
+      "train_time_sec": 342.4422481060028,
+      "held_out_cum_pnl": 0.06689585741988174,
+      "held_out_acc": 0.6036577090119435,
+      "held_out_n_active": 40519
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 1,
+      "best_iter": 772,
+      "train_time_sec": 467.0394217967987,
+      "held_out_cum_pnl": -0.37247094307636114,
+      "held_out_acc": 0.39163726022439377,
+      "held_out_n_active": 80392
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 2,
+      "best_iter": 296,
+      "train_time_sec": 200.42926287651062,
+      "held_out_cum_pnl": 2.572654398596798,
+      "held_out_acc": 0.5943607491856677,
+      "held_out_n_active": 42748
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 3,
+      "best_iter": 1063,
+      "train_time_sec": 609.9378800392151,
+      "held_out_cum_pnl": 2.2819717938185593,
+      "held_out_acc": 0.9168023887079262,
+      "held_out_n_active": 4925
+    },
+    {
+      "horizon": 10,
+      "seed": 42,
+      "held_out_sym": 4,
+      "best_iter": 704,
+      "train_time_sec": 391.9402234554291,
+      "held_out_cum_pnl": 6.7316132991689805,
+      "held_out_acc": 0.48294426348172276,
+      "held_out_n_active": 63505
+    }
+  ],
+  "elapsed_sec": 2024.8899612426758
+}

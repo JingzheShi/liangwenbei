@@ -1,0 +1,142 @@
+[09:29:11] args: {'held': 0, 'epochs': 5, 'batch_size': 1024, 'lr': 0.001, 'weight_decay': 0.001, 'num_workers': 4, 'seed': 42, 'patience': 1, 'swa_topk': 2, 'label_smoothing': 0.1, 'data_dir': '/root/projects/liangwenbei_workdir/data', 'stats': '/root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/stats.npz', 'out_dir': '/root/projects/liangwenbei_workdir/experiments/T19_NN_regularized', 'no_wandb': False, 'wandb_project': 'liangwenbei', 'wandb_entity': 'jingzheshi'}
+[09:29:11] device: cuda
+[09:29:11] gpu: NVIDIA GeForce RTX 3090
+[09:29:11] Loading stats from /root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/stats.npz
+[09:29:11]   features: 154, log1p_cols: ['amount_delta']
+[09:29:11] LOSO held=0: train=640 val=128 test=48
+[09:29:26]   train ds: 1178880 samples in 15.2s
+[09:29:29]   val ds: 235776 samples in 3.0s
+[09:29:30]   test ds: 88416 samples in 1.3s
+[09:29:30]   class_weights label_5: dist=['0.121', '0.765', '0.114'] weights=['2.757', '0.436', '2.912']
+[09:29:30]   class_weights label_10: dist=['0.182', '0.651', '0.167'] weights=['1.835', '0.512', '1.994']
+[09:29:30]   class_weights label_20: dist=['0.146', '0.714', '0.140'] weights=['2.276', '0.467', '2.387']
+[09:29:30]   class_weights label_40: dist=['0.219', '0.580', '0.200'] weights=['1.519', '0.574', '1.666']
+[09:29:30]   class_weights label_60: dist=['0.262', '0.503', '0.235'] weights=['1.274', '0.662', '1.419']
+[09:29:30] Normalizing train features...
+[09:29:31]   normalize: replaced 97704 non-finite values across 640 sessions
+[09:29:31] Normalizing val features...
+[09:29:31]   normalize: replaced 81296 non-finite values across 128 sessions
+[09:29:31] Normalizing test features...
+[09:29:31]   normalize: replaced 0 non-finite values across 48 sessions
+/usr/local/lib/python3.12/dist-packages/torch/nn/modules/conv.py:549: UserWarning: Using padding='same' with even kernel lengths and odd dilation may require a zero-padded copy of the input be created (Triggered internally at ../aten/src/ATen/native/Convolution.cpp:1036.)
+  return F.conv2d(
+[09:29:31] model: DeepLOBReg, n_params=985023
+[09:29:33] scheduler: cosine over 5755 steps; epochs=5
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /root/.netrc.
+wandb: Currently logged in as: jingzheshi to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run hprcynpv
+wandb: Tracking run with wandb version 0.26.1
+wandb: Run data is saved locally in /root/projects/liangwenbei_workdir/wandb/run-20260506_092934-hprcynpv
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run T19-NN-reg-fold0-20260506-092934
+wandb: ⭐️ View project at https://wandb.ai/jingzheshi/liangwenbei
+wandb: 🚀 View run at https://wandb.ai/jingzheshi/liangwenbei/runs/hprcynpv
+[09:30:16]   epoch 1 step 200/1151: loss=5.6331 lr=9.97e-04
+[09:30:55]   epoch 1 step 400/1151: loss=5.6007 lr=9.88e-04
+[09:31:33]   epoch 1 step 600/1151: loss=5.5835 lr=9.73e-04
+[09:32:12]   epoch 1 step 800/1151: loss=5.5715 lr=9.53e-04
+[09:32:51]   epoch 1 step 1000/1151: loss=5.5618 lr=9.27e-04
+[09:33:21] epoch 1 train: total_loss=5.5519 per_head=['1.1555', '1.0881', '1.1369', '1.0916', '1.0799'] time=224.6s
+[09:33:36] epoch 1 val: loss_proxy=1.0387 h10_cum_pnl=-4.8693 best_h=label_20(-3.0156) time=15.5s
+[09:33:36]   label_5: acc=0.514 cum_pnl=-10.4951 pred_dist={0: 52643, 1: 92072, 2: 91061}
+[09:33:36]   label_10: acc=0.547 cum_pnl=-4.8693 pred_dist={0: 48801, 1: 94844, 2: 92131}
+[09:33:36]   label_20: acc=0.487 cum_pnl=-3.0156 pred_dist={0: 48324, 1: 92588, 2: 94864}
+[09:33:36]   label_40: acc=0.499 cum_pnl=-4.6697 pred_dist={0: 42999, 1: 98347, 2: 94430}
+[09:33:36]   label_60: acc=0.490 cum_pnl=-3.9472 pred_dist={0: 42596, 1: 102951, 2: 90229}
+[09:33:36]   -> NEW BEST val_h10_cum_pnl=-4.8693 at epoch 1
+[09:34:15]   epoch 2 step 200/1151: loss=5.4769 lr=8.70e-04
+[09:34:54]   epoch 2 step 400/1151: loss=5.4648 lr=8.31e-04
+[09:35:33]   epoch 2 step 600/1151: loss=5.4513 lr=7.88e-04
+[09:36:12]   epoch 2 step 800/1151: loss=5.4400 lr=7.42e-04
+[09:36:51]   epoch 2 step 1000/1151: loss=5.4301 lr=6.93e-04
+[09:37:20] epoch 2 train: total_loss=5.4238 per_head=['1.1098', '1.0543', '1.1123', '1.0774', '1.0700'] time=224.1s
+[09:37:33] epoch 2 val: loss_proxy=0.9943 h10_cum_pnl=5.6359 best_h=label_20(9.1532) time=13.1s
+[09:37:33]   label_5: acc=0.555 cum_pnl=0.4074 pred_dist={0: 68585, 1: 97896, 2: 69295}
+[09:37:33]   label_10: acc=0.582 cum_pnl=5.6359 pred_dist={0: 61502, 1: 101176, 2: 73098}
+[09:37:33]   label_20: acc=0.510 cum_pnl=9.1532 pred_dist={0: 56869, 1: 95182, 2: 83725}
+[09:37:33]   label_40: acc=0.513 cum_pnl=3.7200 pred_dist={0: 53230, 1: 99565, 2: 82981}
+[09:37:33]   label_60: acc=0.499 cum_pnl=1.4474 pred_dist={0: 52401, 1: 101920, 2: 81455}
+[09:37:33]   -> NEW BEST val_h10_cum_pnl=5.6359 at epoch 2
+[09:38:13]   epoch 3 step 200/1151: loss=5.3615 lr=6.02e-04
+[09:38:52]   epoch 3 step 400/1151: loss=5.3547 lr=5.48e-04
+[09:39:30]   epoch 3 step 600/1151: loss=5.3502 lr=4.93e-04
+[09:40:09]   epoch 3 step 800/1151: loss=5.3466 lr=4.39e-04
+[09:40:48]   epoch 3 step 1000/1151: loss=5.3428 lr=3.85e-04
+[09:41:18] epoch 3 train: total_loss=5.3394 per_head=['1.0822', '1.0341', '1.0948', '1.0668', '1.0615'] time=224.4s
+[09:41:31] epoch 3 val: loss_proxy=1.0053 h10_cum_pnl=7.9789 best_h=label_20(13.8406) time=13.0s
+[09:41:31]   label_5: acc=0.531 cum_pnl=1.2347 pred_dist={0: 72259, 1: 89725, 2: 73792}
+[09:41:31]   label_10: acc=0.567 cum_pnl=7.9789 pred_dist={0: 69139, 1: 92983, 2: 73654}
+[09:41:31]   label_20: acc=0.492 cum_pnl=13.8406 pred_dist={0: 72254, 1: 86900, 2: 76622}
+[09:41:31]   label_40: acc=0.495 cum_pnl=11.5094 pred_dist={0: 73723, 1: 86340, 2: 75713}
+[09:41:31]   label_60: acc=0.488 cum_pnl=10.1843 pred_dist={0: 67551, 1: 89440, 2: 78785}
+[09:41:31]   -> NEW BEST val_h10_cum_pnl=7.9789 at epoch 3
+[09:42:10]   epoch 4 step 200/1151: loss=5.3083 lr=2.95e-04
+[09:42:49]   epoch 4 step 400/1151: loss=5.3029 lr=2.46e-04
+[09:43:28]   epoch 4 step 600/1151: loss=5.3012 lr=2.01e-04
+[09:44:07]   epoch 4 step 800/1151: loss=5.2996 lr=1.59e-04
+[09:44:46]   epoch 4 step 1000/1151: loss=5.2959 lr=1.21e-04
+[09:45:15] epoch 4 train: total_loss=5.2947 per_head=['1.0708', '1.0244', '1.0855', '1.0591', '1.0550'] time=224.2s
+[09:45:28] epoch 4 val: loss_proxy=0.9947 h10_cum_pnl=8.7174 best_h=label_20(15.0988) time=13.0s
+[09:45:28]   label_5: acc=0.536 cum_pnl=1.9045 pred_dist={0: 74399, 1: 90698, 2: 70679}
+[09:45:28]   label_10: acc=0.568 cum_pnl=8.7174 pred_dist={0: 74678, 1: 92176, 2: 68922}
+[09:45:28]   label_20: acc=0.495 cum_pnl=15.0988 pred_dist={0: 78422, 1: 87580, 2: 69774}
+[09:45:28]   label_40: acc=0.501 cum_pnl=12.7958 pred_dist={0: 75551, 1: 88726, 2: 71499}
+[09:45:28]   label_60: acc=0.492 cum_pnl=12.5741 pred_dist={0: 75334, 1: 89906, 2: 70536}
+[09:45:28]   -> NEW BEST val_h10_cum_pnl=8.7174 at epoch 4
+[09:46:07]   epoch 5 step 200/1151: loss=5.2778 lr=6.59e-05
+[09:46:46]   epoch 5 step 400/1151: loss=5.2742 lr=4.14e-05
+[09:47:25]   epoch 5 step 600/1151: loss=5.2717 lr=2.24e-05
+[09:48:04]   epoch 5 step 800/1151: loss=5.2722 lr=9.15e-06
+[09:48:43]   epoch 5 step 1000/1151: loss=5.2731 lr=1.70e-06
+[09:49:12] epoch 5 train: total_loss=5.2720 per_head=['1.0657', '1.0197', '1.0804', '1.0549', '1.0514'] time=224.2s
+[09:49:25] epoch 5 val: loss_proxy=0.9975 h10_cum_pnl=8.9903 best_h=label_20(15.4678) time=12.6s
+[09:49:25]   label_5: acc=0.542 cum_pnl=2.1634 pred_dist={0: 71996, 1: 92401, 2: 71379}
+[09:49:25]   label_10: acc=0.570 cum_pnl=8.9903 pred_dist={0: 71615, 1: 93174, 2: 70987}
+[09:49:25]   label_20: acc=0.496 cum_pnl=15.4678 pred_dist={0: 75607, 1: 87603, 2: 72566}
+[09:49:25]   label_40: acc=0.501 cum_pnl=14.2652 pred_dist={0: 76245, 1: 87855, 2: 71676}
+[09:49:25]   label_60: acc=0.491 cum_pnl=13.7763 pred_dist={0: 75834, 1: 87572, 2: 72370}
+[09:49:25]   -> NEW BEST val_h10_cum_pnl=8.9903 at epoch 5
+[09:49:25] SWA averaging 2 states, val_h10_pnls=[8.99029216374724, 8.717415483237728]
+[09:49:43] SWA val h10_cum_pnl=8.9273, SWA test h10_cum_pnl=-7.5639, time=17.7s
+[09:49:43]   test label_5: acc=0.207 cum_pnl=-10.1916 pred_dist={0: 45321, 1: 10484, 2: 32611}
+[09:49:43]   test label_10: acc=0.285 cum_pnl=-7.5639 pred_dist={0: 41696, 1: 14644, 2: 32076}
+[09:49:43]   test label_20: acc=0.665 cum_pnl=0.3746 pred_dist={0: 13989, 1: 58059, 2: 16368}
+[09:49:43]   test label_40: acc=0.675 cum_pnl=1.9361 pred_dist={0: 13114, 1: 60629, 2: 14673}
+[09:49:43]   test label_60: acc=0.672 cum_pnl=3.0677 pred_dist={0: 12046, 1: 62478, 2: 13892}
+[09:49:43] Wrote OOF -> /root/projects/liangwenbei_workdir/experiments/T19_NN_regularized/loso_pred_nn_h10_held0.parquet (88416 rows)
+[09:49:43] Saved SWA model -> /root/projects/liangwenbei_workdir/experiments/T19_NN_regularized/model_h10_held0.pt
+[09:49:43] Saved history -> /root/projects/liangwenbei_workdir/experiments/T19_NN_regularized/fold0_history.json
+wandb: updating run metadata
+wandb: uploading wandb-summary.json; uploading config.yaml
+wandb: 
+wandb: Run history:
+wandb:                 epoch ▁▃▅▆█
+wandb:                  fold ▁▁▁▁▁
+wandb:                    lr █▆▄▂▁
+wandb:   train/loss_label_10 █▅▂▁▁
+wandb:   train/loss_label_20 █▅▃▂▁
+wandb:   train/loss_label_40 █▅▃▂▁
+wandb:    train/loss_label_5 █▄▂▁▁
+wandb:   train/loss_label_60 █▆▃▂▁
+wandb:      train/total_loss █▅▃▂▁
+wandb: val/accuracy_label_10 ▁█▅▅▆
+wandb:                   +17 ...
+wandb: 
+wandb: Run summary:
+wandb:           best_epoch 5
+wandb: best_val_h10_cum_pnl 8.99029
+wandb:                epoch 5
+wandb:                 fold 0
+wandb:                   lr 0
+wandb:         swa_n_states 2
+wandb: swa_test_h10_cum_pnl -7.56387
+wandb:  swa_val_h10_cum_pnl 8.92728
+wandb:  train/loss_label_10 1.01974
+wandb:  train/loss_label_20 1.0804
+wandb:                  +22 ...
+wandb: 
+wandb: 🚀 View run T19-NN-reg-fold0-20260506-092934 at: https://wandb.ai/jingzheshi/liangwenbei/runs/hprcynpv
+wandb: ⭐️ View project at: https://wandb.ai/jingzheshi/liangwenbei
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260506_092934-hprcynpv/logs
+[09:49:44] Fold training done.
