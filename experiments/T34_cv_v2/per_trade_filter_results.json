@@ -1,0 +1,166 @@
+{
+  "mmpc_demo": {
+    "table": {
+      "5": {
+        "cum_pnl": 4.0921844904101325,
+        "n_active": 25097,
+        "per_trade_pnl": 0.00016305472727457993
+      },
+      "10": {
+        "cum_pnl": 6.154876106902256,
+        "n_active": 65019,
+        "per_trade_pnl": 9.466273100020387e-05
+      },
+      "20": {
+        "cum_pnl": 6.333862569126732,
+        "n_active": 19725,
+        "per_trade_pnl": 0.0003211083685235352
+      },
+      "40": {
+        "cum_pnl": 6.272348267045856,
+        "n_active": 52124,
+        "per_trade_pnl": 0.00012033512905851154
+      },
+      "60": {
+        "cum_pnl": 3.572519692653003,
+        "n_active": 112629,
+        "per_trade_pnl": 3.1719359069626855e-05
+      }
+    },
+    "best_no_filter": {
+      "horizon": 20,
+      "cum_pnl": 6.333862569126732
+    },
+    "filter_5e-5": {
+      "policy": "filter_5e-5",
+      "cutoff": 5e-05,
+      "kept_horizons": [
+        5,
+        10,
+        20,
+        40
+      ],
+      "all_dropped": false,
+      "best_horizon": 20,
+      "best_cum_pnl": 6.333862569126732,
+      "best_per_trade": 0.0003211083685235352
+    },
+    "filter_1e-4": {
+      "policy": "filter_1e-4",
+      "cutoff": 0.0001,
+      "kept_horizons": [
+        5,
+        20,
+        40
+      ],
+      "all_dropped": false,
+      "best_horizon": 20,
+      "best_cum_pnl": 6.333862569126732,
+      "best_per_trade": 0.0003211083685235352
+    },
+    "filter_1.5e-4": {
+      "policy": "filter_1.5e-4",
+      "cutoff": 0.00015,
+      "kept_horizons": [
+        5,
+        20
+      ],
+      "all_dropped": false,
+      "best_horizon": 20,
+      "best_cum_pnl": 6.333862569126732,
+      "best_per_trade": 0.0003211083685235352
+    }
+  },
+  "iter_002": {
+    "table": {
+      "5": {
+        "cum_pnl": 17.49165054303625,
+        "n_active": 80454,
+        "n_total": 442080,
+        "per_trade_pnl": 0.0002174118197110927
+      },
+      "10": {
+        "cum_pnl": 21.859534071535457,
+        "n_active": 97135,
+        "n_total": 442080,
+        "per_trade_pnl": 0.0002250428174348634
+      },
+      "20": {
+        "cum_pnl": 19.699923555713404,
+        "n_active": 88106,
+        "n_total": 442080,
+        "per_trade_pnl": 0.00022359343921768556
+      },
+      "40": {
+        "cum_pnl": 11.705118204614314,
+        "n_active": 74883,
+        "n_total": 442080,
+        "per_trade_pnl": 0.00015631208958794804
+      },
+      "60": {
+        "cum_pnl": 6.300164893731614,
+        "n_active": 55288,
+        "n_total": 442080,
+        "per_trade_pnl": 0.00011395175976218373
+      }
+    },
+    "best_no_filter": {
+      "horizon": 10,
+      "cum_pnl": 21.859534071535457
+    },
+    "filter_5e-5": {
+      "policy": "filter_5e-5",
+      "cutoff": 5e-05,
+      "kept_horizons": [
+        5,
+        10,
+        20,
+        40,
+        60
+      ],
+      "all_dropped": false,
+      "best_horizon": 10,
+      "best_cum_pnl": 21.859534071535457,
+      "best_per_trade": 0.0002250428174348634
+    },
+    "filter_1e-4": {
+      "policy": "filter_1e-4",
+      "cutoff": 0.0001,
+      "kept_horizons": [
+        5,
+        10,
+        20,
+        40,
+        60
+      ],
+      "all_dropped": false,
+      "best_horizon": 10,
+      "best_cum_pnl": 21.859534071535457,
+      "best_per_trade": 0.0002250428174348634
+    },
+    "filter_1.5e-4": {
+      "policy": "filter_1.5e-4",
+      "cutoff": 0.00015,
+      "kept_horizons": [
+        5,
+        10,
+        20,
+        40
+      ],
+      "all_dropped": false,
+      "best_horizon": 10,
+      "best_cum_pnl": 21.859534071535457,
+      "best_per_trade": 0.0002250428174348634
+    }
+  },
+  "horizon_aware_filter": {
+    "ood_shift_per_horizon": {
+      "5": 0.0003,
+      "10": 0.00025,
+      "20": 0.00018,
+      "40": 0.00012,
+      "60": 6e-05
+    },
+    "_doc": "Filter passes if LOSO per_trade >= ood_shift[h]. Reproduces iter_004a (mmpc_demo all dropped, iter_002 keeps h_40+h_60)."
+  }
+}

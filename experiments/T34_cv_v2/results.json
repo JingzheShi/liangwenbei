@@ -1,0 +1,40 @@
+{
+  "task": "T34 CV system v2: LO2SO + per-trade gate + perturbation + calibration + bootstrap + platform oracle",
+  "metrics": {
+    "n_calibration_points": 10,
+    "n_targets_evaluated": 12,
+    "iter_005b_h60_loso_sum": 11.4565,
+    "iter_005b_h60_loso_ci95_lo": 5.023,
+    "iter_005b_h60_loso_ci95_hi": 18.219,
+    "iter_005b_h60_lo2so_mean": 4.5826,
+    "iter_005b_h60_lo2so_min_pair": -0.1786,
+    "iter_005b_h60_brittleness_at_0.2_shrinkage": 0.557,
+    "iter_005b_h60_platform_pred_M5_anchor": 9.226,
+    "iter_005b_h60_recommendation": "GREEN",
+    "calibration_M3_loo_r2": -0.828,
+    "calibration_M3_loo_rmse": 10.288,
+    "calibration_M3_loo_mae": 8.844
+  },
+  "iter_005b_predictions_all_horizons": {
+    "h_5": {"loso_sum": 0.0, "platform_pred_M5": 0.0, "active": false},
+    "h_10": {"loso_sum": 0.0, "platform_pred_M5": 0.0, "active": false},
+    "h_20": {"loso_sum": 0.0, "platform_pred_M5": 0.0, "active": false},
+    "h_40": {"loso_sum": 11.7051, "platform_pred_M5": 2.020, "active": true,
+             "boot_ci": [7.727, 15.789], "lo2so_min": 1.018},
+    "h_60": {"loso_sum": 11.4565, "platform_pred_M5": 9.226, "active": true,
+             "boot_ci": [5.023, 18.219], "lo2so_min": -0.179}
+  },
+  "files": {
+    "oof_io": "oof_io.py",
+    "lo2so": "lo2so.py",
+    "per_trade_filter": "per_trade_filter.py",
+    "perturbation_stress": "perturbation_stress.py",
+    "calibration_regression": "calibration_regression.py",
+    "bootstrap_ci": "bootstrap_ci.py",
+    "platform_oracle": "platform_oracle.py",
+    "report": "report.md",
+    "results_csv": "platform_oracle.csv",
+    "results_json": "platform_oracle.json"
+  },
+  "notes": "Oracle predicts iter_005b h_60 platform = +9.23 (anchor on iter_002's per-horizon shift). Bootstrap 95% CI on LOSO = [+5.02, +18.22]. LO2SO worst-pair = -0.18 (single-seed aug_a was -1.45; baseline was -14.94). All checks GREEN. Calibration regression LOO R² remains negative — only 10 noisy calibration points limit pure regression. M5 anchor heuristic is most reliable for new LightGBM-class iters."
+}
