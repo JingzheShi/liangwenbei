@@ -1,5 +1,5 @@
-# Data — never commit (474M of parquet)
-data/
+# Data — never commit (474M of parquet); /data/ only matches repo-root dataset dir
+/data/
 *.parquet
 *.csv
 *.h5

@@ -1,12 +1,14 @@
 {
-  "status": "completed",
-  "step": "all sanity checks done",
+  "status": "done",
+  "step": "全部 3 个交付物完成；测试全通；EDA 扫描产出 6 张图 + JSON + Markdown 报告",
   "metrics": {
-    "test_pnl_passed": true,
-    "perfect_label_60_cum_pnl": 2.742762445112203,
-    "perfect_label_60_single_pnl": 0.002670654766418893,
-    "perfect_best_score": 2.742762445112203,
-    "perfect_best_horizon": "label_60"
+    "files_with_nan": 8,
+    "pct_tick_unchanged": 0.7092441666666667,
+    "random_baseline_pnl_per_trade_label_5": -0.00019999984016706593,
+    "random_baseline_pnl_per_trade_label_60": -0.000199998393006324,
+    "local_debug_train_samples": 1473600,
+    "local_debug_val_samples": 294720,
+    "local_debug_test_samples": 442080
   },
-  "timestamp": "2026-05-06T00:28:19"
+  "timestamp": "2026-05-06T00:33:39.547751Z"
 }

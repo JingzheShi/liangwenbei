@@ -1,191 +1,105 @@
 {
-  "task": "Local PnL evaluator implementation (src/eval/)",
-  "test_pnl_passed": true,
-  "session_evaluated": "snapshot_sym0_date0_am.parquet",
-  "n_eval_points": 1842,
-  "valid_t_range": [
-    99,
-    1940
-  ],
+  "task": "数据处理 pipeline (EDA + split + LOBDataset)",
+  "deliverables": {
+    "src/data/split.py": "get_split() 支持 local_debug / submission；get_file_path() 校验三元组",
+    "src/data/dataset.py": "LOBDataset：1842 sample/session, window=100, 5 head, return_midprices/return_meta 可选",
+    "src/data/test_dataset.py": "10 个单元测试全部通过",
+    "src/data/eda.py": "扫描 1200 文件 ~10s，产出 eda_report.md + 6 张图",
+    "analysis/eda_report.md": "中文 EDA 报告",
+    "analysis/eda_stats.json": "机器可读的全部 EDA 数字"
+  },
   "metrics": {
-    "perfect_cum_pnl_per_horizon": {
-      "label_5": 0.5675834450608849,
-      "label_10": 0.9672286067771697,
-      "label_20": 1.2162428573765853,
-      "label_40": 2.0648565701977715,
-      "label_60": 2.742762445112203
+    "files_seen": 1200,
+    "files_expected": 1200,
+    "total_rows": 2401200,
+    "files_with_nan": 8,
+    "files_with_inf": 0,
+    "files_with_time_violation": 0,
+    "files_with_midprice_zero": 0,
+    "files_with_midprice_nan": 0,
+    "pct_tick_unchanged": 0.7092441666666667,
+    "label_dist_overall": {
+      "label_5": {
+        "0_down": 295291,
+        "1_flat": 1829098,
+        "2_up": 276811,
+        "p_down": 0.12297642845244044,
+        "p_flat": 0.761743295019157,
+        "p_up": 0.11528027652840246
+      },
+      "label_10": {
+        "0_down": 439218,
+        "1_flat": 1562603,
+        "2_up": 399379,
+        "p_down": 0.18291604197901049,
+        "p_flat": 0.6507592037314676,
+        "p_up": 0.1663247542895219
+      },
+      "label_20": {
+        "0_down": 322666,
+        "1_flat": 1772362,
+        "2_up": 306172,
+        "p_down": 0.13437697817757788,
+        "p_flat": 0.7381151091121106,
+        "p_up": 0.1275079127103115
+      },
+      "label_40": {
+        "0_down": 489292,
+        "1_flat": 1468591,
+        "2_up": 443317,
+        "p_down": 0.20376978177577879,
+        "p_flat": 0.6116071131101116,
+        "p_up": 0.18462310511410962
+      },
+      "label_60": {
+        "0_down": 589498,
+        "1_flat": 1288974,
+        "2_up": 522728,
+        "p_down": 0.24550141595868732,
+        "p_flat": 0.5368040979510245,
+        "p_up": 0.2176944860902882
+      }
     },
-    "perfect_single_pnl_per_horizon": {
-      "label_5": 0.0007527631897359216,
-      "label_10": 0.0009769985927042119,
-      "label_20": 0.0020169864964785828,
-      "label_40": 0.002341107222446453,
-      "label_60": 0.002670654766418893
+    "random_baseline_per_trade_pnl": {
+      "label_5": -0.00019999984016706593,
+      "label_10": -0.0001999996865400966,
+      "label_20": -0.00019999939227825217,
+      "label_40": -0.00019999888411150265,
+      "label_60": -0.000199998393006324
     },
-    "perfect_best_score": 2.742762445112203,
-    "perfect_best_horizon": "label_60",
-    "all_flat_cum_pnl_per_horizon": {
-      "label_5": 0.0,
-      "label_10": 0.0,
-      "label_20": 0.0,
-      "label_40": 0.0,
-      "label_60": 0.0
+    "always_up_per_trade_pnl": {
+      "label_5": -0.00020159816950677468,
+      "label_10": -0.00020313428557481659,
+      "label_20": -0.00020607660975812726,
+      "label_40": -0.0002111577690843041,
+      "label_60": -0.00021606832976513968
     },
-    "all_long_cum_pnl_per_horizon": {
-      "label_5": -0.32830118182829704,
-      "label_10": -0.2955090452626079,
-      "label_20": -0.26375129045862306,
-      "label_40": -0.1696265702786544,
-      "label_60": -0.06160397998196454
+    "always_down_per_trade_pnl": {
+      "label_5": -0.00019840151082735718,
+      "label_10": -0.00019686508750537665,
+      "label_20": -0.00019392217479837707,
+      "label_40": -0.00018883999913870124,
+      "label_60": -0.00018392845624750828
     },
-    "all_short_cum_pnl_per_horizon": {
-      "label_5": -0.40850683873739385,
-      "label_10": -0.4413055343863045,
-      "label_20": -0.47306964137646873,
-      "label_40": -0.5672131883831559,
-      "label_60": -0.6752573853585732
-    },
-    "random_cum_pnl_per_horizon": {
-      "label_5": -0.27219108508852663,
-      "label_10": -0.26109829054220635,
-      "label_20": -0.24952110334572047,
-      "label_40": -0.26682085990858423,
-      "label_60": -0.3680600311575953
+    "fee_per_trade": 0.00019973157279981214,
+    "dataset_sample_counts": {
+      "local_debug": {
+        "train_sessions": 800,
+        "val_sessions": 160,
+        "test_sessions": 240,
+        "samples_per_session": 1842,
+        "train_samples": 1473600,
+        "val_samples": 294720,
+        "test_samples": 442080
+      },
+      "submission": {
+        "train_sessions": 960,
+        "val_sessions": 240,
+        "samples_per_session": 1842,
+        "train_samples": 1768320,
+        "val_samples": 442080
+      }
     }
   },
-  "perfect_full_metrics": {
-    "label_5": {
-      "accuracy": 1.0,
-      "precision_up": 1.0,
-      "precision_down": 1.0,
-      "precision_macro": 1.0,
-      "recall_up": 1.0,
-      "recall_down": 1.0,
-      "recall_macro": 1.0,
-      "f0_5_up": 1.0,
-      "f0_5_down": 1.0,
-      "f0_5_macro": 1.0,
-      "cum_pnl": 0.5675834450608849,
-      "single_pnl": 0.0007527631897359216,
-      "n_predictions_active": 754,
-      "n_total": 1842,
-      "pred_distribution": {
-        "0": 377,
-        "1": 1088,
-        "2": 377
-      },
-      "label_distribution": {
-        "0": 377,
-        "1": 1088,
-        "2": 377
-      }
-    },
-    "label_10": {
-      "accuracy": 1.0,
-      "precision_up": 1.0,
-      "precision_down": 1.0,
-      "precision_macro": 1.0,
-      "recall_up": 1.0,
-      "recall_down": 1.0,
-      "recall_macro": 1.0,
-      "f0_5_up": 1.0,
-      "f0_5_down": 1.0,
-      "f0_5_macro": 1.0,
-      "cum_pnl": 0.9672286067771697,
-      "single_pnl": 0.0009769985927042119,
-      "n_predictions_active": 990,
-      "n_total": 1842,
-      "pred_distribution": {
-        "0": 501,
-        "1": 852,
-        "2": 489
-      },
-      "label_distribution": {
-        "0": 501,
-        "1": 852,
-        "2": 489
-      }
-    },
-    "label_20": {
-      "accuracy": 1.0,
-      "precision_up": 1.0,
-      "precision_down": 1.0,
-      "precision_macro": 1.0,
-      "recall_up": 1.0,
-      "recall_down": 1.0,
-      "recall_macro": 1.0,
-      "f0_5_up": 1.0,
-      "f0_5_down": 1.0,
-      "f0_5_macro": 1.0,
-      "cum_pnl": 1.2162428573765853,
-      "single_pnl": 0.0020169864964785828,
-      "n_predictions_active": 603,
-      "n_total": 1842,
-      "pred_distribution": {
-        "0": 280,
-        "1": 1239,
-        "2": 323
-      },
-      "label_distribution": {
-        "0": 280,
-        "1": 1239,
-        "2": 323
-      }
-    },
-    "label_40": {
-      "accuracy": 1.0,
-      "precision_up": 1.0,
-      "precision_down": 1.0,
-      "precision_macro": 1.0,
-      "recall_up": 1.0,
-      "recall_down": 1.0,
-      "recall_macro": 1.0,
-      "f0_5_up": 1.0,
-      "f0_5_down": 1.0,
-      "f0_5_macro": 1.0,
-      "cum_pnl": 2.0648565701977715,
-      "single_pnl": 0.002341107222446453,
-      "n_predictions_active": 882,
-      "n_total": 1842,
-      "pred_distribution": {
-        "0": 427,
-        "1": 960,
-        "2": 455
-      },
-      "label_distribution": {
-        "0": 427,
-        "1": 960,
-        "2": 455
-      }
-    },
-    "label_60": {
-      "accuracy": 1.0,
-      "precision_up": 1.0,
-      "precision_down": 1.0,
-      "precision_macro": 1.0,
-      "recall_up": 1.0,
-      "recall_down": 1.0,
-      "recall_macro": 1.0,
-      "f0_5_up": 1.0,
-      "f0_5_down": 1.0,
-      "f0_5_macro": 1.0,
-      "cum_pnl": 2.742762445112203,
-      "single_pnl": 0.002670654766418893,
-      "n_predictions_active": 1027,
-      "n_total": 1842,
-      "pred_distribution": {
-        "0": 501,
-        "1": 815,
-        "2": 526
-      },
-      "label_distribution": {
-        "0": 501,
-        "1": 815,
-        "2": 526
-      }
-    },
-    "best_score": 2.742762445112203,
-    "best_horizon": "label_60"
-  },
-  "notes": "本地 PnL 评测器已实现并通过 sanity check (5 cases / 6 assertions)。完美预测在 sym0_date0_am 一个 session (1842 个有效预测点) 上：label_60 累计收益率 2.7428，单次收益率 0.2671%。所有 trivial baseline (all-flat/long/short/random) 均严格劣于完美预测。注意完美预测 != 理论 PnL 上限 — 当 label=1 (|x|≤α) 但 |x|>2*fee 时，预测涨/跌可能比预测平更赚。"
+  "notes": "完整性：1200/1200 文件齐全，时间戳全部连续，midprice 无 0/NaN。8 个文件有 NaN（仅 ask 侧深档，源于 sym=1/3 涨停日），最严重 (1,91,pm) 65% tick 涨停。瞎猜{跌,涨}所有 horizon 期望 PnL ≈ -0.02% (= 单笔手续费)。midprice 70.9% tick 不动；label_5/10 (α=0.05%) p_flat=76%/65%, label_20/40/60 (α=0.1%) p_flat=74%/61%/54%。label_10 和 label_60 出手机会最多，建议重点优化。LOBDataset(window=100, max_horizon=60)：每 session 1842 样本；local_debug: train=1.47M / val=294k / test=442k；submission: train=1.77M / val=442k。测试 10/10 通过，包括跨 session 边界检查、midprice 一致性、DataLoader 烟测。"
 }
