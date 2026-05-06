@@ -1,0 +1,18 @@
+{
+  "status": "completed",
+  "step": "T8 sym=2 diagnostic finished — report.md + 5 figures + stats + oof analysis written",
+  "metrics": {
+    "sym2_amount_z_vs_others": 7.49,
+    "sym2_per_tick_vol_z": -2.85,
+    "loso_pred_up_rate": 0.621,
+    "loso_true_up_rate": 0.182,
+    "oof_acc": 0.292
+  },
+  "key_findings": [
+    "sym=2 is highest-volume, tightest-spread, lowest-per-tick-vol stock (likely blue-chip/ETF)",
+    "LOSO model over-predicts UP 62% on sym=2 vs truth 18%",
+    "model reads sym=2 baseline microstructure as 'accumulation' signal",
+    "5 sym-agnostic feature ideas to fix this without violating hard constraints"
+  ],
+  "timestamp": "2026-05-06T06:30:00Z"
+}
