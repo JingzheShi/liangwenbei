@@ -1,0 +1,37 @@
+{
+  "feat_names": [
+    "sec_norm",
+    "sin_sess_pos",
+    "cos_sess_pos",
+    "is_open_30min",
+    "is_close_30min",
+    "is_pm"
+  ],
+  "ks_pairwise": {
+    "sec_norm": {
+      "worst_p": 0.004380824614354059
+    },
+    "sin_sess_pos": {
+      "worst_p": 0.007523967773798311
+    },
+    "cos_sess_pos": {
+      "worst_p": 0.021802367874619404
+    },
+    "is_open_30min": {
+      "worst_p": 0.6849224542750916
+    },
+    "is_close_30min": {
+      "worst_p": 0.02782170811564888
+    },
+    "is_pm": {
+      "worst_p": 0.7218788415520777
+    }
+  },
+  "exact_match": {
+    "sym0_vs_sym1_n_match": 2000,
+    "sym0_vs_sym2_n_match": 2000,
+    "sym0_vs_sym3_n_match": 2000,
+    "sym0_vs_sym4_n_match": 2000
+  },
+  "exact_invariant": true
+}

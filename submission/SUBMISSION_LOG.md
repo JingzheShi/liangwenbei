@@ -125,3 +125,18 @@
 - M1 / M_cb / M_dro / M_r34 各种 2-way 3-way 加权 → 没有突破 +13.61（最高 +13.62）
 - 单 idea + 修正特征是真正的 lever
 | 010  | 2026-05-07 | t61_batchvec | _(待填)_ | _(待跑 PnL)_ | _(待填)_ | _未提交_ | _未提交_ | _(待填)_ | zip=15.47MB, 11 files; pred_dist=label_5=[0,1842,0], label_10=[0,1842,0], label_20=[0,1842,0], label_40=[0,1842,0], label_60=[20,1809,13]; note=T61 batch-vectorized feature extraction. Same model + thresh as iter_009 (LOSO-equiv +24.52). 56x faster: 254min->4.5min for 442k samples. Predictions identical to iter_009. |
+
+---
+## iter_013 (2026-05-07) — Regression on Δmid + EV-gated 🏆 PLATFORM RESULT
+
+| iter | 日期 | 模型 | 关键 trick | LOSO-equiv | 平台 PnL | 平台 best horizon | 备注 |
+| ---- | ---- | ---- | ---------- | ---------- | -------- | ------------------ | ---- |
+| 013  | 2026-05-07 | LightGBM 5-seed regression_l2 (359-d Stage 1+2+3+5) + EV gate (thr_up=3.7e-4, thr_dn=1.6e-4) | **regression on Δmid_norm 替代 3-class CE** + asymmetric EV gate | **+36.23** | **+19.23** | label_60 | platform: acc=0.307, recall=0.258, F0.5=0.295, single=0.000120; vs iter_002 +4.07 → **+15.16 提升**; 公榜较好 team +29.18 仍 +9.95 leading |
+
+### LOSO-equiv → Platform gap analysis
+
+iter_002: LOSO h_60 = +6.30, Platform = +4.07, gap = -2.23
+iter_013: LOSO-equiv = +36.23, Platform = +19.23, gap = **-17.0** (HUGE!)
+
+Cause: DE 4D thresh on local test labels over-fits MUCH MORE on regression+EV setup (smaller search space and wider feature variance).
+Mitigation: prefer symmetric k=1.25 (+33.72 → expected platform ~+18-20) over DE asymmetric (+36.23 → +19).
