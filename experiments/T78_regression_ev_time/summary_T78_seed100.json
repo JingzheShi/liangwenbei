@@ -1,0 +1,57 @@
+{
+  "task": "T78 regression \u0394mid + time seed=100",
+  "seed": 100,
+  "horizon": 60,
+  "objective": "regression_l2",
+  "split_info": {
+    "strategy": "V4",
+    "train_dates": "0-75",
+    "val_dates": "76-79 (walk-forward last 5%)",
+    "n_train": 1399920,
+    "n_val": 73680
+  },
+  "n_features": 365,
+  "drop_names": [
+    "dualz_ask_diff1",
+    "dualz_bid_diff5",
+    "dualz_ask_diff5",
+    "qrank_W100_spread1",
+    "qrank_W100_spread5",
+    "qrank_W100_spread10",
+    "qrank_W100_cumspread",
+    "kyle_lam_W50",
+    "kyle_lam_W100",
+    "roll_eff_spr_ratio_W100",
+    "liq_asym_top5_W5"
+  ],
+  "best_iter": 124,
+  "train_time_sec": 24.634746313095093,
+  "val": {
+    "mse": 5.021153810957912e-06,
+    "mae": 0.001532409223727882,
+    "corr": 0.14949772024305527
+  },
+  "test": {
+    "mse": 3.558438265827135e-06,
+    "mae": 0.0011756756575778127,
+    "corr": 0.14287789503078907,
+    "ev_gate_k1_cum_pnl": 28.617326581909,
+    "ev_gate_k1_n_active": 236146
+  },
+  "params": {
+    "seed": 100,
+    "horizon": 60,
+    "objective": "regression_l2",
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "no_wandb": true
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "task": "T78: regression on Δmid + EV-gated decision + 6 time features (schemeQ)",
+  "experiment": "T78_regression_ev_time",
+  "iter_013_loso_baseline": 36.2281,
+  "iter_012_loso_baseline": 26.4396,
+  "decision": "REJECT — time features do not help in regression either",
+  "metrics": {
+    "loso_equiv": 35.5116,
+    "vs_iter_013": -0.7165,
+    "vs_iter_012": 9.0720,
+    "best_threshold_thr_up": 0.0003540,
+    "best_threshold_thr_dn": 0.0001760,
+    "best_symmetric_k": 1.25,
+    "best_symmetric_k_loso": 32.7458,
+    "single_seed_loso_range": [28.6173, 31.2264],
+    "single_seed_mean_loso_k1": 29.62,
+    "n_test": 442080,
+    "n_features": 365,
+    "objective": "regression_l2",
+    "horizon": 60,
+    "validation_strategy": "V4 walk-forward (date 0-75 train, 76-79 val, 96-119 test)"
+  },
+  "per_seed_comparison": {
+    "42":  {"T75_ev_k1": 28.2772, "T78_ev_k1": 31.2264, "delta": +2.9492, "T78_test_corr": 0.1529, "T78_best_iter": 66},
+    "1":   {"T75_ev_k1": 30.5520, "T78_ev_k1": 29.3064, "delta": -1.2456, "T78_test_corr": 0.1503, "T78_best_iter": 73},
+    "7":   {"T75_ev_k1": 31.0220, "T78_ev_k1": 29.5062, "delta": -1.5158, "T78_test_corr": 0.1530, "T78_best_iter": 78},
+    "13":  {"T75_ev_k1": 31.2957, "T78_ev_k1": 29.4478, "delta": -1.8479, "T78_test_corr": 0.1511, "T78_best_iter": 68},
+    "100": {"T75_ev_k1": 29.8455, "T78_ev_k1": 28.6173, "delta": -1.2282, "T78_test_corr": 0.1429, "T78_best_iter": 124}
+  },
+  "ensemble_de_asym": {
+    "thr_up": 0.0003540,
+    "thr_dn": 0.0001760,
+    "single_total": 35.5116,
+    "sum_per_sym": 35.5116,
+    "per_sym": [4.405, 5.645, 3.712, 10.435, 11.315]
+  },
+  "compare_T75_iter013": {
+    "T75_thr_up": 0.0003723,
+    "T75_thr_dn": 0.0001613,
+    "T75_loso": 36.2281,
+    "T75_per_sym": [3.654, 6.648, 4.244, 10.434, 11.248],
+    "T78_minus_T75_per_sym": [+0.751, -1.003, -0.532, +0.001, +0.067]
+  },
+  "compliance": {
+    "sym_in_features": false,
+    "date_in_features": false,
+    "time_features_used": ["sec_norm", "sin_sess_pos", "cos_sess_pos", "is_open_30min", "is_close_30min", "is_pm"],
+    "stateless_predict": "n/a (no submission packaged)",
+    "shuffle_invariant": "n/a (no submission packaged)"
+  },
+  "notes": "Adding the 6 stateless time features (T74 schemeQ: sec_norm, sin/cos session position, is_open_30min, is_close_30min, is_pm) to the regression model (T75) marginally underperforms the time-feature-free baseline (-0.72 LOSO-equiv vs iter_013 +36.23). Single-seed test correlation is ~equal (0.150 vs 0.153). The single-seed EV-gate (k=1) is also slightly worse on average (29.62 vs 30.20). Per-sym breakdown shows the regression-on-schemeQ ensemble redistributes pnl: +0.75 sym0, -1.00 sym1, -0.53 sym2, ±0.0 sym3/4. The most plausible explanation is that the regressor was already learning whatever session-position signal exists implicitly through the LOB microstructure (spread widths, trade intensity etc.), and the explicit time feature primarily adds an extra split dimension that fits training-window-specific intraday-volatility quirks that don't generalize to date 96-119. This rules out time features for the current regression-EV stack — same conclusion as T74 for 3-class classification, but also for the more magnitude-sensitive regression objective. iter_013 stays as the SOTA submission. Save model and pred files for future ablation, do not package."
+}
