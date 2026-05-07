@@ -1,0 +1,45 @@
+{
+  "task": "T53b full-data h60 5-seed (schemeN 340-d)",
+  "n_full": 1768320,
+  "feat_dim": 340,
+  "fail_dropped": [
+    "dualz_ask_diff1",
+    "dualz_bid_diff5",
+    "dualz_ask_diff5",
+    "qrank_W100_spread1",
+    "qrank_W100_spread5",
+    "qrank_W100_spread10",
+    "qrank_W100_cumspread",
+    "kyle_lam_W50",
+    "kyle_lam_W100",
+    "roll_eff_spr_ratio_W100"
+  ],
+  "n_iter": 300,
+  "models": {
+    "seed42": {
+      "path": "/root/projects/liangwenbei_workdir/experiments/T53_r34_stage3/full_model_h60_seed42.txt",
+      "n_iter": 300,
+      "train_time": 105.63870930671692
+    },
+    "seed1": {
+      "path": "/root/projects/liangwenbei_workdir/experiments/T53_r34_stage3/full_model_h60_seed1.txt",
+      "n_iter": 300,
+      "train_time": 109.83671736717224
+    },
+    "seed7": {
+      "path": "/root/projects/liangwenbei_workdir/experiments/T53_r34_stage3/full_model_h60_seed7.txt",
+      "n_iter": 300,
+      "train_time": 84.19791460037231
+    },
+    "seed13": {
+      "path": "/root/projects/liangwenbei_workdir/experiments/T53_r34_stage3/full_model_h60_seed13.txt",
+      "n_iter": 300,
+      "train_time": 148.4442102909088
+    },
+    "seed100": {
+      "path": "/root/projects/liangwenbei_workdir/experiments/T53_r34_stage3/full_model_h60_seed100.txt",
+      "n_iter": 300,
+      "train_time": 105.31403040885925
+    }
+  }
+}
