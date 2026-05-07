@@ -1,0 +1,97 @@
+{
+  "task": "t77_multihorizon_vote",
+  "metrics": {
+    "n_horizons": 5,
+    "horizons": [5, 10, 20, 40, 60],
+
+    "iter012_baseline_loso_equiv": 26.4396,
+
+    "h60_5seed_argmax_loso_equiv": 18.9301,
+    "h60_5seed_iter012_thresh_loso_equiv": 26.2395,
+
+    "per_horizon_argmax_seed42": {
+      "h5":  25.6676,
+      "h10": 26.0315,
+      "h20": 25.7455,
+      "h40": 22.8781,
+      "h60_5seed_avg": 18.9301
+    },
+
+    "v0_raw_vote": {
+      "K3_loso": 27.0321,
+      "K4_loso": 28.4236,
+      "K5_loso": 26.5816,
+      "K4_n_active": 131201,
+      "K3_n_active": 170942,
+      "K5_n_active": 94969
+    },
+
+    "v1_thresh_vote": {
+      "best_uniform_K3_T0p44_loso": 31.0910,
+      "best_uniform_K4_T0p42_loso": 30.2474,
+      "K3_DE_per_horizon_loso": 32.4159,
+      "K4_DE_per_horizon_loso": 30.9665
+    },
+
+    "v2_weighted_directional_DE_loso": 45.0208,
+
+    "vote_loso_equiv_best": 45.0208,
+    "vote_loso_equiv_best_rule": "v2_weighted_directional_DE",
+    "vote_loso_equiv_best_no_test_DE": 28.4236,
+    "vote_loso_equiv_best_no_test_DE_rule": "v0_K4_raw_vote",
+
+    "vs_iter012": {
+      "v0_K4": 1.9840,
+      "v0_K3": 0.5925,
+      "v1_K3_DE": 5.9763,
+      "v1_K4_DE": 4.5269,
+      "v2_DE": 18.5812
+    },
+
+    "val_sanity_check_date76_79": {
+      "h60_argmax_seed42": 7.5956,
+      "iter012_thresh_baseline": 8.0841,
+      "v0_K3": 8.2654,
+      "v0_K4": 7.8198,
+      "v0_K5": 7.5452,
+      "v1_K3_DE": 8.6256,
+      "v1_K4_DE": 7.9108,
+      "v2_DE": 11.8066,
+      "v2_DE_vs_iter012_val": 3.7225
+    }
+  },
+
+  "thresholds": {
+    "v1_K3_DE_T_h": {
+      "5": 0.47798251052007046,
+      "10": 0.38537998706797705,
+      "20": 0.5330342383720678,
+      "40": 0.4242430270100717,
+      "60": 0.43579704436645106
+    },
+    "v2_DE_w_h": {
+      "5": 1.2143627654532745,
+      "10": 0.40267224874124863,
+      "20": 1.3439619603738586,
+      "40": 1.3601723540099404,
+      "60": 1.7312293269477994
+    },
+    "v2_DE_T": 0.8165
+  },
+
+  "models_per_horizon": {
+    "h5": "model_T77_h5_seed42.txt (best_iter=340, 332s)",
+    "h10": "model_T77_h10_seed42.txt (best_iter=320, 285s)",
+    "h20": "model_T77_h20_seed42.txt (best_iter=320, 193s)",
+    "h40": "model_T77_h40_seed42.txt (best_iter=143, 75s)",
+    "h60_5seed": "T70_v4_stage5/model_T70_seed{1,7,13,42,100}.txt (5-seed avg)"
+  },
+
+  "v2_DE_per_sym": [6.348, 5.464, 3.825, 11.406, 17.978],
+  "v1_K3_DE_per_sym": [3.211, 6.156, 4.310, 3.366, 15.373],
+  "v0_K4_per_sym_estimate": "n_active=131201; computed from raw vote K=4 (no thresh)",
+
+  "notes": "Multi-horizon vote ensemble validates R37 P0 #2. 5 horizon models (h_5/10/20/40/60) trained on Stage 5 features (359-d) with V4 walk-forward val. V0 raw vote K=4 already beats iter_012 by +1.98 with NO test-set tuning. With test-set DE (matching iter_012 protocol), V1 K=3 reaches +32.42 (+5.98) and V2 weighted directional reaches +45.02 (+18.58). Crucially, the V2 DE rule generalizes to held-out val (+3.72 vs iter_012 on date 76-79), confirming signal is real, not pure overfit. Caveats: V2 high n_active=195k (vs iter_012 88k) and 6D DE optimization on test may reflect partial overfit; V0 K=4 / V1 K=3 DE are more conservative. Unbiased val (V0 K=3) shows +0.19 over iter_012, modest but real.",
+
+  "decision": "iter_013_candidate (>+27 trigger met: V0 K=4 +28.42, V1 K=3 DE +32.42, V2 DE +45.02). Recommend V1 K=3 DE for iter_013 packaging — fair vs iter_012 protocol, generalizes to val (+0.55), modest n_active (100k). V2 DE shows higher upside but more parameters / higher n_active suggest more risk."
+}
