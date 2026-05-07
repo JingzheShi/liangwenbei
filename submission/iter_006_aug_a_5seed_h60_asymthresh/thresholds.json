@@ -1,0 +1,67 @@
+{
+  "_doc": "iter_006: iter_005b base (5-seed aug_a ensemble for h_60) + T30 asymmetric (T_up,T_dn,d_up,d_dn) DE-optimized gating. h_5/h_10/h_20 disabled (matches iter_005b). h_40 from iter_002 baseline.",
+  "_source": "T30 differential_evolution PnL maximization on 5-seed aug_a OOF",
+  "horizons": [
+    {
+      "h": 5,
+      "T": 0.99,
+      "delta": 0.99,
+      "active": false,
+      "_reason": "iter_002 platform = -7.68. Disabled."
+    },
+    {
+      "h": 10,
+      "T": 0.99,
+      "delta": 0.99,
+      "active": false,
+      "_reason": "iter_002 platform = -8.64. Disabled."
+    },
+    {
+      "h": 20,
+      "T": 0.99,
+      "delta": 0.99,
+      "active": false,
+      "_reason": "iter_002 platform = -5.09. Disabled."
+    },
+    {
+      "h": 40,
+      "T": 0.5,
+      "delta": 0.0,
+      "active": true,
+      "_reason": "iter_002 platform = +2.02. Kept unchanged (symmetric)."
+    },
+    {
+      "h": 60,
+      "T_up": 0.4480917972708376,
+      "T_dn": 0.39144661429951816,
+      "d_up": 0.2597244012809361,
+      "d_dn": 0.024449627822859837,
+      "active": true,
+      "_reason": "T30 asymmetric DE optimum on 5-seed aug_a OOF. Vs iter_005b (T=0.45,d=0.10) sum=+11.46 -> asym sum=+13.61.",
+      "asym_meta": {
+        "T_up": 0.4480917972708376,
+        "T_dn": 0.39144661429951816,
+        "d_up": 0.2597244012809361,
+        "d_dn": 0.024449627822859837,
+        "OOF_sum_cum_pnl": 13.60621189959305,
+        "OOF_std_cum_pnl": 2.558719090959556,
+        "OOF_n_pos_folds": 5,
+        "OOF_per_fold_pnl": [
+          1.8232876243070164,
+          2.6363583879331203,
+          1.4782756577417884,
+          0.09920082941743304,
+          7.569089400193692
+        ],
+        "_source": "T30 differential_evolution best (5 seeds convergent)"
+      },
+      "ensemble_seeds": [
+        42,
+        1,
+        7,
+        13,
+        100
+      ]
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+[22:13:52] args: {'held': 1, 'epochs': 6, 'batch_size': 1024, 'lr': 0.0005, 'weight_decay': 0.005, 'num_workers': 4, 'seed': 42, 'patience': 2, 'swa_topk': 1, 'label_smoothing': 0.1, 'aug_a_lo': 0.8, 'aug_a_hi': 1.2, 'warmup_steps': 100, 'data_dir': '/root/projects/liangwenbei_workdir/data', 'stats': '/root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/stats.npz', 'out_dir': '/root/projects/liangwenbei_workdir/experiments/T32_nn_h60', 'no_wandb': False, 'wandb_project': 'liangwenbei', 'wandb_entity': 'jingzheshi'}
+[22:13:52] device: cuda
+[22:13:52] gpu: NVIDIA GeForce RTX 3090
+[22:13:52] Loading stats from /root/projects/liangwenbei_workdir/experiments/T1_nn_baseline/stats.npz
+[22:13:52]   features: 154, log1p_cols: ['amount_delta']
+[22:13:52] LOSO held=1: train=640 val=128 test=48
+[22:13:59]   train ds: 1178880 samples in 6.8s
+[22:14:00]   val ds: 235776 samples in 1.4s
+[22:14:00]   test ds: 88416 samples in 0.5s
+[22:14:00]   h60_idx=4 (in ['label_5', 'label_10', 'label_20', 'label_40', 'label_60'])
+[22:14:00]   class_weights h60: dist=['0.253', '0.523', '0.224'] weights=['1.319', '0.637', '1.487']
+[22:14:01] Normalizing train features...
+[22:14:01]   normalize: replaced 13398 non-finite values across 640 sessions
+[22:14:01] Normalizing val features...
+[22:14:01]   normalize: replaced 0 non-finite values across 128 sessions
+[22:14:01] Normalizing test features...
+[22:14:01]   normalize: replaced 0 non-finite values across 48 sessions
+/usr/local/lib/python3.12/dist-packages/torch/nn/modules/conv.py:549: UserWarning: Using padding='same' with even kernel lengths and odd dilation may require a zero-padded copy of the input be created (Triggered internally at ../aten/src/ATen/native/Convolution.cpp:1036.)
+  return F.conv2d(
+[22:14:01] model: DeepLOB_H60, n_params=984243
+[22:14:02] scheduler: warmup(100) + cosine over 6906 steps; epochs=6
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /root/.netrc.
+wandb: Currently logged in as: jingzheshi to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.26.1
+wandb: Run data is saved locally in /root/projects/liangwenbei_workdir/experiments/T32_nn_h60/wandb/run-20260506_221403-68mws3gw
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run T32-NN-h60-fold1-20260506-221403
+wandb: ⭐️ View project at https://wandb.ai/jingzheshi/liangwenbei
+wandb: 🚀 View run at https://wandb.ai/jingzheshi/liangwenbei/runs/68mws3gw
+[22:14:50]   epoch 1 step 200/1151: loss=1.0974 lr=5.00e-04
+[22:15:34]   epoch 1 step 400/1151: loss=1.0896 lr=4.98e-04
+[22:16:19]   epoch 1 step 600/1151: loss=1.0857 lr=4.93e-04
+[22:17:04]   epoch 1 step 800/1151: loss=1.0834 lr=4.87e-04
+[22:17:49]   epoch 1 step 1000/1151: loss=1.0814 lr=4.79e-04
+[22:18:24] epoch 1 train: loss=1.0803 time=258.9s
+[22:18:39] epoch 1 val: loss_proxy=1.0049 h60_argmax_pnl=-11.3241 h60_thr(T=0.45,d=0.10)_pnl=-1.0676 acc=0.538 pred_dist=[0, 1, 2] time=15.0s
+[22:18:39]   -> NEW BEST val_h60_thr_pnl=-1.0676 at epoch 1
+[22:19:25]   epoch 2 step 200/1151: loss=1.0723 lr=4.59e-04
+[22:20:11]   epoch 2 step 400/1151: loss=1.0723 lr=4.46e-04
+[22:20:57]   epoch 2 step 600/1151: loss=1.0711 lr=4.31e-04
+[22:21:44]   epoch 2 step 800/1151: loss=1.0706 lr=4.14e-04
+[22:22:30]   epoch 2 step 1000/1151: loss=1.0695 lr=3.96e-04
+[22:23:05] epoch 2 train: loss=1.0691 time=266.8s
+[22:23:20] epoch 2 val: loss_proxy=0.9950 h60_argmax_pnl=-11.9994 h60_thr(T=0.45,d=0.10)_pnl=-1.9518 acc=0.539 pred_dist=[0, 1, 2] time=14.1s
+[22:23:20]   no improvement (1/2)
+[22:24:06]   epoch 3 step 200/1151: loss=1.0632 lr=3.61e-04
+[22:24:52]   epoch 3 step 400/1151: loss=1.0616 lr=3.40e-04
+[22:25:38]   epoch 3 step 600/1151: loss=1.0608 lr=3.18e-04
+[22:26:24]   epoch 3 step 800/1151: loss=1.0599 lr=2.96e-04
+[22:27:10]   epoch 3 step 1000/1151: loss=1.0589 lr=2.73e-04
+[22:27:45] epoch 3 train: loss=1.0581 time=265.4s
+[22:27:59] epoch 3 val: loss_proxy=1.0147 h60_argmax_pnl=-10.3831 h60_thr(T=0.45,d=0.10)_pnl=2.9692 acc=0.520 pred_dist=[0, 1, 2] time=14.6s
+[22:27:59]   -> NEW BEST val_h60_thr_pnl=2.9692 at epoch 3
+[22:28:46]   epoch 4 step 200/1151: loss=1.0498 lr=2.33e-04
+[22:29:33]   epoch 4 step 400/1151: loss=1.0474 lr=2.10e-04
+[22:30:19]   epoch 4 step 600/1151: loss=1.0458 lr=1.87e-04
+[22:31:05]   epoch 4 step 800/1151: loss=1.0441 lr=1.65e-04
+[22:31:49]   epoch 4 step 1000/1151: loss=1.0426 lr=1.44e-04
+[22:32:23] epoch 4 train: loss=1.0415 time=263.4s
+[22:32:37] epoch 4 val: loss_proxy=1.0035 h60_argmax_pnl=-5.3516 h60_thr(T=0.45,d=0.10)_pnl=2.3117 acc=0.526 pred_dist=[0, 1, 2] time=13.7s
+[22:32:37]   no improvement (1/2)
+[22:33:18]   epoch 5 step 200/1151: loss=1.0287 lr=1.09e-04
+[22:34:04]   epoch 5 step 400/1151: loss=1.0275 lr=9.03e-05
+[22:34:49]   epoch 5 step 600/1151: loss=1.0267 lr=7.33e-05
+[22:35:35]   epoch 5 step 800/1151: loss=1.0255 lr=5.77e-05
+[22:36:20]   epoch 5 step 1000/1151: loss=1.0245 lr=4.38e-05
+[22:36:54] epoch 5 train: loss=1.0236 time=257.5s
+[22:37:08] epoch 5 val: loss_proxy=1.0061 h60_argmax_pnl=-8.0231 h60_thr(T=0.45,d=0.10)_pnl=-0.9745 acc=0.522 pred_dist=[0, 1, 2] time=13.7s
+[22:37:08]   no improvement (2/2)
+[22:37:08] early stop at epoch 5 (patience=2)
+[22:37:08] SWA averaging 1 states, val_h60_thr_pnls=[2.969188253545302]
+[22:37:27] SWA val: argmax=-10.3831 thr(0.45,0.10)=2.9692 | SWA test: argmax=-20.9470 thr(0.45,0.10)=-10.8065 time=19.1s
+[22:37:27]   test argmax: acc=0.342 pred_dist=[0, 1, 2] n_active=26207
+[22:37:27] Wrote OOF -> /root/projects/liangwenbei_workdir/experiments/T32_nn_h60/loso_pred_nn_h60_held1.parquet (88416 rows)
+[22:37:27] Saved SWA model -> /root/projects/liangwenbei_workdir/experiments/T32_nn_h60/model_h60_held1.pt
+[22:37:27] Saved history -> /root/projects/liangwenbei_workdir/experiments/T32_nn_h60/fold1_history.json
+wandb: updating run metadata
+wandb: uploading output.log; uploading wandb-summary.json; uploading config.yaml
+wandb: uploading wandb-summary.json
+wandb: 
+wandb: Run history:
+wandb:                     epoch ▁▃▅▆█
+wandb:                      fold ▁▁▁▁▁
+wandb:                        lr █▇▅▃▁
+wandb:                train/loss █▇▅▃▁
+wandb:               val/h60_acc ▇█▁▃▂
+wandb:  val/h60_cum_pnl_T045d010 ▂▁█▇▂
+wandb:    val/h60_cum_pnl_argmax ▂▁▃█▅
+wandb: val/h60_n_active_T045d010 ▁▂▅▆█
+wandb:            val/loss_proxy ▅▁█▄▅
+wandb: 
+wandb: Run summary:
+wandb:           best_epoch 3
+wandb: best_val_h60_thr_pnl 2.96919
+wandb:                epoch 5
+wandb:                 fold 1
+wandb:                   lr 3e-05
+wandb:         swa_n_states 1
+wandb:  swa_test_argmax_pnl -20.94697
+wandb:     swa_test_thr_pnl -10.80655
+wandb:           train/loss 1.02364
+wandb:          val/h60_acc 0.52178
+wandb:                   +4 ...
+wandb: 
+wandb: 🚀 View run T32-NN-h60-fold1-20260506-221403 at: https://wandb.ai/jingzheshi/liangwenbei/runs/68mws3gw
+wandb: ⭐️ View project at: https://wandb.ai/jingzheshi/liangwenbei
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260506_221403-68mws3gw/logs
+[22:37:29] Fold training done.

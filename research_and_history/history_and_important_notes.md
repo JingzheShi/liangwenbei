@@ -535,3 +535,53 @@ R13 关注**后处理与决策规则**（calibration、Bayes EV gating、z-score
   - https://www.youtube.com/watch?v=26NozcM6X3k (Patrick Yam 2nd)
   - https://www.youtube.com/watch?v=lXYC0c7wJFU (Evgeniia Grigoreva 8th)
 - 后续 worker 可手动看视频提取 trick
+
+## T37 + T38 后期实验记录（2026-05-07）
+
+### T37：iter_007 候选探索（**negative**）
+
+| 实验 | LOSO h_60 sum + DE 4D | per_fold | vs iter_006 (+13.61) |
+|---|---|---|---|
+| stepA：aug 范围 [0.75, 1.25] 5-seed | +12.94 | [1.67, 3.19, 1.74, 0.11, 6.23] | -0.67 ❌ |
+| stepB：stepA + revol_wmp1_sigma_hat | +12.27 | [1.22, 2.66, 1.54, 0.10, 6.75] | -1.34 ❌ |
+
+**failure mode**：T31 phase1 单 seed 显示 [0.75, 1.25] (+10.80) > [0.80, 1.20] (+9.99)，但 5-seed ensemble + DE thresh 反转 → **更宽 aug 提升单模型 robustness 但降低 ensemble 多样性**。
+
+**revol 教训**：`revol_wmp1_sigma_hat` 在 LightGBM gain rank #1（28% gain share）但加进去反而 -0.67 LOSO。**单特征 importance 不预测 ensemble 边际收益**。
+
+### T38：3-way ensemble + 加权探索（**negative，差距在 DE 噪声内**）
+
+13 个 combo（M1/M2/M3 + 4 个均值 + 6 个加权）排名：
+
+| Rank | combo | sum | vs M1 (+13.59) | 备注 |
+|---|---|---|---|---|
+| 1 | M12_w_6_4 (60% iter_005b + 40% stepA) | **+13.62** | +0.03 | DE 噪声 ±0.05 内 |
+| 2 | M1 iter_005b alone (= iter_006 base) | +13.59 | — | **真 SOTA** |
+| 3 | M12_avg | +13.55 | -0.04 | |
+| 7 | M123_w_7_15_15 (70/15/15) | +13.39 | -0.20 | 加 revol 全部跌 |
+| 13 | M3 stepB alone | +12.26 | -1.33 | revol-only ensemble 最差 |
+
+**结论**：iter_006 (= M1 + DE) 仍是最强。M12_w_6_4 +0.03 在 DE 噪声内，不打包 iter_007（不浪费 12h 配额）。
+
+### 综合洞察
+
+1. **Diversity 不是瓶颈，signal 是瓶颈**
+   - 加 stepA / stepB / revol 都未真正提升
+   - 5-seed iter_005b 已经把 226-d Scheme C 的可提取 signal 榨完
+2. **revol 在 LightGBM 是骗局**
+   - LightGBM 把 `revol_wmp1_sigma_hat` 当成全局 sigma 替代品（rank 1, 28% gain）
+   - 但 OOF performance 反而降，说明这个 feature 主要 capture 的是 train fold 的 label 噪声
+3. **stepA 比 stepB 强（M12 > M123 总是）**
+   - 说明 revol 这一支彻底放弃
+4. **DE 4D thresh 噪声 ±0.05**
+   - 任何 LOSO sum 改进 < 0.1 都不可信
+   - 改进必须 > +0.3 才值得提交
+
+### 下一步策略候选
+
+按 ROI 排序：
+1. **等 iter_006 平台反馈**（最关键 — 校准 LOSO ↔ 平台 mapping）
+2. **深度特征工程**：read 良文杯历史冠军方案 / Kaggle Jane Street top solutions（R31 提到的 1st HAO LI / 2nd Patrick Yam YouTube writeup 待 mining）
+3. **CatBoost ensemble 重做**：T17 单独 catboost ≈ LightGBM，但 LightGBM 5-seed + CatBoost 5-seed 平均可能 +0.3
+4. **训练 train+val 合并 final model**（当前 LOSO 只用 train，最终线上推理可加 val 进 train）
+5. **Optuna 重做**（T36 stuck on trial 0，需要用更小空间快速 sweep）

@@ -1,0 +1,13 @@
+[
+  {"name": "range_baseline_0805_baseline", "kind": "baseline", "seed": 42},
+  {"name": "range_uniform_0.95_1.05", "kind": "uniform", "lo": 0.95, "hi": 1.05, "aug_ratio": 1.0, "seed": 42},
+  {"name": "range_uniform_0.90_1.10", "kind": "uniform", "lo": 0.90, "hi": 1.10, "aug_ratio": 1.0, "seed": 42},
+  {"name": "range_uniform_0.85_1.15", "kind": "uniform", "lo": 0.85, "hi": 1.15, "aug_ratio": 1.0, "seed": 42},
+  {"name": "range_uniform_0.80_1.20", "kind": "uniform", "lo": 0.80, "hi": 1.20, "aug_ratio": 1.0, "seed": 42},
+  {"name": "range_uniform_0.75_1.25", "kind": "uniform", "lo": 0.75, "hi": 1.25, "aug_ratio": 1.0, "seed": 42},
+  {"name": "range_uniform_0.70_1.30", "kind": "uniform", "lo": 0.70, "hi": 1.30, "aug_ratio": 1.0, "seed": 42},
+  {"name": "range_uniform_0.65_1.35", "kind": "uniform", "lo": 0.65, "hi": 1.35, "aug_ratio": 1.0, "seed": 42},
+  {"name": "range_uniform_0.60_1.40", "kind": "uniform", "lo": 0.60, "hi": 1.40, "aug_ratio": 1.0, "seed": 42},
+  {"name": "range_uniform_0.50_1.50", "kind": "uniform", "lo": 0.50, "hi": 1.50, "aug_ratio": 1.0, "seed": 42},
+  {"name": "range_uniform_0.40_1.60", "kind": "uniform", "lo": 0.40, "hi": 1.60, "aug_ratio": 1.0, "seed": 42}
+]

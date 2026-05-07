@@ -1,0 +1,90 @@
+{
+  "task": "T30 — threshold gating deep optimization on 5-seed aug_a OOF h=60",
+  "baseline": {
+    "name": "iter_005b symmetric (T=0.45, delta=0.10)",
+    "OOF_sum_cum_pnl": 11.4565,
+    "OOF_per_fold_pnl": [1.298, 2.161, -0.276, 0.097, 8.177],
+    "OOF_n_pos_folds": 4,
+    "OOF_std": 3.0674,
+    "OOF_n_active": 100256
+  },
+  "variants": {
+    "fine_grid_1426": {
+      "best": {"T": 0.47, "delta": 0.07},
+      "OOF_sum_cum_pnl": 11.832,
+      "OOF_per_fold_pnl": [0.834, 3.370, 0.886, 0.110, 6.631],
+      "OOF_n_pos_folds": 5,
+      "OOF_std": 2.401,
+      "delta_vs_baseline": 0.376
+    },
+    "asymmetric_grid": {
+      "best": {"T_up": 0.475, "T_dn": 0.40, "d_up": 0.075, "d_dn": 0.025},
+      "OOF_sum_cum_pnl": 12.5504,
+      "OOF_per_fold_pnl": [1.730, 2.612, 1.236, 0.125, 6.848],
+      "OOF_n_pos_folds": 5,
+      "OOF_std": 2.313,
+      "delta_vs_baseline": 1.094
+    },
+    "DE_4D": {
+      "best": {"T_up": 0.4481, "T_dn": 0.3914, "d_up": 0.2597, "d_dn": 0.0244},
+      "OOF_sum_cum_pnl": 13.6062,
+      "OOF_per_fold_pnl": [1.823, 2.636, 1.478, 0.099, 7.569],
+      "OOF_n_pos_folds": 5,
+      "OOF_std": 2.5587,
+      "delta_vs_baseline": 2.150,
+      "robustness": {
+        "5_seed_DE_convergence": "all 5 DE seeds within 0.02 of each other on every parameter, sum within +/-0.01",
+        "neighborhood_sweep_21060_combos": {
+          "ge_13.0": 675,
+          "ge_12.5": 4226,
+          "ge_12.0": 9093,
+          "all_5_pos_folds": 16232,
+          "max_in_neighborhood": 13.443
+        }
+      }
+    },
+    "conformal_split": {
+      "best": {"alpha": 0.12, "type": "symmetric"},
+      "OOF_sum_cum_pnl": 10.8139,
+      "OOF_per_fold_pnl": [0.398, 3.595, 1.071, 0.060, 5.690],
+      "OOF_n_pos_folds": 5,
+      "delta_vs_baseline": -0.643
+    },
+    "per_regime_in_sample": {
+      "best": {"indicator": "regime_intst", "n_bins": 4},
+      "OOF_sum_cum_pnl": 20.8304,
+      "OOF_per_fold_pnl": [2.674, 3.727, 2.359, 0.037, 12.034],
+      "OOF_n_pos_folds": 5,
+      "delta_vs_baseline": 9.374,
+      "_note": "in-sample (thresholds picked on pooled 5-fold OOF including held fold) — biased; honest CV in per_regime_LOSO_CV"
+    },
+    "per_regime_LOSO_CV": "see per_regime_cv_results.json once finished",
+    "ev_gate_v2": {
+      "best": {"alpha": 2.0, "eps": 5e-5},
+      "OOF_sum_cum_pnl": 7.985,
+      "OOF_per_fold_pnl": [0.908, 2.619, 0.089, 0.549, 3.820],
+      "OOF_n_pos_folds": 5,
+      "delta_vs_baseline": -3.471
+    }
+  },
+  "iter_006_decision": {
+    "selected_variant": "DE_4D",
+    "reason": "Largest robust OOF gain (+2.15) with 5/5 positive folds and verified by neighborhood + cross-seed convergence",
+    "h_60_thresholds": {
+      "T_up": 0.4480917972708376,
+      "T_dn": 0.39144661429951816,
+      "d_up": 0.2597244012809361,
+      "d_dn": 0.024449627822859837
+    },
+    "sanity_check": "22/22 PASS (sanity_check.py)",
+    "zip": "submission_050606_iter006.zip",
+    "predicted_platform_h60": "+13.61 - 2.23 = ~+11.4 (using T22 OOF->platform offset)",
+    "predicted_platform_total": "~+13.4 (h_40 +2.02 unchanged)"
+  },
+  "metrics": {
+    "best_OOF_sum_cum_pnl_robust": 13.6062,
+    "iter_005b_baseline": 11.4565,
+    "delta_vs_baseline": 2.1497
+  },
+  "notes": "Sym-agnostic + stateless + no-date enforced; per-regime in-sample number is biased (used pooled OOF including held fold), see per_regime_LOSO_CV for honest estimate"
+}
