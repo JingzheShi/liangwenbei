@@ -124,3 +124,4 @@
 ### 本次 LOSO ensemble 实验（13 combo, T38）
 - M1 / M_cb / M_dro / M_r34 各种 2-way 3-way 加权 → 没有突破 +13.61（最高 +13.62）
 - 单 idea + 修正特征是真正的 lever
+| 010  | 2026-05-07 | t61_batchvec | _(待填)_ | _(待跑 PnL)_ | _(待填)_ | _未提交_ | _未提交_ | _(待填)_ | zip=15.47MB, 11 files; pred_dist=label_5=[0,1842,0], label_10=[0,1842,0], label_20=[0,1842,0], label_40=[0,1842,0], label_60=[20,1809,13]; note=T61 batch-vectorized feature extraction. Same model + thresh as iter_009 (LOSO-equiv +24.52). 56x faster: 254min->4.5min for 442k samples. Predictions identical to iter_009. |

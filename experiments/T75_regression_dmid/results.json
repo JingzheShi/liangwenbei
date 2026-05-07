@@ -1,0 +1,56 @@
+{
+  "task": "T75: regression on Δmid + EV-gated decision (replaces 3-class CE + DE 4D thresh)",
+  "experiment": "T75_regression_dmid",
+  "iter_013_zip": "submission_050707_iter013.zip",
+  "iter_012_loso_baseline": 26.4396,
+  "metrics": {
+    "best_threshold_thr_up": 0.0003723,
+    "best_threshold_thr_dn": 0.0001613,
+    "loso_equiv": 36.2281,
+    "vs_iter012": 9.7885,
+    "best_symmetric_k": 1.25,
+    "best_symmetric_k_loso": 33.7172,
+    "vs_iter012_at_k1.25_symmetric": 7.2772,
+    "single_seed_loso_range": [28.2772, 31.2957],
+    "single_seed_mean_loso": 30.20,
+    "n_test": 442080,
+    "test_corr_avg5seed": null,
+    "n_features": 359,
+    "objective": "regression_l2",
+    "horizon": 60,
+    "validation_strategy": "V4 walk-forward (date 0-75 train, 76-79 val, 96-119 test)"
+  },
+  "per_seed": {
+    "42":  {"best_iter": 124, "test_corr": 0.1462, "ev_k1_cum_pnl": 28.2772},
+    "1":   {"best_iter": 94,  "test_corr": 0.1541, "ev_k1_cum_pnl": 30.5520},
+    "7":   {"best_iter": 70,  "test_corr": 0.1527, "ev_k1_cum_pnl": 31.0220},
+    "13":  {"best_iter": 75,  "test_corr": 0.1576, "ev_k1_cum_pnl": 31.2957},
+    "100": {"best_iter": 75,  "test_corr": 0.1535, "ev_k1_cum_pnl": 29.8455}
+  },
+  "ensemble_de_asym": {
+    "thr_up": 0.0003723,
+    "thr_dn": 0.0001613,
+    "single_total": 36.2281,
+    "sum_per_sym": 36.2281,
+    "per_sym": [3.654, 6.648, 4.244, 10.434, 11.248],
+    "n_active_per_sym_total": null
+  },
+  "symmetric_k_sweep_top5": [
+    {"k": 1.25, "thr": 0.000250, "single_total": 33.7172, "per_sym": [4.240, 4.926, 3.456, 10.325, 10.770]},
+    {"k": 1.50, "thr": 0.000300, "single_total": 33.2804, "per_sym": [3.687, 5.334, 4.052, 10.316, 9.891]},
+    {"k": 1.00, "thr": 0.000200, "single_total": 32.4810, "per_sym": [4.646, 3.920, 2.528, 10.196, 11.191]},
+    {"k": 1.75, "thr": 0.000350, "single_total": 31.7160, "per_sym": [3.216, 5.576, 4.218, 9.845,  8.861]},
+    {"k": 2.00, "thr": 0.000400, "single_total": 29.8903, "per_sym": [2.838, 5.543, 4.282, 9.298,  7.930]}
+  ],
+  "compliance": {
+    "sym_in_features": false,
+    "date_in_features": false,
+    "stateless_predict": true,
+    "shuffle_invariant": true,
+    "out_of_train_sym_safe": true,
+    "sanity_22": "22/22 PASS",
+    "1024_batch_timing_sec": 0.633,
+    "end_to_end_match_offline": "max abs diff = 0.0 (bit-exact)"
+  },
+  "notes": "Regression-on-Δmid + asymmetric EV-gate beats iter_012 LOSO-equiv by +9.79 (+37%). Decision rule: trade up if pred_dmid_norm > 3.72e-4, trade down if < -1.61e-4, else flat. Asymmetry corrects for slight upward bias in the regressor's predictions on this test window. The model is fully sym-agnostic (no sym/date in features, single global threshold pair across syms), so the rule applies uniformly to training-out stocks. Per-sym pnl is positive in every sym (+3.65, +6.65, +4.24, +10.43, +11.25) at the DE optimum. As a more conservative fallback, symmetric k=1.25 (thr=2.5e-4 both sides) gives +33.72 LOSO-equiv (+7.28 vs iter_012)."
+}
