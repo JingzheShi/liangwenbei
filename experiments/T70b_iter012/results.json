@@ -1,0 +1,30 @@
+{
+  "task": "iter_012_packaged",
+  "metrics": {
+    "loso_equiv": 26.439575649208216,
+    "vs_iter011": 0.4995756492082144,
+    "n_features": 359,
+    "n_models": 5,
+    "feature_precision_max_diff": 0.0,
+    "end_to_end_prob_max_diff": 0.0,
+    "argmax_agreement_pct": 100.0,
+    "sanity_pass": "22/22",
+    "contract_pass": true,
+    "inference_time_1024batch_s": 0.554,
+    "inference_time_1024batch_ms_per_window": 0.541,
+    "extrapolated_full_442k_min": 3.9,
+    "platform_timeout_min": 30,
+    "zip_size_mb": 11.51
+  },
+  "thresholds": {
+    "T_up": 0.4379910127008917,
+    "T_dn": 0.4448964062818059,
+    "d_up": 8.099624641794145e-05,
+    "d_dn": 6.68533652402048e-05,
+    "ensemble_seeds": [1, 7, 13, 42, 100]
+  },
+  "per_sym_test": [2.67269684083315, 5.217472511079283, 3.732753901464376, 3.2594353755751637, 11.557217020256243],
+  "notes": "iter_012 = T70 V4 walk-forward + Stage 5 features 5-seed + DE 4D thresh. Bit-exact precision match vs T68 schemeP cache (max diff = 0.0) and vs direct booster.predict (max diff = 0.0). Bug fix: T70 models expect blocked raw-column order (bid1..bid10, bsize1..bsize10, ...) while config.json uses interleaved; added RAW_COLS_TRAIN_ORDER in Predictor.py. All 22 sanity checks pass; contract validator passes; inference time 0.541 ms/window (~3.9 min for full 442k).",
+  "decision": "PACKAGED",
+  "zip_path": "submission_050707_iter012.zip"
+}
