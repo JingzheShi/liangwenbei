@@ -1,0 +1,168 @@
+{
+  "task": "T64 time-based val for early stopping",
+  "pilot_seed42": {
+    "V1": {
+      "best_iter": 151,
+      "test_full_cum_pnl": 16.5731,
+      "loso_equiv_sum_argmax": 16.5731,
+      "per_sym": {
+        "0": 2.22,
+        "1": -1.077,
+        "2": -0.257,
+        "3": 3.409,
+        "4": 12.278
+      }
+    },
+    "V2": {
+      "best_iter": 105,
+      "test_full_cum_pnl": 18.98801872065191,
+      "loso_equiv_sum_argmax": 18.98801872065191,
+      "per_sym": {
+        "0": 2.3781,
+        "1": -0.0677,
+        "2": -0.3462,
+        "3": 3.2146,
+        "4": 13.8092
+      },
+      "split_info": {
+        "strategy": "V2",
+        "train_dates": "0-79",
+        "val_dates": "80-95",
+        "n_train": 1473600,
+        "n_val": 294720
+      },
+      "val_cum_pnl": 18.326866567034543,
+      "train_time_sec": 214.47222471237183
+    },
+    "V3": {
+      "best_iter": 126,
+      "test_full_cum_pnl": 17.919007329212537,
+      "loso_equiv_sum_argmax": 17.919007329212537,
+      "per_sym": {
+        "0": 2.0689,
+        "1": -0.6677,
+        "2": -0.5803,
+        "3": 3.3041,
+        "4": 13.794
+      },
+      "split_info": {
+        "strategy": "V3",
+        "train_dates": "0-79",
+        "val_dates": "88-95 (last 8 days, tighter)",
+        "n_train": 1473600,
+        "n_val": 147360
+      },
+      "val_cum_pnl": 5.696430887459892,
+      "train_time_sec": 200.6364254951477
+    },
+    "V4": {
+      "best_iter": 129,
+      "test_full_cum_pnl": 19.537585274053946,
+      "loso_equiv_sum_argmax": 19.537585274053946,
+      "per_sym": {
+        "0": 2.3507,
+        "1": 0.5694,
+        "2": 0.1602,
+        "3": 3.4051,
+        "4": 13.0521
+      },
+      "split_info": {
+        "strategy": "V4",
+        "train_dates": "0-75",
+        "val_dates": "76-79 (walk-forward, last 5% of train)",
+        "n_train": 1399920,
+        "n_val": 73680
+      },
+      "val_cum_pnl": 7.00466698807788,
+      "train_time_sec": 221.47939085960388
+    }
+  },
+  "five_seed": {
+    "V2": {
+      "n_seeds": 1,
+      "seeds_data": [
+        {
+          "seed": 42,
+          "best_iter": 105,
+          "test_full_cum_pnl": 18.98801872065191,
+          "loso_equiv_sum_argmax": 18.98801872065191,
+          "val_cum_pnl": 18.326866567034543
+        }
+      ],
+      "test_cum_pnl_mean": 18.98801872065191,
+      "test_cum_pnl_std": 0.0,
+      "test_cum_pnl_min": 18.98801872065191,
+      "test_cum_pnl_max": 18.98801872065191
+    },
+    "V3": {
+      "n_seeds": 1,
+      "seeds_data": [
+        {
+          "seed": 42,
+          "best_iter": 126,
+          "test_full_cum_pnl": 17.919007329212537,
+          "loso_equiv_sum_argmax": 17.919007329212537,
+          "val_cum_pnl": 5.696430887459892
+        }
+      ],
+      "test_cum_pnl_mean": 17.919007329212537,
+      "test_cum_pnl_std": 0.0,
+      "test_cum_pnl_min": 17.919007329212537,
+      "test_cum_pnl_max": 17.919007329212537
+    },
+    "V4": {
+      "n_seeds": 1,
+      "seeds_data": [
+        {
+          "seed": 42,
+          "best_iter": 129,
+          "test_full_cum_pnl": 19.537585274053946,
+          "loso_equiv_sum_argmax": 19.537585274053946,
+          "val_cum_pnl": 7.00466698807788
+        }
+      ],
+      "test_cum_pnl_mean": 19.537585274053946,
+      "test_cum_pnl_std": 0.0,
+      "test_cum_pnl_min": 19.537585274053946,
+      "test_cum_pnl_max": 19.537585274053946
+    }
+  },
+  "t59_v1_5seed_reference": {
+    "test_full_cum_pnl_per_seed": [
+      20.481135958356138,
+      18.585915820083002,
+      17.29917473719338,
+      17.94412750756368,
+      16.5731
+    ],
+    "test_full_cum_pnl_mean": 18.17669080463924,
+    "test_full_cum_pnl_std": 1.3321828841604346,
+    "loso_equiv_sum_per_seed": [
+      20.481135958356138,
+      18.585915820083002,
+      17.29917473719338,
+      17.94412750756368,
+      16.5731
+    ]
+  },
+  "de_results_t64": {},
+  "t59_v1_de_reference": {
+    "best_sum": 24.51717618480638,
+    "best_thresh": [
+      0.43996653019471355,
+      0.4486852981395917,
+      0.0002846413038741502,
+      0.0007805642073444308
+    ],
+    "raw_argmax": 18.889617361879555,
+    "n_active": 89974,
+    "per_sym": [
+      2.217352990700073,
+      4.614509005750396,
+      2.4413150610437944,
+      3.4468323495466504,
+      11.797166777765469
+    ],
+    "vs_iter008": 7.677176184806381
+  }
+}

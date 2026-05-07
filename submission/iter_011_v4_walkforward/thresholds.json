@@ -1,0 +1,11 @@
+{
+  "_doc": "iter_011 thresholds: T64 V4 walk-forward val 5-seed + DE 4D (LOSO-equiv +25.9417)",
+  "horizons": [
+    {"h": 5,  "T": 0.99, "delta": 0.99, "active": false},
+    {"h": 10, "T": 0.99, "delta": 0.99, "active": false},
+    {"h": 20, "T": 0.99, "delta": 0.99, "active": false},
+    {"h": 40, "T": 0.5,  "delta": 0.0,  "active": false},
+    {"h": 60, "T_up": 0.4436, "T_dn": 0.4399, "d_up": 0.000221, "d_dn": 0.000185, "active": true,
+     "ensemble_seeds": [1, 7, 13, 42, 100]}
+  ]
+}
