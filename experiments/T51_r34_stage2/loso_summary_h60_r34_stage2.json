@@ -1,0 +1,233 @@
+{
+  "task": "T51 R34 stage 2 features LOSO",
+  "params": {
+    "horizon": 60,
+    "seeds": "42",
+    "syms": "0,1,2,3,4",
+    "variant": "aug_a",
+    "aug_ratio": 1.0,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "n_drop_tail": 3,
+    "no_drop_tail": false,
+    "drop_fail_extras": false,
+    "out_tag": "r34_stage2",
+    "pred_prefix": "loso_pred",
+    "pred_no_h_tag": false,
+    "no_wandb": false
+  },
+  "horizon": 60,
+  "fold_results": {
+    "seed42": {
+      "0": {
+        "horizon": 60,
+        "held": 0,
+        "seed": 42,
+        "n_train": 1178880,
+        "n_val": 235776,
+        "n_test": 88416,
+        "best_iter": 126,
+        "train_time_sec": 91.5446367263794,
+        "test": {
+          "accuracy": 0.6656600615273254,
+          "precision_up": 0.16370242876266972,
+          "precision_down": 0.2062818898681333,
+          "precision_macro": 0.18499215931540153,
+          "recall_up": 0.22167551469636151,
+          "recall_down": 0.36653714823972683,
+          "recall_macro": 0.29410633146804416,
+          "f0_5_up": 0.17273736252648572,
+          "f0_5_down": 0.22604818682196434,
+          "f0_5_macro": 0.19939277467422503,
+          "cum_pnl": 1.7915317452678314,
+          "single_pnl": 7.012140378362485e-05,
+          "n_predictions_active": 25549,
+          "n_total": 88416,
+          "pred_distribution": {
+            "0": 15091,
+            "1": 62867,
+            "2": 10458
+          },
+          "label_distribution": {
+            "0": 8493,
+            "1": 72200,
+            "2": 7723
+          }
+        }
+      },
+      "1": {
+        "horizon": 60,
+        "held": 1,
+        "seed": 42,
+        "n_train": 1178880,
+        "n_val": 235776,
+        "n_test": 88416,
+        "best_iter": 145,
+        "train_time_sec": 100.33034253120422,
+        "test": {
+          "accuracy": 0.38348262757871876,
+          "precision_up": 0.29394469954742164,
+          "precision_down": 0.3674744663533489,
+          "precision_macro": 0.3307095829503853,
+          "recall_up": 0.4051174649426334,
+          "recall_down": 0.48976449592329496,
+          "recall_macro": 0.4474409804329642,
+          "f0_5_up": 0.31101448464850956,
+          "f0_5_down": 0.3867901063976786,
+          "f0_5_macro": 0.34890229552309404,
+          "cum_pnl": -1.9324372834130934,
+          "single_pnl": -2.8269365449736583e-05,
+          "n_predictions_active": 68358,
+          "n_total": 88416,
+          "pred_distribution": {
+            "0": 38087,
+            "1": 20058,
+            "2": 30271
+          },
+          "label_distribution": {
+            "0": 28577,
+            "1": 37875,
+            "2": 21964
+          }
+        }
+      },
+      "2": {
+        "horizon": 60,
+        "held": 2,
+        "seed": 42,
+        "n_train": 1178880,
+        "n_val": 235776,
+        "n_test": 88416,
+        "best_iter": 120,
+        "train_time_sec": 87.79326868057251,
+        "test": {
+          "accuracy": 0.24403954035468695,
+          "precision_up": 0.19085404771351192,
+          "precision_down": 0.2886469900642899,
+          "precision_macro": 0.23975051888890092,
+          "recall_up": 0.6875893356534709,
+          "recall_down": 0.42527312846456056,
+          "recall_macro": 0.5564312320590157,
+          "f0_5_up": 0.22308700473838086,
+          "f0_5_down": 0.30846703361049305,
+          "f0_5_macro": 0.26577701917443697,
+          "cum_pnl": -8.62737682530995,
+          "single_pnl": -0.0001010858826357101,
+          "n_predictions_active": 85347,
+          "n_total": 88416,
+          "pred_distribution": {
+            "0": 27376,
+            "1": 3069,
+            "2": 57971
+          },
+          "label_distribution": {
+            "0": 18581,
+            "1": 53744,
+            "2": 16091
+          }
+        }
+      },
+      "3": {
+        "horizon": 60,
+        "held": 3,
+        "seed": 42,
+        "n_train": 1178880,
+        "n_val": 235776,
+        "n_test": 88416,
+        "best_iter": 150,
+        "train_time_sec": 108.91741704940796,
+        "test": {
+          "accuracy": 0.795647846543612,
+          "precision_up": 0.26881720430107525,
+          "precision_down": 0.3786407766990291,
+          "precision_macro": 0.3237289905000522,
+          "recall_up": 0.011880717595342758,
+          "recall_down": 0.016457432218588457,
+          "recall_macro": 0.014169074906965607,
+          "f0_5_up": 0.05047955577990914,
+          "f0_5_down": 0.0700997573469938,
+          "f0_5_macro": 0.06028965656345146,
+          "cum_pnl": 0.3019480804762986,
+          "single_pnl": 0.0003851378577503809,
+          "n_predictions_active": 784,
+          "n_total": 88416,
+          "pred_distribution": {
+            "0": 412,
+            "1": 87632,
+            "2": 372
+          },
+          "label_distribution": {
+            "0": 9479,
+            "1": 70520,
+            "2": 8417
+          }
+        }
+      },
+      "4": {
+        "horizon": 60,
+        "held": 4,
+        "seed": 42,
+        "n_train": 1178880,
+        "n_val": 235776,
+        "n_test": 88416,
+        "best_iter": 129,
+        "train_time_sec": 91.83839559555054,
+        "test": {
+          "accuracy": 0.36680012667390516,
+          "precision_up": 0.3018345850675471,
+          "precision_down": 0.370611712959192,
+          "precision_macro": 0.3362231490133696,
+          "recall_up": 0.5824471665096245,
+          "recall_down": 0.5263157894736842,
+          "recall_macro": 0.5543814779916543,
+          "f0_5_up": 0.33401950441293776,
+          "f0_5_down": 0.39391893061832284,
+          "f0_5_macro": 0.3639692175156303,
+          "cum_pnl": 7.458740422573124,
+          "single_pnl": 9.342343774359482e-05,
+          "n_predictions_active": 79838,
+          "n_total": 88416,
+          "pred_distribution": {
+            "0": 36831,
+            "1": 8578,
+            "2": 43007
+          },
+          "label_distribution": {
+            "0": 25935,
+            "1": 40194,
+            "2": 22287
+          }
+        }
+      }
+    }
+  },
+  "aggregate": {
+    "seed42": {
+      "horizon": 60,
+      "seed": 42,
+      "n_folds": 5,
+      "cum_pnl_per_fold": [
+        1.7915317452678314,
+        -1.9324372834130934,
+        -8.62737682530995,
+        0.3019480804762986,
+        7.458740422573124
+      ],
+      "acc_per_fold": [
+        0.6656600615273254,
+        0.38348262757871876,
+        0.24403954035468695,
+        0.795647846543612,
+        0.36680012667390516
+      ],
+      "cum_pnl_sum": -1.0075938604057892,
+      "cum_pnl_mean": -0.20151877208115784,
+      "n_pos_folds": 3
+    }
+  }
+}

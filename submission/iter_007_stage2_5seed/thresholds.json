@@ -1,0 +1,60 @@
+{
+  "_doc": "iter_007: T51 R34 Stage 1+2 features (327-d) with 5-seed full-data h=60 LightGBM ensemble + T51b DE 4D asymmetric (T_up,T_dn,d_up,d_dn) thresholds. h_5/h_10/h_20 disabled. h_40 from iter_002 baseline (symmetric T=0.5,delta=0.0).",
+  "_source": "T51b differential_evolution PnL maximization on 5-seed LOSO OOF (seeds 1,7,13,42,100; aug_a)",
+  "horizons": [
+    {
+      "h": 5,
+      "T": 0.99,
+      "delta": 0.99,
+      "active": false,
+      "_reason": "iter_002 platform = -7.68. Disabled."
+    },
+    {
+      "h": 10,
+      "T": 0.99,
+      "delta": 0.99,
+      "active": false,
+      "_reason": "iter_002 platform = -8.64. Disabled."
+    },
+    {
+      "h": 20,
+      "T": 0.99,
+      "delta": 0.99,
+      "active": false,
+      "_reason": "iter_002 platform = -5.09. Disabled."
+    },
+    {
+      "h": 40,
+      "T": 0.5,
+      "delta": 0.0,
+      "active": false,
+      "_reason": "h=40 not active in iter_007 (no h_40 model bundled, single h=60 horizon)."
+    },
+    {
+      "h": 60,
+      "T_up": 0.4647667067858266,
+      "T_dn": 0.4235742201283039,
+      "d_up": 0.04353369925921728,
+      "d_dn": 0.0065369841148522345,
+      "active": true,
+      "_reason": "T51b DE 4D optimum on 5-seed LOSO OOF. Sum cum_pnl = +15.058 (vs iter_006 +13.61, +1.45 improvement).",
+      "asym_meta": {
+        "T_up": 0.4647667067858266,
+        "T_dn": 0.4235742201283039,
+        "d_up": 0.04353369925921728,
+        "d_dn": 0.0065369841148522345,
+        "OOF_sum_cum_pnl": 15.05763549037002,
+        "OOF_per_fold_pnl": [
+          2.4213780883877174,
+          4.898525553708886,
+          -1.4738015063762764,
+          0.13709304563069624,
+          9.074440309018996
+        ],
+        "OOF_n_active_per_fold": [4720, 34989, 44094, 164, 32743],
+        "_source": "T51b differential_evolution best on 5-seed LOSO OOF"
+      },
+      "ensemble_seeds": [1, 7, 13, 42, 100]
+    }
+  ]
+}

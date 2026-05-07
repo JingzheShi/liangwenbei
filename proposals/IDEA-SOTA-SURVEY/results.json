@@ -1,0 +1,89 @@
+{
+  "task": "IDEA-SOTA-SURVEY — 2026-05-07 post-R31/R33 追新调研",
+  "new_papers_count": 15,
+  "experiment_status_checked": ["T41","T42","T43","T44","T45","T46","T47","T48","T49","T50","T51","T52"],
+  "current_sota_loso_h60": 13.61,
+  "current_sota_experiment": "iter_006 (LGB 5-seed h60 + DE thresh)",
+  "top5_methods": [
+    {
+      "rank": 1,
+      "name": "GMADL Custom Loss for LightGBM/CatBoost",
+      "source": "arxiv 2412.18405 + 2602.00776",
+      "experiment_id": "T53 (proposed)",
+      "expected_loso_delta": "+1 ~ +3",
+      "effort": "1 day",
+      "formula": "loss_i = -(sigmoid(a*R_true*R_pred) - 0.5) * |R_true|^b, a,b>0",
+      "key_insight": "Direction-aware loss penalizes wrong-direction predictions on large moves more heavily. Naturally ignores label=1 (flat) samples. CatBoost native custom_obj support."
+    },
+    {
+      "rank": 2,
+      "name": "Triple GBDT Ensemble (LGB + CatBoost + DART) with Trimmed Mean",
+      "source": "T46 (12.64) + T50 (pending) + Jane Street 1st place",
+      "experiment_id": "T56 (proposed, after T50 done)",
+      "expected_loso_delta": "+0.5 ~ +2",
+      "effort": "0.5 day (post-processing only)",
+      "key_insight": "Take middle 60% of 15 model outputs (5 seeds × 3 algo), then DE thresh optimize. Trimmed mean > simple mean in OOD competitions (Jane Street 1st)."
+    },
+    {
+      "rank": 3,
+      "name": "VWAP-to-Mid Deviation + Roll Effective Spread (new features)",
+      "source": "arxiv 2602.00776 (SHAP top-3) + 2403.09267 + 2505.02139",
+      "experiment_id": "T54 (proposed)",
+      "expected_loso_delta": "+0.5 ~ +2",
+      "effort": "0.5 day",
+      "key_insight": "These two features consistently dominate SHAP across all LOB papers but are NOT in our 226-d. VWAP deviation = asymmetric pressure; Roll spread = effective vs quoted spread ratio."
+    },
+    {
+      "rank": 4,
+      "name": "Global LOB Normalization (LOBench recommendation)",
+      "source": "arxiv 2505.02139",
+      "experiment_id": "T55 (proposed)",
+      "expected_loso_delta": "+5 ~ +10 (if fold 2 fixed, high uncertainty)",
+      "effort": "0.5 day (feature rebuild) + 2h training",
+      "key_insight": "Per-feature z-score (T7/T44) breaks LOB monotonicity constraints. Global z-score (all price cols share mu/sigma, all vol cols share mu/sigma) preserves bid1 > bid2 > ... constraint. LOBench showed this on same 3s/tick China A-share data. May fix fold2 OOD root cause."
+    },
+    {
+      "rank": 5,
+      "name": "Covariate-Dependent Stacking (CDST)",
+      "source": "arxiv 2408.09755 (updated 2025-09)",
+      "experiment_id": "T57 (proposed, after T46+T50 done)",
+      "expected_loso_delta": "+0.5 ~ +2",
+      "effort": "1 day",
+      "key_insight": "Instead of fixed ensemble weights, let alpha_k = f(realized_vol, spread_ratio, time_of_day). Stateless-compatible (gate input from 100-tick window). Particularly useful if LGB and CatBoost have complementary strengths across vol regimes."
+    }
+  ],
+  "anti_patterns": [
+    {
+      "rank": 1,
+      "name": "Per-Feature Adaptive Normalization does not fix cross-sym OOD",
+      "evidence": "T44 LOSO seed42 sum = -4.20, fold2 = -8.67 (vs iter_006 fold2 = +1.48)",
+      "root_cause": "Per-feature z-score equalizes each column's mean/variance but does NOT align the LOB structural constraints across syms. Tree split thresholds remain sym-specific.",
+      "correct_path": "Global normalization (all price cols share mu/sigma). T55 proposed."
+    },
+    {
+      "rank": 2,
+      "name": "Multi-horizon equal-weight stacking degrades precision",
+      "evidence": "T47 stacking+DE thresh = 12.36 < iter_006 = 13.61",
+      "root_cause": "h30/h120/h240 models introduce noise. Linear stacker underfits. DE thresh is 4D regardless of how many inputs.",
+      "correct_path": "Single-horizon (h60) model is cleaner. If multi-horizon used, each horizon needs its own threshold optimization, not just one shared DE."
+    },
+    {
+      "rank": 3,
+      "name": "Group DRO over-corrects worst-group in small-group settings",
+      "evidence": "T45 LOSO DE thresh = 8.66 < iter_006 = 13.61 (fold2 improved -8.89->-2.80 but others dropped)",
+      "root_cause": "Only 5 groups (syms), DRO variance too high. Up-weighting sym2 makes model learn sym2-specific features, hurting sym-agnostic generalization.",
+      "correct_path": "Fix sym2 OOD via global feature normalization, not loss re-weighting."
+    }
+  ],
+  "currently_running_experiments": {
+    "T41": {"name": "class_weight_focal", "status": "running", "step": "pilot_done"},
+    "T42": {"name": "OvA binary ensemble", "status": "running", "step": "training_done"},
+    "T46": {"name": "CatBoost h60 5-seed", "status": "completed", "de_thresh_sum": 12.64},
+    "T47": {"name": "Multi-horizon stacking", "status": "completed", "de_thresh_sum": 12.36},
+    "T49": {"name": "CatBoost Ordered h60 CPU", "status": "running"},
+    "T50": {"name": "DART h60 (seed42 done, 2.12 raw argmax)", "status": "running"},
+    "T51": {"name": "R34 stage 2 features", "status": "running"},
+    "T52": {"name": "Cross-sym mixup sweep", "status": "running"}
+  },
+  "notes": "LOBench (2505.02139) is the key new finding: same 3s/tick China A-share format as our project, showing global z-score normalization preserves LOB constraints. T44's failure is explained by per-feature normalization being fundamentally insufficient. GMADL (2412.18405) is the top missing direction: direction-aware loss that naturally handles class imbalance and return magnitude weighting."
+}

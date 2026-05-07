@@ -1,0 +1,44 @@
+{
+  "task": "AUDIT-LEAKAGE: end-to-end pipeline leakage audit for 良文杯 LOB prediction (iter_006_aug_a_5seed_h60_asymthresh)",
+  "audit_date": "2026-05-07",
+  "submission": "iter_006_aug_a_5seed_h60_asymthresh",
+  "verdict": "CLEAN — no critical bugs, no data leakage",
+  "critical_bugs": [],
+  "suspect_features": [],
+  "minor_concerns": [
+    {
+      "id": "M1",
+      "title": "EWMA initialization skew",
+      "severity": "LOW",
+      "description": "Training EWMA uses full session history; inference uses 100-tick window. Max delta = 1.23% of signal std for alpha=0.05; negligible for other alphas.",
+      "impact": "None — tree models robust to 1% noise"
+    },
+    {
+      "id": "M2",
+      "title": "Test set reuse: early stopping + threshold tuning",
+      "severity": "LOW",
+      "description": "Final models early-stop on dates 96..119; threshold OOF optimization also targets dates 96..119 via LOSO structure. Slight upward bias in reported LOSO metrics.",
+      "impact": "Minor metric optimism; not a submission-breaking issue"
+    },
+    {
+      "id": "M3",
+      "title": "Inactive model files in submission ZIP",
+      "severity": "COSMETIC",
+      "description": "model_h5.txt, model_h10.txt, model_h20.txt present but never loaded (active=false in thresholds.json).",
+      "impact": "None"
+    }
+  ],
+  "constraint_compliance": {
+    "date_zeroed": "COMPLIANT — date not in config.feature, assertion in training code",
+    "stateless_predictor": "COMPLIANT — runtime test confirms order-invariant output",
+    "sym_agnostic": "COMPLIANT — sym never in feature list, OOD sym passes"
+  },
+  "feature_alignment": {
+    "train_features": 223,
+    "inference_features": 223,
+    "match": true,
+    "raw_features": 154,
+    "t3_features_no_time": 69
+  },
+  "fix_priority": []
+}

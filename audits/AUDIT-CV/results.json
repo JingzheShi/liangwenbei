@@ -1,0 +1,111 @@
+{
+  "task": "AUDIT-CV: Comprehensive cross-validation design audit for Liangwenbei LOB prediction project",
+  "date": "2026-05-07",
+  "cv_design_summary": {
+    "outer_loop": "5-fold LOSO (Leave-One-Symbol-Out)",
+    "train_dates": "0-79 (80 days)",
+    "val_dates": "80-95 (16 days, used for LightGBM early stopping)",
+    "test_dates_oof": "96-119 (24 days, held-out sym only)",
+    "total_sessions": 1200,
+    "oof_sessions": 240,
+    "seeds": [42, 1, 7, 13, 100],
+    "augmentation": "per-feature uniform[0.75,1.25] scale on train only (1:1 concat)",
+    "threshold_selection": "DE 4D on OOF predictions (CONTAMINATED)"
+  },
+  "risk_count_by_severity": {
+    "Critical": 1,
+    "High": 2,
+    "Medium": 2,
+    "Low-Medium": 1,
+    "Low": 1
+  },
+  "risks": [
+    {
+      "id": "Q7",
+      "severity": "CRITICAL",
+      "title": "OOF threshold contamination: DE threshold optimized on same OOF used for final metric",
+      "evidence": "de_thresh.py runs 5-seed DE + coarse grid on the 5 held-out test folds. The reported iter_006 LOSO +13.61 is already DE-maximized on OOF. Raw argmax OOF was -0.57 (T37 stepA). Threshold adds +13-14 PnL units from OOF-specific optimization.",
+      "consequence": "True unbiased LOSO sum may be 1-4 points lower than reported. Platform threshold generalization unknown.",
+      "fix": "Move DE to val-set predictions (sym!=k, date 80-95) for threshold selection; apply to OOF for clean reporting."
+    },
+    {
+      "id": "Q1",
+      "severity": "HIGH",
+      "title": "LOSO tests known-sym generalization; platform tests novel-stock generalization",
+      "evidence": "CRITICAL_CONSTRAINTS.md: 'sym 0-4 can map to stocks not in the 5 training stocks'. T8 shows sym=2 is already 7.49 z-scores from other syms in amount_delta. True OOD (novel stocks) is harder than LOSO (known sym holdout).",
+      "consequence": "LOSO systematically underestimates OOD penalty for platform's test distribution. The calibration gap (-2.23 for h_60) may underestimate true gap with novel stocks.",
+      "fix": "LOSO is best available proxy. Supplement with LO2SO worst-pair and bootstrap CI as lower-bound estimates."
+    },
+    {
+      "id": "Q5",
+      "severity": "HIGH",
+      "title": "LOSO→platform calibration has only 2 anchors; 95% CI is ±7 points",
+      "evidence": "T23/T34: calibration uses mmpc_demo (zero-alpha) + iter_002 as anchors. iter_006 extrapolates far beyond both. Bootstrap CI for iter_005b: [+5.02, +18.22] at 95%. Only 2 calibration data points = degenerate linear fit.",
+      "consequence": "Reported 'platform prediction +11' for iter_006 has true 95% CI probably [+4, +18] or wider. Submission decision based on LOSO alone is unreliable.",
+      "fix": "Run LO2SO + bootstrap CI. Get more platform submissions to add calibration anchors. Always report CI alongside point estimate."
+    },
+    {
+      "id": "Q6",
+      "severity": "MEDIUM",
+      "title": "5-seed ensemble reduces model noise but not dominant sym-level variance",
+      "evidence": "T23 cluster-sym bootstrap std = 5.26 vs session std = 1.89. Per-fold raw pnl range in T37: [-7.21, +7.68]. Seed-to-seed LOSO sum variation < 0.5.",
+      "consequence": "Presenting LOSO sum as a stable estimate is misleading. The ±5/fold sym-level noise dominates regardless of how many seeds are run.",
+      "fix": "Always report cluster-sym bootstrap CI. Note that 5 seeds help threshold optimization quality but not LOSO estimate reliability."
+    },
+    {
+      "id": "Q3",
+      "severity": "MEDIUM",
+      "title": "Early stopping on training-sym val (date 80-95); not on held-out sym distribution",
+      "evidence": "Val = {sym != held, date 80-95}. The model's best_iteration is selected to minimize logloss on training syms, not held-out sym. Sym-distribution mismatch at stopping criterion.",
+      "consequence": "Model may over- or under-stop relative to held-out sym optimum. Effect size likely small given patience=40 regularization.",
+      "fix": "Acceptable tradeoff. Alternative (val on held sym) introduces information leakage. Current design is correct LOSO convention."
+    },
+    {
+      "id": "Q2",
+      "severity": "LOW-MEDIUM",
+      "title": "No walk-forward CV; temporal drift of -43% within 24-day test window is unaccounted for",
+      "evidence": "T23 Scheme C: iter_002 h_10 cum_pnl = +9.10 (dates 96-103) → +7.51 (104-111) → +5.25 (112-119). -43% decay. If platform test extends past date 119, further decay expected.",
+      "consequence": "LOSO sum aggregates over all 24 OOF test days uniformly. Recency-weighted estimate would be 15-25% lower. No walk-forward CV implemented.",
+      "fix": "QW1: compute 3-window time-decay check on existing OOF. Apply recency discount to platform prediction."
+    },
+    {
+      "id": "Q4",
+      "severity": "LOW",
+      "title": "Augmentation design is correct; no CV independence issue",
+      "evidence": "Aug applied to train only. Per-fold deterministic RNG seed (seed*7919 + held*17 + 1). Val/test never augmented. No cross-fold contamination.",
+      "consequence": "None. Augmentation is correctly isolated.",
+      "fix": "None needed."
+    }
+  ],
+  "top3_quickwins": [
+    {
+      "rank": 1,
+      "name": "Time-Window Decay Check on iter_006 OOF",
+      "severity_addressed": "LOW-MED (Q2)",
+      "description": "Split 5 LOSO OOF folds into 3 sub-windows (96-103, 104-111, 112-119). Compute cum_pnl per window. Quantify temporal decay to discount platform prediction.",
+      "implementation": "~30 lines of Python on existing OOF parquets. No model retraining.",
+      "time_required": "2-3 hours",
+      "expected_loso_change": "None (diagnostic). Generates discount factor for platform estimate."
+    },
+    {
+      "rank": 2,
+      "name": "Val-Based Threshold Selection (fixes OOF contamination)",
+      "severity_addressed": "CRITICAL (Q7)",
+      "description": "Re-run inference on val set (sym!=k, date 80-95) using existing saved models. Run DE on val predictions to select threshold. Apply val-threshold to OOF test for uncontaminated LOSO metric.",
+      "implementation": "Infer val set with saved model .txt files (no retraining). Modify de_thresh.py to accept val predictions as input. 2-3 hours of work.",
+      "time_required": "3-6 hours",
+      "expected_loso_change": "-1 to -4 points from current +13.61 (removes OOF-specific optimization). More honest platform estimate."
+    },
+    {
+      "rank": 3,
+      "name": "LO2SO + Bootstrap CI for iter_006",
+      "severity_addressed": "HIGH (Q5, Q6)",
+      "description": "Adapt T34 lo2so.py and bootstrap_ci.py to load iter_006 OOF parquets. Compute 10-pair worst-case PnL and session-level 95% CI. Use as go/no-go gate before submitting.",
+      "implementation": "Adapt oof_io.py in T34 for iter_006 layout. Run existing scripts.",
+      "time_required": "2-4 hours",
+      "expected_loso_change": "None (diagnostic). Provides LO2SO worst-pair (flag if < -2) and honest 95% CI for submission decision."
+    }
+  ],
+  "headline_finding": "The LOSO sum +13.61 is contaminated by OOF-optimized DE thresholds (CRITICAL). True unbiased estimate likely +9-12. Platform gap from LOSO has only 2 calibration anchors; 95% CI for platform performance is approximately [+4, +18]. LOSO is the best available local proxy but misses the platform's true OOD challenge (novel stocks). Three quick-win diagnostics (decay check, val-thresh, LO2SO+CI) can be implemented in 8-15 total hours without retraining.",
+  "notes": "Augmentation is correctly implemented; no leakage found. Temporal cut is clean; no future-looking. Early stopping on training syms is the correct LOSO convention. The two critical design flaws are: (1) threshold tuned on OOF [fixable in 4-6h], (2) LOSO is not the right OOD distribution for this competition [mitigatable with LO2SO and bootstrap CI]."
+}

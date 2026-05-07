@@ -1,0 +1,287 @@
+{
+  "task": "AUDIT-METRIC: PnL formula, F0.5, DE threshold overfit",
+  "pnl_impl_correct": "True",
+  "pnl_impl_notes": {
+    "formula": "matches official: (side*diff - fee_rate*|side|*|(mp_tn+1)+(mp_t+1)|) / (mp_t+1)",
+    "abs_side_uses": "pred (correct \u2014 we incur fee based on what we trade, not what truth is)",
+    "denominator": "mp_t+1 (correct \u2014 normalized by current price, not future)",
+    "vectorized_vs_scalar_diff": 9.159339953157541e-16
+  },
+  "de_overfit_analysis": {
+    "full_de_5fold_sum": 13.60621189959305,
+    "raw_argmax_5fold_sum": -1.5790073073774429,
+    "full_de_lift": 15.185219206970494,
+    "leave2out_results": [
+      {
+        "train_folds": [
+          2,
+          3,
+          4
+        ],
+        "test_folds": [
+          0,
+          1
+        ],
+        "thresh": [
+          0.42763132005742543,
+          0.40016996432941376,
+          0.2531055193791546,
+          0.0035391389563838582
+        ],
+        "train_sum_DE": 9.522380776408994,
+        "train_sum_raw": 0.781224642000315,
+        "test_sum_DE": 3.8276354880566306,
+        "test_sum_raw": -2.360231949377758,
+        "train_lift_over_raw": 8.74115613440868,
+        "test_lift_over_raw": 6.187867437434388,
+        "elapsed_sec": 63.28486490249634
+      },
+      {
+        "train_folds": [
+          1,
+          3,
+          4
+        ],
+        "test_folds": [
+          0,
+          2
+        ],
+        "thresh": [
+          0.42046424118686815,
+          0.46717579627499894,
+          0.23095321761533041,
+          0.14142749779226804
+        ],
+        "train_sum_DE": 11.027303237744807,
+        "train_sum_raw": 3.933174784273554,
+        "test_sum_DE": 1.2246348107288452,
+        "test_sum_raw": -5.512182091650997,
+        "train_lift_over_raw": 7.094128453471253,
+        "test_lift_over_raw": 6.736816902379842,
+        "elapsed_sec": 54.39278984069824
+      },
+      {
+        "train_folds": [
+          1,
+          2,
+          4
+        ],
+        "test_folds": [
+          0,
+          3
+        ],
+        "thresh": [
+          0.4480891605229326,
+          0.4672010612532545,
+          0.26046529314259015,
+          0.13851818260607443
+        ],
+        "train_sum_DE": 12.064910995322633,
+        "train_sum_raw": -3.2658287178134415,
+        "test_sum_DE": 0.8632682895040118,
+        "test_sum_raw": 1.6868214104359986,
+        "train_lift_over_raw": 15.330739713136074,
+        "test_lift_over_raw": -0.8235531209319868,
+        "elapsed_sec": 57.86648392677307
+      },
+      {
+        "train_folds": [
+          1,
+          2,
+          3
+        ],
+        "test_folds": [
+          0,
+          4
+        ],
+        "thresh": [
+          0.4479351825808603,
+          0.5024044372958251,
+          0.2993441884149952,
+          0.10280380740062994
+        ],
+        "train_sum_DE": 6.1006578254395984,
+        "train_sum_raw": -10.893576227661686,
+        "test_sum_DE": 6.0706522678231725,
+        "test_sum_raw": 9.314568920284243,
+        "train_lift_over_raw": 16.994234053101284,
+        "test_lift_over_raw": -3.2439166524610705,
+        "elapsed_sec": 57.9323468208313
+      },
+      {
+        "train_folds": [
+          0,
+          3,
+          4
+        ],
+        "test_folds": [
+          1,
+          2
+        ],
+        "thresh": [
+          0.3939455168207205,
+          0.3825239055775486,
+          0.0004512207919566691,
+          0.001664331190880497
+        ],
+        "train_sum_DE": 12.499381600796163,
+        "train_sum_raw": 9.432062465030599,
+        "test_sum_DE": -6.456829384947225,
+        "test_sum_raw": -11.011069772408042,
+        "train_lift_over_raw": 3.0673191357655636,
+        "test_lift_over_raw": 4.554240387460817,
+        "elapsed_sec": 66.79930830001831
+      },
+      {
+        "train_folds": [
+          0,
+          2,
+          4
+        ],
+        "test_folds": [
+          1,
+          3
+        ],
+        "thresh": [
+          0.4276325047998922,
+          0.3918167382692419,
+          0.2530733571481272,
+          0.0018543211781141544
+        ],
+        "train_sum_DE": 11.33777233246999,
+        "train_sum_raw": 2.2330589629436033,
+        "test_sum_DE": 2.1646238045583495,
+        "test_sum_raw": -3.812066270321046,
+        "train_lift_over_raw": 9.104713369526387,
+        "test_lift_over_raw": 5.976690074879396,
+        "elapsed_sec": 25.830305099487305
+      },
+      {
+        "train_folds": [
+          0,
+          2,
+          3
+        ],
+        "test_folds": [
+          1,
+          4
+        ],
+        "thresh": [
+          0.4483466646829898,
+          0.3934116255898867,
+          0.2999773801827057,
+          0.0017003951028775888
+        ],
+        "train_sum_DE": 4.126325340000341,
+        "train_sum_raw": -5.394688546904641,
+        "test_sum_DE": 9.00938895085309,
+        "test_sum_raw": 3.8156812395271986,
+        "train_lift_over_raw": 9.521013886904981,
+        "test_lift_over_raw": 5.193707711325891,
+        "elapsed_sec": 17.416533708572388
+      },
+      {
+        "train_folds": [
+          0,
+          1,
+          4
+        ],
+        "test_folds": [
+          2,
+          3
+        ],
+        "thresh": [
+          0.4202071748118372,
+          0.3790607687776103,
+          0.22439543915707813,
+          0.024795577656390372
+        ],
+        "train_sum_DE": 12.487541717697493,
+        "train_sum_raw": 5.385009105216842,
+        "test_sum_DE": 0.06642401035133279,
+        "test_sum_raw": -6.964016412594285,
+        "train_lift_over_raw": 7.102532612480651,
+        "test_lift_over_raw": 7.030440422945618,
+        "elapsed_sec": 21.10466766357422
+      },
+      {
+        "train_folds": [
+          0,
+          1,
+          3
+        ],
+        "test_folds": [
+          2,
+          4
+        ],
+        "thresh": [
+          0.47984971714863045,
+          0.39121583842017715,
+          0.27733790680613335,
+          0.024130736238987593
+        ],
+        "train_sum_DE": 4.892528101695954,
+        "train_sum_raw": -2.2427384046314027,
+        "test_sum_DE": 7.897696872268528,
+        "test_sum_raw": 0.6637310972539598,
+        "train_lift_over_raw": 7.135266506327357,
+        "test_lift_over_raw": 7.2339657750145685,
+        "elapsed_sec": 21.271810054779053
+      },
+      {
+        "train_folds": [
+          0,
+          1,
+          2
+        ],
+        "test_folds": [
+          3,
+          4
+        ],
+        "thresh": [
+          0.4480044621161579,
+          0.39627415185539455,
+          0.29933698020911004,
+          0.024584338675900735
+        ],
+        "train_sum_DE": 6.836900208456566,
+        "train_sum_raw": -9.441741906718399,
+        "test_sum_DE": 6.321868767027195,
+        "test_sum_raw": 7.862734599340955,
+        "train_lift_over_raw": 16.278642115174964,
+        "test_lift_over_raw": -1.5408658323137603,
+        "elapsed_sec": 26.27482843399048
+      }
+    ],
+    "in_sample_lift_per_fold": 3.3456581993432395,
+    "oos_lift_per_fold": 1.865269655286685,
+    "lift_gap_per_fold": 1.4803885440565545,
+    "overfit_gap_5fold_estimate": 5.858870930537069,
+    "expected_oos_score": 7.747340969055982,
+    "symmetric_2param_result": 11.832,
+    "4d_extra_over_2param": 1.77421189959305
+  },
+  "f05_metrics_iter006": {
+    "precision_up": 0.3435861789324297,
+    "precision_dn": 0.35213090505685496,
+    "recall_up": 0.15510839151695824,
+    "recall_dn": 0.3764453961456103,
+    "f05_macro": 0.31657503516733504,
+    "accuracy": 0.5989549402823019,
+    "active_rate": 0.2983170466883822
+  },
+  "top3_fixes": [
+    "1. Optimize threshold with 2-param symmetric (T, delta) to avoid overfit; 4D DE gives ~1.7 extra lift that may not generalize",
+    "2. Monitor active_rate per fold: fold0=6.87%, fold3=0.28% suggest the DE has tuned away from trading on hard folds, which may not transfer OOS",
+    "3. Report F0.5 for completeness but optimize PnL directly -- lecture says F0.5 but final ranking uses cumulative PnL"
+  ],
+  "abstain_analysis": {
+    "note": "Higher threshold \u2192 more abstain \u2192 generally higher PnL in OOF, consistent with precision-over-recall strategy",
+    "best_sym_grid": {
+      "T": 0.47,
+      "d": 0.0,
+      "total_pnl": 11.831792007599157,
+      "active_rate": 0.1648864458921462
+    }
+  }
+}

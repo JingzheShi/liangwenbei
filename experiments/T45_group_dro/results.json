@@ -1,0 +1,16 @@
+{
+  "task": "T45 Group DRO bug fix + full LOSO + DE thresh",
+  "metrics": {
+    "n_dro_updates_fold2": 3,
+    "n_dro_updates_loso": [4, 3, 3, 4, 4],
+    "fold2_cum_pnl": -2.796,
+    "loso_sum_raw_argmax": 3.834,
+    "loso_sum_iter006_thresh": 3.059,
+    "loso_sum_de_thresh_t45": 8.662,
+    "loso_per_fold_raw": [-0.766, 1.824, -2.796, 0.991, 4.581],
+    "loso_per_fold_de_t45": [0.201, 3.167, -1.703, 0.793, 6.205],
+    "best_t45_thresholds": {"T_up": 0.38, "T_dn": 0.46, "d_up": 0.0, "d_dn": 0.0},
+    "vs_13_61_ensemble_bar": -4.948
+  },
+  "notes": "Bug was off-by-K: K=200 with best_iter ~120 + ES=40 meant callback never fired. Fixed with K=50 + first_update_at=20. Group DRO substantially rescues fold 2 (-8.89 -> -2.80) and fold 1 (-2.74 -> +1.82) at single seed, but single seed T45 cannot beat the 5-seed iter_006 ensemble +13.61 bar. Negative result per task gate; recommend 5-seed Group DRO ensemble as follow-up."
+}

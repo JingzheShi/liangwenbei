@@ -1,0 +1,10 @@
+{
+  "_doc": "STUB - placeholder for smoke test. Actual T_up/T_dn/d_up/d_dn from T51b DE 5-seed will replace.",
+  "horizons": [
+    {"h": 5, "T": 0.99, "delta": 0.99, "active": false},
+    {"h": 10, "T": 0.99, "delta": 0.99, "active": false},
+    {"h": 20, "T": 0.99, "delta": 0.99, "active": false},
+    {"h": 40, "T": 0.5, "delta": 0.0, "active": true, "_reason": "iter_002 baseline kept."},
+    {"h": 60, "T_up": 0.50, "T_dn": 0.50, "d_up": 0.05, "d_dn": 0.05, "active": false, "_reason": "STUB"}
+  ]
+}

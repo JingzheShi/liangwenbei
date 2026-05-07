@@ -1,0 +1,46 @@
+{
+  "task": "T48 cross-sym pooling features (R33 #2)",
+  "status": "ABORTED_AT_STEP_1_INFEASIBLE",
+  "metrics": {
+    "inference_compatible": "N",
+    "loso_sum": null,
+    "vs_iter006": null
+  },
+  "verdict": "NO-GO",
+  "verdict_reason": "Predictor receives windows with only feature columns (no sym, date, or time), windows are globally shuffled (C2), no per-call grouping by t_local can be reconstructed, and no cross-call state is allowed. The cross-sectional grouping the trick requires at inference time is structurally unavailable.",
+  "constraints_in_conflict": [
+    "C1: date is zeroed at inference — cannot anchor pool by (date, t)",
+    "C2: test windows shuffled and no cross-call state allowed — cannot guarantee 5 syms at same t end up in same predict() call, cannot maintain a rolling cross-sym snapshot",
+    "C3: sym not in feature columns and forbidden from the model — cannot identify which sym a given window is"
+  ],
+  "workarounds_considered": [
+    {
+      "name": "within-batch pooling using time as group key",
+      "rejected_because": "group size unknown and unstable (often 1 with batch:1 example); severe train/inference distribution shift; time != t_local; would need time added to feature list and platform makes no batching guarantees"
+    },
+    {
+      "name": "static lookup of training-time per-time-of-day stats",
+      "rejected_because": "degenerates to a time-of-day feature; does not provide current-moment market state; expected gain ~ 0"
+    },
+    {
+      "name": "target residualization at training only (no inference-time pooling)",
+      "rejected_because": "different trick, not R33 #2; residualization at inference requires knowing the market component, which we again cannot compute"
+    }
+  ],
+  "transferability_notes": [
+    "Volkova JS2024 and hyd Optiver2023 both rely on Kaggle APIs that supply cross-sectional grouping directly per timestep. Our platform instead globally shuffles windows and strips identifying tags, so the structural symmetry the references rely on does not exist."
+  ],
+  "recommendation": [
+    "Drop R33 #2 from candidate list under current platform contract.",
+    "Re-prioritize budget toward R33 #3 (KNN-target, inference-compatible), #5 (Triplet imbalance, within-window), #6 (Hull MA, within-window).",
+    "If a 'market state' signal is desired, derive it from within-window LOB statistics (book-imbalance Z-scores, recent volatility) instead."
+  ],
+  "time_spent_min": 30,
+  "outputs": {
+    "report_md": "experiments/T48_cross_sym_pooling/REPORT.md",
+    "results_json": "experiments/T48_cross_sym_pooling/results.json",
+    "oof_parquet": null,
+    "model_artifacts": null,
+    "thresholds_json": null
+  }
+}

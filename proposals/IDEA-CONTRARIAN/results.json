@@ -1,0 +1,119 @@
+{
+  "task": "IDEA-CONTRARIAN brainstorm for Liangwenbei LOB prediction (5-day deadline 2026-05-11)",
+  "idea_count": 9,
+  "ideas": {
+    "A_knn_target_retrieval": {
+      "type": "feature_engineering",
+      "feasibility": "HIGH",
+      "upside_loso_delta": "+1 to +3",
+      "time_days": 1.5,
+      "initial_round": true,
+      "note": "nyanp-style KNN retrieval from training set; FAISS PQ-compressed; fully stateless; constraint-safe"
+    },
+    "B_multihorizon_meta_stacker": {
+      "type": "model_architecture",
+      "feasibility": "HIGH",
+      "upside_loso_delta": "+1.5 to +5",
+      "time_days": 2,
+      "initial_round": true,
+      "note": "5-horizon OOF probs → meta-GBDT with PnL objective; captures cross-horizon consensus signal; highest expected upside for initial round"
+    },
+    "C_pnl_bandit_policy": {
+      "type": "loss_function",
+      "feasibility": "MEDIUM",
+      "upside_loso_delta": "0 to +2",
+      "time_days": 1.5,
+      "initial_round": true,
+      "note": "REINFORCE-style custom LightGBM objective; R10 explored PnL loss but not bandit framing; risk of gradient variance"
+    },
+    "D_regime_adaptive_threshold": {
+      "type": "inference_strategy",
+      "feasibility": "HIGH",
+      "upside_loso_delta": "+0.5 to +2",
+      "time_days": 0.75,
+      "initial_round": true,
+      "note": "Market regime detection from window features -> per-regime thresholds; stateless; domain-aware conformal variant"
+    },
+    "E_siamese_bidasym_features": {
+      "type": "feature_engineering",
+      "feasibility": "HIGH",
+      "upside_loso_delta": "+0.3 to +1.5",
+      "time_days": 0.75,
+      "initial_round": true,
+      "note": "Explicit bid-ask asymmetry features; Siamese LOB (2505.22678) finding translated to tabular; low cost"
+    },
+    "F_generative_augmentation": {
+      "type": "data_augmentation",
+      "feasibility": "LOW (initial) / MEDIUM (finals)",
+      "upside_loso_delta": "+3 to +8",
+      "time_days": 7,
+      "initial_round": false,
+      "note": "Conditional DDPM/Flow for LOB; LOB-Bench warns of model derailment; good for finals with 2+ weeks"
+    },
+    "G_causal_conservative_actor": {
+      "type": "inference_strategy",
+      "feasibility": "N/A",
+      "upside_loso_delta": "~0",
+      "time_days": 999,
+      "initial_round": false,
+      "note": "REJECTED: market impact is irrelevant in simulation scoring; philosophical interest only"
+    },
+    "H_gnn_ssm_adversarial_invariance": {
+      "type": "model_architecture",
+      "feasibility": "LOW (initial) / MEDIUM (finals)",
+      "upside_loso_delta": "-5 to +5",
+      "time_days": 3,
+      "initial_round": false,
+      "note": "NN failed 3x (T1/T19/T32); adversarial sym-invariance GRL could fix root cause; Finals-only candidate"
+    },
+    "I_horizon_audit": {
+      "type": "quick_win",
+      "feasibility": "VERY HIGH",
+      "upside_loso_delta": "0 to +2",
+      "time_days": 0.5,
+      "initial_round": true,
+      "note": "Check if h_5/h_10 actually beat h_60; competition takes best horizon; may be free money"
+    }
+  },
+  "top3_for_initial_round": [
+    {
+      "rank": 1,
+      "id": "B",
+      "name": "Multi-Horizon Meta-Stacker",
+      "why": "Highest expected upside (+1.5~+5), 5 horizons are completely untapped cross-horizon signal, constraint-safe, 2-day implementation, failure mode is benign (worst case = iter_006 unchanged)"
+    },
+    {
+      "rank": 2,
+      "id": "A",
+      "name": "KNN-Target Retrieval Feature",
+      "why": "Proven concept (nyanp Optiver 2021 1st), sym-agnostic, stateless, FAISS+PQ makes it feasible within 2GB model limit, captures non-axis-aligned feature space structure GBDT misses"
+    },
+    {
+      "rank": 3,
+      "id": "I",
+      "name": "Horizon Audit (quick win)",
+      "why": "0.5 days, zero risk, may reveal h_5 or h_10 outperforms h_60 at current LOSO, free submission slot optimization"
+    }
+  ],
+  "top2_for_finals": [
+    {
+      "rank": 1,
+      "id": "F",
+      "name": "Conditional Generative Augmentation (DDPM/Flow)",
+      "why": "Can 10x the effective training set especially for minority classes; LOB-Bench warns of derailment but short-horizon (h_5) is more tractable; 1-2 weeks needed for proper validation"
+    },
+    {
+      "rank": 2,
+      "id": "H_adversarial",
+      "name": "Adversarial Sym-Invariant Neural Network (GRL)",
+      "why": "Root-cause fix for NN failure (implicit sym representation); Gradient Reversal Layer explicitly suppresses sym information; ensemble with GBDT could reach +15~+20; 3-5 days needed"
+    }
+  ],
+  "explicitly_rejected": [
+    "G_causal_conservative_actor: market impact irrelevant in simulation",
+    "Cross-sym pooling at inference: already proven infeasible (T48 ABORTED)",
+    "Online learning: C2 (shuffled order) makes it structurally impossible",
+    "iTransformer/PatchTST/TimesNet: user-flagged as garbage per memory"
+  ],
+  "key_insight": "The +13.6 ceiling is not a feature engineering problem (T39 confirmed saturation). The next +2-5 must come from: (1) using cross-horizon signal coherence [Idea B], (2) non-axis-aligned neighborhood structure [Idea A], or (3) changing the optimization target from CE to PnL [Idea C]. Incremental features are dead."
+}

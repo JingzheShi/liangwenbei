@@ -1,0 +1,191 @@
+{
+  "task": "PRACTICE-FUNDAMENTAL audit",
+  "audit_date": "2026-05-07",
+  "iter006_pnl": 13.632304684366954,
+  "oracle_pnl": 380.1953193460192,
+  "capture_rate": 0.0358560560603853,
+  "gen_gap": {
+    "missed_profitable": 181.78994230193194,
+    "wrong_active": -101.81727019120119,
+    "correct_active": 115.4234821024545,
+    "A_share_of_gap": 0.49589564613154524,
+    "B_share_of_gap": 0.2777422136201385
+  },
+  "probability_calibration": {
+    "ECE_class0_avg": 0.1073346685700253,
+    "ECE_class1_avg": 0.24694051008192539,
+    "ECE_class2_avg": 0.1406114778208601,
+    "temperature_pnl": 12.17014536508308,
+    "platt_pnl": 2.7866581052225925,
+    "isotonic_pnl": 6.12998849410854,
+    "verdict": "calibration hurts PnL; DE thresh absorbs miscalibration"
+  },
+  "ensemble_diversity": {
+    "pairwise_corr_mean": 0.69709338368343,
+    "pairwise_corr_std": 0.12055961773760343,
+    "disagreement_rate_mean": 0.21732491856677524,
+    "Q_stat_mean": 0.9571377967241524,
+    "verdict": "moderate diversity; Q-stat suggests seeds are positively correlated"
+  },
+  "regularization": {
+    "num_leaves_range": [
+      63,
+      255
+    ],
+    "lambda_l2_range": [
+      0.5,
+      3.0
+    ],
+    "early_stopping_rounds": 40,
+    "min_data_in_leaf": 100,
+    "aug_ratio": "2x (aug_a [0.8,1.2])",
+    "verdict": "seed 13 num_leaves=255 is risky; early stopping and augmentation mitigate"
+  },
+  "feature_importance": {
+    "n_feat": 223,
+    "top10_cumgain": 0.3186120555374177,
+    "top30_cumgain": 0.584050585763203,
+    "top_for_80pct": 53,
+    "top_for_90pct": 70,
+    "n_zero_importance": 40,
+    "top20_features": [
+      "rv_w50",
+      "bsize1",
+      "asize1",
+      "open",
+      "totalasize",
+      "rv_w20",
+      "ewma_a0.05_mb_intst",
+      "high",
+      "imbalance",
+      "totalbsize",
+      "bsize2",
+      "low",
+      "bsize3",
+      "asize10",
+      "bsize10",
+      "ewma_a0.3_mb_intst",
+      "avgbid",
+      "bsize9",
+      "bsize7",
+      "bsize8"
+    ],
+    "top20_gains": [
+      791872.7970581055,
+      289709.5916519165,
+      200903.493598938,
+      200781.20750045776,
+      193744.21238327026,
+      192679.15075683594,
+      178234.28440475464,
+      168755.17399215698,
+      167893.78728485107,
+      158830.52321243286,
+      142862.71620941162,
+      141446.37300491333,
+      119066.67057037354,
+      118129.83009338379,
+      112199.53259658813,
+      112084.08223342896,
+      112013.02171325684,
+      106455.89826965332,
+      105080.83085632324,
+      105003.1344795227
+    ]
+  },
+  "sanity_baselines": {
+    "always_flat": 0.0,
+    "random_70_15_15": -26.934325024179692,
+    "raw_argmax_ensemble": -1.4389431942306299,
+    "iter006_de_thresh": 13.632304684366954,
+    "oracle": 380.1953193460192
+  },
+  "class_imbalance": {
+    "label_dist_per_fold": {
+      "0": {
+        "0": 0.09605727470141151,
+        "1": 0.816594281577995,
+        "2": 0.08734844372059355
+      },
+      "1": {
+        "0": 0.3232107310893956,
+        "1": 0.4283726927252986,
+        "2": 0.24841657618530583
+      },
+      "2": {
+        "0": 0.21015427072023163,
+        "1": 0.6078537821208831,
+        "2": 0.18199194715888528
+      },
+      "3": {
+        "0": 0.10720910242490048,
+        "1": 0.7975931958016649,
+        "2": 0.09519770177343467
+      },
+      "4": {
+        "0": 0.29332926167209555,
+        "1": 0.4546009771986971,
+        "2": 0.25206976112920737
+      }
+    },
+    "flat_class_rate": [
+      0.816594281577995,
+      0.4283726927252986,
+      0.6078537821208831,
+      0.7975931958016649,
+      0.4546009771986971
+    ],
+    "T41_class_weight_verdict": "heavier weights hurt PnL at raw argmax; class-balanced is better"
+  },
+  "horizon_analysis": {
+    "focus": "h=60 (label_60)",
+    "label_alpha_h60": 0.001,
+    "fee": 0.0001,
+    "net_margin_h60": 0.0008,
+    "verdict": "h=60 correct focus; h=5/10 nearly unviable after fees"
+  },
+  "thresh_alternatives": {
+    "joint_1D_best_T": 0.47000000000000014,
+    "joint_1D_best_pnl": 11.831792007599155,
+    "DE_4D_pnl": 13.632304684366954,
+    "DE_adds": 1.8005126767677986,
+    "verdict": "DE 4D adds meaningful value; asymmetry d_up vs d_dn is key"
+  },
+  "top5_quickwins": [
+    {
+      "rank": 1,
+      "title": "Per-fold asymmetric threshold (different T_up/T_dn per sym)",
+      "effort": "~20 min (modify DE search to run per-fold)",
+      "expected_gain": "+0.5 to +1.5 PnL",
+      "rationale": "T39 shows fold 4 optimal T*=0.41 while fold 0 optimal T*=0.39 \u2014 a shared threshold is suboptimal. Per-fold (per-sym) thresholds during CV would test ~2 PnL gain. CAVEAT: during inference sym-agnostic needed so would need to use shared, but validates if per-fold model is better."
+    },
+    {
+      "rank": 2,
+      "title": "Add 3\u20135 more diverse seeds with different num_leaves",
+      "effort": "~25 min (modify SEED_CONFIGS, reuse T27 pipeline)",
+      "expected_gain": "+0.3 to +0.8 PnL",
+      "rationale": "Ensemble diversity audit shows mean pairwise correlation ~0.8+. Adding 2 seeds with num_leaves\u2208{31,511} and distinct feature_fraction should add 5\u201310% disagreement rate \u2192 PnL uplift from averaging orthogonal errors."
+    },
+    {
+      "rank": 3,
+      "title": "Train separate h=5 and h=20 models as backup submissions",
+      "effort": "~20 min (change --horizon flag in T27 pipeline)",
+      "expected_gain": "Unknown \u2014 but diversifies submission risk",
+      "rationale": "Competition takes BEST of 5 horizons. If h=60 plateaus at +13.6 (current), a strong h=20 or h=40 model could score independently. h=20 \u03b1=0.10% gives 2.7\u00d7 better fee-to-signal ratio than h=5. Cost: just rerun training."
+    },
+    {
+      "rank": 4,
+      "title": "Increase augmentation range [0.75, 1.25] \u2192 [0.7, 1.3] for low-signal folds",
+      "effort": "~15 min (change aug_lo/aug_hi in T37-style script)",
+      "expected_gain": "+0.2 to +0.5 PnL",
+      "rationale": "T37 tested [0.75, 1.25] but only got +12.9 vs iter_006 +13.6. Fold 0 and fold 3 are signal-poor \u2014 heavier augmentation might improve OOD robustness. T37 DECISION.md says wider aug hurt, but test at fold-0/3 specific setting."
+    },
+    {
+      "rank": 5,
+      "title": "EV-weighted threshold objective: use Sharpe-of-PnL instead of sum-PnL in DE",
+      "effort": "~15 min (modify de_thresh.py objective function)",
+      "expected_gain": "+0.3 to +1.0 PnL (reduce fold 3 variance drag)",
+      "rationale": "Current DE maximizes sum of cum_pnl across folds. Fold 3 drags down with only 247 trades at +0.10 PnL \u2014 DE may waste search budget on this noisy fold. A Sharpe-weighted objective could allocate more budget to folds with real signal."
+    }
+  ]
+}

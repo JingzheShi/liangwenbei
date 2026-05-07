@@ -1,0 +1,50 @@
+{
+  "task": "iter_007 compat audit + package: T51 R34 Stage 1+2 features (327-d) with 5-seed full-data h_60 LightGBM ensemble + DE 4D thresholds",
+  "audit": {
+    "max_W_in_features": 100,
+    "all_W_le_100": true,
+    "stage1_max_W": 100,
+    "stage2_max_W": 100,
+    "schemeC_base_max_W": 60,
+    "ewma_features_cold_start_drift_max": 1.15e-5,
+    "decision": "Path A (drop W>100) is identical to keeping all features — no W>100 features exist in T51 cache. No retrain needed beyond full-data 5-seed."
+  },
+  "metrics": {
+    "loso_sum_5seed_DE": 15.05763549037002,
+    "loso_per_fold": [2.4213780883877174, 4.898525553708886, -1.4738015063762764, 0.13709304563069624, 9.074440309018996],
+    "iter006_loso_sum": 13.60621189959305,
+    "vs_iter006": 1.4514235907769702,
+    "n_features": 327,
+    "n_seeds": 5,
+    "horizon": 60,
+    "DE_thresholds": {
+      "T_up": 0.4647667067858266,
+      "T_dn": 0.4235742201283039,
+      "d_up": 0.04353369925921728,
+      "d_dn": 0.0065369841148522345
+    }
+  },
+  "fail_dropped_features": [
+    "dualz_ask_diff1", "dualz_bid_diff5", "dualz_ask_diff5",
+    "qrank_W100_spread1", "qrank_W100_spread5", "qrank_W100_spread10", "qrank_W100_cumspread",
+    "kyle_lam_W50", "kyle_lam_W100"
+  ],
+  "tail_dropped_features": ["time_minutes_since_session_start", "time_session_progress", "time_is_pm"],
+  "sanity_check": {
+    "passed": 22,
+    "failed": 0,
+    "summary": "All 22 contract checks pass. Predictor is sym-agnostic, stateless, no date dependency, 5 boosters loaded, DE 4D threshold present, FAIL features excluded from model, feature dim 327 matches model.feature_name()."
+  },
+  "single_session_pnl_demo": {
+    "session": "sym=0, date=119, session=am",
+    "iter_006_h60_cum_pnl": 22.4813,
+    "iter_007_h60_cum_pnl": 23.6590,
+    "delta": 1.1777,
+    "iter_006_n_active": 58,
+    "iter_007_n_active": 69
+  },
+  "submission_zip": "submission_050707_iter007.zip",
+  "submission_zip_size_mb": 22.06,
+  "decision": "PACKAGED",
+  "notes": "All Stage 1+2 features (T51) are W <= 100, fully inference-compatible. EWMA cold-start drift max 1.15e-5 — negligible. Trained 5 full-data h60 models on 327-d cache (train+val concat, 1.77M samples, GPU LightGBM, 200 rounds, ~75s/seed). Predictor.py reuses iter_006 template + adds Stage 1+2 feature compute (R34 stage1 + stage2). Inference cost ~33ms/window (vs 12ms for iter_006), well under typical platform limits. Validate_contract zip→tempdir→LocalEvaluator full path passes."
+}

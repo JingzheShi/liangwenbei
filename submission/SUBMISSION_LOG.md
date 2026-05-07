@@ -84,3 +84,43 @@
 - **提交状态**：⛔ 未提交（流程演练，不浪费 12h 提交配额）。
 | 002  | 2026-05-06 | lgbm-schemeC-multihorizon | _(待填)_ | _(待跑 PnL)_ | _(待填)_ | _未提交_ | _未提交_ | _(待填)_ | zip=15.19MB, 10 files; pred_dist=label_5=[133,1610,99], label_10=[173,1537,132], label_20=[26,1771,45], label_40=[8,1793,41], label_60=[3,1830,9]; note=Scheme C1 (T2 raw 154 + T3 69 = 223-d, no time-encoding) multi-horizon LightGBM. All 5 horizons thresholded. LOSO best sums: h5=+17.5, h10=+21.9, h20=+19.7, h40=+11.7, h60=+6.3 (vs iter_001c +6.45) |
 | 003  | 2026-05-06 | lgbm_schemeC_5seed | _(待填)_ | _(待跑 PnL)_ | _(待填)_ | _未提交_ | _未提交_ | _(待填)_ | zip=34.59MB, 14 files; pred_dist=label_5=[133,1610,99], label_10=[149,1554,139], label_20=[26,1771,45], label_40=[8,1793,41], label_60=[3,1830,9]; note=iter_003: T11 5-seed h=10 ensemble (T=0.55, δ=0.10) on Scheme C 223-d; h_5/20/40/60 reuse iter_002. LOSO h_10 ens=+22.224 vs iter_002 +21.860 (+0.36). T16 6-model T11+T14 mixup tied at +22.245, no uplift; iter_003 stays T11-only. |
+
+---
+## iter_007 (2026-05-07) — R34 Stage 2 sym-invariant features 🏆 BREAKTHROUGH
+
+| iter | 日期 | 模型 | 关键 trick | LOSO PnL | best horizon | 平台预期 | 备注 |
+| ---- | ---- | ---- | ---------- | -------- | ------------ | -------- | ---- |
+| 007  | 2026-05-07 | LightGBM 5-seed Scheme C+R34 Stage 1+2 (327-d) + DE 4D thresh | R34 113 sym-invariant 新特征（dual zscore / signed RV / Kyle invariant / GOFI / quantile rank / vol-burst / EWMA-OFI ...）；max W=100 inference 兼容 | **LOSO h_60 +15.058** (5-seed avg + DE), per_fold=[+2.42, +4.90, -1.47, +0.14, +9.07] | label_60 | **~+12.8** (LOSO gap 校准 -2.23) | `submission_050707_iter007.zip` 22.06 MB; MD5=a90bba4d6dab860d8dc8b29eefc2078a; sanity 22/22 ✓; 本地 single session +23.66 vs iter_006 +22.48 (+1.18) |
+
+### 关键发现链
+- **T39 saturation 诊断**：单纯调阈值 saturated（marginal precision < break-even），需更强模型
+- **T41 class weight 全失败**：上权 0/2 类反而 PnL 越差（饱和印证）
+- **T44 R34 Stage 1（54 维）**：单 seed +12.09，未达 iter_006
+- **T45 Group DRO**：5-seed +9.07（fold 2 修复但 fold 4 牺牲）
+- **T46 CatBoost Plain 5-seed**：+12.64
+- **T47 multi-horizon stacking**：+12.36
+- **T51 Stage 2（+59 features = 113 total extras）**：单 seed +13.67（首次持平 iter_006）
+- **T51b 5-seed Stage 2**：**+15.06 真突破**
+
+### 重要 negatives（不要再试）
+- iTransformer / PatchTST / TimesNet (TS forecasting)
+- DeepLOB CNN / 任何 NN h_60（T1, T19, T32 全 -16+）
+- Platt / Isotonic / Temperature 校准（T40 全部摧毁信号）
+- alpha101+alpha191 全套 226 因子（T22 collinear）
+- aug 范围 [0.75, 1.25]（T31 单 seed 略好但 ensemble 反转）
+- ReVol+SG 特征（T35 LightGBM gain rank #1 是骗局）
+- Cross-sym pooling（T48 inference 不兼容）
+- CatBoost Ordered + GPU + MultiClass（库不支持，CPU 太慢）
+- Cross-sym mixup（T52 fold 2 改善有限）
+- Group DRO 5-seed（fold 2 修复但 fold 4 损失更多）
+
+### Stage 2 关键贡献特征
+- **Window quantile rank**（W=20/50/100）：无量纲 percentile rank，sym OOD robust
+- **Realized skewness**（W=50/100）：returns 三阶矩，trend detection
+- **GOFI generalized OFI**（multi-level ~30 dim）：MLOFI + passive size 调整
+- **Vol-burst ratio**（W=20/50/100）：vol_t / mean(vol, W) breakout
+- **Kyle's λ rolling**（已剔除 sym OOD KS FAIL 的 W=50/100 列）
+
+### 本次 LOSO ensemble 实验（13 combo, T38）
+- M1 / M_cb / M_dro / M_r34 各种 2-way 3-way 加权 → 没有突破 +13.61（最高 +13.62）
+- 单 idea + 修正特征是真正的 lever

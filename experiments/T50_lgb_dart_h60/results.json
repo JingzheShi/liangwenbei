@@ -1,0 +1,57 @@
+{
+  "task": "T50 LightGBM DART h_60 LOSO",
+  "horizon": 60,
+  "seeds": [
+    42
+  ],
+  "syms": [
+    0
+  ],
+  "boosting_type": "dart",
+  "params": {
+    "seeds": "42",
+    "syms": "0",
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 30,
+    "learning_rate": 0.04,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 16,
+    "drop_rate": 0.1,
+    "max_drop": 50,
+    "skip_drop": 0.5,
+    "use_gpu": true
+  },
+  "results": [
+    {
+      "tag": "dart",
+      "seed": 42,
+      "held_out_sym": 0,
+      "n_train_orig": 1178880,
+      "n_train_used": 2357760,
+      "n_val": 235776,
+      "n_test": 88416,
+      "final_iter": 30,
+      "train_time_sec": 57.159295082092285,
+      "held_cum_pnl": 2.1232924780402445,
+      "held_single_pnl": 0.00016179932012803813,
+      "held_acc": 0.7544901375316685,
+      "held_n_active": 13123
+    }
+  ],
+  "agg_by_seed": [
+    {
+      "seed": 42,
+      "n_folds": 1,
+      "cum_pnl_per_fold": [
+        2.1232924780402445
+      ],
+      "cum_pnl_sum": 2.1232924780402445,
+      "cum_pnl_mean": 2.1232924780402445,
+      "n_pos_folds": 1
+    }
+  ],
+  "overall_argmax_sum_cum_pnl": 2.1232924780402445,
+  "elapsed_sec": 64.72703003883362
+}

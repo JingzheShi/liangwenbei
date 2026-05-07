@@ -1,0 +1,116 @@
+{
+  "passed": 22,
+  "failed": 0,
+  "items": [
+    {
+      "name": "01 Predictor loads",
+      "passed": true,
+      "detail": "0.08s, 5 boosters"
+    },
+    {
+      "name": "02 predict shape (3,5)",
+      "passed": true,
+      "detail": "shape=(3, 5)"
+    },
+    {
+      "name": "03 features finite (real session)",
+      "passed": true,
+      "detail": "shape=(327,), finite=True"
+    },
+    {
+      "name": "04 Idempotent within instance",
+      "passed": true,
+      "detail": "[1, 1, 1, 1, 0] == [1, 1, 1, 1, 0]"
+    },
+    {
+      "name": "05 Idempotent across instances",
+      "passed": true,
+      "detail": "[1, 1, 1, 1, 0] == [1, 1, 1, 1, 0]"
+    },
+    {
+      "name": "06 Order independence (3 batches reversed)",
+      "passed": true,
+      "detail": "abc=[[1, 1, 1, 1, 0], [1, 1, 1, 1, 0], [1, 1, 1, 1, 1]] cba=[[1, 1, 1, 1, 1], [1, 1, 1, 1, 0], [1, 1, 1, 1, 0]]"
+    },
+    {
+      "name": "07 Out-of-dist sym=99 OK (no sym in features)",
+      "passed": true,
+      "detail": "pred=[1, 1, 1, 1, 0]"
+    },
+    {
+      "name": "08 Date=0 ignored (date never read)",
+      "passed": true,
+      "detail": "date NOT in feat list"
+    },
+    {
+      "name": "09 No mutable state delta",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "10 feat dim",
+      "passed": true,
+      "detail": "computed_dim=327"
+    },
+    {
+      "name": "11 5 boosters loaded for h_60",
+      "passed": true,
+      "detail": "n=5"
+    },
+    {
+      "name": "12 4D threshold present",
+      "passed": true,
+      "detail": "{\"T_up\": 0.4647667067858266, \"T_dn\": 0.4235742201283039, \"d_up\": 0.04353369925921728, \"d_dn\": 0.0065369841148522345}"
+    },
+    {
+      "name": "13 requirements safe",
+      "passed": true,
+      "detail": "numpy==2.4.4 | pandas==2.3.3 | lightgbm==4.6.0 |"
+    },
+    {
+      "name": "14 config 154 features",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "15 inference compute matches cache",
+      "passed": true,
+      "detail": "max_diff=0.0000e+00 (worst=open)"
+    },
+    {
+      "name": "16 pred dist not all flat (h_60)",
+      "passed": true,
+      "detail": "up=6 dn=20 flat=24 of 50"
+    },
+    {
+      "name": "17 h_60 active, others off",
+      "passed": true,
+      "detail": "{\"5\": false, \"10\": false, \"20\": false, \"40\": false, \"60\": true}"
+    },
+    {
+      "name": "18 No FAIL features in model",
+      "passed": true,
+      "detail": "n_features=327"
+    },
+    {
+      "name": "19 single == batched (first slot)",
+      "passed": true,
+      "detail": "[1, 1, 1, 1, 0] vs [1, 1, 1, 1, 0]"
+    },
+    {
+      "name": "20 first-slot independent of second",
+      "passed": true,
+      "detail": "[1, 1, 1, 1, 0] vs [1, 1, 1, 1, 0]"
+    },
+    {
+      "name": "21 model.feature_name() len 327",
+      "passed": true,
+      "detail": "got 327"
+    },
+    {
+      "name": "22 submission size < 100MB",
+      "passed": true,
+      "detail": "70.2MB"
+    }
+  ]
+}
