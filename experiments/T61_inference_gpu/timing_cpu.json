@@ -1,0 +1,15 @@
+{
+  "n_batches_profiled": 1024,
+  "feature_extract_s": 35.19296169281006,
+  "feature_extract_ms_per_sample": 34.36812665313482,
+  "ensemble5_predict_s": 0.025374650955200195,
+  "ensemble5_predict_ms_per_sample": 0.02477993257343769,
+  "single_model_predict_s": 0.00470733642578125,
+  "single_model_predict_ms_per_sample": 0.004597008228302002,
+  "full_predict_1024_s": 35.319671392440796,
+  "n_total_assumed": 442000,
+  "est_total_s": 15245.405034627765,
+  "est_total_min": 254.09008391046277,
+  "feature_pct": 99.6412489283299,
+  "predict_pct": 0.07184282852821484
+}

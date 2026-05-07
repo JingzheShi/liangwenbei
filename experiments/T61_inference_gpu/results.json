@@ -1,0 +1,19 @@
+{
+  "task": "T61 inference fix via batch-vectorized feature extraction (iter_010)",
+  "metrics": {
+    "iter_009_total_time_min_estimated_442k": 254.09,
+    "iter_010_total_time_min_estimated_442k": 4.32,
+    "speedup": 58.8,
+    "iter_010_1024_window_total_s": 0.601,
+    "iter_010_1024_window_feat_extract_s": 0.555,
+    "iter_010_1024_window_predict_s": 0.035,
+    "feature_max_abs_diff_vs_iter009": 7.18e-3,
+    "feature_max_abs_diff_vs_singlewindow": 3.55e-7,
+    "predictions_match_iter009_pct": 100.0,
+    "loso_equiv_score": 24.52,
+    "submission_zip_size_mb": 15.47,
+    "n_models": 5,
+    "n_features": 340
+  },
+  "notes": "Same model + threshold as iter_009. Only feature extractor was rewritten to operate on (N, 100, K) 3-D batch tensor, replacing pandas rolling/EWM with numpy cumsum / scipy.signal.lfilter (axis=-1). 100% prediction agreement with iter_009 reference; max numerical diff is ~3e-8 relative on kyle_inv (huge values, float32 noise). All sanity + contract checks pass. Inference budget now well under 30 min."
+}
