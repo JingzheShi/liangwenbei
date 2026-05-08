@@ -1,0 +1,269 @@
+{
+  "task": "T144 Quantile/Huber multi-loss ensemble",
+  "cross_correlations": {
+    "T87-L2": 0.713743,
+    "T87-MAE": 0.780998,
+    "T87-Quantile": 0.782792,
+    "T87-Huber": 0.718856,
+    "L2-MAE": 0.824385,
+    "L2-Quantile": 0.821479,
+    "L2-Huber": 0.984767,
+    "MAE-Quantile": 0.979413,
+    "MAE-Huber": 0.822677,
+    "Quantile-Huber": 0.821234
+  },
+  "configs": {
+    "B_T87_MAE": {
+      "loso_pnl": 41.2046,
+      "thr_up": 0.00026046,
+      "thr_dn": 0.00028546,
+      "vs_iter018_v1": 1.0746,
+      "vs_T87_MAE": 0.0046,
+      "weights": "1:1.5",
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 4.0411306342223945,
+          "n_active": 27730
+        },
+        {
+          "sym": 1,
+          "pnl": 4.454705924782264,
+          "n_active": 43446
+        },
+        {
+          "sym": 2,
+          "pnl": 4.064709187040443,
+          "n_active": 43702
+        },
+        {
+          "sym": 3,
+          "pnl": 10.532587985791444,
+          "n_active": 25003
+        },
+        {
+          "sym": 4,
+          "pnl": 18.111504949914153,
+          "n_active": 44739
+        }
+      ]
+    },
+    "F1_4way_light": {
+      "loso_pnl": 41.0574,
+      "thr_up": 0.00028568,
+      "thr_dn": 0.00022515,
+      "vs_iter018_v1": 0.9274,
+      "vs_T87_MAE": -0.1426,
+      "weights": "1:1:1:0.5",
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 4.137103685069164,
+          "n_active": 30351
+        },
+        {
+          "sym": 1,
+          "pnl": 5.0313124344463835,
+          "n_active": 42312
+        },
+        {
+          "sym": 2,
+          "pnl": 4.105430173230403,
+          "n_active": 43609
+        },
+        {
+          "sym": 3,
+          "pnl": 11.513080383274325,
+          "n_active": 31156
+        },
+        {
+          "sym": 4,
+          "pnl": 16.27049636847849,
+          "n_active": 44579
+        }
+      ]
+    },
+    "F2_3way_no_L2": {
+      "loso_pnl": 40.5098,
+      "thr_up": 0.00023573,
+      "thr_dn": 0.00030282,
+      "vs_iter018_v1": 0.3798,
+      "vs_T87_MAE": -0.6902,
+      "weights": "1:1.5:0.7",
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 4.451061886536305,
+          "n_active": 27148
+        },
+        {
+          "sym": 1,
+          "pnl": 4.529714005696073,
+          "n_active": 42354
+        },
+        {
+          "sym": 2,
+          "pnl": 3.8137168161313446,
+          "n_active": 43763
+        },
+        {
+          "sym": 3,
+          "pnl": 10.111565759247693,
+          "n_active": 23672
+        },
+        {
+          "sym": 4,
+          "pnl": 17.603713821039555,
+          "n_active": 44426
+        }
+      ]
+    },
+    "F3_T87_MAE_Huber": {
+      "loso_pnl": 41.1406,
+      "thr_up": 0.00026889,
+      "thr_dn": 0.00028047,
+      "vs_iter018_v1": 1.0106,
+      "vs_T87_MAE": -0.0594,
+      "weights": "1:1.5:0.5",
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 4.5130418773694565,
+          "n_active": 25907
+        },
+        {
+          "sym": 1,
+          "pnl": 4.864019382844195,
+          "n_active": 41176
+        },
+        {
+          "sym": 2,
+          "pnl": 4.1080556063667455,
+          "n_active": 41979
+        },
+        {
+          "sym": 3,
+          "pnl": 10.970309457961122,
+          "n_active": 27760
+        },
+        {
+          "sym": 4,
+          "pnl": 16.68522161255861,
+          "n_active": 42462
+        }
+      ]
+    },
+    "F4_5way_equal": {
+      "loso_pnl": 40.6818,
+      "thr_up": 0.00029381,
+      "thr_dn": 0.00025077,
+      "vs_iter018_v1": 0.5518,
+      "vs_T87_MAE": -0.5182,
+      "weights": "1:1:1:1:1",
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 4.685807937971891,
+          "n_active": 25692
+        },
+        {
+          "sym": 1,
+          "pnl": 5.629690767614826,
+          "n_active": 37817
+        },
+        {
+          "sym": 2,
+          "pnl": 4.177614488838859,
+          "n_active": 40096
+        },
+        {
+          "sym": 3,
+          "pnl": 11.22098092923311,
+          "n_active": 30995
+        },
+        {
+          "sym": 4,
+          "pnl": 14.96766607775779,
+          "n_active": 40455
+        }
+      ]
+    },
+    "F5_5way_mae_heavy": {
+      "loso_pnl": 40.6713,
+      "thr_up": 0.0003038,
+      "thr_dn": 0.00023993,
+      "vs_iter018_v1": 0.5413,
+      "vs_T87_MAE": -0.5287,
+      "weights": "1:0.7:1.5:0.7:0.7",
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 4.343909918816948,
+          "n_active": 28050
+        },
+        {
+          "sym": 1,
+          "pnl": 5.4305519109361855,
+          "n_active": 38909
+        },
+        {
+          "sym": 2,
+          "pnl": 4.180936323559477,
+          "n_active": 41077
+        },
+        {
+          "sym": 3,
+          "pnl": 11.054917484330602,
+          "n_active": 28258
+        },
+        {
+          "sym": 4,
+          "pnl": 15.661008679134994,
+          "n_active": 42347
+        }
+      ]
+    }
+  },
+  "best_config": "B_T87_MAE",
+  "best_loso_pnl": 41.2046,
+  "delta_vs_iter018_v1_baseline": 1.0746,
+  "delta_vs_T87_MAE": 0.0046,
+  "verdict": "MAE-only (T87+MAE=+41.20) remains winner \u2014 no v4 needed. Best new combo F3(T87+MAE+Huber)=+41.14 is -0.06 vs B. Quantile(corr=0.979 w/MAE) and Huber(corr=0.985 w/L2) add no net diversity. KEY FINDING: T87+MAE+conformal_wrapper=+43.21 (+2.01 over bare T87+MAE) \u2014 recommend T145 to validate conformal on T87+MAE signal.",
+  "conformal_wrapper": {
+    "applied_to": "B_T87_MAE",
+    "loso_pnl": 43.2096,
+    "n_active": 149214,
+    "per_sym": [
+      {
+        "sym": 0,
+        "pnl": 4.096672368229458
+      },
+      {
+        "sym": 1,
+        "pnl": 5.590769083081469
+      },
+      {
+        "sym": 2,
+        "pnl": 4.8780177701779035
+      },
+      {
+        "sym": 3,
+        "pnl": 10.532587985791444
+      },
+      {
+        "sym": 4,
+        "pnl": 18.111504949914153
+      }
+    ],
+    "per_sym_band": {
+      "0": 2.4039e-05,
+      "1": 0.0001884959,
+      "2": 0.0001356665,
+      "3": 0.0,
+      "4": 0.0
+    }
+  },
+  "best_config_among_new": "F3_T87_MAE_Huber",
+  "best_new_loso_pnl": 41.1406,
+  "delta_new_vs_T87_MAE": -0.0594
+}
