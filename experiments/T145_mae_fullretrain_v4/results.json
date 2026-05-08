@@ -1,0 +1,37 @@
+{
+  "task": "T145b: full-retrain MAE LGB + iter_019 v4",
+  "v4_zip": "/root/projects/liangwenbei_workdir/submission_050818_iter019_v4_maefullretrain.zip",
+  "v4_md5": "6cadccb39903847b3859cffa04ebc978",
+  "v4_size_mb": 14.79,
+  "v4_files": 16,
+  "smoke_test_ok": true,
+  "models_trained": [1, 7, 13, 42, 100],
+  "training_method": "GPU (RTX 3090), 330 rounds each, objective=regression_l1 (MAE)",
+  "training_times_sec": {
+    "seed1": 168.0,
+    "seed7": 193.2,
+    "seed13": 155.8,
+    "seed42": 186.9,
+    "seed100": 133.1
+  },
+  "total_training_time_min": 13.95,
+  "thresh_method": "Option 1 (reused v3_mae_v2 thresh from T146)",
+  "thresholds": {
+    "thr_up": 0.00021285270423820527,
+    "thr_dn": 0.00025742239175867594
+  },
+  "base_loso_v3_mae_v2": 43.9599,
+  "expected_platform_v4": "iter_018_v1 +28.93 base + MAE gain + full-retrain gain. v3_mae_v2 LOSO=+43.96; v4 adds full-retrain (M7 trick, 0-119 data, 2.21M->4.42M with aug). Expected +1~3 over v3_mae_v2 on platform.",
+  "vs_v3_mae_v2": "v4 uses same conformal thresholds but LGB models trained on full data (train+val+test) instead of LOSO-CV. Same stack: T87 NN (5 seeds) + MAE LGB full-retrain (5 seeds) + conformal wrapper. Only change from v3_mae_v2: LGB .txt files.",
+  "seed_configs": {
+    "1":   {"feature_fraction": 0.6, "bagging_fraction": 0.70, "num_leaves": 127, "lambda_l2": 1.0},
+    "7":   {"feature_fraction": 0.7, "bagging_fraction": 0.85, "num_leaves": 63,  "lambda_l2": 2.0},
+    "13":  {"feature_fraction": 0.5, "bagging_fraction": 0.60, "num_leaves": 255, "lambda_l2": 0.5},
+    "42":  {"feature_fraction": 0.8, "bagging_fraction": 0.80, "num_leaves": 127, "lambda_l2": 1.0},
+    "100": {"feature_fraction": 0.4, "bagging_fraction": 0.50, "num_leaves": 127, "lambda_l2": 3.0}
+  },
+  "model_sizes_mb": {
+    "seed1": 4.7, "seed7": 2.4, "seed13": 9.4, "seed42": 4.7, "seed100": 4.7
+  },
+  "notes": "All 5 seeds trained successfully. GPU used (RTX 3090) for 3x speedup. Thresholds reused from T146 (Option 1). Predictor unchanged from v3_mae_v2. Abstain rate ~74% on sample data - consistent with conformal wrapper behavior."
+}

@@ -1,0 +1,65 @@
+{
+  "_doc": "iter_019 v4: T87 SPO+ NN + full-retrain MAE LGB (5 seeds, train+val+test 0-119, 330 rounds) + conformal wrapper. LGB models: T145 full-retrain MAE. Thresholds from T146 (Option 1 reuse): thr_up=2.13e-4, thr_dn=2.57e-4. Expected LOSO ~+43~+45 (v3_mae_v2 base +43.96 + full-retrain gain).",
+  "horizons": [
+    {
+      "h": 5,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 10,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 20,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 40,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 60,
+      "thr_up": 0.00021285270423820527,
+      "thr_dn": 0.00025742239175867594,
+      "w_nn": 1.0,
+      "w_lgb": 1.5,
+      "active": true,
+      "ensemble_seeds": [
+        1,
+        7,
+        13,
+        42,
+        100
+      ],
+      "_doc": "T146 conformal-aware DE LOSO opt thresholds; iter_019 v3_mae B_T87_MAE with conformal wrapper in objective. LOSO=+43.9599. Old no-conformal: 0.00026046/0.00028546."
+    }
+  ],
+  "conformal_wrapper": {
+    "enabled": true,
+    "per_sym_beta": {
+      "0": 0.1,
+      "1": 0.4,
+      "2": 0.3,
+      "3": 0.0,
+      "4": 0.0
+    },
+    "default_beta_for_ood": 0.16,
+    "per_sym_sigma": {
+      "0": 0.0002403901,
+      "1": 0.0004712397,
+      "2": 0.0004522216,
+      "3": 0.0004235249,
+      "4": 0.0004279811
+    },
+    "default_sigma_for_ood": 0.0003998317,
+    "_doc": "beta = 4-fold CV consensus / V8 in-sample fit from R_conformal_select (REPORT.md). sigma = std(combined_pred) per sym on local val 442k. OOD: beta = mean(per_sym_beta) = 0.16, sigma = mean(per_sym_sigma)."
+  }
+}

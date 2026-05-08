@@ -1,0 +1,17 @@
+{
+  "task": "T145 MAE full-retrain seed=7",
+  "seed": 7,
+  "objective": "regression_l1",
+  "horizon": 60,
+  "n_features": 359,
+  "num_boost_round": 330,
+  "train_time_sec": 193.16441822052002,
+  "n_train_full": 4420800,
+  "cfg": {
+    "seed": 7,
+    "feature_fraction": 0.7,
+    "bagging_fraction": 0.85,
+    "num_leaves": 63,
+    "lambda_l2": 2.0
+  }
+}
