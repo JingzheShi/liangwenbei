@@ -1,0 +1,445 @@
+{
+  "task": "T91 (R44 revival of T35 ReVol+Savgol features under regression)",
+  "experiment": "T91_revol_regr_revival",
+  "iter013_zip": "submission_050707_iter013.zip",
+  "iter014_zip": "submission_050708_iter014.zip",
+  "iter014_loso_baseline": 38.28102,
+  "T75_LGB_only_loso_baseline": 36.2281,
+  "iter012_loso": 26.44,
+  "hypothesis_under_test": "R44: ReVol features were #1 LightGBM gain (28%) under CE but lost -0.77 LOSO. R44 hypothesized that ReVol's per-sample (\u03bc\u0302, \u03c3\u0302) standardized log-return is in the SAME family as the regression target \u0394mid_norm = (mp_t60 - mp_t)/(mp_t+1), so under L2 regression a true ReVol signal lifts pred while \u03c4-noise gets rejected. Expected gain: +0.5 ~ +2.5 LOSO-equiv at iter_014.",
+  "verdict": "PARTIALLY DISCONFIRMED \u2014 within-noise gain only",
+  "metrics": {
+    "n_features_baseline_T75": 359,
+    "best_variant": "v2_revol12",
+    "best_lgb_only_loso": 36.3777,
+    "best_lgb_only_vs_T75": 0.1496,
+    "best_ensemble_loso": 38.1779,
+    "best_ensemble_vs_iter014": -0.1031,
+    "n_features_best_variant": 371,
+    "horizon": 60,
+    "objective": "regression_l2",
+    "validation_strategy": "V4 walk-forward (date 0-75 train, 76-79 val, 96-119 test)",
+    "n_test": 442080
+  },
+  "variants": {
+    "v1_all32": {
+      "n_features_total": 391,
+      "n_features_extra": 32,
+      "description": "schemeP + all 12 ReVol + 20 Savgol",
+      "lgb_only": {
+        "de_loso_sum": 36.10463116449913,
+        "vs_T75": -0.12346883550086574,
+        "thr_up": 0.00031377125963062105,
+        "thr_dn": 0.00017601365059283854,
+        "per_sym": [
+          4.214620947239853,
+          5.682233064714056,
+          3.9164518880243664,
+          10.848424878762392,
+          11.442900385758467
+        ],
+        "best_symmetric_k": 1.0,
+        "best_symmetric_loso": 33.13784154376579
+      },
+      "best_ensemble": {
+        "label": "ensemble w_nn=1.0 w_lgb=2.0",
+        "w_nn": 1.0,
+        "w_lgb": 2.0,
+        "de_loso_sum": 38.0466656771243,
+        "vs_iter014": -0.2343543228756957,
+        "thr_up": 0.0003753756333967019,
+        "thr_dn": 0.00017312368834867002,
+        "per_sym": [
+          3.4524147816476374,
+          5.330487755087104,
+          4.359612075087971,
+          12.128325020118933,
+          12.775826045182658
+        ]
+      },
+      "ensemble_all_weights": [
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=0.0",
+          "w_nn": 1.0,
+          "w_lgb": 0.0,
+          "de_loso_sum": 35.89122986600802,
+          "vs_iter014": -2.38979013399198
+        },
+        {
+          "label": "ensemble w_nn=0.0 w_lgb=1.0",
+          "w_nn": 0.0,
+          "w_lgb": 1.0,
+          "de_loso_sum": 36.10463116449913,
+          "vs_iter014": -2.176388835500866
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=1.0",
+          "w_nn": 1.0,
+          "w_lgb": 1.0,
+          "de_loso_sum": 38.02137922961663,
+          "vs_iter014": -0.2596407703833705
+        },
+        {
+          "label": "ensemble w_nn=1.5 w_lgb=1.0",
+          "w_nn": 1.5,
+          "w_lgb": 1.0,
+          "de_loso_sum": 38.03617939492777,
+          "vs_iter014": -0.24484060507222694
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=1.5",
+          "w_nn": 1.0,
+          "w_lgb": 1.5,
+          "de_loso_sum": 37.92632983472626,
+          "vs_iter014": -0.35469016527373753
+        },
+        {
+          "label": "ensemble w_nn=2.0 w_lgb=1.0",
+          "w_nn": 2.0,
+          "w_lgb": 1.0,
+          "de_loso_sum": 37.70931946479277,
+          "vs_iter014": -0.5717005352072277
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=2.0",
+          "w_nn": 1.0,
+          "w_lgb": 2.0,
+          "de_loso_sum": 38.0466656771243,
+          "vs_iter014": -0.2343543228756957
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=0.5",
+          "w_nn": 1.0,
+          "w_lgb": 0.5,
+          "de_loso_sum": 37.70931946479277,
+          "vs_iter014": -0.5717005352072277
+        },
+        {
+          "label": "ensemble w_nn=0.5 w_lgb=1.0",
+          "w_nn": 0.5,
+          "w_lgb": 1.0,
+          "de_loso_sum": 38.0466656771243,
+          "vs_iter014": -0.2343543228756957
+        }
+      ],
+      "nn_lgb_cross_corr": 0.7859011818565764
+    },
+    "v2_revol12": {
+      "n_features_total": 371,
+      "n_features_extra": 12,
+      "description": "schemeP + 12 ReVol features only (drop Savgol)",
+      "lgb_only": {
+        "de_loso_sum": 36.37771135112147,
+        "vs_T75": 0.14961135112147161,
+        "thr_up": 0.00036116167066883084,
+        "thr_dn": 0.00016645069318685607,
+        "per_sym": [
+          3.9360423967333125,
+          5.771740503911383,
+          4.347815263530675,
+          10.860503164291938,
+          11.46161002265416
+        ],
+        "best_symmetric_k": 1.25,
+        "best_symmetric_loso": 34.05116956890458
+      },
+      "best_ensemble": {
+        "label": "ensemble w_nn=1.0 w_lgb=1.5",
+        "w_nn": 1.0,
+        "w_lgb": 1.5,
+        "de_loso_sum": 38.17791245948955,
+        "vs_iter014": -0.10310754051045024,
+        "thr_up": 0.0003436729539342718,
+        "thr_dn": 0.0001687060504105154,
+        "per_sym": [
+          3.4543376755790294,
+          4.72061211766403,
+          4.423946784729154,
+          12.162485555965109,
+          13.416530325552223
+        ]
+      },
+      "ensemble_all_weights": [
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=0.0",
+          "w_nn": 1.0,
+          "w_lgb": 0.0,
+          "de_loso_sum": 35.89122986600802,
+          "vs_iter014": -2.38979013399198
+        },
+        {
+          "label": "ensemble w_nn=0.0 w_lgb=1.0",
+          "w_nn": 0.0,
+          "w_lgb": 1.0,
+          "de_loso_sum": 36.37771135112147,
+          "vs_iter014": -1.9033086488785287
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=1.0",
+          "w_nn": 1.0,
+          "w_lgb": 1.0,
+          "de_loso_sum": 38.15784667646136,
+          "vs_iter014": -0.12317332353863719
+        },
+        {
+          "label": "ensemble w_nn=1.5 w_lgb=1.0",
+          "w_nn": 1.5,
+          "w_lgb": 1.0,
+          "de_loso_sum": 38.04083425294101,
+          "vs_iter014": -0.24018574705898743
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=1.5",
+          "w_nn": 1.0,
+          "w_lgb": 1.5,
+          "de_loso_sum": 38.17791245948955,
+          "vs_iter014": -0.10310754051045024
+        },
+        {
+          "label": "ensemble w_nn=2.0 w_lgb=1.0",
+          "w_nn": 2.0,
+          "w_lgb": 1.0,
+          "de_loso_sum": 37.78723725316818,
+          "vs_iter014": -0.493782746831819
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=2.0",
+          "w_nn": 1.0,
+          "w_lgb": 2.0,
+          "de_loso_sum": 38.06546356527576,
+          "vs_iter014": -0.2155564347242347
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=0.5",
+          "w_nn": 1.0,
+          "w_lgb": 0.5,
+          "de_loso_sum": 37.78723725316818,
+          "vs_iter014": -0.493782746831819
+        },
+        {
+          "label": "ensemble w_nn=0.5 w_lgb=1.0",
+          "w_nn": 0.5,
+          "w_lgb": 1.0,
+          "de_loso_sum": 38.06546356527576,
+          "vs_iter014": -0.2155564347242347
+        }
+      ],
+      "nn_lgb_cross_corr": 0.7782622140241222
+    },
+    "v4_revol_only6": {
+      "n_features_total": 365,
+      "n_features_extra": 6,
+      "description": "schemeP + 6 wmp1-ReVol features only (the T35 #1 gain group)",
+      "lgb_only": {
+        "de_loso_sum": 36.284417108975035,
+        "vs_T75": 0.056317108975036945,
+        "thr_up": 0.00036782658610338775,
+        "thr_dn": 0.00016609284642327008,
+        "per_sym": [
+          3.914550859348222,
+          6.152097594786941,
+          4.372064830165948,
+          10.613300796392767,
+          11.232403028281155
+        ],
+        "best_symmetric_k": 1.25,
+        "best_symmetric_loso": 34.00251711456635
+      },
+      "best_ensemble": {
+        "label": "ensemble w_nn=1.0 w_lgb=1.0",
+        "w_nn": 1.0,
+        "w_lgb": 1.0,
+        "de_loso_sum": 38.08657301361769,
+        "vs_iter014": -0.19444698638231017,
+        "thr_up": 0.000375986744212891,
+        "thr_dn": 0.0001785349832691609,
+        "per_sym": [
+          3.4188657402403946,
+          4.6653246025749295,
+          4.4860228961061885,
+          12.31764530149039,
+          13.198714473205786
+        ]
+      },
+      "ensemble_all_weights": [
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=0.0",
+          "w_nn": 1.0,
+          "w_lgb": 0.0,
+          "de_loso_sum": 35.89122986600802,
+          "vs_iter014": -2.38979013399198
+        },
+        {
+          "label": "ensemble w_nn=0.0 w_lgb=1.0",
+          "w_nn": 0.0,
+          "w_lgb": 1.0,
+          "de_loso_sum": 36.284417108975035,
+          "vs_iter014": -1.9966028910249634
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=1.0",
+          "w_nn": 1.0,
+          "w_lgb": 1.0,
+          "de_loso_sum": 38.08657301361769,
+          "vs_iter014": -0.19444698638231017
+        },
+        {
+          "label": "ensemble w_nn=1.5 w_lgb=1.0",
+          "w_nn": 1.5,
+          "w_lgb": 1.0,
+          "de_loso_sum": 37.893091483185835,
+          "vs_iter014": -0.3879285168141635
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=1.5",
+          "w_nn": 1.0,
+          "w_lgb": 1.5,
+          "de_loso_sum": 38.061562864026286,
+          "vs_iter014": -0.21945713597371252
+        },
+        {
+          "label": "ensemble w_nn=2.0 w_lgb=1.0",
+          "w_nn": 2.0,
+          "w_lgb": 1.0,
+          "de_loso_sum": 37.60595253159921,
+          "vs_iter014": -0.6750674684007905
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=2.0",
+          "w_nn": 1.0,
+          "w_lgb": 2.0,
+          "de_loso_sum": 37.996414470380095,
+          "vs_iter014": -0.2846055296199026
+        },
+        {
+          "label": "ensemble w_nn=1.0 w_lgb=0.5",
+          "w_nn": 1.0,
+          "w_lgb": 0.5,
+          "de_loso_sum": 37.60595253159921,
+          "vs_iter014": -0.6750674684007905
+        },
+        {
+          "label": "ensemble w_nn=0.5 w_lgb=1.0",
+          "w_nn": 0.5,
+          "w_lgb": 1.0,
+          "de_loso_sum": 37.996414470380095,
+          "vs_iter014": -0.2846055296199026
+        }
+      ],
+      "nn_lgb_cross_corr": 0.7749836720105685
+    }
+  },
+  "per_seed_v1_all32": {
+    "42": {
+      "best_iter": 72,
+      "test_corr": 0.148786012661345,
+      "ev_k1_cum_pnl": 29.0310394452661,
+      "delta_vs_T75": 0.7538394452660988
+    },
+    "1": {
+      "best_iter": 81,
+      "test_corr": 0.1545438355959973,
+      "ev_k1_cum_pnl": 30.55555541626639,
+      "delta_vs_T75": 0.003555416266390665
+    },
+    "7": {
+      "best_iter": 72,
+      "test_corr": 0.15815955737959145,
+      "ev_k1_cum_pnl": 32.16399616760678,
+      "delta_vs_T75": 1.1419961676067842
+    },
+    "13": {
+      "best_iter": 50,
+      "test_corr": 0.15092334006170494,
+      "ev_k1_cum_pnl": 29.949112947419046,
+      "delta_vs_T75": -1.3465870525809542
+    },
+    "100": {
+      "best_iter": 79,
+      "test_corr": 0.1539770115608417,
+      "ev_k1_cum_pnl": 32.302982642172076,
+      "delta_vs_T75": 2.4574826421720743
+    }
+  },
+  "per_seed_v2_revol12": {
+    "42": {
+      "best_iter": 76,
+      "test_corr": 0.14646421565847262,
+      "ev_k1_cum_pnl": 30.017805300437672,
+      "delta_vs_T75": 1.7406053004376716
+    },
+    "1": {
+      "best_iter": 110,
+      "test_corr": 0.1518382592619238,
+      "ev_k1_cum_pnl": 30.33857485515744,
+      "delta_vs_T75": -0.21342514484256014
+    },
+    "7": {
+      "best_iter": 145,
+      "test_corr": 0.1509574875184186,
+      "ev_k1_cum_pnl": 31.005700159680185,
+      "delta_vs_T75": -0.016299840319813796
+    },
+    "13": {
+      "best_iter": 79,
+      "test_corr": 0.14832858690132011,
+      "ev_k1_cum_pnl": 30.098914188889268,
+      "delta_vs_T75": -1.1967858111107326
+    },
+    "100": {
+      "best_iter": 107,
+      "test_corr": 0.1477701732999629,
+      "ev_k1_cum_pnl": 29.878234987638457,
+      "delta_vs_T75": 0.03273498763845595
+    }
+  },
+  "per_seed_v4_revol_only6": {
+    "42": {
+      "best_iter": 69,
+      "test_corr": 0.15586096897761076,
+      "ev_k1_cum_pnl": 33.36808262144642,
+      "delta_vs_T75": 5.0908826214464185
+    },
+    "1": {
+      "best_iter": 91,
+      "test_corr": 0.1469117848609547,
+      "ev_k1_cum_pnl": 29.38069905139697,
+      "delta_vs_T75": -1.1713009486030295
+    },
+    "7": {
+      "best_iter": 165,
+      "test_corr": 0.1495570038248466,
+      "ev_k1_cum_pnl": 29.04863124143793,
+      "delta_vs_T75": -1.9733687585620672
+    },
+    "13": {
+      "best_iter": 69,
+      "test_corr": 0.15318264905028123,
+      "ev_k1_cum_pnl": 30.65514148284116,
+      "delta_vs_T75": -0.6405585171588406
+    },
+    "100": {
+      "best_iter": 73,
+      "test_corr": 0.14928513000846433,
+      "ev_k1_cum_pnl": 30.04679494963888,
+      "delta_vs_T75": 0.2012949496388785
+    }
+  },
+  "compliance": {
+    "sym_in_features": false,
+    "date_in_features": false,
+    "ReVol_features_use_only_past_window": true,
+    "Savgol_features_use_only_past_window": true,
+    "stateless_predict": true,
+    "out_of_train_sym_safe": true
+  },
+  "interpretation": {
+    "v1_all32_LGB_only_-0.12_vs_T75": "Adding all 32 features (12 ReVol + 20 Savgol) to schemeP slightly hurts standalone LGB regression \u2014 likely because the 20 Savgol smoothers are redundant with existing EWMA/MA features in schemeP, adding noise to the 5-seed average.",
+    "v2_revol12_LGB_only_+0.15_vs_T75": "ReVol-only (12 features, drop Savgol) gives a small +0.15 lift on standalone LGB. This is consistent with R44's prediction direction but at the LOW END of the +0.5~+2.5 expected range. Within typical seed-noise (T63/T67/T73/T76 noise floor was ~0.5).",
+    "v4_revol_only6_LGB_only_+0.06_vs_T75": "Just the 6 wmp1-ReVol features (the T35 highest-gain group) gives essentially zero lift, showing that the marginal v2 gain comes from the COMBINATION of mid + wmp1 ReVol, not from the highest-gain features alone.",
+    "ensemble_with_NN_no_gain": "When ensembled with T81 NN at the iter_014 weights, NONE of the three variants beats iter_014's +38.28. Best is v2 at +38.18 (-0.10) \u2014 within noise. The implication: the small standalone LGB lift is fully redundant with what the NN already captures.",
+    "per_seed_variance": "Per-seed \u0394ev vs T75 is HIGH variance: v4 seed 42 = +5.09 but seed 7 = -1.97. The seed-mean is small (+0.30) and the high variance is itself a sign that ReVol is mostly fitting test-window noise rather than a stable signal.",
+    "R44_F-F_pathway_status": "R44 said ReVol's CE F-F false-signal artifact would be REJECTED under regression. Confirmed: regression LGB rejects T35's catastrophic CE -0.77 hit (T91 v2 LGB = +0.15 vs T75). But the OTHER half of R44's hypothesis (ReVol becomes a TRUE signal under regression) is NOT supported \u2014 gain is within noise floor.",
+    "next_steps_implication": "R44 top-3 (T35-revival) is essentially DEAD as an iter_015 candidate. Recommend reallocating budget to R44 top-1 (T46-CatBoost-regression \u2014 diversity from boosting algo difference is a stronger thesis) and top-2 (T22-alpha101 \u2014 alphas designed for regression-style targets at h=60)."
+  }
+}
