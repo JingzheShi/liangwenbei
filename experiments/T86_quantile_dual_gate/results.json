@@ -1,0 +1,27 @@
+{
+  "task": "T86 quantile regression + dual-gate evaluation",
+  "metrics": {
+    "iter013_baseline": 36.23,
+    "iter014_baseline": 38.28,
+    "iter014_local_recheck": 38.28,
+    "dual_gate_R1_agree_on_sign": 6.61,
+    "dual_gate_R2_both_strong": 5.86,
+    "iqr_midpoint_alone_R3": 36.18,
+    "independent_thresh_R4": 19.57,
+    "hybrid_grid_best_loso": 40.2214,
+    "hybrid_polished_loso": 40.2214,
+    "vs_iter014": 1.9414,
+    "vs_iter013": 3.9914,
+    "thr_up": 0.000321,
+    "thr_dn": 0.000239,
+    "best_weights": {"w_q_mid": 2.0, "w_t75": 0.5, "w_t81": 1.0},
+    "per_sym_at_best": [3.885, 4.927, 4.470, 12.502, 14.438],
+    "n_active_per_sym": [32428, 34042, 35407, 41365, 34015],
+    "sign_agreement_pct": 6.3,
+    "sign_disagree_pct": 93.7,
+    "corr_q30_q70": -0.22,
+    "corr_qmid_t75": 0.851,
+    "corr_qmid_t81": 0.773
+  },
+  "notes": "Quantile dual-gate (R1/R2) fails — noise dominates so q30 and q70 disagree on sign in 93.7% of rows. IQR midpoint alone (R3) ties T75 (+36.18 vs +36.23). The win comes from adding q_mid as a 3rd predictor to the T75+T81 ensemble: best (w_q=2.0, w_t75=0.5, w_t81=1.0) → +40.22 LOSO-equiv = +1.94 over iter_014. All 5 syms strongly positive; corr(q30, q70)=-0.22 confirms the two tails learn genuinely different features."
+}
