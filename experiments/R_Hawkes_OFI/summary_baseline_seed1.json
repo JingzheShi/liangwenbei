@@ -1,0 +1,17 @@
+{
+  "task": "R_Hawkes baseline seed=1",
+  "variant": "baseline",
+  "seed": 1,
+  "best_iter": 328,
+  "train_time_sec": 68.07672142982483,
+  "feat_dim": 359,
+  "n_train_aug": 2799840,
+  "n_val": 73680,
+  "val_corr": 0.18044846140006254,
+  "val_l1": 0.0015211058780550957,
+  "test_corr": 0.1651808314834915,
+  "test_l1": 0.0011728715617209673,
+  "test_fixed_thr_pnl": 32.852696918743504,
+  "test_n_active": 280805,
+  "hawkes_feature_importance": {}
+}

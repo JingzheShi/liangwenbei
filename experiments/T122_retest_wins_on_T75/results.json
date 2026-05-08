@@ -1,0 +1,81 @@
+{
+  "task": "T122 retest 3 winning tricks (HYD, lag, monotone) on T75 LGB L2 baseline",
+  "objective": "regression_l2",
+  "baseline": "T75 LGB L2 (objective=regression_l2), schemeP 359-d, V4 split, aug_a 0.8-1.2, 3 seeds (1, 7, 42)",
+  "variants_tested": ["baseline", "hyd", "lag", "monotone", "all3"],
+  "seeds": [1, 7, 42],
+  "n_models": 15,
+  "metrics": {
+    "baseline_de_loso_3seed_ens": 35.2972,
+    "hyd_de_loso_3seed_ens": 36.0588,
+    "lag_de_loso_3seed_ens": 35.4286,
+    "monotone_de_loso_3seed_ens": 37.5678,
+    "all3_de_loso_3seed_ens": 37.7449,
+    "delta_hyd_vs_baseline": 0.7616,
+    "delta_lag_vs_baseline": 0.1314,
+    "delta_monotone_vs_baseline": 2.2706,
+    "delta_all3_vs_baseline": 2.4477,
+    "best_delta_single_trick": 2.2706,
+    "best_delta_combined": 2.4477,
+    "best_variant": "all3",
+    "iter_014_published_loso_ref": 38.28,
+    "t75_baseline_published_loso_ref": 36.23,
+    "baseline_seed42_evgate_k1_reproduces_t75_published": true
+  },
+  "iter017_gate_threshold": 0.5,
+  "wins_for_iter017": ["monotone", "hyd"],
+  "rejects_for_iter017": ["lag"],
+  "per_variant_per_sym_at_DE": {
+    "baseline": [3.62, 6.51, 3.62, 10.31, 11.23],
+    "hyd":      [3.98, 4.95, 4.47, 10.55, 12.10],
+    "lag":      [3.78, 5.78, 4.21, 10.76, 10.89],
+    "monotone": [3.68, 6.62, 4.44, 10.93, 11.90],
+    "all3":     [3.97, 5.77, 5.32, 10.28, 12.40]
+  },
+  "per_variant_per_sym_min": {
+    "baseline": 3.6199,
+    "hyd": 3.9809,
+    "lag": 3.7784,
+    "monotone": 3.6758,
+    "all3": 3.9678
+  },
+  "per_variant_thresholds": {
+    "baseline": {"thr_up": 3.3642e-04, "thr_dn": 1.5240e-04},
+    "hyd":      {"thr_up": 3.0209e-04, "thr_dn": 1.4773e-04},
+    "lag":      {"thr_up": 3.2239e-04, "thr_dn": 1.6286e-04},
+    "monotone": {"thr_up": 3.6620e-04, "thr_dn": 1.7076e-04},
+    "all3":     {"thr_up": 3.1215e-04, "thr_dn": 1.6504e-04}
+  },
+  "per_seed_de_loso": {
+    "baseline": {"1": 34.2508, "7": 34.0645, "42": 32.7557},
+    "hyd":      {"1": 36.2715, "7": 33.6660, "42": 34.7042},
+    "lag":      {"1": 33.4569, "7": 35.6502, "42": 34.1590},
+    "monotone": {"1": 35.1174, "7": 35.8468, "42": 36.0867},
+    "all3":     {"1": 35.6074, "7": 36.7613, "42": 34.7802}
+  },
+  "post_ensemble_correlations_to_baseline": {
+    "hyd": 0.9526,
+    "lag": 0.9576,
+    "monotone": 0.9636,
+    "all3": 0.9391
+  },
+  "comparison_to_huber_baseline_published": {
+    "huber_R3_hyd_delta": 1.42,
+    "huber_R4_lag_delta": 1.60,
+    "huber_T117_monotone_delta": 1.87,
+    "L2_T122_hyd_delta": 0.7616,
+    "L2_T122_lag_delta": 0.1314,
+    "L2_T122_monotone_delta": 2.2706,
+    "interpretation": "monotone strengthens on L2 (+2.27 vs +1.87 on Huber). hyd weakens (+0.76 vs +1.42). lag dies (+0.13 vs +1.60) — Huber-specific phenomenon."
+  },
+  "compliance": {
+    "no_date_in_features": true,
+    "no_sym_in_features": true,
+    "stateless_predictor_compatible": true,
+    "sym_agnostic": true,
+    "objective": "regression_l2 (NOT huber)",
+    "baseline_seed42_matches_t75_published": "+28.2798 (exact match)"
+  },
+  "recommendation": "Build iter_017 on T75 LGB L2 + monotone constraints (+2.27 alone) + optionally HYD (+0.76 marginal lift, total +2.45). Drop lag features — they are Huber-specific. Most reliable single change: monotone constraints (lowest seed-variance, highest lift, theoretically motivated, robust across baselines).",
+  "notes": "monotone +2.27 LOSO is the strongest single-trick lift; monotone+HYD (+2.45) ≈ monotone alone within noise. Lag +0.13 fails the iter_017 gate of 0.5 — it was a Huber-specific phenomenon and should not propagate to platform-friendly L2 stacks."
+}

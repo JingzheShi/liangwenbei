@@ -1,0 +1,20 @@
+{
+  "seed": 42,
+  "held_out_sym": 4,
+  "split_info": {
+    "strategy": "V4_LOSO",
+    "held_out_sym": 4,
+    "n_train": 1119936,
+    "n_val": 58944
+  },
+  "best_iter": 63,
+  "train_time_sec": 52.43078851699829,
+  "val": {
+    "mse": 4.390192771097645e-06,
+    "corr": 0.16587470924194678
+  },
+  "test": {
+    "mse": 3.518027824611636e-06,
+    "corr": 0.1545977767212838
+  }
+}

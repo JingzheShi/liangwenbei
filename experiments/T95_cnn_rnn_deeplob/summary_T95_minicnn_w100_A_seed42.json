@@ -1,0 +1,90 @@
+{
+  "task": "T95 minicnn w100 seed=42 tag=A",
+  "arch": "minicnn",
+  "window": 100,
+  "scheme": "top5",
+  "seed": 42,
+  "F_dim": 20,
+  "n_params": 39849,
+  "split_info": {
+    "strategy": "V4",
+    "train_dates": "0-75",
+    "val_dates": "76-79",
+    "test_dates": "96-119"
+  },
+  "dropped_for_window_test": 0,
+  "best_epoch": 0,
+  "best_val_mse": 5.253002655081218e-06,
+  "test_mse": 3.772546506297658e-06,
+  "test_corr": 0.010542503125604378,
+  "test_ev_gate_k1_cum_pnl": -19.43526666161572,
+  "test_ev_gate_k1_n_active": 114866,
+  "train_time_sec": 63.62380933761597,
+  "pred_time_sec_test": 2.4191441535949707,
+  "epoch_logs": [
+    {
+      "epoch": 0,
+      "train_loss": 1.369511792855819,
+      "val_mse": 5.253002655081218e-06,
+      "val_corr": 0.010263008517754685,
+      "lr": 0.0009829629131445341,
+      "time": 19.173619270324707
+    },
+    {
+      "epoch": 1,
+      "train_loss": 1.341146382008071,
+      "val_mse": 5.299340045894496e-06,
+      "val_corr": 0.0036951370915546834,
+      "lr": 0.0009330127018922195,
+      "time": 11.459812641143799
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.3103047061112276,
+      "val_mse": 5.745239832322113e-06,
+      "val_corr": -0.018485891863252377,
+      "lr": 0.0008535533905932737,
+      "time": 11.075057029724121
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.2820373278439703,
+      "val_mse": 5.553464689000975e-06,
+      "val_corr": -0.02222746767279261,
+      "lr": 0.00075,
+      "time": 10.100739479064941
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.2578220857988869,
+      "val_mse": 5.7038637351070065e-06,
+      "val_corr": -0.03397275160638421,
+      "lr": 0.0006294095225512604,
+      "time": 11.810091257095337
+    }
+  ],
+  "args": {
+    "arch": "minicnn",
+    "scheme": "top5",
+    "window": 100,
+    "seed": 42,
+    "hidden": 64,
+    "gru_hidden": 64,
+    "n_layers": 1,
+    "bidir": false,
+    "kernel": 3,
+    "dropout": 0.1,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 1024,
+    "epochs": 12,
+    "patience": 4,
+    "target_scale": 0.0,
+    "num_workers": 4,
+    "cuda": "0",
+    "no_wandb": true,
+    "tag": "A",
+    "use_sample_weight": true,
+    "max_train_samples": 0
+  }
+}

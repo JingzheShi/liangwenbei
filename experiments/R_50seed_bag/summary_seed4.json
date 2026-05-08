@@ -1,0 +1,28 @@
+{
+  "seed": 4,
+  "horizon": 60,
+  "objective": "regression_l2",
+  "split_info": {
+    "strategy": "V4",
+    "train_dates": "0-75",
+    "val_dates": "76-79",
+    "n_train": 1399920,
+    "n_val": 73680
+  },
+  "best_iter": 80,
+  "train_time_sec": 20.04110336303711,
+  "val": {
+    "mse": 5.002711986890063e-06,
+    "corr": 0.15361702755053105
+  },
+  "test": {
+    "mse": 3.5226075851824135e-06,
+    "corr": 0.1548014643315165
+  },
+  "fixed_cfg": {
+    "feature_fraction": 0.8,
+    "bagging_fraction": 0.8,
+    "num_leaves": 127,
+    "lambda_l2": 1.0
+  }
+}

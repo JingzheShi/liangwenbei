@@ -1,0 +1,135 @@
+{
+  "task": "IDEA-CF-FRESH-OPUS",
+  "core_insights": [
+    "PnL 公式不是 accuracy 代理 — 是 magnitude × correctness − fee。Round-trip cost ≈ 2bp。短 horizon 净边际 3bp,长 horizon 净边际 8bp。长 horizon 在数学上有 2-3× 更宽的安全边际。",
+    "score=max-over-5-horizons 是服务器替你做模型选择 → 集中火力优化 1-2 个 best-bet horizon (押 h=40 / h=60),其他 horizon 当免费保险。",
+    "决策阶段 (τ 调优) 与模型阶段同等重要,但 effort/return 高一到两个数量级。 大多数 baseline 用 argmax / 固定 τ 直接放弃 50% PnL。",
+    "5 stocks 太少使 OOD novel sym 是 first-class 风险:必须 sym-agnostic 表征 (per-window normalization, LOSO CV, sym-dropout augmentation)。",
+    "stateless + shuffled batch + 100-tick window 把序列问题 reduce 成 i.i.d. supervised learning,完美匹配 GBDT, 但 1D-CNN 能补 GBDT 错过的 lag-cross-correlation。"
+  ],
+  "n_ideas": 13,
+  "top10": [
+    {
+      "rank": 1,
+      "name": "GBDT regression on Δmp/mp_t with weighted MSE (w=|Δ|^0.5), per-horizon 独立 model",
+      "expected_strength": "strong",
+      "rationale_key": "PnL 在 magnitude 上线性 → regression 比 3-class CE 更 PnL-aligned; magnitude weighting 让 loss 关心交易上重要的样本"
+    },
+    {
+      "rank": 2,
+      "name": "2D τ-grid search (τ_up, τ_down) on LOSO holdout, per-horizon 独立",
+      "expected_strength": "strong",
+      "rationale_key": "fee=2bp 在阈值处不可微,argmax / fixed τ 直接放弃 30-50% PnL; 不需要新模型 / 新特征"
+    },
+    {
+      "rank": 3,
+      "name": "手工特征 ~500 维 + time-of-day (分钟号 / session phase / AM-PM)",
+      "expected_strength": "strong",
+      "rationale_key": "data 已重度预处理,手工 + GBDT 是 Pareto 最优; time-of-day 是 free alpha 但常被忘"
+    },
+    {
+      "rank": 4,
+      "name": "LOSO 5-fold × 3-seed GBDT ensemble (mean predict)",
+      "expected_strength": "medium",
+      "rationale_key": "OOD 泛化 + 阈值方差 reduce; 每 sym 各 hold 一次=cv+ensemble 一举两得"
+    },
+    {
+      "rank": 5,
+      "name": "Stage 2 PnL fine-tune: 用 stage 1 regression r̂ 作 init,再用 PnL surrogate fine-tune",
+      "expected_strength": "medium",
+      "rationale_key": "纯 PnL loss 直接训会失败 (gradient 病态),两阶段 init 把它 stable 化,直对齐 objective"
+    },
+    {
+      "rank": 6,
+      "name": "3-class CE auxiliary head (multi-task,权重 0.1)",
+      "expected_strength": "medium",
+      "rationale_key": "CE 在 |Δ|≈α 边界给 anchor + confidence calibration; 主 regression + 辅 CE 互补"
+    },
+    {
+      "rank": 7,
+      "name": "per-horizon, per-fold τ 选取 + holdout 二次验证",
+      "expected_strength": "medium",
+      "rationale_key": "防 τ 过拟合 holdout — 把 holdout 50/50 切, 前半选 τ 后半验证"
+    },
+    {
+      "rank": 8,
+      "name": "1D-CNN on raw 100×D window 作 stacking 第二模型,在 LOSO holdout 选 blend weight",
+      "expected_strength": "medium",
+      "rationale_key": "GBDT 完全忽略时序结构,CNN 抓 lag-cross-correlation 提供 model-class diversity"
+    },
+    {
+      "rank": 9,
+      "name": "Sym-dropout augmentation: 训练时 25% sample 视为 unknown sym (通过 z-score scale jitter)",
+      "expected_strength": "weak-medium",
+      "rationale_key": "OOD insurance, 强迫 model 仅用窗口信号; 边际效果但 cheap"
+    },
+    {
+      "rank": 10,
+      "name": "Window length augmentation: 训练时随机用 80-100 ticks",
+      "expected_strength": "weak",
+      "rationale_key": "鲁棒性 + 轻微 ensemble 效果, 几乎零成本"
+    },
+    {
+      "rank": 11,
+      "name": "Quantile regression: 同时预测 Q25/Q50/Q75, 决策 require Q25>fee 或 Q75<-fee (高置信门槛)",
+      "expected_strength": "medium",
+      "rationale_key": "PnL 关心 magnitude+置信; quantile 直接给置信区间, 高置信 τ 更稳"
+    },
+    {
+      "rank": 12,
+      "name": "Order flow regime feature: 100-tick abs return std → volatility regime conditioning",
+      "expected_strength": "weak",
+      "rationale_key": "volatility 是 HFT 公认重要 conditioning, 让 model 学 regime-specific signal"
+    },
+    {
+      "rank": 13,
+      "name": "Cross-horizon stacking: 用 horizon-5 r̂ 作 horizon-60 model 的额外特征 (vice versa)",
+      "expected_strength": "weak-medium",
+      "rationale_key": "不同 horizon 抓不同尺度信号, 简单 stacking 提供 micro-/meso-scale 互补"
+    }
+  ],
+  "high_risk_high_reward": [
+    {
+      "name": "HRHR-1: End-to-end PnL maximization with Gumbel-Softmax discrete decision",
+      "potential": "+10-15% PnL if converged; 0 or worse if collapses to no-trade",
+      "rationale_key": "Unify model+decision into single optimization,从根本上 attack post-hoc τ 的 sub-optimality"
+    },
+    {
+      "name": "HRHR-2: Adversarial domain training — sym classifier head with reverse gradient",
+      "potential": "+20 PnL on novel sym subset; or main loss 退化",
+      "rationale_key": "OOD novel sym 是题面 first-class 风险,直接 attack 风险源"
+    },
+    {
+      "name": "HRHR-3: Self-supervised pretraining on next-tick prediction (BERT-style masked)",
+      "potential": "+15-25 PnL upper bound; or pretrain 不 transfer",
+      "rationale_key": "用全部 2.4M ticks 学 universal microstructure dynamics, 预训 trunk 后 fine-tune horizon heads"
+    },
+    {
+      "name": "HRHR-4: Bayesian queue dynamics hardcoded model (Cont 2014-style)",
+      "potential": "+10 PnL stable; or mis-specification",
+      "rationale_key": "机制性模型 universal,极强 OOD 泛化, 在 novel sym 上稳吃 GBDT"
+    },
+    {
+      "name": "HRHR-5: Trade-size / position-aware fee saving (smooth 连续同向预测)",
+      "potential": "+15-30% fee saving cumulative; 或与官方公式冲突",
+      "rationale_key": "连续 5-10 tick 同向 trade 节省 ~80% 中间 fee, 但需先验证评测公式合规性"
+    }
+  ],
+  "key_design_choices_summary": {
+    "target": "Δmp/mp_t 连续回归 (主) + 3-class CE (辅, multi-task)",
+    "loss": "weighted MSE (w=|Δ|^0.5) + 0.1× CE; stage 2 用 PnL surrogate fine-tune",
+    "model_family": "GBDT (LightGBM) 主力 + 1D-CNN 做 stacking",
+    "cv": "Leave-One-Sym-Out (LOSO) × Last-N-Days-Holdout 联合",
+    "feature_pipeline": "~500 手工特征 + time-of-day + raw 100×D (CNN 用)",
+    "normalization": "log1p (volume/intst) + per-window z-score; 价/return 不 normalize; indicator 严格保留",
+    "augmentation": "sym-shuffle / window-crop / LOB-level-mask; 不用 Gaussian / MixUp / time-reversal",
+    "training": "5 LOSO folds × 3 seeds × 5 horizons; mean predict",
+    "threshold": "2D (τ_up, τ_down) grid search on LOSO holdout, 每 horizon 独立",
+    "multi_horizon": "5 个独立单 horizon 模型,提交全 5 个让服务器取 max",
+    "ood_sym": "LOSO CV + sym-agnostic 特征 + sym-dropout augmentation",
+    "calibration": "通过 τ 调优隐式做; 不单独 isotonic / Platt",
+    "early_stopping": "validation PnL (after τ-grid) 作主 metric; F1_macro 备用",
+    "submission": "5 horizons 全填 (免费保险); 算力优先级 h=40 > h=60 > h=20 > h=10/5"
+  },
+  "highest_leverage_single_trick": "在 LOSO holdout 上做 2D (τ_up, τ_down) grid search 取代 argmax / fixed τ — 不需要新模型/特征/代码, 但在 fee=2bp 的 sharp boundary 下能改写排行榜 (估计 +30-50% PnL)"
+}

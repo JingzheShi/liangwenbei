@@ -1,0 +1,63 @@
+{
+  "_doc": "iter_016 v3 CHIS. All 5 horizons activated. h=60 uses T99-winner 4-way stack (T87 SPO+ NN + T99 CB Huber a=1e-3 + T99 LGB Huber a=1e-3 + T95 GRU, w=1.0:0.7:1.0:1.0) at +44.72 LOSO-equiv. CB stream swapped from T89 RMSE (T108) to T99 CB Huber. h=5/10/20/40 unchanged from T108 (joint 4-D DE-tuned LGB+CB regression ensembles). Source for h=60 weights/thresholds: experiments/T99_e2e_execution_gbdt/ev_winner_refine.json (precise DE optimum). Source for short horizons: experiments/T98_multihorizon_iter016/de_thresh_per_h.log.",
+  "horizons": [
+    {
+      "h": 5,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000425604,
+      "thr_dn": 0.000402417,
+      "w_lgb": 1.552,
+      "w_cb": 0.423,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 18.1625
+    },
+    {
+      "h": 10,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000385420,
+      "thr_dn": 0.000298694,
+      "w_lgb": 0.177,
+      "w_cb": 0.007,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 25.1481
+    },
+    {
+      "h": 20,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000452352,
+      "thr_dn": 0.000392895,
+      "w_lgb": 2.695,
+      "w_cb": 0.704,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 30.1010
+    },
+    {
+      "h": 40,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000336669,
+      "thr_dn": 0.000238573,
+      "w_lgb": 2.821,
+      "w_cb": 0.952,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 36.3850
+    },
+    {
+      "h": 60,
+      "active": true,
+      "kind": "fourway_iter015v2",
+      "thr_up": 0.00028828625764948444,
+      "thr_dn": 0.00021862410744476657,
+      "w_t87": 1.0,
+      "w_t89": 0.7,
+      "w_huber": 1.0,
+      "w_gru": 1.0,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 44.7178,
+      "_cb_stream": "T99 CB_Huber alpha=1e-3 (model_cb_huber_seed*.cbm)"
+    }
+  ]
+}

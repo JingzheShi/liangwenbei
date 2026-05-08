@@ -1,0 +1,37 @@
+{
+  "task": "T88 NN regression seed=13",
+  "seed": 13,
+  "horizon": 60,
+  "n_features": 371,
+  "best_epoch": 0,
+  "n_params": 137345,
+  "train_time_sec": 57.27216362953186,
+  "val": {
+    "mse": 5.067556685389718e-06,
+    "corr": 0.12945160104807799
+  },
+  "test": {
+    "mse": 3.5407547329668887e-06,
+    "corr": 0.15333179891824197,
+    "ev_gate_k1_cum_pnl": 28.4234247771555,
+    "ev_gate_k1_n_active": 254446
+  },
+  "params": {
+    "seed": 13,
+    "horizon": 60,
+    "hidden": "256,128,64",
+    "dropout": 0.1,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "batch_size": 4096,
+    "epochs": 30,
+    "patience": 8,
+    "target_scale": 0.0,
+    "aug_mode": "concat",
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "use_layernorm": true,
+    "no_wandb": true,
+    "cuda": "0"
+  }
+}

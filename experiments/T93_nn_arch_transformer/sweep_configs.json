@@ -1,0 +1,12 @@
+[
+  {"tag": "ft_rg",         "arch": "ft",     "prep": "rankgauss",    "d_token": 16, "n_heads": 4, "depth": 2, "ffn_mult": 2.0, "dropout": 0.10, "lr": 3e-4, "batch_size": 2048, "epochs": 10},
+  {"tag": "ft_w5",         "arch": "ft",     "prep": "winsorize_p5", "d_token": 16, "n_heads": 4, "depth": 2, "ffn_mult": 2.0, "dropout": 0.10, "lr": 3e-4, "batch_size": 2048, "epochs": 10},
+  {"tag": "ft_d24",        "arch": "ft",     "prep": "standard",     "d_token": 24, "n_heads": 4, "depth": 2, "ffn_mult": 2.0, "dropout": 0.10, "lr": 3e-4, "batch_size": 2048, "epochs": 10},
+  {"tag": "ft_dp3",        "arch": "ft",     "prep": "standard",     "d_token": 16, "n_heads": 4, "depth": 3, "ffn_mult": 2.0, "dropout": 0.20, "lr": 3e-4, "batch_size": 2048, "epochs": 12},
+  {"tag": "mixer_rg",      "arch": "mixer",  "prep": "rankgauss",    "d_token": 16,             "depth": 4, "ffn_mult": 2.0, "dropout": 0.10, "lr": 3e-4, "batch_size": 4096, "epochs": 10},
+  {"tag": "mixer_std",     "arch": "mixer",  "prep": "standard",     "d_token": 16,             "depth": 4, "ffn_mult": 2.0, "dropout": 0.10, "lr": 3e-4, "batch_size": 4096, "epochs": 10},
+  {"tag": "resmlp_rg",     "arch": "resmlp", "prep": "rankgauss",    "resmlp_d": 256, "depth": 4, "ffn_mult": 2.0, "dropout": 0.10, "lr": 3e-4, "batch_size": 4096, "epochs": 12},
+  {"tag": "resmlp_std",    "arch": "resmlp", "prep": "standard",     "resmlp_d": 256, "depth": 4, "ffn_mult": 2.0, "dropout": 0.10, "lr": 3e-4, "batch_size": 4096, "epochs": 12},
+  {"tag": "autoint_std",   "arch": "autoint","prep": "standard",     "d_token": 12, "n_heads": 2, "depth": 2, "dropout": 0.10, "lr": 3e-4, "batch_size": 2048, "epochs": 8},
+  {"tag": "mlp_rg",        "arch": "mlp",    "prep": "rankgauss",    "mlp_hidden": "256,128,64", "dropout": 0.10, "lr": 3e-4, "batch_size": 4096, "epochs": 12}
+]

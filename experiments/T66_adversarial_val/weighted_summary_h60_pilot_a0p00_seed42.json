@@ -1,0 +1,138 @@
+{
+  "task": "T66 weighted alpha=0.0 adv=False",
+  "params": {
+    "horizon": 60,
+    "seeds": "42",
+    "decay_alpha": 0.0,
+    "latest_date": 95,
+    "use_adv_weight": false,
+    "adv_mode": "ratio_clip",
+    "adv_w_lo": 0.5,
+    "adv_w_hi": 5.0,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "no_gpu": false,
+    "out_tag": "pilot_a0p00_seed42",
+    "no_wandb": true
+  },
+  "horizon": 60,
+  "seed_results": {
+    "seed42": {
+      "horizon": 60,
+      "seed": 42,
+      "decay_alpha": 0.0,
+      "use_adv_weight": false,
+      "best_iter": 152,
+      "train_time_sec": 253.2890067100525,
+      "val": {
+        "accuracy": 0.5174809989142237,
+        "precision_up": 0.33720693947014146,
+        "precision_down": 0.3735636711496258,
+        "precision_macro": 0.35538530530988366,
+        "recall_up": 0.41117804655196444,
+        "recall_down": 0.46749387341201654,
+        "recall_macro": 0.4393359599819905,
+        "f0_5_up": 0.34979250378762927,
+        "f0_5_down": 0.3892036527196064,
+        "f0_5_macro": 0.3694980782536178,
+        "cum_pnl": 17.241499264543204,
+        "single_pnl": 0.000102877204086944,
+        "n_predictions_active": 167593,
+        "n_total": 294720,
+        "pred_distribution": {
+          "0": 88855,
+          "1": 127127,
+          "2": 78738
+        },
+        "label_distribution": {
+          "0": 71002,
+          "1": 159145,
+          "2": 64573
+        }
+      },
+      "test_full": {
+        "accuracy": 0.5772823923271806,
+        "precision_up": 0.3045930955945929,
+        "precision_down": 0.36252611133506796,
+        "precision_macro": 0.33355960346483043,
+        "recall_up": 0.37769671295206714,
+        "recall_down": 0.4345138088178773,
+        "recall_macro": 0.40610526088497223,
+        "f0_5_up": 0.31685876876231256,
+        "f0_5_down": 0.37495001487708873,
+        "f0_5_macro": 0.3459043918197007,
+        "cum_pnl": 16.920700786798992,
+        "single_pnl": 8.295030436794188e-05,
+        "n_predictions_active": 203986,
+        "n_total": 442080,
+        "pred_distribution": {
+          "0": 109148,
+          "1": 238094,
+          "2": 94838
+        },
+        "label_distribution": {
+          "0": 91065,
+          "1": 274533,
+          "2": 76482
+        }
+      },
+      "per_sym_test_argmax": {
+        "0": {
+          "n": 88416,
+          "accuracy": 0.7908297140788998,
+          "cum_pnl": 2.1303165080874797,
+          "single_pnl": 0.0001889751182548993,
+          "n_active": 11273,
+          "f0_5_macro": 0.2826789722601233
+        },
+        "1": {
+          "n": 88416,
+          "accuracy": 0.3804515019905899,
+          "cum_pnl": -1.1908160934570697,
+          "single_pnl": -1.6963192214488172e-05,
+          "n_active": 70200,
+          "f0_5_macro": 0.3524486147869449
+        },
+        "2": {
+          "n": 88416,
+          "accuracy": 0.5045014477017734,
+          "cum_pnl": -0.2414631369191586,
+          "single_pnl": -5.063712633305203e-06,
+          "n_active": 47685,
+          "f0_5_macro": 0.31345886143145274
+        },
+        "3": {
+          "n": 88416,
+          "accuracy": 0.7851067680057908,
+          "cum_pnl": 3.371835746445309,
+          "single_pnl": 0.0005062816436104068,
+          "n_active": 6660,
+          "f0_5_macro": 0.2765701147377115
+        },
+        "4": {
+          "n": 88416,
+          "accuracy": 0.4255225298588491,
+          "cum_pnl": 12.850827762642432,
+          "single_pnl": 0.00018851701330011781,
+          "n_active": 68168,
+          "f0_5_macro": 0.38405488602119453
+        }
+      },
+      "loso_equiv_sum_argmax": 16.920700786798992
+    }
+  },
+  "agg": {
+    "test_full_cum_pnl_per_seed": [
+      16.920700786798992
+    ],
+    "loso_equiv_sum_argmax_per_seed": [
+      16.920700786798992
+    ],
+    "test_full_cum_pnl_mean": 16.920700786798992,
+    "loso_equiv_sum_argmax_mean": 16.920700786798992
+  }
+}

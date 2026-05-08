@@ -1,0 +1,43 @@
+{
+  "_doc": "iter_014 thresholds: T83 robust threshold strategy 'kfold5_date' applied on the same 5-seed regression \u0394mid avg as iter_013. LOSO-equiv (full-fit) = 36.2213; iter_013 baseline = 36.1464.",
+  "horizons": [
+    {
+      "h": 5,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 10,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 20,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 40,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 60,
+      "thr_up": 0.0003715273205089116,
+      "thr_dn": 0.00016598792602583347,
+      "active": true,
+      "ensemble_seeds": [
+        1,
+        7,
+        13,
+        42,
+        100
+      ],
+      "_doc": "T83 winner: kfold5_date. 36.2213 LOSO-equiv on full 442k."
+    }
+  ]
+}

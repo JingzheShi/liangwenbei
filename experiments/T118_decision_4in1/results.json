@@ -1,0 +1,90 @@
+{
+  "task": "T118 decision_4in1: post-hoc decision rule comparison vs DE asym threshold",
+  "ensemble": "iter_016 v3 (T87 NN + 0.7*T99 CB Huber + 1.0*T99 LGB Huber + 1.0*T95 GRU)",
+  "weights_nn_cb_lgb_gru": [1.0, 0.7, 1.0, 1.0],
+  "n_total": 442080,
+  "baseline_thresholds": {"thr_up": 2.882863e-4, "thr_dn": 2.186241e-4},
+
+  "metrics": {
+    "baseline_de_loso": 44.7178,
+    "baseline_de_per_sym_min": 4.4561,
+    "baseline_de_active_rate": 0.4451,
+
+    "nsf_loso": 44.3862,
+    "nsf_loso_config": "fe=2.50e-4, gamma=0 (symmetric)",
+    "nsf_pmin": 4.05,
+
+    "nsf_asym_g0.05_loso": 42.9276,
+    "nsf_asym_g0.05_pmin": 4.6417,
+    "nsf_asym_g0.05_config": "thr_up=DE_thr_up + 0.05*spread, thr_dn=DE_thr_dn + 0.05*spread",
+
+    "tbt_loso": 44.3206,
+    "tbt_pmin": 3.9906,
+    "tbt_active_rate": 0.4451,
+
+    "stk_loso": 44.2842,
+    "stk_loso_config": "PnL-based win, cutoff=0.42, 10 buckets, 5-fold",
+    "stk_pmin": 4.4005,
+
+    "bat_loso_sorted": 47.1275,
+    "bat_loso_shuffled": 43.4421,
+    "bat_pmin_sorted": 5.2265,
+    "bat_pmin_shuffled": 3.6526,
+    "bat_disqualified": true,
+    "bat_disqualification_reason": "test cache is sym-sorted (only 4 transitions / 442080 rows); batch=1024 within-batch quantile is effectively per-sym thresholding; under shuffled order LOSO drops -1.3 vs baseline",
+
+    "stack_nsf_AND_tbt_loso": 44.2240,
+    "stack_nsf_AND_tbt_pmin": 4.8006,
+
+    "best_rule": "baseline_de",
+    "best_per_sym_min": 4.4561,
+
+    "vs_iter016_v3_target_44.72": {
+      "baseline_match": "exact +44.7178 vs target +44.72",
+      "best_alternative_loso_gap": "-0.33 (NSF fe=2.5e-4 g=0)",
+      "best_alternative_pmin_gain": "+0.18 (NSF asym g=0.05, costs -1.79 LOSO)"
+    }
+  },
+
+  "shuffle_invariance_test": {
+    "method": "permute 442k rows, apply rule on permuted preds, invert permutation, re-evaluate",
+    "purpose": "production scenario - platform shuffles row order; rules that aggregate within batches must be stable",
+    "results": {
+      "baseline_de_sorted": 44.7178,
+      "baseline_de_shuffled": 44.7178,
+      "nsf_g0_fe2.88e-4_sorted": 44.2240,
+      "nsf_g0_fe2.88e-4_shuffled": 44.2240,
+      "tbt_sorted": 44.3206,
+      "tbt_shuffled": 44.3206,
+      "bat_b1024_sorted": 47.1275,
+      "bat_b1024_shuffled": 43.4421,
+      "bat_b1024_delta_due_to_shuffle": -3.6854,
+      "bat_b1024_5perm_mean": 43.34,
+      "bat_b1024_5perm_std": 0.13
+    }
+  },
+
+  "iter_017_recommendation": {
+    "promote_to_iter_017": false,
+    "reason": "no rule clearly beats DE asym thresholds; BAT (+47.13 sorted) was sym-sorted artifact; other rules within noise or worse; DE remains optimum",
+    "negative_result_value": "documented BAT batch-quantile rule fails under shuffle test; future audits must shuffle-test before considering batch-aggregate rules",
+    "potentially_useful_for_oos_robustness": [
+      "NSF asym g=0.05 (DE base + small spread term): +0.18 pmin at -1.79 LOSO cost - not recommended",
+      "TBT scale-invariant fallback (-0.40 LOSO) - useful only if transmission shifts heavily on platform"
+    ]
+  },
+
+  "files": {
+    "eval_4in1.py": "main eval (sorted order, all 4 rules)",
+    "eval_shuffle.py": "shuffle-invariance test (key BAT validation)",
+    "eval_stk_stack.py": "STK PnL-based + NSF-TBT stacking",
+    "eval_nsf_asym.py": "asymmetric NSF (DE thr base + gamma*spread)",
+    "results_full.json": "verbose first-pass results from eval_4in1.py",
+    "results_shuffle.json": "shuffle test outputs",
+    "results_stk_stack.json": "STK PnL + stacking outputs",
+    "results_nsf_asym.json": "asymmetric NSF sweep",
+    "REPORT.md": "full writeup"
+  },
+
+  "notes": "BAT +47.13 was sym-sorted artifact (drops to +43.44 under shuffle); no rule beats DE asym thr; NSF g=0 reduces to symmetric thresh, TBT -0.40 LOSO, STK reduces to TBT-like behavior. Recommendation: keep DE asym for iter_017. Negative result on BAT is itself valuable - shuffle-test must be standard before adopting batch-aggregate rules."
+}

@@ -1,0 +1,35 @@
+{
+  "n": 4096,
+  "gru_backend": "torch_cuda",
+  "predict_time_seconds": 2.983426094055176,
+  "extrapolated_442k_seconds": 322.00024601072073,
+  "stateless_ok": true,
+  "shuffle_invariant_ok": true,
+  "action_distribution": {
+    "h5": {
+      "short": 1250,
+      "flat": 1200,
+      "long": 1646
+    },
+    "h10": {
+      "short": 1444,
+      "flat": 958,
+      "long": 1694
+    },
+    "h20": {
+      "short": 1588,
+      "flat": 1048,
+      "long": 1460
+    },
+    "h40": {
+      "short": 2024,
+      "flat": 826,
+      "long": 1246
+    },
+    "h60": {
+      "short": 1726,
+      "flat": 1245,
+      "long": 1125
+    }
+  }
+}

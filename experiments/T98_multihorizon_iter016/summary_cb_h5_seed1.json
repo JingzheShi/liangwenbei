@@ -1,0 +1,70 @@
+{
+  "task": "T98 CatBoost regression \u0394mid h=5 seed=1",
+  "seed": 1,
+  "horizon": 5,
+  "objective": "RMSE",
+  "split_info": {
+    "strategy": "V4",
+    "horizon": 5,
+    "train_dates": "0-75",
+    "val_dates": "76-79 (walk-forward last 5%)",
+    "n_train": 1399920,
+    "n_val": 73680
+  },
+  "n_features": 359,
+  "drop_names": [
+    "dualz_ask_diff1",
+    "dualz_bid_diff5",
+    "dualz_ask_diff5",
+    "qrank_W100_spread1",
+    "qrank_W100_spread5",
+    "qrank_W100_spread10",
+    "qrank_W100_cumspread",
+    "kyle_lam_W50",
+    "kyle_lam_W100",
+    "roll_eff_spr_ratio_W100",
+    "liq_asym_top5_W5"
+  ],
+  "best_iter": 1486,
+  "train_time_sec": 28.31527590751648,
+  "val": {
+    "mse": 4.0827558223099913e-07,
+    "mae": 0.0004191943444311619,
+    "corr": 0.4160003431470902
+  },
+  "test": {
+    "mse": 2.6531333219281805e-07,
+    "mae": 0.0003288567531853914,
+    "corr": 0.404948032591818,
+    "ev_gate_k1_cum_pnl": 7.950527717320806,
+    "ev_gate_k1_n_active": 209251
+  },
+  "params": {
+    "seed": 1,
+    "horizon": 5,
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "iterations": 1500,
+    "early_stopping": 80,
+    "learning_rate": 0.05,
+    "use_gpu": true,
+    "no_wandb": true
+  },
+  "cb_params": {
+    "iterations": 1500,
+    "learning_rate": 0.05,
+    "depth": 6,
+    "l2_leaf_reg": 1.0,
+    "loss_function": "RMSE",
+    "eval_metric": "RMSE",
+    "random_seed": 1,
+    "rsm": 1.0,
+    "bootstrap_type": "Bernoulli",
+    "subsample": 0.7,
+    "early_stopping_rounds": 80,
+    "allow_writing_files": false,
+    "task_type": "GPU",
+    "devices": "0"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "task": "R-NaN2 CB Huber NaN-handling sweep (3 variants x 3 seeds)",
+  "verdict": "hypothesis_falsified",
+  "reason": "PM premise wrong — current T99 CB pipeline already does NaN passthrough (no nan_to_num); baseline was already 'Trick A'. NaN-handling difference is within seed noise; nan_mode='Max' actively hurts.",
+  "variants": {
+    "zero": {
+      "description": "explicit np.nan_to_num(X, nan=0) before training",
+      "seeds": [1, 7, 42],
+      "k1_cum_pnl_per_seed": {"1": 36.7484, "7": 35.6336, "42": 34.0180},
+      "k1_cum_pnl_3seed_avg": 36.5849,
+      "de_loso_3seed": 40.3924,
+      "de_thr_up": 0.000301,
+      "de_thr_dn": 0.000307,
+      "de_per_sym": [4.45, 4.56, 4.13, 11.15, 16.11]
+    },
+    "min": {
+      "description": "NaN passthrough + nan_mode='Min' (CB default = current pipeline)",
+      "seeds": [1, 7, 42],
+      "k1_cum_pnl_per_seed": {"1": 32.1876, "7": 36.4136, "42": 38.6265},
+      "k1_cum_pnl_3seed_avg": 36.1056,
+      "de_loso_3seed": 40.1754,
+      "de_thr_up": 0.000339,
+      "de_thr_dn": 0.000315,
+      "de_per_sym": [4.69, 5.00, 4.04, 11.26, 15.19]
+    },
+    "max": {
+      "description": "NaN passthrough + nan_mode='Max'",
+      "seeds": [1, 7, 42],
+      "k1_cum_pnl_per_seed": {"1": 31.4995, "7": 30.0213, "42": 37.9520},
+      "k1_cum_pnl_3seed_avg": 33.1576,
+      "de_loso_3seed": 38.7982,
+      "de_thr_up": 0.000321,
+      "de_thr_dn": 0.000353,
+      "de_per_sym": [4.45, 4.62, 4.15, 10.53, 15.05]
+    }
+  },
+  "metrics": {
+    "baseline_zero_de": 40.39,
+    "passthrough_min_de": 40.18,
+    "passthrough_max_de": 38.80,
+    "delta_zero_vs_min": 0.22,
+    "delta_max_vs_min": -1.39,
+    "best_nan_mode": "Min",
+    "best_variant_overall": "zero (within noise of min)",
+    "T99_baseline_cb_huber_5seed_de": 40.24,
+    "delta_best_vs_T99_baseline": 0.15
+  },
+  "key_facts": {
+    "nan_density_train_pct": 0.016,
+    "nan_cells_train": 86602,
+    "nan_cells_val": 77576,
+    "nan_cells_test": 0,
+    "n_features": 359,
+    "n_train_rows_after_aug": 2799840,
+    "n_val_rows": 73680,
+    "n_test_rows": 442080,
+    "model": "CatBoost Regressor Huber:delta=0.001 GPU",
+    "gpu": "RTX 3080 10GB",
+    "train_time_per_model_sec": "~15-20"
+  },
+  "notes": "Recommend keeping current pipeline. Drop nan_mode='Max'. No combined LGB+CB run since A did not win."
+}

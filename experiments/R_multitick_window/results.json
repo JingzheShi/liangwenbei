@@ -1,0 +1,50 @@
+{
+  "task": "R_multitick_window: multi-tick window snapshots (raw LOB at t={-5,-20,-50,-90}) added to T75 LGB L2 base. 4 lookbacks × 20 features = 80 new features (439 total vs 359 baseline). 3-seed (1/7/42) on V4 walk-forward split.",
+  "verdict": "ABORT — multi-tick window snapshots NOT useful. Trick HURTS LOSO by 0.7~1.1 (DE 2D and 4D respectively). 3 of 5 syms regress; sym 4 (largest baseline contributor) loses -1.19.",
+  "metrics": {
+    "n_new_features": 80,
+    "lookbacks": [5, 20, 50, 90],
+    "per_lookback_features": "bid1-5, bsize1-5, ask1-5, asize1-5",
+    "n_seeds": 3,
+    "seeds": [1, 7, 42],
+    "n_features_baseline": 359,
+    "n_features_trick": 439,
+    "baseline_de_2d_loso": 36.5201,
+    "baseline_de_4d_loso": 38.0467,
+    "trick_de_2d_loso": 35.8016,
+    "trick_de_4d_loso": 36.8995,
+    "delta_de_2d": -0.7184,
+    "delta_de_4d": -1.1472,
+    "per_sym_delta_4d": {"0": -0.2446, "1": -0.2196, "2": 0.2177, "3": 0.2910, "4": -1.1917},
+    "per_sym_delta_4d_min": -1.1917,
+    "per_sym_delta_4d_max": 0.2910,
+    "test_corr_baseline_avg": 0.1567,
+    "test_corr_trick_avg": 0.1533,
+    "best_iter_baseline_avg": 88.3,
+    "best_iter_trick_avg": 90.3,
+    "multitick_in_top50_seed1": 1,
+    "multitick_in_top50_seed7": 1,
+    "multitick_in_top50_seed42": 1,
+    "multitick_top_rank_seed1": 46,
+    "multitick_top_rank_seed7": 48,
+    "multitick_top_rank_seed42": 49
+  },
+  "diagnostic": {
+    "feature_importance": "Only 1 multi-tick feature appears in top-50 by gain (rank 46-49) per seed. The model essentially ignores them — schemeP's existing 359 features already capture intra-window dynamics adequately via rolling W20/W50/W100 stats, OFI, signed BV, EWMA, etc.",
+    "test_corr": "trick test corr (0.1533) slightly LOWER than baseline (0.1567) — extra noise dimensions may be hurting generalization.",
+    "best_iter": "trick best_iter slightly higher (90 vs 88) — model takes a few more rounds before early-stop, consistent with mild dilution."
+  },
+  "constraint_compliance": {
+    "sym_used": false,
+    "date_used": false,
+    "stateless_within_window": true,
+    "raw_lookback_features_only_within_100tick_window": true
+  },
+  "files": {
+    "build_script": "build_multitick.py",
+    "train_script": "train_multitick.py",
+    "eval_script": "eval_de.py",
+    "de_results": "de_results.json"
+  },
+  "notes": "Multi-tick raw snapshots (t={-5,-20,-50,-90}) were hypothesized to add signal beyond schemeP's last-tick raw + window stats. Result is the opposite — the trick is redundant and slightly noisy. Conclusion: T100 W3 'cheap fix' hypothesis is REJECTED for LGB L2 on T75 base. NOT iter_018 candidate. iter_017 (T123) remains the leader."
+}

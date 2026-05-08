@@ -1,0 +1,65 @@
+{
+  "winner_strategy": "kfold5_date",
+  "winner_thr_up": 0.0003715273205089116,
+  "winner_thr_dn": 0.00016598792602583347,
+  "winner_full_pnl": 36.221349724845865,
+  "iter013_full_pnl": 36.1464,
+  "delta_vs_iter013": 0.07494972484586526,
+  "candidates": [
+    {
+      "strategy": "kfold5_date",
+      "rank_metric": 35.944,
+      "mean_gap_S1S2": -0.2004999999999999
+    },
+    {
+      "strategy": "de_asym",
+      "rank_metric": 35.744,
+      "mean_gap_S1S2": -0.33599999999999985
+    },
+    {
+      "strategy": "kfold5_row",
+      "rank_metric": 35.735,
+      "mean_gap_S1S2": -0.32299999999999995
+    },
+    {
+      "strategy": "ensemble_avg_3",
+      "rank_metric": 35.733000000000004,
+      "mean_gap_S1S2": 0.09050000000000002
+    },
+    {
+      "strategy": "quantile_grid",
+      "rank_metric": 35.69,
+      "mean_gap_S1S2": -0.2530000000000001
+    },
+    {
+      "strategy": "bootstrap15",
+      "rank_metric": 35.649,
+      "mean_gap_S1S2": -0.2795000000000001
+    },
+    {
+      "strategy": "de_reg_lam0.1",
+      "rank_metric": 35.391,
+      "mean_gap_S1S2": -0.47299999999999986
+    },
+    {
+      "strategy": "de_reg_lam1.0",
+      "rank_metric": 34.689,
+      "mean_gap_S1S2": -0.18800000000000017
+    },
+    {
+      "strategy": "de_reg_lam10.0",
+      "rank_metric": 33.734,
+      "mean_gap_S1S2": -0.23500000000000032
+    },
+    {
+      "strategy": "sym_grid",
+      "rank_metric": 33.629000000000005,
+      "mean_gap_S1S2": -0.14049999999999985
+    }
+  ],
+  "iter013_thr": {
+    "thr_up": 0.0003723,
+    "thr_dn": 0.0001613
+  },
+  "rank_metric": "mean_eval\u00d72 (S1+S2 stand-in)"
+}

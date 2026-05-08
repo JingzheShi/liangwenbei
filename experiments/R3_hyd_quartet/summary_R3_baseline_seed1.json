@@ -1,0 +1,19 @@
+{
+  "arm": "baseline",
+  "seed": 1,
+  "horizon": 60,
+  "tag": "baseline_seed1",
+  "n_features": 359,
+  "best_iter": 328,
+  "train_time_sec": 145.87983536720276,
+  "val": {
+    "mse": 4.942143277730793e-06,
+    "mae": 0.0015211018035188317,
+    "corr": 0.1804559325548891
+  },
+  "test": {
+    "corr": 0.16520589113043177,
+    "ev_gate_k1_cum_pnl": 32.86283734244699,
+    "ev_gate_k1_n_active": 280810
+  }
+}

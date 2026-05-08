@@ -1,0 +1,19 @@
+{
+  "task": "T115 LGB Huber baseline seed=7",
+  "variant": "baseline",
+  "seed": 7,
+  "alpha": 0.001,
+  "n_features": 359,
+  "best_iter": 312,
+  "train_time_sec": 122.26513743400574,
+  "val": {
+    "mae": 0.0015151393599808216,
+    "corr": 0.18506521658022668
+  },
+  "test": {
+    "mae": 0.0011665071360766888,
+    "corr": 0.16725890794941195,
+    "ev_gate_k1_cum_pnl": 35.90721728082127,
+    "ev_gate_k1_n_active": 270869
+  }
+}

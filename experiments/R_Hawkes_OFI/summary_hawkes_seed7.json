@@ -1,0 +1,42 @@
+{
+  "task": "R_Hawkes hawkes seed=7",
+  "variant": "hawkes",
+  "seed": 7,
+  "best_iter": 350,
+  "train_time_sec": 94.95020699501038,
+  "feat_dim": 365,
+  "n_train_aug": 2799840,
+  "n_val": 73680,
+  "val_corr": 0.1793850929063242,
+  "val_l1": 0.001520289690233767,
+  "test_corr": 0.16678266661982194,
+  "test_l1": 0.001169916708022356,
+  "test_fixed_thr_pnl": 35.298761283127426,
+  "test_n_active": 277123,
+  "hawkes_feature_importance": {
+    "hawkes_forecast_buy_30": {
+      "gain": 0.014220700963051058,
+      "split": 49
+    },
+    "hawkes_forecast_sell_30": {
+      "gain": 0.0014736090088263154,
+      "split": 8
+    },
+    "hawkes_forecast_imb_30": {
+      "gain": 0.02325906501209829,
+      "split": 54
+    },
+    "hawkes_branching_b": {
+      "gain": 0.027832515152113046,
+      "split": 73
+    },
+    "hawkes_branching_s": {
+      "gain": 0.024079423150396906,
+      "split": 67
+    },
+    "hawkes_fast_signed": {
+      "gain": 0.014130704730632715,
+      "split": 35
+    }
+  }
+}

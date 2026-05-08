@@ -1,0 +1,86 @@
+{
+  "windows": 24,
+  "features": 216,
+  "checks": {
+    "1_single_vs_batched": {
+      "max_abs_diff": 0.0,
+      "rows_with_diff": 0,
+      "cols_with_diff": 0,
+      "leakage": false
+    },
+    "2_shuffle_invariance": {
+      "max_abs_diff": 0.0,
+      "perm": [
+        19,
+        11,
+        7,
+        6,
+        8,
+        1,
+        2,
+        4,
+        17,
+        3,
+        18,
+        15,
+        23,
+        12,
+        21,
+        10,
+        9,
+        14,
+        16,
+        20,
+        0,
+        5,
+        13,
+        22
+      ],
+      "leakage": false
+    },
+    "3_replication": {
+      "max_abs_diff": 0.0,
+      "n_copies": 8,
+      "leakage": false
+    },
+    "4_reverse_ordering": {
+      "max_abs_diff": 0.0,
+      "leakage": false
+    },
+    "5_mixed_interleave": {
+      "max_abs_diff": 0.0,
+      "leakage": false
+    },
+    "6_adversarial_neighbours": {
+      "max_abs_diff": 0.0,
+      "per_target_row_diff": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "leakage": false
+    },
+    "8_heterogeneous_syms": {
+      "max_abs_diff": 0.0,
+      "n_windows": 36,
+      "n_paths": 12,
+      "leakage": false
+    },
+    "9_batch_vs_single_window_ref": {
+      "max_abs_diff": 5.329072336746066e-07,
+      "n_compared": 12,
+      "tolerance_doc": 0.001,
+      "leakage": false
+    }
+  },
+  "axis_review": {
+    "scanned_file": "/root/projects/liangwenbei_workdir/submission/iter_013_time_features/fast_features_batch.py",
+    "summary": "All numpy reductions in fast_features_batch.py use axis=-1 (time) or axis=1 within (N, T, K) slices. lfilter calls use axis=-1. EWMA initial conditions zi are per-window: (1-a)*x[:, :1]. No axis=0 reductions; no global stats; no cross-row indexing."
+  },
+  "leak_top_features": [],
+  "verdict": {
+    "leakage_found": false,
+    "max_abs_diff_overall": 5.329072336746066e-07,
+    "fix_needed": false
+  }
+}

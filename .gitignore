@@ -12,6 +12,12 @@
 *.ckpt
 *.bin
 *.onnx
+*.cbm
+*model*.txt
+*classifier.txt
+*.db
+xgb_model_*.json
+*.npy
 checkpoints/
 runs/
 wandb/
@@ -42,6 +48,8 @@ logs/
 # Submission artifacts
 submission.zip
 submissions/
+# Iter zip 提交包（在 workdir 根的大 zip）
+/submission_*.zip
 
 # But DO commit example weights since they're small reference baselines
 !examples/example_official/best_val_model.pth

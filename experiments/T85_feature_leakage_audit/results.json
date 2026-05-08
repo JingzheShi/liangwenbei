@@ -1,0 +1,17 @@
+{
+  "task": "T85 within-window feature leakage audit (training cache + inference)",
+  "metrics": {
+    "leakage_found": "N",
+    "severity": 0,
+    "n_features_audited": 216,
+    "max_rel_diff_cache_vs_fresh": 5.75e-08,
+    "max_abs_diff_cache_vs_fresh_excl_kyle_inv": 9.29e-07,
+    "kyle_inv_max_abs_diff": 0.226,
+    "kyle_inv_max_rel_diff": 5.52e-08,
+    "n_test1_perturb_each_tick_passes": 216,
+    "n_test2_step_plateau_passes": 38,
+    "test3_n_features_responsive_to_perturb_now": 208,
+    "test3_n_features_responsive_to_perturb_deep_history": 76
+  },
+  "notes": "All last-tick features in compute_batch_features (T3+S1+S2+S3+S5 = 216) are causal: depend on rows [t-W+1,t] only. Static review (0 forward ops, 0 centred ops, 0 backward IIR), perturb-each-tick test (earliest responsive row matches declared W), step-signal sweep (plateau at 99-W), reverse-window sanity (208 vs 76 split), and cache-vs-fresh test (rel diff at float32 storage precision) all converge. kyle_inv has large abs diff due to numerical instability of amt/cbrt(amt*sigma+EPS) for tiny sigma but rel diff still at float32 precision. Training cache (T68 schemeP) is bit-exact reproducible from fresh inference compute. The iter_013 LOSO-equiv vs platform gap is NOT caused by feature-level future leakage."
+}

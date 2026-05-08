@@ -1,0 +1,36 @@
+{
+  "n": 4096,
+  "predict_time_seconds": 6.31382942199707,
+  "extrapolated_442k_seconds": 681.4496364444494,
+  "stateless_ok": true,
+  "shuffle_invariant_ok": true,
+  "h_long_active": true,
+  "h_short_active": [],
+  "action_distribution": {
+    "h5": {
+      "short": 0,
+      "flat": 4096,
+      "long": 0
+    },
+    "h10": {
+      "short": 0,
+      "flat": 4096,
+      "long": 0
+    },
+    "h20": {
+      "short": 0,
+      "flat": 4096,
+      "long": 0
+    },
+    "h40": {
+      "short": 0,
+      "flat": 4096,
+      "long": 0
+    },
+    "h60": {
+      "short": 2008,
+      "flat": 1013,
+      "long": 1075
+    }
+  }
+}

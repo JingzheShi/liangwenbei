@@ -1,0 +1,42 @@
+{
+  "task": "T116 LGB GMADL seed=1",
+  "seed": 1,
+  "horizon": 60,
+  "objective": "gmadl",
+  "tag": "gmadl_a500000_b1",
+  "gmadl_a": 500000.0,
+  "gmadl_b": 1.0,
+  "n_features": 359,
+  "best_iter": 76,
+  "train_time_sec": 100.57347393035889,
+  "val": {
+    "mse": 5.050400432082824e-06,
+    "mae": 0.001540995785035193,
+    "corr": 0.1120448582136778
+  },
+  "test": {
+    "mse": 3.5850796393788187e-06,
+    "mae": 0.001207843772135675,
+    "corr": 0.11226626360716328,
+    "ev_gate_k1_cum_pnl": 12.604140819026926,
+    "ev_gate_k1_n_active": 252262
+  },
+  "params": {
+    "seed": 1,
+    "horizon": 60,
+    "gmadl_a": 500000.0,
+    "gmadl_b": 1.0,
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": false,
+    "no_wandb": true,
+    "tag": ""
+  }
+}

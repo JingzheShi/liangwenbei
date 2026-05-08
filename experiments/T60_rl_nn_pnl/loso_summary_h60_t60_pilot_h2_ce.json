@@ -1,0 +1,228 @@
+{
+  "task": "T60 NN with direct expected-PnL loss (LOSO)",
+  "params": {
+    "seeds": "42",
+    "syms": "2",
+    "horizon": 60,
+    "epochs": 12,
+    "batch_size": 4096,
+    "lr": 0.001,
+    "weight_decay": 0.01,
+    "hidden": 256,
+    "depth": 4,
+    "dropout": 0.4,
+    "ent_beta": 0.005,
+    "lam_act": 0.0,
+    "activity_target": 0.3,
+    "ce_weight_start": 1.0,
+    "ce_weight_end": 0.05,
+    "ce_warmup_frac": 0.5,
+    "pnl_scale": 100.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "patience": 4,
+    "out_tag": "t60_pilot_h2_ce",
+    "save_preds": false,
+    "no_wandb": true,
+    "device": "cuda",
+    "n_drop_tail": 3
+  },
+  "horizon": 60,
+  "n_features": 340,
+  "fold_results": {
+    "42": {
+      "2": {
+        "horizon": 60,
+        "held": 2,
+        "seed": 42,
+        "n_train": 1178880,
+        "n_val": 235776,
+        "n_test": 88416,
+        "best_epoch": 10,
+        "best_val_expected_pnl": 4.2804072089493275,
+        "fit_time_sec": 56.87407946586609,
+        "test": {
+          "accuracy": 0.40620475931958017,
+          "precision_up": 0.2165758544603053,
+          "precision_down": 0.3135189533713519,
+          "precision_macro": 0.2650474039158286,
+          "recall_up": 0.5977875831209993,
+          "recall_down": 0.2514934610623755,
+          "recall_macro": 0.42464052209168746,
+          "f0_5_up": 0.2482361017202847,
+          "f0_5_down": 0.2987813455070907,
+          "f0_5_macro": 0.2735087236136877,
+          "cum_pnl": -7.507328048223091,
+          "single_pnl": -0.0001265585739513999,
+          "n_predictions_active": 59319,
+          "n_total": 88416,
+          "pred_distribution": {
+            "0": 14905,
+            "1": 29097,
+            "2": 44414
+          },
+          "label_distribution": {
+            "0": 18581,
+            "1": 53744,
+            "2": 16091
+          }
+        },
+        "val": {
+          "accuracy": 0.5499838830076005,
+          "precision_up": 0.3591108328115216,
+          "precision_down": 0.39982619159034694,
+          "precision_macro": 0.37946851220093425,
+          "recall_up": 0.2683407092585733,
+          "recall_down": 0.3225997842502697,
+          "recall_macro": 0.29547024675442146,
+          "f0_5_up": 0.3363554165342978,
+          "f0_5_down": 0.3815581300398081,
+          "f0_5_macro": 0.35895677328705294,
+          "cum_pnl": 15.825888124185113,
+          "single_pnl": 0.00019020357098954526,
+          "n_predictions_active": 83205,
+          "n_total": 235776,
+          "pred_distribution": {
+            "0": 44877,
+            "1": 152571,
+            "2": 38328
+          },
+          "label_distribution": {
+            "0": 55620,
+            "1": 128863,
+            "2": 51293
+          }
+        },
+        "history": [
+          {
+            "epoch": 0,
+            "train_main_loss": 0.005757057843284922,
+            "train_entropy": 0.9567761793845898,
+            "train_ce": 0.968254921620107,
+            "train_e_abs_mean": 0.4838934000229603,
+            "val_expected_pnl_sum": -10.39377100020647,
+            "val_e_abs_mean": 0.4432334920611884
+          },
+          {
+            "epoch": 1,
+            "train_main_loss": 0.0034842615730728828,
+            "train_entropy": 0.9405734481174705,
+            "train_ce": 0.9487716187742193,
+            "train_e_abs_mean": 0.48419683146554404,
+            "val_expected_pnl_sum": -8.751859456300735,
+            "val_e_abs_mean": 0.43147459661792337
+          },
+          {
+            "epoch": 2,
+            "train_main_loss": 0.0019748397654349168,
+            "train_entropy": 0.9307720778948839,
+            "train_ce": 0.9418269567199691,
+            "train_e_abs_mean": 0.48458192534866085,
+            "val_expected_pnl_sum": -6.723497040569782,
+            "val_e_abs_mean": 0.434353490864674
+          },
+          {
+            "epoch": 3,
+            "train_main_loss": 6.41502264744451e-05,
+            "train_entropy": 0.9192990407234424,
+            "train_ce": 0.9364222037287411,
+            "train_e_abs_mean": 0.48524814759998963,
+            "val_expected_pnl_sum": -5.596461810171604,
+            "val_e_abs_mean": 0.44153099598506634
+          },
+          {
+            "epoch": 4,
+            "train_main_loss": -0.0024742904519884728,
+            "train_entropy": 0.9039298722073517,
+            "train_ce": 0.9343052751596018,
+            "train_e_abs_mean": 0.4870826194521917,
+            "val_expected_pnl_sum": -4.157765835523605,
+            "val_e_abs_mean": 0.451175078765836
+          },
+          {
+            "epoch": 5,
+            "train_main_loss": -0.007113441822081642,
+            "train_entropy": 0.8659093445338851,
+            "train_ce": 0.9498505915026711,
+            "train_e_abs_mean": 0.49670535624998013,
+            "val_expected_pnl_sum": 3.851315751671791,
+            "val_e_abs_mean": 0.4647860858391214
+          },
+          {
+            "epoch": 6,
+            "train_main_loss": -0.012886899030978723,
+            "train_entropy": 0.8027436355555614,
+            "train_ce": 1.0005643373074153,
+            "train_e_abs_mean": 0.5161953537782551,
+            "val_expected_pnl_sum": 3.036167349666357,
+            "val_e_abs_mean": 0.4621257533467942
+          },
+          {
+            "epoch": 7,
+            "train_main_loss": -0.014288467089731516,
+            "train_entropy": 0.7959113259268894,
+            "train_ce": 1.0034429483900371,
+            "train_e_abs_mean": 0.5188693572721574,
+            "val_expected_pnl_sum": 3.43264377117157,
+            "val_e_abs_mean": 0.4655390629680356
+          },
+          {
+            "epoch": 8,
+            "train_main_loss": -0.01581628879008412,
+            "train_entropy": 0.7892896953027748,
+            "train_ce": 1.0039500548448677,
+            "train_e_abs_mean": 0.5220920871316287,
+            "val_expected_pnl_sum": 3.9703254364430904,
+            "val_e_abs_mean": 0.4676507293336684
+          },
+          {
+            "epoch": 9,
+            "train_main_loss": -0.016730492186695176,
+            "train_entropy": 0.7862075032680482,
+            "train_ce": 1.0046059804941234,
+            "train_e_abs_mean": 0.5236269084301886,
+            "val_expected_pnl_sum": 3.719967432320118,
+            "val_e_abs_mean": 0.46165263976388077
+          },
+          {
+            "epoch": 10,
+            "train_main_loss": -0.01735022621720738,
+            "train_entropy": 0.783394329775687,
+            "train_ce": 1.0044304526719416,
+            "train_e_abs_mean": 0.5244817670859421,
+            "val_expected_pnl_sum": 4.2804072089493275,
+            "val_e_abs_mean": 0.4678096993867789
+          },
+          {
+            "epoch": 11,
+            "train_main_loss": -0.017592082245439195,
+            "train_entropy": 0.7830825588731631,
+            "train_ce": 1.0035361891072425,
+            "train_e_abs_mean": 0.5253807952168451,
+            "val_expected_pnl_sum": 4.220388811081648,
+            "val_e_abs_mean": 0.4685225460868446
+          }
+        ]
+      }
+    }
+  },
+  "aggregate": {
+    "42": {
+      "horizon": 60,
+      "seed": 42,
+      "n_folds": 1,
+      "cum_pnl_per_fold": [
+        -7.507328048223091
+      ],
+      "acc_per_fold": [
+        0.40620475931958017
+      ],
+      "n_active_per_fold": [
+        59319
+      ],
+      "cum_pnl_sum": -7.507328048223091,
+      "cum_pnl_mean": -7.507328048223091,
+      "n_pos_folds": 0
+    }
+  }
+}

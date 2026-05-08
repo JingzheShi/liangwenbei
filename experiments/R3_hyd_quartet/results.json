@@ -1,0 +1,33 @@
+{
+  "task": "R3 HYD Interaction Quartet (T110 #1) — schemeP 359 vs schemeP+HYD 375",
+  "experiment_id": "R3_hyd_quartet",
+  "date": "2026-05-08",
+  "executed_on": "local RTX 3090 (vast.ai ssh6.vast.ai:14816 was Connection refused — pivoted)",
+  "metrics": {
+    "baseline_loso": 39.8245,
+    "trick_loso": 41.2438,
+    "delta_loso": 1.4193,
+    "delta_per_sym": {
+      "0": -0.0069,
+      "1": -0.8589,
+      "2": 0.0916,
+      "3": 0.6341,
+      "4": 1.5595
+    },
+    "delta_per_sym_min": -0.8589,
+    "delta_per_sym_max": 1.5595,
+    "per_seed_delta": {
+      "1": 1.8948,
+      "7": 2.2731,
+      "42": 0.1321
+    },
+    "per_seed_delta_mean": 1.4333,
+    "per_seed_delta_std": 0.9330,
+    "n_seeds_positive": 3,
+    "baseline_thresh": {"T_up": 3.5386e-4, "T_dn": 3.7894e-4},
+    "trick_thresh": {"T_up": 3.0120e-4, "T_dn": 2.9893e-4}
+  },
+  "passes_iter017_bar": true,
+  "iter017_bar_loso": 0.5,
+  "notes": "All 3 seeds positive. Mean per-seed delta (+1.43) matches ensemble delta (+1.42) — gain is not an ensembling artefact. Trick has lower val_corr but higher test_corr — HYD interactions help OOD generalization. Caveat: sym 1 hurt -0.86 in ensemble; per-sym min delta = -0.86. Pure LGB Huber arm only; full ensemble validation (CB+NN+GRU) needed to confirm iter_017."
+}

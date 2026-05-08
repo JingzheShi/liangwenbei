@@ -1,0 +1,212 @@
+{
+  "task": "T60 NN with direct expected-PnL loss (LOSO)",
+  "params": {
+    "seeds": "42",
+    "syms": "4",
+    "horizon": 60,
+    "epochs": 12,
+    "batch_size": 4096,
+    "lr": 0.001,
+    "weight_decay": 0.01,
+    "hidden": 256,
+    "depth": 4,
+    "dropout": 0.4,
+    "ent_beta": 0.01,
+    "lam_act": 0.1,
+    "activity_target": 0.3,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "patience": 4,
+    "out_tag": "t60_pilot_h4",
+    "save_preds": false,
+    "no_wandb": true,
+    "device": "cuda",
+    "n_drop_tail": 3
+  },
+  "horizon": 60,
+  "n_features": 340,
+  "fold_results": {
+    "42": {
+      "4": {
+        "horizon": 60,
+        "held": 4,
+        "seed": 42,
+        "n_train": 1178880,
+        "n_val": 235776,
+        "n_test": 88416,
+        "best_epoch": 10,
+        "best_val_expected_pnl": -16.15174987912178,
+        "fit_time_sec": 57.69957256317139,
+        "test": {
+          "accuracy": 0.4546009771986971,
+          "precision_up": null,
+          "precision_down": null,
+          "precision_macro": null,
+          "recall_up": 0.0,
+          "recall_down": 0.0,
+          "recall_macro": 0.0,
+          "f0_5_up": null,
+          "f0_5_down": null,
+          "f0_5_macro": null,
+          "cum_pnl": 0.0,
+          "single_pnl": 0.0,
+          "n_predictions_active": 0,
+          "n_total": 88416,
+          "pred_distribution": {
+            "0": 0,
+            "1": 88416,
+            "2": 0
+          },
+          "label_distribution": {
+            "0": 25935,
+            "1": 40194,
+            "2": 22287
+          }
+        },
+        "val": {
+          "accuracy": 0.5771325325732899,
+          "precision_up": null,
+          "precision_down": null,
+          "precision_macro": null,
+          "recall_up": 0.0,
+          "recall_down": 0.0,
+          "recall_macro": 0.0,
+          "f0_5_up": null,
+          "f0_5_down": null,
+          "f0_5_macro": null,
+          "cum_pnl": 0.0,
+          "single_pnl": 0.0,
+          "n_predictions_active": 0,
+          "n_total": 235776,
+          "pred_distribution": {
+            "0": 0,
+            "1": 235776,
+            "2": 0
+          },
+          "label_distribution": {
+            "0": 52416,
+            "1": 136074,
+            "2": 47286
+          }
+        },
+        "history": [
+          {
+            "epoch": 0,
+            "train_main_loss": 7.188834122023885e-05,
+            "train_entropy": 0.8974706070042588,
+            "train_e_abs_mean": 0.36169527494040166,
+            "val_expected_pnl_sum": -16.888040721416473,
+            "val_e_abs_mean": 0.3601242494117165
+          },
+          {
+            "epoch": 1,
+            "train_main_loss": 7.191087468400857e-05,
+            "train_entropy": 0.9043259769516323,
+            "train_e_abs_mean": 0.3622057069202199,
+            "val_expected_pnl_sum": -16.841227382421494,
+            "val_e_abs_mean": 0.3604416997373169
+          },
+          {
+            "epoch": 2,
+            "train_main_loss": 7.134815510835126e-05,
+            "train_entropy": 0.9046667397475269,
+            "train_e_abs_mean": 0.3621620991266253,
+            "val_expected_pnl_sum": -16.548178672790527,
+            "val_e_abs_mean": 0.35841118525733906
+          },
+          {
+            "epoch": 3,
+            "train_main_loss": 7.029617794196048e-05,
+            "train_entropy": 0.9047501638968527,
+            "train_e_abs_mean": 0.36214916762389265,
+            "val_expected_pnl_sum": -16.396229833364487,
+            "val_e_abs_mean": 0.35883832469695814
+          },
+          {
+            "epoch": 4,
+            "train_main_loss": 6.95670340163431e-05,
+            "train_entropy": 0.9047962803276303,
+            "train_e_abs_mean": 0.36214524871881054,
+            "val_expected_pnl_sum": -16.328819811344147,
+            "val_e_abs_mean": 0.35919588629508253
+          },
+          {
+            "epoch": 5,
+            "train_main_loss": 6.919997483338952e-05,
+            "train_entropy": 0.9048284560927351,
+            "train_e_abs_mean": 0.3621434224221398,
+            "val_expected_pnl_sum": -16.25870978832245,
+            "val_e_abs_mean": 0.3592731970788084
+          },
+          {
+            "epoch": 6,
+            "train_main_loss": 6.89309305415603e-05,
+            "train_entropy": 0.9048567180913124,
+            "train_e_abs_mean": 0.3621465485854465,
+            "val_expected_pnl_sum": -16.221728414297104,
+            "val_e_abs_mean": 0.3589042162403351
+          },
+          {
+            "epoch": 7,
+            "train_main_loss": 6.867744310663701e-05,
+            "train_entropy": 0.904866220482527,
+            "train_e_abs_mean": 0.3621414775115789,
+            "val_expected_pnl_sum": -16.183522880077362,
+            "val_e_abs_mean": 0.35912149348554084
+          },
+          {
+            "epoch": 8,
+            "train_main_loss": 6.842538187316701e-05,
+            "train_entropy": 0.9048637334868134,
+            "train_e_abs_mean": 0.3621357888857006,
+            "val_expected_pnl_sum": -16.18036377429962,
+            "val_e_abs_mean": 0.35949426624078573
+          },
+          {
+            "epoch": 9,
+            "train_main_loss": 6.82834460770779e-05,
+            "train_entropy": 0.9048799538198175,
+            "train_e_abs_mean": 0.36214557719800167,
+            "val_expected_pnl_sum": -16.18104326725006,
+            "val_e_abs_mean": 0.35980810275165837
+          },
+          {
+            "epoch": 10,
+            "train_main_loss": 6.817720055317984e-05,
+            "train_entropy": 0.9048789992653457,
+            "train_e_abs_mean": 0.3621446830636127,
+            "val_expected_pnl_sum": -16.15174987912178,
+            "val_e_abs_mean": 0.359362179759271
+          },
+          {
+            "epoch": 11,
+            "train_main_loss": 6.812703173838143e-05,
+            "train_entropy": 0.9048738932247141,
+            "train_e_abs_mean": 0.3621378174498596,
+            "val_expected_pnl_sum": -16.164429247379303,
+            "val_e_abs_mean": 0.359736424962809
+          }
+        ]
+      }
+    }
+  },
+  "aggregate": {
+    "42": {
+      "horizon": 60,
+      "seed": 42,
+      "n_folds": 1,
+      "cum_pnl_per_fold": [
+        0.0
+      ],
+      "acc_per_fold": [
+        0.4546009771986971
+      ],
+      "n_active_per_fold": [
+        0
+      ],
+      "cum_pnl_sum": 0.0,
+      "cum_pnl_mean": 0.0,
+      "n_pos_folds": 0
+    }
+  }
+}

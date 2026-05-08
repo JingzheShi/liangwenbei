@@ -1,0 +1,168 @@
+{
+  "task": "T96 schemeQ LGB seed=42",
+  "seed": 42,
+  "horizon": 60,
+  "objective": "regression_l2",
+  "split_info": {
+    "strategy": "V4_schemeQ",
+    "train_dates": "0-75",
+    "val_dates": "76-79",
+    "n_train": 1399920,
+    "n_val": 73680
+  },
+  "n_features": 383,
+  "n_features_p": 359,
+  "n_features_extra": 24,
+  "best_iter": 48,
+  "train_time_sec": 35.281590938568115,
+  "val": {
+    "mse": 5.020607659389498e-06,
+    "mae": 0.0015243650414049625,
+    "corr": 0.137281503148635
+  },
+  "test": {
+    "mse": 3.5356617900106357e-06,
+    "mae": 0.001154920319095254,
+    "corr": 0.14001130771029985,
+    "ev_gate_k1_cum_pnl": 27.939736920045938,
+    "ev_gate_k1_n_active": 171669
+  },
+  "extra_feature_ranks": [
+    {
+      "rank": 9,
+      "feature": "daily_sret_W1500",
+      "gain": 0.3659930474823341
+    },
+    {
+      "rank": 10,
+      "feature": "daily_sret_W300",
+      "gain": 0.33441273344215006
+    },
+    {
+      "rank": 12,
+      "feature": "adj_range_W300",
+      "gain": 0.3160102899419144
+    },
+    {
+      "rank": 25,
+      "feature": "adj_range_W1500",
+      "gain": 0.2013201400404796
+    },
+    {
+      "rank": 28,
+      "feature": "factor_raw_W300",
+      "gain": 0.19452784967143089
+    },
+    {
+      "rank": 29,
+      "feature": "factor_dema_W1500",
+      "gain": 0.19371319992933422
+    },
+    {
+      "rank": 35,
+      "feature": "hlc_typ_W1500",
+      "gain": 0.1629442103439942
+    },
+    {
+      "rank": 38,
+      "feature": "factor_dema_W300",
+      "gain": 0.15548315015621483
+    },
+    {
+      "rank": 39,
+      "feature": "adj_range_W60",
+      "gain": 0.15479385980870575
+    },
+    {
+      "rank": 40,
+      "feature": "factor_raw_simple_W300",
+      "gain": 0.15060008014552295
+    },
+    {
+      "rank": 41,
+      "feature": "factor_raw_simple_W1500",
+      "gain": 0.14808931993320584
+    },
+    {
+      "rank": 48,
+      "feature": "factor_dema_W60",
+      "gain": 0.12877439940348268
+    },
+    {
+      "rank": 52,
+      "feature": "daily_sret_W60",
+      "gain": 0.10988174937665462
+    },
+    {
+      "rank": 55,
+      "feature": "hlc_typ_W300",
+      "gain": 0.10653400036972016
+    },
+    {
+      "rank": 63,
+      "feature": "factor_raw_W1500",
+      "gain": 0.09502864978276193
+    },
+    {
+      "rank": 81,
+      "feature": "factor_raw_simple_W60",
+      "gain": 0.06598643003962934
+    },
+    {
+      "rank": 90,
+      "feature": "hlc_typ_W60",
+      "gain": 0.05353776039555669
+    },
+    {
+      "rank": 130,
+      "feature": "factor_raw_W60",
+      "gain": 0.03551911958493292
+    },
+    {
+      "rank": 139,
+      "feature": "hlc_range_W1500",
+      "gain": 0.02747061033733189
+    },
+    {
+      "rank": 209,
+      "feature": "hlc_range_W60",
+      "gain": 0.007779380073770881
+    },
+    {
+      "rank": 225,
+      "feature": "hlc_range_W300",
+      "gain": 0.005842939950525761
+    },
+    {
+      "rank": 232,
+      "feature": "hlc_range_simple_W60",
+      "gain": 0.005364069947972894
+    },
+    {
+      "rank": 262,
+      "feature": "hlc_range_simple_W300",
+      "gain": 0.0020593800581991673
+    },
+    {
+      "rank": 272,
+      "feature": "hlc_range_simple_W1500",
+      "gain": 0.0
+    }
+  ],
+  "params": {
+    "seed": 42,
+    "horizon": 60,
+    "objective": "regression_l2",
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "no_wandb": false
+  }
+}

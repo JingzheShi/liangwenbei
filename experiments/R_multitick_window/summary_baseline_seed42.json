@@ -1,0 +1,16 @@
+{
+  "task": "T75 L2 baseline seed=42",
+  "seed": 42,
+  "variant": "baseline",
+  "n_features": 359,
+  "best_iter": 62,
+  "train_time_sec": 26.633456707000732,
+  "val": {
+    "mse": 5.0081239351129625e-06,
+    "corr": 0.1485522763636451
+  },
+  "test": {
+    "mse": 3.520453901728615e-06,
+    "corr": 0.15332312048089988
+  }
+}

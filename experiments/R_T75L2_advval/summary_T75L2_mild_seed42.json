@@ -1,0 +1,25 @@
+{
+  "task": "T75 L2 advval[True] seed=42",
+  "seed": 42,
+  "horizon": 60,
+  "objective": "regression_l2",
+  "advval_enabled": true,
+  "split_info": {
+    "strategy": "V4",
+    "train_dates": "0-75",
+    "val_dates": "76-79",
+    "n_train": 1399920,
+    "n_val": 73680
+  },
+  "n_features": 359,
+  "best_iter": 89,
+  "train_time_sec": 68.48811340332031,
+  "val": {
+    "mse": 5.033090928918682e-06,
+    "corr": 0.14981117074386655
+  },
+  "test": {
+    "mse": 3.541105343174422e-06,
+    "corr": 0.1495091104778941
+  }
+}

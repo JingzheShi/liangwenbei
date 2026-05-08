@@ -1,0 +1,33 @@
+{
+  "task": "T122 LGB L2 hyd seed=1",
+  "variant": "hyd",
+  "seed": 1,
+  "horizon": 60,
+  "tag": "hyd_seed1",
+  "objective": "regression_l2",
+  "use_hyd": true,
+  "use_lag": false,
+  "use_monotone": false,
+  "n_constrained": 0,
+  "n_features": 375,
+  "best_iter": 74,
+  "train_time_sec": 39.90449833869934,
+  "val": {
+    "mse": 5.02811371916323e-06,
+    "mae": 0.0015319774392992258,
+    "corr": 0.14592599218203603
+  },
+  "test": {
+    "mae": 0.0011631360976025462,
+    "corr": 0.16032741023392838,
+    "ev_gate_k1_cum_pnl": 32.98772201560875,
+    "ev_gate_k1_n_active": 209147,
+    "per_sym_ev_gate": [
+      4.20157852371891,
+      3.0996291751026805,
+      3.306423825620822,
+      9.730548352341462,
+      12.649542138824877
+    ]
+  }
+}

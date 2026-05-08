@@ -1,0 +1,32 @@
+{
+  "n_windows": 100,
+  "shape_pred": [
+    100,
+    5
+  ],
+  "predict_time_ms_pass1": 812.0450973510742,
+  "ms_per_window": 8.120450973510742,
+  "per_horizon_active_count": {
+    "5": 39,
+    "10": 49,
+    "20": 50,
+    "40": 57,
+    "60": 57
+  },
+  "per_horizon_long_count": {
+    "5": 20,
+    "10": 31,
+    "20": 35,
+    "40": 40,
+    "60": 39
+  },
+  "per_horizon_short_count": {
+    "5": 19,
+    "10": 18,
+    "20": 15,
+    "40": 17,
+    "60": 18
+  },
+  "idempotent": true,
+  "single_consistent": true
+}

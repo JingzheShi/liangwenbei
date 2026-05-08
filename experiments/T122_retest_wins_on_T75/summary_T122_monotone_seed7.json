@@ -1,0 +1,33 @@
+{
+  "task": "T122 LGB L2 monotone seed=7",
+  "variant": "monotone",
+  "seed": 7,
+  "horizon": 60,
+  "tag": "monotone_seed7",
+  "objective": "regression_l2",
+  "use_hyd": false,
+  "use_lag": false,
+  "use_monotone": true,
+  "n_constrained": 18,
+  "n_features": 359,
+  "best_iter": 95,
+  "train_time_sec": 31.90781879425049,
+  "val": {
+    "mse": 4.976550371793564e-06,
+    "mae": 0.0015233892481774092,
+    "corr": 0.16640960511036307
+  },
+  "test": {
+    "mae": 0.0011635893024504185,
+    "corr": 0.15930680474595893,
+    "ev_gate_k1_cum_pnl": 32.51829302492706,
+    "ev_gate_k1_n_active": 208367,
+    "per_sym_ev_gate": [
+      4.224099857454274,
+      3.8199164560032237,
+      2.810524307969452,
+      9.889325016757613,
+      11.774427386742495
+    ]
+  }
+}

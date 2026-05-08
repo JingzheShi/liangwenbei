@@ -1,0 +1,45 @@
+{
+  "task": "t83_robust_thresh",
+  "summary": "Tested 10 robust threshold strategies (sym_grid, DE asym, DE+regularization, K-fold CV-DE date/row, bootstrap median, quantile grid, ensemble averaging) on iter_013's 5-seed regression OOF predictions. Evaluated each via 3 splits (forward-date, backward-date, random row).",
+  "iter013_baseline": {
+    "thr_up": 0.000372,
+    "thr_dn": 0.000161,
+    "loso_local": 36.1464,
+    "platform_actual": 19.23,
+    "transmission_rate": 0.532
+  },
+  "winner": {
+    "strategy": "kfold5_date",
+    "thr_up": 0.0003715273205089116,
+    "thr_dn": 0.00016598792602583347,
+    "loso_full_fit": 36.2213,
+    "delta_vs_iter013_local": 0.0750
+  },
+  "diagnostic_finding": "Per-half PnL is heterogeneous: halfA (96-107) yields 1.35x more PnL/date than halfB (108-119). The S1+S2 date-split gap (-6 PnL per 12 eval dates) is ~91% intrinsic to data, only 0.4 PnL is recoverable via better thresholding. This bounds the platform gap reduction from threshold strategies to <<1.",
+  "best_strategy": "kfold5_date",
+  "unbiased_eval": 35.944,
+  "vs_iter013": 0.20,
+  "metrics": {
+    "best_strategy": "kfold5_date",
+    "unbiased_eval_S1+S2": 35.944,
+    "vs_iter013_unbiased": 0.20,
+    "vs_iter013_full_fit": 0.075,
+    "n_action_flips": 2722,
+    "action_flip_fraction": 0.0062
+  },
+  "strategy_ranking_S1S2_sum_eval": [
+    {"strategy": "kfold5_date", "sum_eval": 35.944},
+    {"strategy": "de_asym", "sum_eval": 35.744},
+    {"strategy": "kfold5_row", "sum_eval": 35.735},
+    {"strategy": "ensemble_avg_3", "sum_eval": 35.733},
+    {"strategy": "quantile_grid", "sum_eval": 35.690},
+    {"strategy": "bootstrap15", "sum_eval": 35.649},
+    {"strategy": "de_reg_lam0.1", "sum_eval": 35.391},
+    {"strategy": "de_reg_lam1.0", "sum_eval": 34.689},
+    {"strategy": "de_reg_lam10.0", "sum_eval": 33.734},
+    {"strategy": "sym_grid", "sum_eval": 33.629}
+  ],
+  "submission_path": "/root/projects/liangwenbei_workdir/submission_050800_iter014_robust_thresh.zip",
+  "submission_size_mb": 3.28,
+  "honest_accounting": "Robust threshold strategies converge to nearly identical thresholds when fit on the full 442k (the data is well-determined). The platform gap of -17 cannot be meaningfully reduced by threshold tweaks — it's dominated by per-date PnL variation that no decision rule can bypass. Iter_014 ships as a marginal-improvement, zero-risk de-risking, but is not expected to deliver the +5 platform target."
+}

@@ -1,0 +1,15 @@
+{
+  "_doc": "iter_015 v2: 4-way ensemble (T87 SPO+ NN + T89 CB + T99 LGB Huber + T95 GRU) with weights 1.0:1.5:0.7:0.7. Asymmetric EV gate at h=60 horizon. Best DE LOSO-equiv on local 442k test: +43.2270 (vs iter_015 packaged +40.13 = +3.10). Search source: experiments/T99_e2e_execution_gbdt/ev_lgb_huber_ensemble.json (label='T87+T89+Huber+T95 w=1:1.5:0.7:0.7'). per_sym = [5.03, 4.59, 4.63, 12.78, 16.20] expected.",
+  "horizons": [
+    {"h": 60,
+     "thr_up": 0.0002870690319757474,
+     "thr_dn": 0.0002073873889201142,
+     "w_t87": 1.0,
+     "w_t89": 1.5,
+     "w_huber": 0.7,
+     "w_gru": 0.7,
+     "active": true,
+     "ensemble_seeds": [1, 7, 13, 42, 100]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "task": "T95 raw-LOB sequence model (CNN/GRU/DeepLOB) — regression on Δmid + EV gate",
+  "metrics": {
+    "best_arch": "GRU 1L hidden=64 dropout=0.10 window-norm top5",
+    "best_window": 100,
+    "best_single_pnl_loso_equiv": 9.06,
+    "best_5seed_ensemble_only_pnl": "n/a (single arch alone insufficient)",
+    "cross_corr_to_T81_NN_avg__1seed": 0.3506,
+    "cross_corr_to_T81_NN_avg__5seed": 0.3713,
+    "cross_corr_to_T75_LGB_avg__1seed": 0.3315,
+    "cross_corr_to_T75_LGB_avg__5seed": 0.3455,
+    "ref_cross_corr_T81_T75": 0.7749,
+    "iter_014_loso_baseline": 38.28,
+    "three_way_ensemble_1seed_T95_at_w05": 39.38,
+    "three_way_ensemble_5seed_T95_at_w05": 39.78,
+    "best_three_way_loso_equiv": 39.78,
+    "vs_iter014_3way_5seed": 1.50,
+    "best_3way_weights_T95_T81_T75": [0.5, 1.0, 1.5],
+    "best_3way_de_thr_up": 0.00038,
+    "best_3way_de_thr_dn": 0.00019,
+    "best_arch_n_params": 16617,
+    "single_seed_train_time_sec": 60,
+    "single_seed_test_inference_sec": 5,
+    "model_size_kb_per_seed": 70
+  },
+  "notes": "GRU is the only seq arch that beats overfit (CNN/DeepLOB collapse train_loss in 2 epochs while val_corr drops). Single-model GRU PnL +9 (far below T81's +28), but cross-corr 0.35 to T81/T75 (vs 0.77 NN-LGB) makes it a strong DIVERSIFIER. 3-way ensemble (T95-5seed + T81-5seed + T75-5seed) at weights (0.5, 1.0, 1.5) hits LOSO-equiv +39.78 = +1.50 over iter_014 — iter_015 candidate. Window-normalization (per-batch per-feature) is critical (global-norm fails because LOB price levels barely move within 100 ticks). Engineered per-tick features (v2: mid_ret, imbalance, log-vol) did not improve on raw top5. Submission packaging deferred (needs Predictor side: per-tick window cache + window-norm + GRU forward + z-scored ensemble combination)."
+}

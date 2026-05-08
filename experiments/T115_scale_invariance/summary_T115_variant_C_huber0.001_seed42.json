@@ -1,0 +1,19 @@
+{
+  "task": "T115 LGB Huber variant_C seed=42",
+  "variant": "variant_C",
+  "seed": 42,
+  "alpha": 0.001,
+  "n_features": 391,
+  "best_iter": 315,
+  "train_time_sec": 56.583229541778564,
+  "val": {
+    "mae": 0.0015219718916341662,
+    "corr": 0.18274610299487767
+  },
+  "test": {
+    "mae": 0.0011732075363397598,
+    "corr": 0.16491911121249778,
+    "ev_gate_k1_cum_pnl": 32.332148700872025,
+    "ev_gate_k1_n_active": 279959
+  }
+}

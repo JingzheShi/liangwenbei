@@ -1,0 +1,16 @@
+{
+  "n_batches_tested": 32,
+  "n_diffs_vs_iter013": 0,
+  "diff_fraction": 0.0,
+  "iter013_thr": {
+    "thr_up": 0.0003723,
+    "thr_dn": 0.0001613
+  },
+  "iter014_thr": {
+    "thr_up": 0.0003715273205089116,
+    "thr_dn": 0.00016598792602583347
+  },
+  "delta_thr_up": -7.726794910884079e-07,
+  "delta_thr_dn": 4.687926025833479e-06,
+  "predict_1024_batch_seconds": 0.5771255493164062
+}

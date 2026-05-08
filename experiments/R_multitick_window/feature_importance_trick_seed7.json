@@ -1,0 +1,252 @@
+[
+  {
+    "name": "open",
+    "gain": 0.5614635914680548,
+    "split": 177
+  },
+  {
+    "name": "ewma_a0.5_mb_intst",
+    "gain": 0.556515499483794,
+    "split": 58
+  },
+  {
+    "name": "mb_intst",
+    "gain": 0.5531362156616524,
+    "split": 73
+  },
+  {
+    "name": "totalbsize",
+    "gain": 0.45018072973471135,
+    "split": 137
+  },
+  {
+    "name": "low",
+    "gain": 0.43499306007288396,
+    "split": 148
+  },
+  {
+    "name": "ma_intst",
+    "gain": 0.403618129552342,
+    "split": 63
+  },
+  {
+    "name": "rv_w50",
+    "gain": 0.382680049224291,
+    "split": 110
+  },
+  {
+    "name": "mid_ewma_resid_a0.05",
+    "gain": 0.3387798812473193,
+    "split": 123
+  },
+  {
+    "name": "ewma_a0.5_lb_intst",
+    "gain": 0.3271948284236714,
+    "split": 40
+  },
+  {
+    "name": "qrank_W100_imbalance",
+    "gain": 0.28402911918237805,
+    "split": 60
+  },
+  {
+    "name": "high",
+    "gain": 0.2837149292463437,
+    "split": 95
+  },
+  {
+    "name": "avgbid",
+    "gain": 0.27688594977371395,
+    "split": 81
+  },
+  {
+    "name": "ewma_a0.05_ma_intst",
+    "gain": 0.2602814791025594,
+    "split": 79
+  },
+  {
+    "name": "rskew_W100",
+    "gain": 0.25369598250836134,
+    "split": 89
+  },
+  {
+    "name": "la_intst",
+    "gain": 0.24979441962204874,
+    "split": 45
+  },
+  {
+    "name": "totalasize",
+    "gain": 0.23965952161233872,
+    "split": 88
+  },
+  {
+    "name": "liq_asym_top5_W100",
+    "gain": 0.2344657186185941,
+    "split": 75
+  },
+  {
+    "name": "bsize1",
+    "gain": 0.2334548317012377,
+    "split": 71
+  },
+  {
+    "name": "ask_mean",
+    "gain": 0.21144514984916896,
+    "split": 67
+  },
+  {
+    "name": "signed_rv_W100",
+    "gain": 0.20657535968348384,
+    "split": 62
+  },
+  {
+    "name": "trade_pers_W100",
+    "gain": 0.1953383496729657,
+    "split": 64
+  },
+  {
+    "name": "asize1",
+    "gain": 0.18878527986817062,
+    "split": 57
+  },
+  {
+    "name": "ewma_a0.5_la_intst",
+    "gain": 0.18564665759913623,
+    "split": 44
+  },
+  {
+    "name": "ofi_tox_lvl1_W50",
+    "gain": 0.1789363499265164,
+    "split": 59
+  },
+  {
+    "name": "rv_w20",
+    "gain": 0.17615600989665836,
+    "split": 52
+  },
+  {
+    "name": "gofi_W5_lvl1",
+    "gain": 0.17403959296643734,
+    "split": 10
+  },
+  {
+    "name": "ewma_a0.05_lb_intst",
+    "gain": 0.16619122016709298,
+    "split": 49
+  },
+  {
+    "name": "cancel_imb_W100",
+    "gain": 0.16160604008473456,
+    "split": 54
+  },
+  {
+    "name": "liq_asym_top5_W50",
+    "gain": 0.15961262956261635,
+    "split": 52
+  },
+  {
+    "name": "bid_mean",
+    "gain": 0.159450329025276,
+    "split": 53
+  },
+  {
+    "name": "ewma_a0.05_mb_intst",
+    "gain": 0.15811858011875302,
+    "split": 53
+  },
+  {
+    "name": "ma_ind",
+    "gain": 0.1495027078781277,
+    "split": 13
+  },
+  {
+    "name": "lb_intst",
+    "gain": 0.1456234207144007,
+    "split": 21
+  },
+  {
+    "name": "ofi_tox_lvl5_W50",
+    "gain": 0.1440349902259186,
+    "split": 47
+  },
+  {
+    "name": "lb_ind",
+    "gain": 0.14318236033432186,
+    "split": 10
+  },
+  {
+    "name": "ewma_a0.3_lb_intst",
+    "gain": 0.14226403052452952,
+    "split": 34
+  },
+  {
+    "name": "ewma_a0.3_mb_intst",
+    "gain": 0.1418639802141115,
+    "split": 38
+  },
+  {
+    "name": "jshare_W100",
+    "gain": 0.13798983057495207,
+    "split": 46
+  },
+  {
+    "name": "signed_bv_W50",
+    "gain": 0.13634339103009552,
+    "split": 36
+  },
+  {
+    "name": "signed_bv_W100",
+    "gain": 0.13336213590810075,
+    "split": 46
+  },
+  {
+    "name": "ewma_a0.05_cb_intst",
+    "gain": 0.13142956618685275,
+    "split": 47
+  },
+  {
+    "name": "qrank_W100_totalasize",
+    "gain": 0.1264913595514372,
+    "split": 49
+  },
+  {
+    "name": "ewma_a0.05_ca_intst",
+    "gain": 0.12633832031860948,
+    "split": 43
+  },
+  {
+    "name": "ewma_a0.05_la_intst",
+    "gain": 0.12259997916407883,
+    "split": 45
+  },
+  {
+    "name": "rskew_W50",
+    "gain": 0.1200018102535978,
+    "split": 42
+  },
+  {
+    "name": "ewma_a0.1_mb_intst",
+    "gain": 0.11273008992429823,
+    "split": 38
+  },
+  {
+    "name": "imbalance",
+    "gain": 0.10894600389292464,
+    "split": 39
+  },
+  {
+    "name": "ask5_lb90",
+    "gain": 0.10472985974047333,
+    "split": 30
+  },
+  {
+    "name": "mlofi_W60_lvl10",
+    "gain": 0.101340769440867,
+    "split": 32
+  },
+  {
+    "name": "ask10",
+    "gain": 0.10018363816197962,
+    "split": 31
+  }
+]

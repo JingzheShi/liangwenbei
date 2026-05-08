@@ -1,0 +1,51 @@
+{
+  "task": "T115 scale-invariance audit + fix experiment",
+  "phase1_ks_audit": {
+    "n_features": 370,
+    "top30_target_count": 14,
+    "top30_raw_target_count": 11,
+    "ks_max_top10": [
+      {"feat": "bid_diff1", "ks_max": 1.0},
+      {"feat": "bid_diff10", "ks_max": 1.0},
+      {"feat": "bid_mean", "ks_max": 1.0, "abs_mean_ratio": 29.78, "note": "stored in 元 absolute"},
+      {"feat": "bsize_mean", "ks_max": 1.0},
+      {"feat": "bid_diff9", "ks_max": 1.0},
+      {"feat": "cumspread", "ks_max": 0.9999},
+      {"feat": "totalbsize", "ks_max": 0.9946},
+      {"feat": "totalasize", "ks_max": 0.9943},
+      {"feat": "kyle_lam_W100", "ks_max": 0.9729},
+      {"feat": "kyle_lam_W50", "ks_max": 0.9462}
+    ],
+    "amount_delta_ks": 0.5684,
+    "verdict": "PM hypothesis partially confirmed: bid_diff/cumspread leak verified. amount_delta moderate leak. NEW finding: bid_mean/ask_mean stored in 元 absolute (worst single leak)."
+  },
+  "phase3_de_loso_3seed": {
+    "baseline":  {"de_sum": 41.225, "per_sym": [4.95, 5.43, 4.31, 11.51, 15.02], "per_sym_min": 4.31},
+    "variant_A": {"de_sum": 39.916, "per_sym": [4.71, 5.15, 3.84, 11.20, 15.01], "per_sym_min": 3.84, "delta_de": -1.31, "delta_per_sym_min": -0.47},
+    "variant_B": {"de_sum": 40.083, "per_sym": [4.62, 5.43, 3.81, 11.33, 14.89], "per_sym_min": 3.81, "delta_de": -1.14, "delta_per_sym_min": -0.50},
+    "variant_C": {"de_sum": 40.880, "per_sym": [4.65, 5.83, 4.09, 10.93, 15.38], "per_sym_min": 4.09, "delta_de": -0.34, "delta_per_sym_min": -0.22}
+  },
+  "metrics": {
+    "baseline_loso_3seed": 41.225,
+    "variant_a_loso": 39.916,
+    "variant_b_loso": 40.083,
+    "variant_c_loso": 40.880,
+    "delta_loso_best": -0.345,
+    "delta_per_sym_min": -0.222
+  },
+  "success_criteria": {
+    "delta_loso_gt_0_3":  {"required": "+0.3",  "achieved": -0.345, "pass": false},
+    "delta_per_sym_min_gt_0_5": {"required": "+0.5", "achieved": -0.222, "pass": false},
+    "ks_reduction": {"required": "meaningful", "achieved": "amount_delta only (0.57→0.28); spread/diff remain near 1.0", "pass": "partial"}
+  },
+  "recommendation": {
+    "iter_017_candidate": false,
+    "reason": "All variants underperform baseline by -0.34 to -1.31 DE LOSO. The 'leak' features are load-bearing for in-distribution performance because train/test share the same 5 syms.",
+    "follow_ups": [
+      "OOD sym holdout test (held-out sym2 or sym3, train on other 4) to measure true OOD generalization",
+      "Targeted drop (vs replace): only remove worst-KS features without adding ratios",
+      "Ensemble baseline + variant_C for diversification (if cross-corr < 0.95)"
+    ]
+  },
+  "notes": "KS audit confirms bid_diff*+cumspread+bid_mean leak (KS=1.00). PM literal fix is no-op (midprice+1≈1). Smart prev-close-proxy fix reduces only amount_delta KS (0.57→0.28); spread/diff KS remain near 1.0 because typical spread in 元 is genuinely sym-dependent (liquidity differences). NOT iter_017 candidate."
+}

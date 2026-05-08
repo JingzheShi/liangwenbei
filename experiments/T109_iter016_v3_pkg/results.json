@@ -1,0 +1,37 @@
+{
+  "task": "T109 iter_016 v3 — swap T89 CB RMSE for T99 CB Huber + retune h=60 weights/thresholds",
+  "submission_zip": "submission_050815_iter016_v3.zip",
+  "zip_size_mb": 51.10,
+  "metrics": {
+    "cum_pnl_target": 44.7178,
+    "cum_pnl_actual": 44.7082,
+    "drift": -0.0096,
+    "vs_T108_baseline": 1.5080,
+    "per_sym": [4.6826, 4.4457, 4.5436, 12.9915, 18.0448],
+    "per_sym_target": [4.6852, 4.4561, 4.5437, 12.9933, 18.0395],
+    "n_active": 196816,
+    "n_total": 442080,
+    "thr_up": 2.882863e-4,
+    "thr_dn": 2.186241e-4,
+    "weights_nn_cb_huber_lgb_huber_gru": [1.0, 0.7, 1.0, 1.0],
+    "total_inference_time_s": 35.65,
+    "gru_backend": "torch_cuda",
+    "predictor_stateless_ok": true,
+    "predictor_shuffle_invariant_ok": true
+  },
+  "h60_changes_vs_T108": {
+    "cb_stream": "model_T89_seed*.cbm (CatBoost RMSE) -> model_cb_huber_seed*.cbm (T99 CatBoost Huber alpha=1e-3)",
+    "weights": "(1.0, 1.5, 0.7, 0.7) -> (1.0, 0.7, 1.0, 1.0)  for (NN, CB, LGB_Huber, GRU)",
+    "thr_up": "2.871e-4 -> 2.883e-4",
+    "thr_dn": "2.074e-4 -> 2.186e-4"
+  },
+  "short_horizons": "h=5/10/20/40 unchanged from T108 (LGB+CB 2-way DE-tuned)",
+  "compliance": {
+    "date_in_features": false,
+    "sym_in_features": false,
+    "stateless": true,
+    "shuffle_invariant": true,
+    "sym_agnostic": true
+  },
+  "notes": "Single-component swap (T89 CB RMSE -> T99 CB Huber on h=60 stack) + retuned 4-way weights. Per-sym matches T99 winner-refine target to 3 decimal places. GPU GRU keeps inference ~35s. Drift -0.0096 well within ±0.10 tolerance."
+}

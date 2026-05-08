@@ -1,0 +1,252 @@
+[
+  {
+    "name": "open",
+    "gain": 0.7672743471339345,
+    "split": 426
+  },
+  {
+    "name": "rv_w50",
+    "gain": 0.5475287627195939,
+    "split": 285
+  },
+  {
+    "name": "low",
+    "gain": 0.5023995423107408,
+    "split": 285
+  },
+  {
+    "name": "totalasize",
+    "gain": 0.4740172043675557,
+    "split": 277
+  },
+  {
+    "name": "mb_intst",
+    "gain": 0.46075676614418626,
+    "split": 95
+  },
+  {
+    "name": "high",
+    "gain": 0.4178697365568951,
+    "split": 234
+  },
+  {
+    "name": "totalbsize",
+    "gain": 0.41139693825971335,
+    "split": 198
+  },
+  {
+    "name": "avgbid",
+    "gain": 0.41078138223383576,
+    "split": 218
+  },
+  {
+    "name": "ewma_a0.5_mb_intst",
+    "gain": 0.40597755007911474,
+    "split": 63
+  },
+  {
+    "name": "mid_ewma_resid_a0.05",
+    "gain": 0.37847287370823324,
+    "split": 235
+  },
+  {
+    "name": "ma_intst",
+    "gain": 0.3617806353722699,
+    "split": 77
+  },
+  {
+    "name": "liq_asym_top5_W100",
+    "gain": 0.316107674210798,
+    "split": 182
+  },
+  {
+    "name": "trade_pers_W100",
+    "gain": 0.3126315663103014,
+    "split": 179
+  },
+  {
+    "name": "signed_bv_W100",
+    "gain": 0.29378554510185495,
+    "split": 167
+  },
+  {
+    "name": "rskew_W100",
+    "gain": 0.29277519055176526,
+    "split": 168
+  },
+  {
+    "name": "ewma_a0.5_lb_intst",
+    "gain": 0.2894768688129261,
+    "split": 40
+  },
+  {
+    "name": "cancel_imb_W100",
+    "gain": 0.2774811029667035,
+    "split": 156
+  },
+  {
+    "name": "signed_rv_W100",
+    "gain": 0.268890934123192,
+    "split": 147
+  },
+  {
+    "name": "ewma_a0.05_ma_intst",
+    "gain": 0.2578410214628093,
+    "split": 139
+  },
+  {
+    "name": "liq_asym_top5_W50",
+    "gain": 0.240287380409427,
+    "split": 137
+  },
+  {
+    "name": "qrank_W100_imbalance",
+    "gain": 0.23400045436574146,
+    "split": 88
+  },
+  {
+    "name": "ask_mean",
+    "gain": 0.2308462499640882,
+    "split": 128
+  },
+  {
+    "name": "bid_mean",
+    "gain": 0.21777372184442356,
+    "split": 126
+  },
+  {
+    "name": "ofi_tox_lvl1_W50",
+    "gain": 0.21624557522591203,
+    "split": 124
+  },
+  {
+    "name": "ewma_a0.05_lb_intst",
+    "gain": 0.20931466639740393,
+    "split": 111
+  },
+  {
+    "name": "bsize1",
+    "gain": 0.20227530546253547,
+    "split": 103
+  },
+  {
+    "name": "ofi_tox_lvl5_W50",
+    "gain": 0.19880739989457652,
+    "split": 113
+  },
+  {
+    "name": "ewma_a0.05_ca_intst",
+    "gain": 0.19611974543659016,
+    "split": 109
+  },
+  {
+    "name": "la_intst",
+    "gain": 0.18404878093861043,
+    "split": 51
+  },
+  {
+    "name": "jshare_W100",
+    "gain": 0.18091107037616894,
+    "split": 107
+  },
+  {
+    "name": "ewma_a0.5_la_intst",
+    "gain": 0.17919723817612976,
+    "split": 65
+  },
+  {
+    "name": "ewma_a0.05_mb_intst",
+    "gain": 0.17686173977563158,
+    "split": 96
+  },
+  {
+    "name": "ewma_a0.05_cb_intst",
+    "gain": 0.17593924840912223,
+    "split": 109
+  },
+  {
+    "name": "ewma_a0.3_lb_intst",
+    "gain": 0.17413873615441844,
+    "split": 63
+  },
+  {
+    "name": "ewma_a0.1_mb_intst",
+    "gain": 0.17265663482248783,
+    "split": 97
+  },
+  {
+    "name": "signed_bv_W50",
+    "gain": 0.17263829504372552,
+    "split": 101
+  },
+  {
+    "name": "rv_w20",
+    "gain": 0.17191017017466947,
+    "split": 92
+  },
+  {
+    "name": "qrank_W100_totalasize",
+    "gain": 0.1693112781504169,
+    "split": 97
+  },
+  {
+    "name": "ewma_a0.05_la_intst",
+    "gain": 0.16545396787114441,
+    "split": 100
+  },
+  {
+    "name": "rskew_W50",
+    "gain": 0.1623107380582951,
+    "split": 86
+  },
+  {
+    "name": "ewma_a0.3_mb_intst",
+    "gain": 0.1558893208275549,
+    "split": 57
+  },
+  {
+    "name": "trade_pers_W50",
+    "gain": 0.15163782093441114,
+    "split": 93
+  },
+  {
+    "name": "asize1",
+    "gain": 0.1498459225986153,
+    "split": 78
+  },
+  {
+    "name": "jshare_W50",
+    "gain": 0.14833162701688707,
+    "split": 75
+  },
+  {
+    "name": "imbalance",
+    "gain": 0.13569400034612045,
+    "split": 86
+  },
+  {
+    "name": "bid4_lb90",
+    "gain": 0.13078351598232985,
+    "split": 41
+  },
+  {
+    "name": "ask10",
+    "gain": 0.13026662898482755,
+    "split": 73
+  },
+  {
+    "name": "lb_ind",
+    "gain": 0.12886260927189142,
+    "split": 14
+  },
+  {
+    "name": "gofi_W60_lvl2",
+    "gain": 0.12243244162527844,
+    "split": 79
+  },
+  {
+    "name": "gofi_W60_lvl10",
+    "gain": 0.11910460179205984,
+    "split": 61
+  }
+]

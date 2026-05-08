@@ -1,0 +1,93 @@
+{
+  "task": "T95 gru w100 seed=7 tag=C",
+  "arch": "gru",
+  "window": 100,
+  "scheme": "top5",
+  "seed": 7,
+  "F_dim": 20,
+  "n_params": 16617,
+  "split_info": {
+    "strategy": "V4",
+    "train_dates": "0-75",
+    "val_dates": "76-79",
+    "test_dates": "96-119"
+  },
+  "dropped_for_window_test": 0,
+  "best_epoch": 1,
+  "best_val_mse": 5.087759745947551e-06,
+  "test_mse": 3.590037749745534e-06,
+  "test_corr": 0.08737202803692468,
+  "test_ev_gate_k1_cum_pnl": 0.2739275266920993,
+  "test_ev_gate_k1_n_active": 213474,
+  "train_time_sec": 126.09777641296387,
+  "pred_time_sec_test": 3.7134571075439453,
+  "epoch_logs": [
+    {
+      "epoch": 0,
+      "train_loss": 1.3685058070316376,
+      "val_mse": 5.107545803184621e-06,
+      "val_corr": 0.05422752371657943,
+      "lr": 0.000288581929876693,
+      "time": 24.760249137878418
+    },
+    {
+      "epoch": 1,
+      "train_loss": 1.3621466841464165,
+      "val_mse": 5.087759745947551e-06,
+      "val_corr": 0.08034349209982647,
+      "lr": 0.0002560660171779821,
+      "time": 26.81526207923889
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.3527079681470275,
+      "val_mse": 5.117006821819814e-06,
+      "val_corr": 0.07171066848949956,
+      "lr": 0.00020740251485476348,
+      "time": 28.154118299484253
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.3354114379628848,
+      "val_mse": 5.1783022172458e-06,
+      "val_corr": 0.04977211781851148,
+      "lr": 0.00015,
+      "time": 25.323927879333496
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.3091395567141844,
+      "val_mse": 5.299811618897365e-06,
+      "val_corr": 0.03603201594015425,
+      "lr": 9.259748514523653e-05,
+      "time": 21.038280725479126
+    }
+  ],
+  "args": {
+    "arch": "gru",
+    "scheme": "top5",
+    "window": 100,
+    "seed": 7,
+    "hidden": 64,
+    "gru_hidden": 64,
+    "n_layers": 1,
+    "bidir": false,
+    "kernel": 3,
+    "dropout": 0.1,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "batch_size": 1024,
+    "epochs": 8,
+    "patience": 3,
+    "target_scale": 0.0,
+    "num_workers": 2,
+    "cuda": "0",
+    "no_wandb": true,
+    "tag": "C",
+    "use_sample_weight": true,
+    "max_train_samples": 0,
+    "norm_mode": "window",
+    "aug_scale": 0.0,
+    "aug_noise": 0.0
+  }
+}

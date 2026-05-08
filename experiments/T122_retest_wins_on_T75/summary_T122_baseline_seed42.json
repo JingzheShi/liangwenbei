@@ -1,0 +1,33 @@
+{
+  "task": "T122 LGB L2 baseline seed=42",
+  "variant": "baseline",
+  "seed": 42,
+  "horizon": 60,
+  "tag": "baseline_seed42",
+  "objective": "regression_l2",
+  "use_hyd": false,
+  "use_lag": false,
+  "use_monotone": false,
+  "n_constrained": 0,
+  "n_features": 359,
+  "best_iter": 124,
+  "train_time_sec": 38.32510852813721,
+  "val": {
+    "mse": 5.010087079426739e-06,
+    "mae": 0.0015382912242785096,
+    "corr": 0.1593094852245521
+  },
+  "test": {
+    "mae": 0.0011747559765353799,
+    "corr": 0.14617371359067574,
+    "ev_gate_k1_cum_pnl": 28.27976046467789,
+    "ev_gate_k1_n_active": 235441,
+    "per_sym_ev_gate": [
+      4.572254441131893,
+      3.4996066933359176,
+      1.5908123786105992,
+      8.047741003678981,
+      10.5693459479205
+    ]
+  }
+}

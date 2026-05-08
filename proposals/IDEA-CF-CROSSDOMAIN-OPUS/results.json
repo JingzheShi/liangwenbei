@@ -1,0 +1,261 @@
+{
+  "task": "IDEA-CF-CROSSDOMAIN-OPUS",
+  "n_ideas": 13,
+  "n_unique_ideas": 12,
+  "n_marked_isomorphic": 1,
+  "baseline_LOSO": 40.09,
+  "by_domain": {
+    "RL_Bandits": [
+      {
+        "name": "Doubly Robust Off-Policy Evaluation for threshold tuning",
+        "from_paper": "Dudik, Langford & Li 2011 'Doubly Robust Policy Evaluation'",
+        "analogy": "logged data = 1.77M samples; π_β = oracle action; π = our policy; DR = direct method + IPS correction → variance ↓",
+        "upside": "+0.5 ~ +1.5",
+        "hours": 8,
+        "redline_compat": "stateless, sym-agnostic, no date",
+        "novelty": "extends T62 unbiased thresh with direct-method baseline"
+      },
+      {
+        "name": "Conservative Q-Learning (offline RL, value-based)",
+        "from_paper": "Kumar et al. 2020 'Conservative Q-Learning for Offline RL'",
+        "analogy": "state = current 100×154 window; action = {SELL,ABSTAIN,BUY}; R = official PnL; CQL penalty pushes down OOD action Q",
+        "upside": "+1 ~ +3",
+        "hours": 16,
+        "redline_compat": "state purely in-batch, no sym embedding, no date",
+        "novelty": "T60 was policy-gradient PnL loss; CQL is value-based with conservatism penalty → different inductive bias"
+      }
+    ],
+    "CV_OOD": [
+      {
+        "name": "Mahalanobis distance OOD score for selective gating",
+        "from_paper": "Lee et al. 2018 'A Simple Unified Framework for Detecting OOD Samples'",
+        "analogy": "5 sym = 5 in-distribution Gaussians; held-out sym → high M(x) → abstain at inference",
+        "upside": "+1 ~ +2",
+        "hours": 8,
+        "redline_compat": "uses train-time stats only; no sym ID at inference",
+        "novelty": "T82/T83 are score-domain robust thresh; Mahalanobis is input-feature-domain OOD"
+      },
+      {
+        "name": "CORAL second-order moment matching across syms",
+        "from_paper": "Sun & Saenko 2016 'Deep CORAL'",
+        "analogy": "5 sym = 5 source domains; minimize ||cov(features_i) - cov(features_j)||_F",
+        "upside": "+0.5 ~ +1.5",
+        "hours": 8,
+        "redline_compat": "sym used only at train time as auxiliary signal",
+        "novelty": "T45 GroupDRO was worst-case risk; CORAL is distribution-matching"
+      }
+    ],
+    "NLP_SSL": [
+      {
+        "name": "Cross-sym contrastive pretraining (SimCSE/SimCLR)",
+        "from_paper": "Chen et al. 2020 SimCLR / Gao et al. 2021 SimCSE",
+        "analogy": "augmentation (time jitter, dropout, vol scaling, cross-sym mix) → InfoNCE → sym-invariant 128-D representation, fed to GBDT",
+        "upside": "+1 ~ +3",
+        "hours": 16,
+        "redline_compat": "encoder consumes only current window",
+        "novelty": "T44 hand-crafted features; this is learned representation"
+      },
+      {
+        "name": "Masked LOB Modeling (BERT-style timestep masking)",
+        "from_paper": "Devlin et al. 2018 BERT",
+        "analogy": "random mask 15% timesteps in window, predict from context; learn token-level (per-tick) representation",
+        "upside": "+1 ~ +2",
+        "hours": 16,
+        "redline_compat": "encoder consumes only current window",
+        "novelty": "no MLM-style SSL tried in 80 experiments"
+      },
+      {
+        "name": "Curriculum learning by horizon difficulty (h60→h5)",
+        "from_paper": "Bengio et al. 2009 'Curriculum Learning'",
+        "analogy": "h=60 high SNR (easy) → h=5 low SNR (hard); LightGBM init_model carries earlier knowledge",
+        "upside": "+0.5 ~ +1.5",
+        "hours": 6,
+        "redline_compat": "no constraint impact",
+        "novelty": "T12 multi-horizon stacking is post-hoc; this is train-time transfer"
+      }
+    ],
+    "Robotics_S2R": [
+      {
+        "name": "Domain Randomization (physics-parameter)",
+        "from_paper": "Tobin et al. 2017",
+        "analogy": "ISOMORPHIC TO T26 — already implemented as feature-gain randomization; only marginal extension via session-level vol/spread randomization",
+        "upside": "0 ~ +0.5",
+        "hours": 4,
+        "redline_compat": "OK",
+        "novelty": "marked as DUPLICATE; not new"
+      },
+      {
+        "name": "RL² / System Identification via in-window latent",
+        "from_paper": "Gupta et al. 2018 / Duan et al. RL² 2016",
+        "analogy": "infer 'regime z' from current 100-tick window only; condition GBDT on z",
+        "upside": "+1 ~ +2",
+        "hours": 12,
+        "redline_compat": "z derived from current window only — no cross-batch state",
+        "novelty": "regime identification not attempted; sym-agnostic"
+      }
+    ],
+    "Bio_Small_N": [
+      {
+        "name": "Prototypical mixture of experts via cluster routing",
+        "from_paper": "Snell et al. 2017 'Prototypical Networks'",
+        "analogy": "K=10 cluster prototypes in encoded feature space (NOT sym ID); soft attention routes window to expert mixture",
+        "upside": "+1 ~ +2",
+        "hours": 12,
+        "redline_compat": "uses learned cluster, not sym ID; T48 violated, this fixes it",
+        "novelty": "sym-agnostic implementation of T48-style mixture"
+      },
+      {
+        "name": "Strong architectural prior — bid-ask symmetric DeepLOB",
+        "from_paper": "Zhang et al. 2019 DeepLOB; informed by AlphaFold-style equivariance",
+        "analogy": "shared-weight conv on bid-stack vs ask-stack with sign flip → encodes mid-symmetry",
+        "upside": "+0.5 ~ +1.5",
+        "hours": 10,
+        "redline_compat": "OK",
+        "novelty": "T93/T94/T95/T97 used standard arch; bid-ask symmetry constraint not used"
+      }
+    ],
+    "Econometrics": [
+      {
+        "name": "GARCH per-window vol-aware threshold",
+        "from_paper": "Engle 1982 / Bollerslev 1986",
+        "analogy": "fit ARMA-GARCH on window's midprice returns → σ̂_{t+h} → threshold scales as k·σ̂",
+        "upside": "+0.5 ~ +1.5",
+        "hours": 8,
+        "redline_compat": "per-window fit, fully stateless",
+        "novelty": "T76/T82/T83 are score-domain; this is input-domain vol-aware gate"
+      },
+      {
+        "name": "Bootstrap CI selective trading via std-as-gate",
+        "from_paper": "Efron 1979 'Bootstrap Methods'",
+        "analogy": "20 bootstrap GBDT → (μ̂, σ̂_bootstrap); trade only if |μ̂| > 2·σ̂",
+        "upside": "+1 ~ +2",
+        "hours": 6,
+        "redline_compat": "OK",
+        "novelty": "T11/T17/T46 use ensemble mean; this uses ensemble disagreement as gate"
+      }
+    ],
+    "Med_Decision": [
+      {
+        "name": "Selective Prediction with Abstain (SelectiveNet)",
+        "from_paper": "Geifman & El-Yaniv 2017 'SelectiveNet'",
+        "analogy": "label=1 (FLAT) IS the abstain action; train (binary classifier g, selector h) jointly with coverage constraint c",
+        "upside": "+2 ~ +4",
+        "hours": 12,
+        "redline_compat": "stateless, sym-agnostic, no date",
+        "novelty": "PARADIGM SHIFT — all 80 experiments treated abstain as post-hoc threshold; SelectiveNet trains it jointly"
+      },
+      {
+        "name": "Deep ensembles + predictive entropy as gate",
+        "from_paper": "Lakshminarayanan, Pritzel & Blundell 2017",
+        "analogy": "M independent models → mean predictive distribution → entropy H; trade only if H < τ_H",
+        "upside": "+0.5 ~ +1",
+        "hours": 4,
+        "redline_compat": "OK",
+        "novelty": "ensembles already in T11/T17/T46 but used as mean; entropy-as-gate is new angle"
+      }
+    ],
+    "Info_Theory": [
+      {
+        "name": "Information Bottleneck via gradient reversal (DANN)",
+        "from_paper": "Tishby 1999 'Information Bottleneck' / Ganin & Lempitsky 2016 DANN",
+        "analogy": "minimax: min_φ,h max_d [CE(h(φ(x)),y) - λ·CE(d(φ(x)),sym)] → φ encodes y info but no sym info",
+        "upside": "+2 ~ +3",
+        "hours": 12,
+        "redline_compat": "sym only used as auxiliary at train time; inference no sym",
+        "novelty": "T45 GroupDRO was worst-case; DANN is invariance-penalty — alternative untried"
+      },
+      {
+        "name": "VAE representation + GBDT downstream",
+        "from_paper": "Kingma & Welling 2013 'Auto-Encoding Variational Bayes'",
+        "analogy": "compress 100×154 to 64-D z via β-VAE; concat z to GBDT",
+        "upside": "+0.5 ~ +1.5",
+        "hours": 10,
+        "redline_compat": "OK",
+        "novelty": "no generative representation tried"
+      },
+      {
+        "name": "MDL feature selection",
+        "from_paper": "Rissanen 1978 'MDL Principle'",
+        "analogy": "noise feature has DL > predictive gain → drop; LightGBM L1 + monotonic constraint approximates MDL",
+        "upside": "+0.3 ~ +0.8",
+        "hours": 6,
+        "redline_compat": "OK",
+        "novelty": "T85 is leakage audit; MDL is statistical model selection — complementary"
+      }
+    ]
+  },
+  "top5_cross_domain": [
+    {
+      "rank": 1,
+      "domain": "Med_Decision",
+      "name": "Selective Prediction with Abstain (SelectiveNet)",
+      "from_paper": "Geifman & El-Yaniv 2017",
+      "score_analogy_x_feasibility": 25,
+      "upside": "+2 ~ +4",
+      "hours": 12,
+      "rationale": "abstain = first-class action, perfect mapping; 80 experiments missed this paradigm shift"
+    },
+    {
+      "rank": 2,
+      "domain": "Info_Theory",
+      "name": "Information Bottleneck via DANN/GRL",
+      "from_paper": "Tishby 1999 + Ganin & Lempitsky 2016",
+      "score_analogy_x_feasibility": 20,
+      "upside": "+2 ~ +3",
+      "hours": 12,
+      "rationale": "directly attacks sym-OOD redline ③ which is the central data challenge"
+    },
+    {
+      "rank": 3,
+      "domain": "RL_Bandits",
+      "name": "Conservative Q-Learning (CQL)",
+      "from_paper": "Kumar et al. 2020",
+      "score_analogy_x_feasibility": 16,
+      "upside": "+1 ~ +3",
+      "hours": 16,
+      "rationale": "offline RL is the natural framework; T60 was policy-gradient, CQL is value-based — orthogonal angle"
+    },
+    {
+      "rank": 4,
+      "domain": "NLP_SSL",
+      "name": "Cross-Sym Contrastive Pretraining (SimCSE)",
+      "from_paper": "Gao et al. 2021 / Chen et al. 2020",
+      "score_analogy_x_feasibility": 16,
+      "upside": "+1 ~ +3",
+      "hours": 16,
+      "rationale": "leverages all 1.77M unlabeled windows including held-out sym; learned representation upper bound > handcrafted"
+    },
+    {
+      "rank": 5,
+      "domain": "CV_OOD",
+      "name": "Mahalanobis OOD Score for Selective Gating",
+      "from_paper": "Lee et al. 2018",
+      "score_analogy_x_feasibility": 15,
+      "upside": "+1 ~ +2",
+      "hours": 8,
+      "rationale": "simple, principled OOD detection; integrates orthogonally with existing GBDT pipeline"
+    }
+  ],
+  "ideal_combined_pipeline": {
+    "stages": [
+      "Stage 1: SimCSE encoder φ pretrain (#4) on all 1.77M windows",
+      "Stage 2: SelectiveNet (g,h) (#1) trained on 226 handcrafted + 128 from φ, with IB-DANN auxiliary loss (#2)",
+      "Stage 3: At inference, gate via Mahalanobis OOD (#5) on encoded z + Bootstrap CI gate (#6.2)",
+      "Stage 4: ABSTAIN if any gate fails, else argmax(g)"
+    ],
+    "expected_LOSO": "+45 ~ +50 (vs +40.09 iter_015 baseline)"
+  },
+  "implementation_schedule_3.5d": {
+    "day1": ["Mahalanobis OOD (8h)", "Bootstrap CI gate (6h)"],
+    "day2": ["SelectiveNet NN-version (12h) — verify upside fast"],
+    "day3": ["IB-DANN GRL (12h)", "SimCSE pretrain (16h, parallel worker)"],
+    "day3.5": "Final ensemble + selective gating + submit",
+    "backlog": ["CQL (16h)", "RL² latent (12h)", "Sym-LOB arch (10h)"]
+  },
+  "redline_compliance_summary": {
+    "redline_1_no_date": "all 13 ideas compliant",
+    "redline_2_stateless": "all 13 ideas compliant — encoders consume only current window; train-time stats stored as constants",
+    "redline_3_sym_agnostic": "all 13 ideas compliant — sym used only as train-time auxiliary signal; inference never reads sym ID; OOD detection / cluster routing replace sym-conditional logic"
+  },
+  "notes": "13 ideas covering all 8 domains. 8 fully novel vs T1-T98, 4 with new orthogonal angle, 1 marked isomorphic (T26 ≡ DR). Top 5 are all in fully-novel set. Central insight: 80+ prior experiments stayed on 'how to train GBDT better' axis; the missing reframe is 'abstain as first-class action' which medical imaging / selective classification literature already solves."
+}

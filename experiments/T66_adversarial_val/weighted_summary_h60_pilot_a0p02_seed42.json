@@ -1,0 +1,138 @@
+{
+  "task": "T66 weighted alpha=0.02 adv=False",
+  "params": {
+    "horizon": 60,
+    "seeds": "42",
+    "decay_alpha": 0.02,
+    "latest_date": 95,
+    "use_adv_weight": false,
+    "adv_mode": "ratio_clip",
+    "adv_w_lo": 0.5,
+    "adv_w_hi": 5.0,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "no_gpu": false,
+    "out_tag": "pilot_a0p02_seed42",
+    "no_wandb": true
+  },
+  "horizon": 60,
+  "seed_results": {
+    "seed42": {
+      "horizon": 60,
+      "seed": 42,
+      "decay_alpha": 0.02,
+      "use_adv_weight": false,
+      "best_iter": 138,
+      "train_time_sec": 234.5082528591156,
+      "val": {
+        "accuracy": 0.5213388979370249,
+        "precision_up": 0.33888581879424223,
+        "precision_down": 0.3763989392781698,
+        "precision_macro": 0.357642379036206,
+        "recall_up": 0.3988663992690443,
+        "recall_down": 0.4717895270555759,
+        "recall_macro": 0.43532796316231015,
+        "f0_5_up": 0.3493940273644056,
+        "f0_5_down": 0.3922611045795413,
+        "f0_5_macro": 0.3708275659719734,
+        "cum_pnl": 18.357837157497706,
+        "single_pnl": 0.00011126096775414069,
+        "n_predictions_active": 164998,
+        "n_total": 294720,
+        "pred_distribution": {
+          "0": 88996,
+          "1": 129722,
+          "2": 76002
+        },
+        "label_distribution": {
+          "0": 71002,
+          "1": 159145,
+          "2": 64573
+        }
+      },
+      "test_full": {
+        "accuracy": 0.5795037097357945,
+        "precision_up": 0.3051746442432083,
+        "precision_down": 0.3643942200815117,
+        "precision_macro": 0.33478443216236,
+        "recall_up": 0.3701263042284459,
+        "recall_down": 0.4319991215066162,
+        "recall_macro": 0.40106271286753103,
+        "f0_5_up": 0.31627495408046974,
+        "f0_5_down": 0.3761677551371664,
+        "f0_5_macro": 0.3462213546088181,
+        "cum_pnl": 17.00093346541262,
+        "single_pnl": 8.469974823342277e-05,
+        "n_predictions_active": 200720,
+        "n_total": 442080,
+        "pred_distribution": {
+          "0": 107960,
+          "1": 241360,
+          "2": 92760
+        },
+        "label_distribution": {
+          "0": 91065,
+          "1": 274533,
+          "2": 76482
+        }
+      },
+      "per_sym_test_argmax": {
+        "0": {
+          "n": 88416,
+          "accuracy": 0.7850954578356858,
+          "cum_pnl": 2.633134153261323,
+          "single_pnl": 0.00022101176374528478,
+          "n_active": 11914,
+          "f0_5_macro": 0.27705960227246623
+        },
+        "1": {
+          "n": 88416,
+          "accuracy": 0.38096045964531305,
+          "cum_pnl": -1.7447194831799941,
+          "single_pnl": -2.5223644400462545e-05,
+          "n_active": 69170,
+          "f0_5_macro": 0.3496662389790345
+        },
+        "2": {
+          "n": 88416,
+          "accuracy": 0.5171349077090119,
+          "cum_pnl": -0.5685000379932095,
+          "single_pnl": -1.2521751459069393e-05,
+          "n_active": 45401,
+          "f0_5_macro": 0.3167976292880993
+        },
+        "3": {
+          "n": 88416,
+          "accuracy": 0.7855139341295693,
+          "cum_pnl": 3.8815273276302085,
+          "single_pnl": 0.0005549796007478136,
+          "n_active": 6994,
+          "f0_5_macro": 0.28426187850121254
+        },
+        "4": {
+          "n": 88416,
+          "accuracy": 0.42881378935939196,
+          "cum_pnl": 12.79949150569429,
+          "single_pnl": 0.00019035248591922028,
+          "n_active": 67241,
+          "f0_5_macro": 0.38565270058533696
+        }
+      },
+      "loso_equiv_sum_argmax": 17.00093346541262
+    }
+  },
+  "agg": {
+    "test_full_cum_pnl_per_seed": [
+      17.00093346541262
+    ],
+    "loso_equiv_sum_argmax_per_seed": [
+      17.00093346541262
+    ],
+    "test_full_cum_pnl_mean": 17.00093346541262,
+    "loso_equiv_sum_argmax_mean": 17.00093346541262
+  }
+}

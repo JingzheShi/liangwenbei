@@ -1,0 +1,115 @@
+{
+  "task": "IDEA-CTX-DATA-OPUS",
+  "n_ideas": 8,
+  "n_deep_ideas": 5,
+  "n_brief_ideas": 3,
+  "baseline": {
+    "iter": "iter_014",
+    "loso_equiv_pnl": 36.22,
+    "platform_iter013_pnl": 19.23,
+    "oracle_pnl": 380.0,
+    "capture_rate": 0.036
+  },
+  "top5": [
+    {
+      "rank": 1,
+      "name": "A1+B1 combo: fee-truncated target + fee-clipped weight",
+      "angle": "A+B",
+      "target_or_data_change": "y = sign(delta) * max(0, |delta| - 2*fee); w = max(0, |delta| - 2*fee). Replaces both target geometry and sample weight with PnL-aware ReLU.",
+      "upside_pnl_loso": "+1.5 to +4",
+      "implementation_hours": 7,
+      "requires_retrain": true,
+      "rationale": "Directly aligns target with platform PnL fee structure. Different from T87 SPO+ (loss surrogate, target=delta) and T92 magnitude weights (smooth decay). ReLU hard truncation is the missing variant. Cheapest high-upside change."
+    },
+    {
+      "rank": 2,
+      "name": "G3: Heteroscedastic regression + Sharpe gate",
+      "angle": "G",
+      "target_or_data_change": "Train M1 fit mu=delta; train M2 fit log(residual^2). At inference: score = mu/sigma; threshold on Sharpe-like score. Provides per-sample uncertainty.",
+      "upside_pnl_loso": "+1 to +3",
+      "implementation_hours": 7,
+      "requires_retrain": "two-stage retrain",
+      "rationale": "T86 dual-gate (q=0.3,q=0.7) gave +1.94 with crude uncertainty proxy. Heteroscedastic NLL is principled extension. Addresses 49.6% missed-due-to-fear samples by exposing high-Sharpe samples that pure point-estimate threshold misses."
+    },
+    {
+      "rank": 3,
+      "name": "C1: Masked LOB SSL pre-training (MAE-style)",
+      "angle": "C",
+      "target_or_data_change": "Pre-train Transformer/CNN encoder on 2.4M ticks with 30% masked feature reconstruction. Extract 256-d embedding per 100-tick window. Concat with 359-d hand features -> 615-d. Retrain LightGBM.",
+      "upside_pnl_loso": "+1 to +5 (high variance)",
+      "implementation_hours": 11,
+      "requires_retrain": "SSL + LGB",
+      "rationale": "Project has NEVER attempted SSL. 384k held-out sym ticks + 480k val/test ticks are unlabeled but feature-distribution-relevant. SSL is fully red-line compliant (no labels = no leak). Should reduce NN/LGB cross-corr (0.77) by injecting orthogonal inductive bias."
+    },
+    {
+      "rank": 4,
+      "name": "A3: Sign-magnitude decoupled heads",
+      "angle": "A",
+      "target_or_data_change": "M_dir: 2-class classifier on sign(delta), trained ONLY on |delta|>2*fee subset (~40% data). M_mag: regression on |delta|, all data. Inference: score = (P(+) - P(-)) * mag. Multiplicative fusion.",
+      "upside_pnl_loso": "+0.5 to +2",
+      "implementation_hours": 5.5,
+      "requires_retrain": "two models",
+      "rationale": "Direction prediction is contaminated by random-sign noise band; magnitude prediction needs all samples for vol regime. Decoupling lets each task use its inductive strength. Distinct from T72 binary cascade (which is sequential)."
+    },
+    {
+      "rank": 5,
+      "name": "A4 hybrid: best-PnL-reachability auxiliary regression",
+      "angle": "A+D",
+      "target_or_data_change": "Add aux head: y_aux = max over h in {5,10,20,40,60} of sign(delta_h)*max(0,|delta_h|-2*fee). Used as confidence filter at inference: only fire trade if main pred and aux pred agree.",
+      "upside_pnl_loso": "+0.5 to +2",
+      "implementation_hours": 6,
+      "requires_retrain": true,
+      "rationale": "Directly aligned with platform max-over-horizons scoring. Distinct from T77 multihorizon vote (which combined predictions, not targets). Aux target as confidence filter is a new use-pattern."
+    }
+  ],
+  "discussion_only": [
+    {
+      "name": "D3: Multi-target joint regression (delta_60, sigma_60, max_drawdown, time_to_max, OFI_60)",
+      "angle": "D",
+      "upside": "+0.5 to +2",
+      "time_h": 7,
+      "note": "XGBoost multi-output. Forces backbone to learn richer LOB representation via auxiliary heads."
+    },
+    {
+      "name": "H1: Curriculum learning by signal quality (3-stage warm-start)",
+      "angle": "H",
+      "upside": "+0.3 to +1.5",
+      "time_h": 6,
+      "note": "Stage 1: |delta|>4*fee (~25%). Stage 2: |delta|>2*fee (~40%). Stage 3: all + fee-clip weight. Uses LightGBM init_model. Different from T92 (static) - this is sequential."
+    },
+    {
+      "name": "E1: Velocity / acceleration auxiliary targets",
+      "angle": "E",
+      "upside": "+0.3 to +1",
+      "time_h": 5,
+      "note": "v(t) = delta(h=10) - delta(h=5); a(t) = v(t+5) - v(t). Joint regression of (delta_60, v, a). Aux for backbone to learn drift dynamics."
+    }
+  ],
+  "rejected": [
+    {"name": "Test-time fine-tuning / online adaptation", "reason": "Banned by user; violates red-line 2 (stateless inference)"},
+    {"name": "Per-sym normalization / sym embedding", "reason": "Violates red-line 3 (sym-agnostic)"},
+    {"name": "Date-conditioned features", "reason": "Violates red-line 1 (date is zeroed at eval)"},
+    {"name": "T92-style smooth magnitude weights", "reason": "8 variants already failed; the missing variant is ReLU hard-truncation = B1 (kept)"},
+    {"name": "KNN-target retrieval (FAISS)", "reason": "Covered by IDEA-CONTRARIAN; not a data/supervision angle"},
+    {"name": "Influence-function reweighting", "reason": "Per-sample Hessian-free too expensive for 4-day window"},
+    {"name": "MAML / Prototypical Networks for sym adaptation", "reason": "Requires test-time fine-tune; violates stateless red-line"},
+    {"name": "GRL (Gradient Reversal Layer) sym adversarial", "reason": "Architecture angle, covered by IDEA-CONTRARIAN H"},
+    {"name": "Pseudo-labeling on held-out sym", "reason": "T65 already attempted with limited gain; SSL (C1) is superior"},
+    {"name": "Frequency-domain FFT auxiliary targets", "reason": "Implementation complex, theoretical upside small (HFT periodicity weak)"},
+    {"name": "Active learning (offline)", "reason": "Equivalent to static weighting on fixed dataset; not a new method"}
+  ],
+  "key_insights": [
+    "T92 failed because all 8 variants used SMOOTH magnitude weights (linear/sqrt/log/clipped). The missing experiment is ReLU hard-truncation at fee threshold (B1). Smooth and ReLU are different families.",
+    "The fee structure is in inference threshold, not in target/loss. Any change that pushes fee into target geometry (A1) or loss landscape (B1, T87 SPO+) is structurally novel and orthogonal.",
+    "Project never attempted SSL despite 384k+ unlabeled-data-eligible ticks. SSL is red-line compliant since it doesn't use labels.",
+    "T86 quantile dual-gate (+1.94) proved per-sample uncertainty is exploitable. G3 heteroscedastic is the principled scaling.",
+    "iter_014 model output is 1-d (mu); upgrading to (mu, sigma) gives a Sharpe-style decision rule that addresses recall bottleneck (49.6% missed)."
+  ],
+  "stacking_combinations_to_test": [
+    "A1 + B1: target + weight both fee-clipped (clean noise rejection)",
+    "A1 + G3: fee-truncated target + heteroscedastic sigma (combine PnL-aware target with uncertainty)",
+    "A1 + B1 + G3: triple combo",
+    "C1 + A1: SSL embedding + fee-truncated target (orthogonal, max value)"
+  ],
+  "notes": "Reasoning grounded in first-principles math (PnL formula decomposition, gradient analysis on truncated targets, two-stage NLL derivation). Each idea explicitly differentiated from existing T1-T98 attempts. All ideas red-line audited."
+}

@@ -1,0 +1,37 @@
+{
+  "_doc": "iter_016 ABLATION = T119. Built on T109 v3 pkg with two changes: (1) T95 GRU completely removed from h=60 stack, (2) h=5/10/20/40 disabled (action=1 / flat). Rationale: iter_016 v3 platform (+25.08) underperformed iter_015 v1 (+28.16) despite +4.6 LOSO lift on local 442k -> reverse signal indicates v3 over-tuned local. Removing GRU + short-horizon DE thresh (the two main local-only tuning vectors) gives a more conservative variant. h=60 thresholds set to 4.21e-4 / 1.86e-4 (iter_015 v1-style conservative, NOT v3 aggressive 2.88e-4 / 2.19e-4).",
+  "horizons": [
+    {
+      "h": 5,
+      "active": false,
+      "_doc": "disabled to remove DE 4-D thresh over-tuning on local 442k"
+    },
+    {
+      "h": 10,
+      "active": false,
+      "_doc": "disabled to remove DE 4-D thresh over-tuning on local 442k"
+    },
+    {
+      "h": 20,
+      "active": false,
+      "_doc": "disabled to remove DE 4-D thresh over-tuning on local 442k"
+    },
+    {
+      "h": 40,
+      "active": false,
+      "_doc": "disabled to remove DE 4-D thresh over-tuning on local 442k"
+    },
+    {
+      "h": 60,
+      "active": true,
+      "kind": "threeway_no_gru",
+      "thr_up": 0.000421,
+      "thr_dn": 0.000186,
+      "w_t87": 1.0,
+      "w_t89": 0.7,
+      "w_huber": 1.0,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_doc": "T87 SPO+ NN + T99 CB Huber + T99 LGB Huber 3-way (GRU removed). Weight ratio same as v3 non-GRU streams. Conservative iter_015 v1-style thresh."
+    }
+  ]
+}

@@ -1,0 +1,252 @@
+[
+  {
+    "name": "open",
+    "gain": 0.776309811277315,
+    "split": 278
+  },
+  {
+    "name": "mb_intst",
+    "gain": 0.6267636041156948,
+    "split": 89
+  },
+  {
+    "name": "totalbsize",
+    "gain": 0.5541436593048275,
+    "split": 166
+  },
+  {
+    "name": "ewma_a0.5_mb_intst",
+    "gain": 0.5276865304913372,
+    "split": 52
+  },
+  {
+    "name": "low",
+    "gain": 0.5195281996857375,
+    "split": 196
+  },
+  {
+    "name": "rv_w50",
+    "gain": 0.4963041106238961,
+    "split": 153
+  },
+  {
+    "name": "avgbid",
+    "gain": 0.4242246797075495,
+    "split": 152
+  },
+  {
+    "name": "liq_asym_top5_W100",
+    "gain": 0.41125315276440233,
+    "split": 146
+  },
+  {
+    "name": "high",
+    "gain": 0.39788103837054223,
+    "split": 153
+  },
+  {
+    "name": "ma_intst",
+    "gain": 0.3922557778423652,
+    "split": 62
+  },
+  {
+    "name": "mid_ewma_resid_a0.05",
+    "gain": 0.39150944096036255,
+    "split": 147
+  },
+  {
+    "name": "totalasize",
+    "gain": 0.3858930302085355,
+    "split": 136
+  },
+  {
+    "name": "ewma_a0.5_lb_intst",
+    "gain": 0.385713639378082,
+    "split": 33
+  },
+  {
+    "name": "rskew_W100",
+    "gain": 0.3546003303490579,
+    "split": 127
+  },
+  {
+    "name": "ewma_a0.05_ma_intst",
+    "gain": 0.33411231043282896,
+    "split": 111
+  },
+  {
+    "name": "cancel_imb_W100",
+    "gain": 0.3218420292250812,
+    "split": 98
+  },
+  {
+    "name": "qrank_W100_imbalance",
+    "gain": 0.294508867780678,
+    "split": 73
+  },
+  {
+    "name": "ewma_a0.05_mb_intst",
+    "gain": 0.2941742608672939,
+    "split": 102
+  },
+  {
+    "name": "trade_pers_W100",
+    "gain": 0.29374640923924744,
+    "split": 113
+  },
+  {
+    "name": "signed_bv_W100",
+    "gain": 0.28004237136337906,
+    "split": 85
+  },
+  {
+    "name": "ofi_tox_lvl1_W50",
+    "gain": 0.2643053182400763,
+    "split": 92
+  },
+  {
+    "name": "bsize1",
+    "gain": 0.2636566702276468,
+    "split": 88
+  },
+  {
+    "name": "signed_rv_W100",
+    "gain": 0.26307725079823285,
+    "split": 87
+  },
+  {
+    "name": "ewma_a0.05_lb_intst",
+    "gain": 0.26050334074534476,
+    "split": 67
+  },
+  {
+    "name": "signed_bv_W50",
+    "gain": 0.24372891953680664,
+    "split": 75
+  },
+  {
+    "name": "la_intst",
+    "gain": 0.23042330937460065,
+    "split": 41
+  },
+  {
+    "name": "asize1",
+    "gain": 0.21403623011428863,
+    "split": 64
+  },
+  {
+    "name": "bid_mean",
+    "gain": 0.20928926952183247,
+    "split": 78
+  },
+  {
+    "name": "jshare_W100",
+    "gain": 0.20350369054358453,
+    "split": 69
+  },
+  {
+    "name": "rv_w20",
+    "gain": 0.20012498984578997,
+    "split": 61
+  },
+  {
+    "name": "ask_mean",
+    "gain": 0.19973660970572382,
+    "split": 75
+  },
+  {
+    "name": "ewma_a0.05_cb_intst",
+    "gain": 0.19660692161414772,
+    "split": 62
+  },
+  {
+    "name": "imbalance",
+    "gain": 0.18613553990144283,
+    "split": 75
+  },
+  {
+    "name": "rskew_W50",
+    "gain": 0.183854550588876,
+    "split": 62
+  },
+  {
+    "name": "ma_ind",
+    "gain": 0.17918091965839267,
+    "split": 14
+  },
+  {
+    "name": "liq_asym_top5_W50",
+    "gain": 0.17879914958029985,
+    "split": 66
+  },
+  {
+    "name": "ofi_tox_lvl5_W50",
+    "gain": 0.1781580203678459,
+    "split": 57
+  },
+  {
+    "name": "qrank_W100_totalasize",
+    "gain": 0.17137283005286008,
+    "split": 63
+  },
+  {
+    "name": "ewma_a0.05_ca_intst",
+    "gain": 0.16859112947713584,
+    "split": 60
+  },
+  {
+    "name": "ewma_a0.5_la_intst",
+    "gain": 0.15802943403832614,
+    "split": 35
+  },
+  {
+    "name": "ewma_a0.05_la_intst",
+    "gain": 0.15547738131135702,
+    "split": 53
+  },
+  {
+    "name": "lb_ind",
+    "gain": 0.14682095916941762,
+    "split": 10
+  },
+  {
+    "name": "ewma_a0.3_mb_intst",
+    "gain": 0.1444263398880139,
+    "split": 39
+  },
+  {
+    "name": "ewma_a0.3_lb_intst",
+    "gain": 0.14134324982296675,
+    "split": 48
+  },
+  {
+    "name": "liq_asym_top5_W20",
+    "gain": 0.13576747989282012,
+    "split": 53
+  },
+  {
+    "name": "ewma_a0.1_mb_intst",
+    "gain": 0.13520992023404688,
+    "split": 47
+  },
+  {
+    "name": "lb_intst",
+    "gain": 0.13510248099919409,
+    "split": 28
+  },
+  {
+    "name": "mlofi_W60_lvl10",
+    "gain": 0.13264108018483967,
+    "split": 41
+  },
+  {
+    "name": "gofi_W5_lvl1",
+    "gain": 0.125621261424385,
+    "split": 11
+  },
+  {
+    "name": "trade_pers_W50",
+    "gain": 0.12423587118973956,
+    "split": 45
+  }
+]

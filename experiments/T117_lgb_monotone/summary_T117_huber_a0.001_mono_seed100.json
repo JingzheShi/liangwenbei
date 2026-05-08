@@ -1,0 +1,129 @@
+{
+  "task": "T117 LGB monotone=True seed=100",
+  "seed": 100,
+  "horizon": 60,
+  "objective": "huber",
+  "alpha": 0.001,
+  "monotone": true,
+  "monotone_method": "advanced",
+  "monotone_penalty": 0.0,
+  "n_constrained": 18,
+  "constrained_list": [
+    {
+      "name": "imbalance",
+      "sign": 1
+    },
+    {
+      "name": "wmp_balance_12",
+      "sign": 1
+    },
+    {
+      "name": "lb_intst",
+      "sign": 1
+    },
+    {
+      "name": "la_intst",
+      "sign": -1
+    },
+    {
+      "name": "mb_intst",
+      "sign": 1
+    },
+    {
+      "name": "ma_intst",
+      "sign": -1
+    },
+    {
+      "name": "cb_intst",
+      "sign": -1
+    },
+    {
+      "name": "ca_intst",
+      "sign": 1
+    },
+    {
+      "name": "ewma_ofi_a0.05_lvl1",
+      "sign": 1
+    },
+    {
+      "name": "ewma_ofi_a0.1_lvl1",
+      "sign": 1
+    },
+    {
+      "name": "ewma_ofi_a0.3_lvl1",
+      "sign": 1
+    },
+    {
+      "name": "ewma_ofi_a0.5_lvl1",
+      "sign": 1
+    },
+    {
+      "name": "signed_rv_W20",
+      "sign": 1
+    },
+    {
+      "name": "signed_rv_W50",
+      "sign": 1
+    },
+    {
+      "name": "signed_rv_W100",
+      "sign": 1
+    },
+    {
+      "name": "signed_bv_W20",
+      "sign": 1
+    },
+    {
+      "name": "signed_bv_W50",
+      "sign": 1
+    },
+    {
+      "name": "signed_bv_W100",
+      "sign": 1
+    }
+  ],
+  "tag": "huber_a0.001_mono",
+  "n_features": 359,
+  "best_iter": 306,
+  "train_time_sec": 60.374228715896606,
+  "val": {
+    "mse": 4.937089215673041e-06,
+    "mae": 0.0015190447447821498,
+    "corr": 0.1807323888630239
+  },
+  "test": {
+    "mse": 3.508486315695336e-06,
+    "mae": 0.0011679341550916433,
+    "corr": 0.16756890870137695,
+    "ev_gate_k1_cum_pnl": 35.79723138850078,
+    "ev_gate_k1_n_active": 272209
+  },
+  "feat_importance": {
+    "monotone_split": 1941,
+    "monotone_gain": 0.36914220286371346,
+    "total_split": 38556,
+    "total_gain": 4.3868356337518435,
+    "monotone_split_pct": 5.034235916588858,
+    "monotone_gain_pct": 8.41477168698943
+  },
+  "params": {
+    "seed": 100,
+    "horizon": 60,
+    "alpha": 0.001,
+    "monotone_method": "advanced",
+    "monotone_penalty": 0.0,
+    "no_monotone": false,
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "no_wandb": true,
+    "tag": ""
+  }
+}

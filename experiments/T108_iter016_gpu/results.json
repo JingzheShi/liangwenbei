@@ -1,0 +1,28 @@
+{
+  "task": "iter_016 CHIS torch GPU GRU repackage",
+  "metrics": {
+    "old_gru_time_seconds_442k": 1391,
+    "new_gru_time_seconds_442k": 3.7,
+    "speedup_factor": 376,
+    "total_inference_time_442k_seconds": 35.7,
+    "cum_pnl_total_torch_cuda": 43.2002,
+    "cum_pnl_total_T106_numpy_baseline": 43.1218,
+    "cum_pnl_drift": 0.0784,
+    "n_active": 188613,
+    "zip_size_mb": 49,
+    "gpu_required": false,
+    "fallback_chain": "torch_cuda -> torch_cpu -> numpy",
+    "stateless_ok": true,
+    "shuffle_invariant_ok": true,
+    "parity_max_abs_diff_numpy_vs_cuda": 3.49e-10
+  },
+  "per_sym_torch_cuda": {
+    "0": 5.0257,
+    "1": 4.5797,
+    "2": 4.6510,
+    "3": 12.7709,
+    "4": 16.1729
+  },
+  "deliverable": "submission_050814_iter016_gpu.zip",
+  "notes": "torch GRU strictly dominates numpy GRU: 376x speedup, drift +0.078 (< 0.10 target), all CRITICAL_CONSTRAINTS preserved. Auto-fallback to numpy if torch unavailable. Recommendation: replace iter_016 v1 as active submission; keep v1 zip as fallback if platform rejects torch."
+}

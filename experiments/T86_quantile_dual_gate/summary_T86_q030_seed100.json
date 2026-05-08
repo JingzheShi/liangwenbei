@@ -1,0 +1,44 @@
+{
+  "task": "T86 quantile seed=100 q=0.3",
+  "seed": 100,
+  "q": 0.3,
+  "horizon": 60,
+  "split_info": {
+    "strategy": "V4",
+    "train_dates": "0-75",
+    "val_dates": "76-79",
+    "n_train": 1399920,
+    "n_val": 73680
+  },
+  "n_features": 359,
+  "best_iter": 117,
+  "train_time_sec": 45.69027590751648,
+  "val": {
+    "pinball": 0.0006600575330179006,
+    "mae": 0.0017433243338018656,
+    "corr": 0.16574070645374922,
+    "cov_above": 0.7382464712269272
+  },
+  "test": {
+    "pinball": 0.0005059152002179281,
+    "mae": 0.00138304743450135,
+    "corr": 0.08287171665460413,
+    "cov_above": 0.7707202316322838
+  },
+  "params": {
+    "seed": 100,
+    "quantile": 0.3,
+    "horizon": 60,
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "no_wandb": true
+  }
+}

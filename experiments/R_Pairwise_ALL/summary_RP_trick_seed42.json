@@ -1,0 +1,19 @@
+{
+  "arm": "trick",
+  "seed": 42,
+  "horizon": 60,
+  "tag": "trick_seed42",
+  "n_features": 396,
+  "best_iter": 246,
+  "train_time_sec": 57.38412523269653,
+  "val": {
+    "mse": 4.937036919727689e-06,
+    "mae": 0.0015160919865593314,
+    "corr": 0.1796053989521123
+  },
+  "test": {
+    "corr": 0.16547049630127894,
+    "ev_gate_k1_cum_pnl": 35.188567040535375,
+    "ev_gate_k1_n_active": 272026
+  }
+}

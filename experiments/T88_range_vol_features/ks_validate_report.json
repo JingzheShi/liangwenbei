@@ -1,0 +1,104 @@
+{
+  "n_train_rows": 1473600,
+  "n_subsample_per_sym": 50000,
+  "ks_threshold": 0.1,
+  "all_features_passed": false,
+  "feature_report": [
+    {
+      "feat": "rv_park_W100",
+      "mean_overall": 22.905508041381836,
+      "mean_KS": 0.225234,
+      "max_KS": 0.37528,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_gk_W100",
+      "mean_overall": 22.287214279174805,
+      "mean_KS": 0.19715000000000002,
+      "max_KS": 0.3100400000000001,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_rs_W100",
+      "mean_overall": 21.803354263305664,
+      "mean_KS": 0.232482,
+      "max_KS": 0.42840000000000006,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_yz_W100",
+      "mean_overall": 22.869895935058594,
+      "mean_KS": 0.21985800000000003,
+      "max_KS": 0.40066,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_park_ratio_W20",
+      "mean_overall": -0.988608181476593,
+      "mean_KS": 0.274866,
+      "max_KS": 0.5775,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_park_ratio_W50",
+      "mean_overall": -0.3901859521865845,
+      "mean_KS": 0.258822,
+      "max_KS": 0.5465599999999999,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_gk_ratio_W20",
+      "mean_overall": -1.0960429906845093,
+      "mean_KS": 0.22648000000000001,
+      "max_KS": 0.49676000000000003,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_gk_ratio_W50",
+      "mean_overall": -0.4321154057979584,
+      "mean_KS": 0.210702,
+      "max_KS": 0.4511,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_rs_ratio_W20",
+      "mean_overall": -1.6116714477539062,
+      "mean_KS": 0.23885800000000001,
+      "max_KS": 0.48046000000000005,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_rs_ratio_W50",
+      "mean_overall": -0.6429924368858337,
+      "mean_KS": 0.20859,
+      "max_KS": 0.42482,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_yz_ratio_W20",
+      "mean_overall": -1.0953822135925293,
+      "mean_KS": 0.233642,
+      "max_KS": 0.47326,
+      "min_p": 0.0,
+      "status": "FAIL"
+    },
+    {
+      "feat": "rv_yz_ratio_W50",
+      "mean_overall": -0.4310440123081207,
+      "mean_KS": 0.20549799999999996,
+      "max_KS": 0.4394199999999999,
+      "min_p": 0.0,
+      "status": "FAIL"
+    }
+  ]
+}

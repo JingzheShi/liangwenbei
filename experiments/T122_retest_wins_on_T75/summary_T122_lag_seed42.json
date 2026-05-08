@@ -1,0 +1,33 @@
+{
+  "task": "T122 LGB L2 lag seed=42",
+  "variant": "lag",
+  "seed": 42,
+  "horizon": 60,
+  "tag": "lag_seed42",
+  "objective": "regression_l2",
+  "use_hyd": false,
+  "use_lag": true,
+  "use_monotone": false,
+  "n_constrained": 0,
+  "n_features": 371,
+  "best_iter": 55,
+  "train_time_sec": 42.34484028816223,
+  "val": {
+    "mse": 5.006150331610115e-06,
+    "mae": 0.001527054701000452,
+    "corr": 0.15029978151683676
+  },
+  "test": {
+    "mae": 0.0011566668981686234,
+    "corr": 0.15181877433291308,
+    "ev_gate_k1_cum_pnl": 31.62446882235487,
+    "ev_gate_k1_n_active": 183590,
+    "per_sym_ev_gate": [
+      3.811593291243277,
+      3.365055539586282,
+      2.5571381626049132,
+      10.644490878534603,
+      11.246190950385795
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "task": "T88 LGB regression seed=13",
+  "seed": 13,
+  "horizon": 60,
+  "n_features": 371,
+  "drop_names": [
+    "dualz_ask_diff1",
+    "dualz_bid_diff5",
+    "dualz_ask_diff5",
+    "qrank_W100_spread1",
+    "qrank_W100_spread5",
+    "qrank_W100_spread10",
+    "qrank_W100_cumspread",
+    "kyle_lam_W50",
+    "kyle_lam_W100",
+    "roll_eff_spr_ratio_W100",
+    "liq_asym_top5_W5"
+  ],
+  "best_iter": 44,
+  "train_time_sec": 46.02215766906738,
+  "val": {
+    "mse": 5.000576038582949e-06,
+    "corr": 0.15085643424227133
+  },
+  "test": {
+    "mse": 3.5174480217392556e-06,
+    "corr": 0.15275702848720293,
+    "ev_gate_k1_cum_pnl": 29.775699261194656
+  },
+  "params": {
+    "seed": 13,
+    "horizon": 60,
+    "objective": "regression_l2",
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "no_wandb": true
+  }
+}

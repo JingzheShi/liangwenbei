@@ -1,0 +1,46 @@
+{
+  "task": "R-NaN2 CB Huber seed=1 variant=zero",
+  "seed": 1,
+  "horizon": 60,
+  "variant": "zero",
+  "cb_nan_mode": "Min",
+  "alpha": 0.001,
+  "tag": "cb_huber_a0.001_zero",
+  "n_features": 359,
+  "best_iter": 209,
+  "train_time_sec": 10.23709750175476,
+  "nan_counts_pre": {
+    "train": 86602,
+    "val": 0,
+    "test": 0
+  },
+  "val": {
+    "mse": 4.951205482939258e-06,
+    "mae": 0.0015191988786682487,
+    "corr": 0.17398135454932276
+  },
+  "test": {
+    "mse": 3.5093146379949758e-06,
+    "mae": 0.0011636398267000914,
+    "corr": 0.1661613506770636,
+    "ev_gate_k1_cum_pnl": 36.7484117166031,
+    "ev_gate_k1_n_active": 266478
+  },
+  "cb_params": {
+    "iterations": 1500,
+    "learning_rate": 0.05,
+    "depth": 6,
+    "l2_leaf_reg": 1.0,
+    "loss_function": "Huber:delta=0.001",
+    "eval_metric": "RMSE",
+    "random_seed": 1,
+    "rsm": 1.0,
+    "bootstrap_type": "Bernoulli",
+    "subsample": 0.7,
+    "early_stopping_rounds": 80,
+    "allow_writing_files": false,
+    "nan_mode": "Min",
+    "task_type": "GPU",
+    "devices": "0"
+  }
+}

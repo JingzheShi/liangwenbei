@@ -1,0 +1,7 @@
+{
+  "zip_path": "/root/projects/liangwenbei_workdir/submission_050800_iter014_robust_thresh.zip",
+  "size_mb": 3.280301,
+  "thr_up": 0.0003715273205089116,
+  "thr_dn": 0.00016598792602583347,
+  "n_boosters": 5
+}

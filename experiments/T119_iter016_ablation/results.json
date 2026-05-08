@@ -1,0 +1,44 @@
+{
+  "task": "iter_016 ablation submission — remove T95 GRU + disable short horizons + conservative h=60 thresh",
+  "submission_zip": "submission_050816_iter016_ablation_001.zip",
+  "rationale": "iter_016 v3 platform +25.08 < iter_015 v1 platform +28.16 despite +4.6 LOSO local lift. Reverse local-vs-platform signal indicates v3 over-tuned local 442k. Ablate the three main local-only tuning vectors: (1) T95 GRU completely removed, (2) h=5/10/20/40 disabled, (3) h=60 thresh reverted to iter_015 v1-style conservative.",
+  "metrics": {
+    "local_LOSO_cum_pnl": 39.9761,
+    "n_active": 220916,
+    "n_total": 442080,
+    "active_rate": 0.4997,
+    "per_sym_pnl": [1.6703, 4.7654, 4.1081, 12.4448, 16.9874],
+    "thr_up": 0.000421,
+    "thr_dn": 0.000186,
+    "weights_h60": {"NN_T87": 1.0, "CB_Huber": 0.7, "LGB_Huber": 1.0, "GRU": 0.0},
+    "n_active_h5_h10_h20_h40": 0,
+    "horizons_active": [60],
+    "extrapolated_442k_inference_seconds": 278.6,
+    "zip_size_mb": 12.77
+  },
+  "comparison": {
+    "vs_iter014_local": "+1.70 (T119 +39.98 vs iter_014 +38.28)",
+    "vs_iter015_v1_local": "-0.15 (T119 +39.98 vs iter_015 v1 +40.13) — essentially equivalent",
+    "vs_iter015_v2_local": "-3.22 (T119 +39.98 vs iter_015 v2 +43.20)",
+    "vs_iter016_v3_local": "-4.74 (T119 +39.98 vs T109 v3 +44.72) — INTENTIONAL: removed v3's local-overfit components",
+    "vs_iter016_v3_platform": "expected: T119 should NOT have v3's reverse-signal collapse since the local-overfit drivers are removed; conservative iter_015 v1-style thresh + iter_015 v1-style horizon plan makes T119 a near-equivalent of iter_015 v1 in tuning aggression"
+  },
+  "pkg_integrity": {
+    "smoke_test_pass": true,
+    "end_to_end_pass": true,
+    "stateless": true,
+    "shuffle_invariant": true,
+    "h_short_active": [],
+    "h_long_active": true,
+    "torch_in_requirements": false,
+    "pkg_size_mb_uncompressed": 26
+  },
+  "constraints": {
+    "sym_not_used": true,
+    "date_not_used": true,
+    "sym_agnostic": true,
+    "stateless_predictor": true,
+    "inference_time_under_3h": true
+  },
+  "notes": "Removed 40 short-horizon model files (model_lgb_h{5,10,20,40}_seed*.txt + model_cb_h{5,10,20,40}_seed*.cbm) from pkg since active=false means they are never loaded — saved ~76 MB pkg size. Short horizons emit action=1 (flat) deterministically. h=60 stack = 3-way (T87 NN + T99 CB Huber + T99 LGB Huber) with non-GRU weight ratio inherited from v3 (1.0:0.7:1.0). Conservative thresh thr_up=4.21e-4 / thr_dn=1.86e-4 chosen to match iter_015 v1 tuning aggression rather than v3's local-DE optimum (2.88e-4 / 2.19e-4)."
+}

@@ -1,0 +1,33 @@
+{
+  "task": "iter_016 CHIS — 5-horizon independent submission, MAX-over-horizons scoring",
+  "submission_zip": "submission_050813_iter016_chis.zip",
+  "submission_size_mb": 49,
+  "metrics": {
+    "h5_loso": 18.1620,
+    "h10_loso": 25.1366,
+    "h20_loso": 30.0973,
+    "h40_loso": 36.3755,
+    "h60_loso": 43.1218,
+    "max_over_horizons": 43.1218,
+    "max_horizon": 60,
+    "vs_iter014": 4.8408,
+    "vs_iter015_packaged": 2.9918,
+    "vs_iter015_v2_offline": -0.1052
+  },
+  "horizon_thresholds": {
+    "h5":  {"kind": "lgb_cb_2way",        "w_lgb": 1.552, "w_cb": 0.423, "thr_up": 4.25604e-04, "thr_dn": 4.02417e-04},
+    "h10": {"kind": "lgb_cb_2way",        "w_lgb": 0.177, "w_cb": 0.007, "thr_up": 3.85420e-04, "thr_dn": 2.98694e-04},
+    "h20": {"kind": "lgb_cb_2way",        "w_lgb": 2.695, "w_cb": 0.704, "thr_up": 4.52352e-04, "thr_dn": 3.92895e-04},
+    "h40": {"kind": "lgb_cb_2way",        "w_lgb": 2.821, "w_cb": 0.952, "thr_up": 3.36669e-04, "thr_dn": 2.38573e-04},
+    "h60": {"kind": "fourway_iter015v2",  "w_t87": 1.0, "w_t89": 1.5, "w_huber": 0.7, "w_gru": 0.7,
+             "thr_up": 2.870690e-04, "thr_dn": 2.073874e-04}
+  },
+  "predictor_checks": {
+    "smoke_test": "pass",
+    "real_data_100_windows": "pass (8.12ms/window)",
+    "idempotent_pass2": true,
+    "single_vs_batch_consistent": true,
+    "shape": [100, 5]
+  },
+  "notes": "5/6 R-radical-rethink workers (T100/T101/T102/T103/T105) converged on CHIS as top pick. Local MAX is +43.12 (h=60) — equals iter_015 v2 — so this is strictly a 0-downside upside extension. Short horizons cannot hurt; if any of them happens to beat 43.12 on the platform's hidden test data, CHIS captures it for free. Stack: h=5/10/20/40 use joint-DE-tuned LGB+CB regression ensembles (5 seeds each); h=60 reuses iter_015 v2's 4-way (T87 SPO+ NN + T89 CB + T99 LGB Huber + T95 GRU, w=1:1.5:0.7:0.7). All CRITICAL_CONSTRAINTS satisfied: stateless, sym-agnostic, shuffle-invariant, no date/sym features."
+}

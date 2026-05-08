@@ -1,0 +1,85 @@
+{
+  "task": "T95 gru w100 seed=1 tag=C",
+  "arch": "gru",
+  "window": 100,
+  "scheme": "top5",
+  "seed": 1,
+  "F_dim": 20,
+  "n_params": 16617,
+  "split_info": {
+    "strategy": "V4",
+    "train_dates": "0-75",
+    "val_dates": "76-79",
+    "test_dates": "96-119"
+  },
+  "dropped_for_window_test": 0,
+  "best_epoch": 0,
+  "best_val_mse": 5.098335350339767e-06,
+  "test_mse": 3.583270427043317e-06,
+  "test_corr": 0.08042826312791482,
+  "test_ev_gate_k1_cum_pnl": -0.5321910161312005,
+  "test_ev_gate_k1_n_active": 168712,
+  "train_time_sec": 104.94572353363037,
+  "pred_time_sec_test": 4.405447244644165,
+  "epoch_logs": [
+    {
+      "epoch": 0,
+      "train_loss": 1.368936547576867,
+      "val_mse": 5.098335350339767e-06,
+      "val_corr": 0.05922154642978797,
+      "lr": 0.000288581929876693,
+      "time": 24.229161739349365
+    },
+    {
+      "epoch": 1,
+      "train_loss": 1.3630839447408645,
+      "val_mse": 5.111548489367124e-06,
+      "val_corr": 0.06690933408115017,
+      "lr": 0.0002560660171779821,
+      "time": 25.85871124267578
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.356586950224763,
+      "val_mse": 5.187664555705851e-06,
+      "val_corr": 0.02766916754580386,
+      "lr": 0.00020740251485476348,
+      "time": 29.507823705673218
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.3374156790424383,
+      "val_mse": 5.192202934267698e-06,
+      "val_corr": 0.038261265331600264,
+      "lr": 0.00015,
+      "time": 25.347943544387817
+    }
+  ],
+  "args": {
+    "arch": "gru",
+    "scheme": "top5",
+    "window": 100,
+    "seed": 1,
+    "hidden": 64,
+    "gru_hidden": 64,
+    "n_layers": 1,
+    "bidir": false,
+    "kernel": 3,
+    "dropout": 0.1,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "batch_size": 1024,
+    "epochs": 8,
+    "patience": 3,
+    "target_scale": 0.0,
+    "num_workers": 2,
+    "cuda": "0",
+    "no_wandb": true,
+    "tag": "C",
+    "use_sample_weight": true,
+    "max_train_samples": 0,
+    "norm_mode": "window",
+    "aug_scale": 0.0,
+    "aug_noise": 0.0
+  }
+}

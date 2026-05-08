@@ -1,0 +1,62 @@
+{
+  "_doc": "iter_016 CHIS (Cross-Horizon Independent Submission). All 5 horizons activated. h=60 reuses iter_015 v2's 4-way stack (T87 SPO+ NN + T89 CB + T99 LGB Huber + T95 GRU, w=1:1.5:0.7:0.7) at +43.23 LOSO-equiv on local 442k test. h=5/10/20/40 use joint 4-D DE-tuned LGB+CB regression ensembles. The platform takes MAX over horizons, so short horizons are 0-downside upside swings. Source for h=60 thresholds: experiments/T106_iter015v2_pkg/full_test_verify.json. Source for short horizons: experiments/T98_multihorizon_iter016/de_thresh_per_h.log (joint 4D DE).",
+  "horizons": [
+    {
+      "h": 5,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000425604,
+      "thr_dn": 0.000402417,
+      "w_lgb": 1.552,
+      "w_cb": 0.423,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 18.1625
+    },
+    {
+      "h": 10,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000385420,
+      "thr_dn": 0.000298694,
+      "w_lgb": 0.177,
+      "w_cb": 0.007,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 25.1481
+    },
+    {
+      "h": 20,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000452352,
+      "thr_dn": 0.000392895,
+      "w_lgb": 2.695,
+      "w_cb": 0.704,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 30.1010
+    },
+    {
+      "h": 40,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000336669,
+      "thr_dn": 0.000238573,
+      "w_lgb": 2.821,
+      "w_cb": 0.952,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 36.3850
+    },
+    {
+      "h": 60,
+      "active": true,
+      "kind": "fourway_iter015v2",
+      "thr_up": 0.0002870690319757474,
+      "thr_dn": 0.0002073873889201142,
+      "w_t87": 1.0,
+      "w_t89": 1.5,
+      "w_huber": 0.7,
+      "w_gru": 0.7,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 43.2270
+    }
+  ]
+}

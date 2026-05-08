@@ -1,0 +1,55 @@
+{
+  "task": "R_T75L2_symaug variant=group_only seed=1",
+  "variant": "group_only",
+  "seed": 1,
+  "horizon": 60,
+  "n_features": 359,
+  "group_sizes": {
+    "price": 79,
+    "size": 27,
+    "flow": 114,
+    "derived": 139
+  },
+  "group_scales": {
+    "price": [
+      0.85,
+      1.15
+    ],
+    "size": [
+      0.7,
+      1.4
+    ],
+    "flow": [
+      0.8,
+      1.2
+    ],
+    "derived": [
+      0.85,
+      1.15
+    ]
+  },
+  "best_iter": 126,
+  "train_time_sec": 35.93670201301575,
+  "val": {
+    "mse": 5.002385933039477e-06,
+    "corr": 0.16297652113450736
+  },
+  "test": {
+    "mse": 3.5487091736285947e-06,
+    "corr": 0.14925229220163616,
+    "ev_gate_k1_cum_pnl": 28.24559294143645
+  },
+  "params": {
+    "seed": 1,
+    "variant": "group_only",
+    "horizon": 60,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "no_wandb": true
+  }
+}
