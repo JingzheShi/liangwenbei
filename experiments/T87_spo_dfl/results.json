@@ -1,0 +1,62 @@
+{
+  "task": "T87 Decision-Focused Learning (SPO+) warm-start fine-tune from T81 NN regression weights",
+  "metrics": {
+    "loso_equiv": 40.0865,
+    "loso_equiv_offline_de": 40.1290,
+    "vs_iter014": 1.81,
+    "vs_iter013": 3.86,
+    "vs_iter012": 13.65,
+    "t87_nn_alone_de": 38.28,
+    "t81_nn_alone_de": 35.89,
+    "n_active": 180166,
+    "n_total": 442080,
+    "per_sym_test": [3.7413, 5.3181, 4.5521, 11.9681, 14.5069]
+  },
+  "config": {
+    "best_variant": "A_L2_plus_lambda_SPO+",
+    "warm_start": "T81_model_T81_seed{S}.pt",
+    "lambda_spo": 30.0,
+    "lr": 3e-5,
+    "epochs": 15,
+    "patience": 6,
+    "batch_size": 4096,
+    "weight_decay": 1e-4,
+    "optimizer": "AdamW",
+    "scheduler": "CosineAnnealingLR",
+    "selection_criterion": "max_val_pnl",
+    "feature_dim": 359,
+    "hidden": [256, 128, 64],
+    "dropout": 0.10,
+    "use_layernorm": true,
+    "n_params": 134273
+  },
+  "ensemble": {
+    "w_nn": 1.0,
+    "w_lgb": 1.5,
+    "thr_up": 0.000358,
+    "thr_dn": 0.000216,
+    "n_nn_seeds": 5,
+    "n_lgb_seeds": 5,
+    "nn_seeds": [1, 7, 13, 42, 100],
+    "lgb_source": "T75",
+    "ensemble_de_loso": 40.1290,
+    "fallback_symmetric_k": 1.25,
+    "fallback_loso": 39.14
+  },
+  "per_seed_t87_vs_t81": {
+    "1":   {"t81": 26.48, "t87": 32.34, "delta": 5.87},
+    "7":   {"t81": 29.21, "t87": 32.12, "delta": 2.91},
+    "13":  {"t81": 27.48, "t87": 31.18, "delta": 3.69},
+    "42":  {"t81": 29.90, "t87": 30.42, "delta": 0.52},
+    "100": {"t81": 28.14, "t87": 32.75, "delta": 4.61}
+  },
+  "cross_correlations": {
+    "T87_vs_T81": 0.9402,
+    "T87_vs_T75_LGB": 0.7137,
+    "T81_vs_T75_LGB": 0.7749,
+    "interpretation": "T87 sits close to T81 but is more diverse from T75 (0.71 vs 0.77) — SPO+ pushed predictions toward decision-distinct points exactly where the ensemble has the most to gain"
+  },
+  "submission_zip": "submission_050802_iter015.zip",
+  "submission_size_mb": 5.8,
+  "notes": "SPO+ decision-focused learning warm-started from T81 weights gives a +1.85 LOSO-equiv lift over iter_014. The convex SPO+ surrogate provides constant subgradient magnitude (~2) at the EV-gate margin, fixing the gradient-collapse failure mode that killed T60 (NN with direct tanh PnL) and T81-B (regression + tanh PnL aux). Single-seed sweep monotone in lambda; lambda=30 saturates. All 5 syms strongly positive on full 442k test."
+}
