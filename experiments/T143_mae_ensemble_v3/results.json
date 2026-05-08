@@ -1,0 +1,183 @@
+{
+  "task": "T143: MAE ensemble eval + iter_019 v3_mae packaging",
+  "configs": {
+    "A_baseline_l2": {
+      "no_conformal": 40.129027,
+      "conformal": 40.129027,
+      "thr_up": 0.0003578388958804361,
+      "thr_dn": 0.00021585225406845106,
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 3.742745,
+          "n_active": 24837
+        },
+        {
+          "sym": 1,
+          "pnl": 5.338999,
+          "n_active": 39671
+        },
+        {
+          "sym": 2,
+          "pnl": 4.564695,
+          "n_active": 38299
+        },
+        {
+          "sym": 3,
+          "pnl": 11.968152,
+          "n_active": 39122
+        },
+        {
+          "sym": 4,
+          "pnl": 14.514435,
+          "n_active": 38312
+        }
+      ]
+    },
+    "B_replace_l2_mae": {
+      "no_conformal": 41.204639,
+      "conformal": 41.204639,
+      "thr_up": 0.00026046267299443117,
+      "thr_dn": 0.00028545826435512497,
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 4.041131,
+          "n_active": 27730
+        },
+        {
+          "sym": 1,
+          "pnl": 4.454706,
+          "n_active": 43446
+        },
+        {
+          "sym": 2,
+          "pnl": 4.064709,
+          "n_active": 43702
+        },
+        {
+          "sym": 3,
+          "pnl": 10.532588,
+          "n_active": 25003
+        },
+        {
+          "sym": 4,
+          "pnl": 18.111505,
+          "n_active": 44739
+        }
+      ]
+    },
+    "C_3way_light": {
+      "no_conformal": 41.035772,
+      "conformal": 41.035772,
+      "thr_up": 0.000340047068632324,
+      "thr_dn": 0.00022542323662514004,
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 4.132779,
+          "n_active": 25893
+        },
+        {
+          "sym": 1,
+          "pnl": 5.469882,
+          "n_active": 38555
+        },
+        {
+          "sym": 2,
+          "pnl": 4.548996,
+          "n_active": 38930
+        },
+        {
+          "sym": 3,
+          "pnl": 11.769147,
+          "n_active": 33790
+        },
+        {
+          "sym": 4,
+          "pnl": 15.114968,
+          "n_active": 39622
+        }
+      ]
+    },
+    "D_3way_equal": {
+      "no_conformal": 41.314726,
+      "conformal": 41.314726,
+      "thr_up": 0.0002862753504875861,
+      "thr_dn": 0.0002374800005752757,
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 4.318624,
+          "n_active": 27707
+        },
+        {
+          "sym": 1,
+          "pnl": 4.903462,
+          "n_active": 41842
+        },
+        {
+          "sym": 2,
+          "pnl": 4.26415,
+          "n_active": 42409
+        },
+        {
+          "sym": 3,
+          "pnl": 11.714803,
+          "n_active": 32970
+        },
+        {
+          "sym": 4,
+          "pnl": 16.113687,
+          "n_active": 42786
+        }
+      ]
+    },
+    "E_3way_mae_heavy": {
+      "no_conformal": 41.32725,
+      "conformal": 41.32725,
+      "thr_up": 0.0002781462944679261,
+      "thr_dn": 0.00022104601751489418,
+      "per_sym": [
+        {
+          "sym": 0,
+          "pnl": 3.904632,
+          "n_active": 31792
+        },
+        {
+          "sym": 1,
+          "pnl": 4.977738,
+          "n_active": 43910
+        },
+        {
+          "sym": 2,
+          "pnl": 3.954056,
+          "n_active": 44959
+        },
+        {
+          "sym": 3,
+          "pnl": 11.526702,
+          "n_active": 30536
+        },
+        {
+          "sym": 4,
+          "pnl": 16.964122,
+          "n_active": 46274
+        }
+      ]
+    }
+  },
+  "best_config": "E_3way_mae_heavy",
+  "best_loso_pnl": 41.32725,
+  "delta_vs_iter018_v1": 1.0756,
+  "v3_zip": "/root/projects/liangwenbei_workdir/submission_050818_iter019_v3_mae.zip",
+  "v3_md5": "d810ceac64a06dfd65b8bc23f8284cc3",
+  "v3_size_mb": 6.239,
+  "v3_files": 16,
+  "smoke_test_ok": true,
+  "expected_platform_v3": "iter_018_v1 +28.93 + (+1.08 LOSO delta * transmission ~0.75) = ~+29.7 to +30.7",
+  "delta_vs_A_baseline_loso": 1.0756,
+  "delta_vs_iter018_v1_conformal": -0.2893,
+  "packaged_config": "B_replace_l2_mae",
+  "packaged_config_note": "E (3-way) technically best (+41.33) but requires Predictor.py changes; B (+41.20) conservative, no code changes, +1.08 vs A baseline"
+}
