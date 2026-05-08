@@ -1,0 +1,37 @@
+{
+  "task": "R_cross_sym: cross-sym features (mean/std/rank/zscore over other 4 syms at same (date,t)) on T75 LGB L2 baseline",
+  "status": "abort_infeasible",
+  "decision": "early_abort_no_gpu_spend",
+  "reason": "Cross-sym features cannot be computed at inference time under platform contract: (a) date is zeroed, (b) sym/date/time absent from config.feature, (c) test order shuffled, so same-(date,t) rows from different syms cannot be aligned in predict(). The PM-proposed 'constants-per-sym' fallback also fails because sym is unknown/untrustworthy at eval. Training with cross-sym features that are absent (or constant) at inference is strictly worse than the baseline that omits them.",
+  "metrics": {
+    "baseline_lgb_l2_3seed_loso": null,
+    "trick_lgb_l2_3seed_loso": null,
+    "delta_loso": null,
+    "n_xs_features_designed": 24,
+    "n_xs_features_usable_at_inference": 0,
+    "stateless_compatible": false,
+    "sym_agnostic_compatible": false,
+    "shuffled_order_compatible": false
+  },
+  "evidence": {
+    "config_feature_count": 154,
+    "config_includes_sym": false,
+    "config_includes_date": false,
+    "config_includes_time": false,
+    "train_data_5_sym_alignment": "100% (verified: all 80 train dates have all 5 syms; 2001 (date,time) groups per session each with 5 syms)",
+    "constraint_violations": [
+      "CRITICAL_CONSTRAINTS §1.1 date=0 → cannot identify (date,t) at inference",
+      "CRITICAL_CONSTRAINTS §1.2 shuffled order → no cross-call alignment",
+      "CRITICAL_CONSTRAINTS §1.3 sym may be unseen → cannot index per-sym lookups"
+    ]
+  },
+  "recommended_alternative": {
+    "name": "cross_sym_distillation",
+    "summary": "Train a TEACHER LGB with cross-sym features at train time (where alignment is trivial). Generate teacher predictions. Train a STUDENT LGB with only the 359 sym-agnostic features against a soft target mixing y_orig and y_teacher. Ship the STUDENT — fully contract-compliant. Estimated effort: 2-3 hours.",
+    "estimated_loso_lift": "uncertain; depends on teacher lift (HYD reports 1-3) and student's recoverable fraction"
+  },
+  "gpu_minutes_consumed": 0,
+  "gpu_minutes_returned_to_pm": "~65 of 90 budgeted",
+  "notes": "Decision made by contract analysis, not by training. See REPORT.md §2 for the four-row failure table and §6 for the recommended alternative.",
+  "timestamp": "2026-05-08T12:10:00Z"
+}
