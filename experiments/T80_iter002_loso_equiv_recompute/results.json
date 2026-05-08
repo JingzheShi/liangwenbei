@@ -1,0 +1,222 @@
+{
+  "task": "T80 iter_002 LOSO-equiv recompute",
+  "n_total": 442080,
+  "horizons": {
+    "5": {
+      "T": 0.6,
+      "delta": 0.1,
+      "active_in_thresholds": true,
+      "n_active": 77702,
+      "n_up": 36871,
+      "n_dn": 40831,
+      "total_cum_pnl": 19.403190223467398,
+      "loso_equiv_sum": 19.403190223467398,
+      "mean_pnl_per_row": 4.389067640125633e-05,
+      "per_sym": {
+        "0": {
+          "n": 88416,
+          "n_active": 11347,
+          "cum_pnl": 2.006069921944721
+        },
+        "1": {
+          "n": 88416,
+          "n_active": 31935,
+          "cum_pnl": 5.979012977180722
+        },
+        "2": {
+          "n": 88416,
+          "n_active": 12234,
+          "cum_pnl": 3.5557607039174544
+        },
+        "3": {
+          "n": 88416,
+          "n_active": 3164,
+          "cum_pnl": 2.1246573840022185
+        },
+        "4": {
+          "n": 88416,
+          "n_active": 19022,
+          "cum_pnl": 5.7376892364222805
+        }
+      }
+    },
+    "10": {
+      "T": 0.55,
+      "delta": 0.1,
+      "active_in_thresholds": true,
+      "n_active": 87584,
+      "n_up": 41195,
+      "n_dn": 46389,
+      "total_cum_pnl": 25.19743128530236,
+      "loso_equiv_sum": 25.19743128530236,
+      "mean_pnl_per_row": 5.699744680895395e-05,
+      "per_sym": {
+        "0": {
+          "n": 88416,
+          "n_active": 13390,
+          "cum_pnl": 2.94863882257138
+        },
+        "1": {
+          "n": 88416,
+          "n_active": 32868,
+          "cum_pnl": 6.1111569526360014
+        },
+        "2": {
+          "n": 88416,
+          "n_active": 16441,
+          "cum_pnl": 4.774014314860455
+        },
+        "3": {
+          "n": 88416,
+          "n_active": 2992,
+          "cum_pnl": 2.1782670951437986
+        },
+        "4": {
+          "n": 88416,
+          "n_active": 21893,
+          "cum_pnl": 9.185354100090727
+        }
+      }
+    },
+    "20": {
+      "T": 0.5,
+      "delta": 0.05,
+      "active_in_thresholds": true,
+      "n_active": 80136,
+      "n_up": 36435,
+      "n_dn": 43701,
+      "total_cum_pnl": 28.530855649712073,
+      "loso_equiv_sum": 28.530855649712073,
+      "mean_pnl_per_row": 6.453776612765126e-05,
+      "per_sym": {
+        "0": {
+          "n": 88416,
+          "n_active": 3446,
+          "cum_pnl": 1.9019802754459874
+        },
+        "1": {
+          "n": 88416,
+          "n_active": 25994,
+          "cum_pnl": 5.102743167205948
+        },
+        "2": {
+          "n": 88416,
+          "n_active": 17389,
+          "cum_pnl": 5.188704542761094
+        },
+        "3": {
+          "n": 88416,
+          "n_active": 8413,
+          "cum_pnl": 4.436076710128052
+        },
+        "4": {
+          "n": 88416,
+          "n_active": 24894,
+          "cum_pnl": 11.901350954170992
+        }
+      }
+    },
+    "40": {
+      "T": 0.5,
+      "delta": 0.0,
+      "active_in_thresholds": true,
+      "n_active": 49775,
+      "n_up": 22555,
+      "n_dn": 27220,
+      "total_cum_pnl": 23.166482771661265,
+      "loso_equiv_sum": 23.16648277166127,
+      "mean_pnl_per_row": 5.240337217621531e-05,
+      "per_sym": {
+        "0": {
+          "n": 88416,
+          "n_active": 2105,
+          "cum_pnl": 1.1521206813343763
+        },
+        "1": {
+          "n": 88416,
+          "n_active": 16861,
+          "cum_pnl": 4.9864155319821855
+        },
+        "2": {
+          "n": 88416,
+          "n_active": 10886,
+          "cum_pnl": 3.952618780923619
+        },
+        "3": {
+          "n": 88416,
+          "n_active": 5489,
+          "cum_pnl": 3.677504185491447
+        },
+        "4": {
+          "n": 88416,
+          "n_active": 14434,
+          "cum_pnl": 9.39782359192964
+        }
+      }
+    },
+    "60": {
+      "T": 0.5,
+      "delta": 0.2,
+      "active_in_thresholds": true,
+      "n_active": 28694,
+      "n_up": 12874,
+      "n_dn": 15820,
+      "total_cum_pnl": 14.611370362375048,
+      "loso_equiv_sum": 14.611370362375046,
+      "mean_pnl_per_row": 3.305141685300183e-05,
+      "per_sym": {
+        "0": {
+          "n": 88416,
+          "n_active": 921,
+          "cum_pnl": 0.6482603866820377
+        },
+        "1": {
+          "n": 88416,
+          "n_active": 10855,
+          "cum_pnl": 4.218659762170274
+        },
+        "2": {
+          "n": 88416,
+          "n_active": 6783,
+          "cum_pnl": 1.9864106442086626
+        },
+        "3": {
+          "n": 88416,
+          "n_active": 1290,
+          "cum_pnl": 0.9274657837719076
+        },
+        "4": {
+          "n": 88416,
+          "n_active": 8845,
+          "cum_pnl": 6.830573785542165
+        }
+      }
+    }
+  },
+  "elapsed_sec": 9.913752317428589,
+  "best_horizon": 20,
+  "best_loso_equiv": 28.530855649712073,
+  "calibration_analysis": {
+    "iter002_h60_loso_equiv": 14.611370362375046,
+    "iter013_h60_loso_equiv": 36.23,
+    "iter002_platform": 4.07,
+    "iter013_platform": 19.23,
+    "loso_gap_iter013_minus_iter002": 21.61862963762495,
+    "platform_gap_iter013_minus_iter002": 15.16,
+    "transmission_ratio_platform_over_loso": 0.7012470380460941,
+    "predicted_iter013_platform_using_calibration": 19.23,
+    "actual_iter013_platform": 19.23,
+    "absolute_loso_inflation_iter002": 10.541370362375046,
+    "absolute_loso_inflation_iter013": 16.999999999999996,
+    "best_loso_horizon": 20,
+    "best_loso_equiv": 28.530855649712073,
+    "platform_per_horizon_iter002": {
+      "5": -7.68,
+      "10": -8.64,
+      "20": -5.09,
+      "40": 2.02,
+      "60": 4.07
+    },
+    "conclusion": "\u0394 LOSO-equiv (h60\u2194h60) reliably predicts \u0394 platform at ratio ~0.70. Per-horizon LOSO-equiv ranking does NOT predict platform ranking."
+  }
+}

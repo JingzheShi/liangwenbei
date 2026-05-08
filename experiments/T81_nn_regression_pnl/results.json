@@ -1,0 +1,22 @@
+{
+  "task": "T81 NN regression on Δmid + EV gate, sister of T75 LightGBM",
+  "metrics": {
+    "best_variant": "A_ensemble_NN_LGB",
+    "nn_only_loso_equiv": 35.8912,
+    "lgb_only_loso_equiv": 36.2281,
+    "ensemble_nn_lgb_loso_equiv": 38.2810,
+    "full_test_verified": 38.2366,
+    "vs_iter012": 11.8410,
+    "vs_iter013": 2.0510,
+    "ensemble_w_nn": 1.0,
+    "ensemble_w_lgb": 1.5,
+    "thr_up": 4.21e-4,
+    "thr_dn": 1.86e-4,
+    "nn_lgb_cross_corr": 0.7749,
+    "nn_test_corr_mean": 0.1506,
+    "nn_n_params": 134273,
+    "submission_zip_size_mb": 5.8,
+    "timing_1024_batch_sec": 0.657
+  },
+  "notes": "Variant A (MLP regression L2 on Δmid_norm + EV gate) — NN-only matches LightGBM (+35.89 vs +36.23). Ensemble NN+LGB (cross-corr 0.77, w=1:1.5) beats iter_013 by +2.05. iter_014 packaged at submission_050708_iter014.zip (5.8 MB, 5 LGB + 5 NN, 0.66s/1024-batch, ~4.7 min full-test, no torch dep)."
+}

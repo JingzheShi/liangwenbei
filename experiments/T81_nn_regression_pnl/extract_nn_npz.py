@@ -1,0 +1,93 @@
+"""Extract MLP weights from .pt → .npz for torch-free inference.
+
+Saves numpy arrays for each linear layer + LayerNorm in the MLP.
+Per the train script, architecture is:
+  Linear(d_in, h0) → LayerNorm(h0) → GELU → Dropout
+  Linear(h0, h1)   → LayerNorm(h1) → GELU → Dropout
+  ...
+  Linear(h_last, 1)
+
+So state_dict keys look like:
+  net.0.weight, net.0.bias              # Linear in -> h0
+  net.1.weight, net.1.bias              # LayerNorm h0
+  net.4.weight, net.4.bias              # Linear h0 -> h1
+  net.5.weight, net.5.bias              # LayerNorm h1
+  ...
+
+If use_layernorm=False, layout differs (Linear → GELU → Dropout, no LN).
+"""
+from __future__ import annotations
+
+import os
+import sys
+
+import numpy as np
+import torch
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def extract_one(pt_path: str, npz_path: str) -> dict:
+    ckpt = torch.load(pt_path, map_location="cpu", weights_only=False)
+    sd = ckpt["state_dict"]
+    hidden = ckpt["hidden"]
+    in_dim = ckpt["in_dim"]
+    use_layernorm = ckpt.get("use_layernorm", True)
+    target_scale = float(ckpt.get("target_scale", 1.0))
+    feat_mean = np.asarray(ckpt["feat_mean"], dtype=np.float32)
+    feat_std = np.asarray(ckpt["feat_std"], dtype=np.float32)
+    keep_idx = np.asarray(ckpt["keep_idx"], dtype=np.int64)
+    clip_val = float(ckpt.get("clip", 10.0))
+
+    # Walk through net.{i} and pull Linear / LayerNorm in order.
+    blocks_per_layer = 4 if use_layernorm else 3   # Linear, LN(opt), GELU, Dropout
+    n_hidden_layers = len(hidden)
+
+    out = {
+        "in_dim": np.array([in_dim], dtype=np.int64),
+        "hidden": np.array(list(hidden), dtype=np.int64),
+        "use_layernorm": np.array([1 if use_layernorm else 0], dtype=np.int8),
+        "target_scale": np.array([target_scale], dtype=np.float32),
+        "feat_mean": feat_mean,
+        "feat_std": feat_std,
+        "keep_idx": keep_idx,
+        "clip": np.array([clip_val], dtype=np.float32),
+    }
+
+    layer_idx = 0
+    for i in range(n_hidden_layers):
+        # Linear layer
+        wkey = f"net.{layer_idx}.weight"
+        bkey = f"net.{layer_idx}.bias"
+        out[f"L{i}_W"] = sd[wkey].numpy().astype(np.float32)  # (h_out, d_in)
+        out[f"L{i}_b"] = sd[bkey].numpy().astype(np.float32)
+        layer_idx += 1
+        if use_layernorm:
+            # LayerNorm
+            ln_w = f"net.{layer_idx}.weight"
+            ln_b = f"net.{layer_idx}.bias"
+            out[f"LN{i}_W"] = sd[ln_w].numpy().astype(np.float32)
+            out[f"LN{i}_b"] = sd[ln_b].numpy().astype(np.float32)
+            layer_idx += 1
+        layer_idx += 2  # skip GELU + Dropout
+
+    # Final linear (h_last -> 1)
+    out["LF_W"] = sd[f"net.{layer_idx}.weight"].numpy().astype(np.float32)
+    out["LF_b"] = sd[f"net.{layer_idx}.bias"].numpy().astype(np.float32)
+
+    np.savez(npz_path, **out)
+    return out
+
+
+def main():
+    seeds = (1, 7, 13, 42, 100)
+    for s in seeds:
+        pt = os.path.join(HERE, f"model_T81_seed{s}.pt")
+        npz = os.path.join(HERE, f"model_T81_seed{s}.npz")
+        info = extract_one(pt, npz)
+        print(f"  seed={s} hidden={info['hidden'].tolist()} target_scale={info['target_scale'][0]:.4f} -> {npz}",
+              flush=True)
+
+
+if __name__ == "__main__":
+    main()
