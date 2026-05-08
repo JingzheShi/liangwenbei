@@ -1,0 +1,132 @@
+{
+  "task": "T142 hawkes 5-seed LOSO CV + full-data retrain",
+  "inference_feasible": true,
+  "inference_notes": "EWMA(alpha=0.2) decays to ~2e-10 after 100 ticks, fully reproducible from 100-tick window; stateless per-session",
+  "num_boost_round": 330,
+  "seeds": [
+    1,
+    7,
+    13,
+    42,
+    100
+  ],
+  "metrics": {
+    "loso_pnl_seed1": 39.73769519149225,
+    "loso_pnl_seed7": 52.12206161604151,
+    "loso_pnl_seed13": 43.146442691350515,
+    "loso_pnl_seed42": 30.025929419395315,
+    "loso_pnl_seed100": 41.22170264297846,
+    "loso_pnl_5seed_ensemble": 55.00368571666688
+  },
+  "seed_cv_details": {
+    "1": {
+      "loso_pnl": 39.73769519149225,
+      "thresh_up": 0.0010848604142665863,
+      "thresh_dn": 0.00035031684092245996,
+      "per_sym": {
+        "sym0": 9.75150888738002,
+        "sym0_n_active": 29381,
+        "sym1": 3.8386730378726464,
+        "sym1_n_active": 80742,
+        "sym2": 7.819080581327649,
+        "sym2_n_active": 147364,
+        "sym3": 8.237063715840623,
+        "sym3_n_active": 98647,
+        "sym4": 10.087921992407104,
+        "sym4_n_active": 96436
+      }
+    },
+    "7": {
+      "loso_pnl": 52.12206161604151,
+      "thresh_up": 0.0008273150306195021,
+      "thresh_dn": 0.00018413306679576635,
+      "per_sym": {
+        "sym0": 19.209475009232428,
+        "sym0_n_active": 53678,
+        "sym1": 2.8739877513735985,
+        "sym1_n_active": 111617,
+        "sym2": -4.528811875669616,
+        "sym2_n_active": 186073,
+        "sym3": 18.407241838576073,
+        "sym3_n_active": 106442,
+        "sym4": 16.157160152899415,
+        "sym4_n_active": 113737
+      }
+    },
+    "13": {
+      "loso_pnl": 43.146442691350515,
+      "thresh_up": 0.0012432413641363382,
+      "thresh_dn": 0.00036823315895162523,
+      "per_sym": {
+        "sym0": 8.479353160654806,
+        "sym0_n_active": 36270,
+        "sym1": 5.510447542346364,
+        "sym1_n_active": 73975,
+        "sym2": 8.297294590324675,
+        "sym2_n_active": 140181,
+        "sym3": 13.712410812980998,
+        "sym3_n_active": 103055,
+        "sym4": 7.142029027207586,
+        "sym4_n_active": 87676
+      }
+    },
+    "42": {
+      "loso_pnl": 30.025929419395315,
+      "thresh_up": 0.0017628853674978018,
+      "thresh_dn": 0.0003508947847876698,
+      "per_sym": {
+        "sym0": 10.38190883282427,
+        "sym0_n_active": 32692,
+        "sym1": 4.6811161840930655,
+        "sym1_n_active": 57680,
+        "sym2": 0.6640131167942154,
+        "sym2_n_active": 96393,
+        "sym3": 9.447347932963558,
+        "sym3_n_active": 63113,
+        "sym4": 4.8460177691705395,
+        "sym4_n_active": 85743
+      }
+    },
+    "100": {
+      "loso_pnl": 41.22170264297846,
+      "thresh_up": 0.0008858814253471792,
+      "thresh_dn": 0.0003763518179766834,
+      "per_sym": {
+        "sym0": 12.457828091504606,
+        "sym0_n_active": 28269,
+        "sym1": 2.912692389547124,
+        "sym1_n_active": 79814,
+        "sym2": 1.3385321698073527,
+        "sym2_n_active": 162957,
+        "sym3": 14.667697936943952,
+        "sym3_n_active": 134686,
+        "sym4": 9.839068556630101,
+        "sym4_n_active": 92156
+      }
+    }
+  },
+  "ensemble_cv": {
+    "loso_pnl": 55.00368571666688,
+    "thresh_up": 0.0009147232631221414,
+    "thresh_dn": 0.00019272314966656268,
+    "per_sym": {
+      "sym0": 16.03690896757316,
+      "sym0_n_active": 49984,
+      "sym1": 5.682942040679585,
+      "sym1_n_active": 100151,
+      "sym2": 5.720281636980195,
+      "sym2_n_active": 165940,
+      "sym3": 17.36173748007696,
+      "sym3_n_active": 118752,
+      "sym4": 10.197608978401643,
+      "sym4_n_active": 113061
+    }
+  },
+  "full_retrain_models": [
+    "/root/projects/liangwenbei_workdir/experiments/T142_hawkes_5seed_fulldata/model_h60_seed1_hawkes_full.txt",
+    "/root/projects/liangwenbei_workdir/experiments/T142_hawkes_5seed_fulldata/model_h60_seed7_hawkes_full.txt",
+    "/root/projects/liangwenbei_workdir/experiments/T142_hawkes_5seed_fulldata/model_h60_seed13_hawkes_full.txt",
+    "/root/projects/liangwenbei_workdir/experiments/T142_hawkes_5seed_fulldata/model_h60_seed42_hawkes_full.txt",
+    "/root/projects/liangwenbei_workdir/experiments/T142_hawkes_5seed_fulldata/model_h60_seed100_hawkes_full.txt"
+  ]
+}
