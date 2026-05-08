@@ -1,0 +1,38 @@
+{
+  "task": "R_full_retrain seed=1",
+  "seed": 1,
+  "horizon": 60,
+  "objective": "regression_l2",
+  "n_features": 359,
+  "drop_names": [
+    "dualz_ask_diff1",
+    "dualz_bid_diff5",
+    "dualz_ask_diff5",
+    "qrank_W100_spread1",
+    "qrank_W100_spread5",
+    "qrank_W100_spread10",
+    "qrank_W100_cumspread",
+    "kyle_lam_W50",
+    "kyle_lam_W100",
+    "roll_eff_spr_ratio_W100",
+    "liq_asym_top5_W5"
+  ],
+  "num_boost_round": 330,
+  "train_time_sec": 403.66169023513794,
+  "n_train_full": 4420800,
+  "params": {
+    "seed": 1,
+    "horizon": 60,
+    "objective": "regression_l2",
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 330,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": false,
+    "no_wandb": true
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "task": "T137-mae seed=13",
+  "variant": "mae",
+  "seed": 13,
+  "objective": "regression_l1",
+  "alpha": null,
+  "best_iter": 101,
+  "train_time_sec": 224.74740719795227,
+  "val": {
+    "mse": 4.945519776811125e-06,
+    "mae": 0.0015120339812710881,
+    "corr": 0.175790411400783
+  },
+  "test": {
+    "mse": 3.5330501759744948e-06,
+    "mae": 0.0011529262410476804,
+    "corr": 0.15213036105388553,
+    "ev_gate_k1_cum_pnl": 29.021450896677123,
+    "ev_gate_k1_n_active": 246865
+  }
+}

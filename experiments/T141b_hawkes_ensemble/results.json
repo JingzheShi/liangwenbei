@@ -1,0 +1,102 @@
+{
+  "task": "T141b: Hawkes ensemble B/C/D eval",
+  "config_A_already_done": {
+    "no_conformal": 40.12,
+    "conformal": 41.92
+  },
+  "configs": {
+    "B_replace_t75_with_hawkes": {
+      "no_conformal": {
+        "loso_pnl": 39.545583868055374,
+        "thresh_up": 0.0003360182676716613,
+        "thresh_dn": 0.00020865230308169053,
+        "per_sym": {
+          "sym0": 3.8123649033432008,
+          "sym0_n_active": 26279,
+          "sym1": 4.829231772355402,
+          "sym1_n_active": 40730,
+          "sym2": 4.41092167228866,
+          "sym2_n_active": 39755,
+          "sym3": 11.72680579682963,
+          "sym3_n_active": 39920,
+          "sym4": 14.766259723238477,
+          "sym4_n_active": 39074
+        },
+        "n_active": 185758
+      },
+      "delta_vs_A_no_conf": -0.5744161319446235
+    },
+    "C_3way_hawkes_0.7": {
+      "no_conformal": {
+        "loso_pnl": 39.941546222007084,
+        "thresh_up": 0.00033877397793160907,
+        "thresh_dn": 0.00020269796987972726,
+        "per_sym": {
+          "sym0": 4.055038525445726,
+          "sym0_n_active": 25510,
+          "sym1": 5.499242013023666,
+          "sym1_n_active": 38776,
+          "sym2": 4.402201610210155,
+          "sym2_n_active": 38612,
+          "sym3": 11.743774098622527,
+          "sym3_n_active": 40739,
+          "sym4": 14.241289974705008,
+          "sym4_n_active": 38361
+        },
+        "n_active": 181998
+      },
+      "delta_vs_A_no_conf": -0.17845377799291384,
+      "conformal": {
+        "loso_pnl": 41.61839622239378,
+        "thresh_up": 0.0002479230539034396,
+        "thresh_dn": 0.00016688829930538909,
+        "per_sym": {
+          "sym0": 4.164225581515964,
+          "sym0_n_active": 29358,
+          "sym1": 5.742948038041521,
+          "sym1_n_active": 24893,
+          "sym2": 4.74714037493216,
+          "sym2_n_active": 29354,
+          "sym3": 11.801757013211368,
+          "sym3_n_active": 49739,
+          "sym4": 15.162325214692764,
+          "sym4_n_active": 46838
+        },
+        "n_active": 180182
+      },
+      "delta_vs_A_conf": -0.3016037776062248
+    },
+    "D_3way_equal": {
+      "no_conformal": {
+        "loso_pnl": 39.818813372275066,
+        "thresh_up": 0.0003415215722035762,
+        "thresh_dn": 0.00020689304965128014,
+        "per_sym": {
+          "sym0": 4.079048733055184,
+          "sym0_n_active": 25169,
+          "sym1": 5.3559779594262515,
+          "sym1_n_active": 38750,
+          "sym2": 4.420106990342012,
+          "sym2_n_active": 38453,
+          "sym3": 11.697751970087495,
+          "sym3_n_active": 39982,
+          "sym4": 14.265927719364122,
+          "sym4_n_active": 37970
+        },
+        "n_active": 180324
+      },
+      "delta_vs_A_no_conf": -0.3011866277249311
+    }
+  },
+  "best": {
+    "config": "C_3way_hawkes_0.7",
+    "mode": "conformal",
+    "loso_pnl": 41.61839622239378,
+    "delta_vs_A_no_conformal": -0.17845377799291384,
+    "delta_vs_A_conformal": -0.3016037776062248
+  },
+  "iter019_v3_recommended": {
+    "candidate": false,
+    "reason": "best_delta -0.1785 <= threshold 0.5 \u2014 no improvement over A"
+  }
+}

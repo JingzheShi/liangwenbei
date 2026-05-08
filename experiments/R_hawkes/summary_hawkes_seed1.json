@@ -1,0 +1,21 @@
+{
+  "task": "Hawkes L2 hawkes seed=1",
+  "variant": "hawkes",
+  "seed": 1,
+  "objective": "regression_l2",
+  "n_features": 365,
+  "best_iter": 66,
+  "train_time_sec": 68.4520857334137,
+  "val_mse": 5.017800049245125e-06,
+  "val_corr": 0.1486649680732325,
+  "test_corr": 0.14344692086958133,
+  "fixed_thr_pnl": 28.93164979979233,
+  "fixed_thr_n_active": 200671,
+  "per_sym_fixed": [
+    4.575626288071611,
+    3.157423468907746,
+    1.0848886934549749,
+    9.00068341069935,
+    11.113027938658645
+  ]
+}

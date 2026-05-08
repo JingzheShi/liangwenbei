@@ -1,0 +1,21 @@
+{
+  "task": "T137-quantile seed=100",
+  "variant": "quantile",
+  "seed": 100,
+  "objective": "quantile",
+  "alpha": 0.5,
+  "best_iter": 109,
+  "train_time_sec": 200.2385151386261,
+  "val": {
+    "mse": 4.957242708769627e-06,
+    "mae": 0.0015090977540239692,
+    "corr": 0.16840125323708918
+  },
+  "test": {
+    "mse": 3.5226203181082383e-06,
+    "mae": 0.0011448017321527004,
+    "corr": 0.15458670710674377,
+    "ev_gate_k1_cum_pnl": 30.71788337859224,
+    "ev_gate_k1_n_active": 233277
+  }
+}

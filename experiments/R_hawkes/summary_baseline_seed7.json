@@ -1,0 +1,21 @@
+{
+  "task": "Hawkes L2 baseline seed=7",
+  "variant": "baseline",
+  "seed": 7,
+  "objective": "regression_l2",
+  "n_features": 359,
+  "best_iter": 203,
+  "train_time_sec": 96.50257754325867,
+  "val_mse": 5.011914709029952e-06,
+  "val_corr": 0.16861707016861366,
+  "test_corr": 0.12617038425868396,
+  "fixed_thr_pnl": 21.300774356617882,
+  "fixed_thr_n_active": 251529,
+  "per_sym_fixed": [
+    4.253092929738687,
+    2.77421115281056,
+    1.7474938626126328,
+    1.1701228294298118,
+    11.355853582026189
+  ]
+}
