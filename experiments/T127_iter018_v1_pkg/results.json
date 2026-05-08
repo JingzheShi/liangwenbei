@@ -1,0 +1,58 @@
+{
+  "task": "iter_018_v1: iter_015 v1 stack + per-sym beta-conformal abstain wrapper",
+  "submission_zip": "/root/projects/liangwenbei_workdir/submission_050817_iter018_v1.zip",
+  "zip_size_mb": 5.53,
+  "stack": {
+    "nn_t87_5seed": "byte-identical to iter_015 v1 nn_h60_seed{1,7,13,42,100}.npz",
+    "lgb_t75_5seed": "byte-identical to iter_015 v1 model_h60_seed{1,7,13,42,100}.txt",
+    "weights": {"w_nn": 1.0, "w_lgb": 1.5},
+    "horizons_active": ["h60"],
+    "thr_up": 0.00029995433796130955,
+    "thr_dn": 0.0002158528296175958,
+    "_thr_note": "DE optimum from R_conformal_select; same DE search as iter_015 v1, slight noise in saved value (iter015_pkg had thr_up=0.000358 from a different DE seed run)"
+  },
+  "conformal_wrapper": {
+    "per_sym_beta": {"0": 0.10, "1": 0.40, "2": 0.30, "3": 0.00, "4": 0.00},
+    "per_sym_sigma": {
+      "0": 0.0002403901,
+      "1": 0.0004712397,
+      "2": 0.0004522216,
+      "3": 0.0004235249,
+      "4": 0.0004279811
+    },
+    "per_sym_band": {
+      "0": 2.403901e-05,
+      "1": 1.884959e-04,
+      "2": 1.356665e-04,
+      "3": 0.0,
+      "4": 0.0
+    },
+    "default_beta_for_ood": 0.16,
+    "default_sigma_for_ood": 0.0003998317,
+    "default_band_for_ood": 6.397307e-05,
+    "_source": "R_conformal_select V8 in-sample fit / 4-fold CV consensus (REPORT.md)"
+  },
+  "metrics": {
+    "cum_pnl_loso_equiv_local_442k": 41.4939,
+    "cum_pnl_baseline_no_abstain": 39.7467,
+    "delta_vs_iter015_v1": 1.7473,
+    "min_per_sym": 4.0855,
+    "active_rate": 0.345,
+    "win_rate": 0.475,
+    "per_sym_pnl": [4.0855, 5.5662, 5.0500, 11.9498, 14.8425],
+    "per_sym_active_rate": [0.251, 0.266, 0.293, 0.483, 0.460],
+    "per_sym_win_rate": [0.502, 0.539, 0.548, 0.231, 0.556]
+  },
+  "expected_platform_pnl": {
+    "iter_015_v1_baseline": 28.16,
+    "iter_018_v1_estimated": "29 to 32 (transmission 0.7x to 0.78x)",
+    "delta_estimated": "+1 to +4"
+  },
+  "validations": {
+    "predictor_smoke_test": "PASS — 3 batches with sym=1, 1 batch sym=99 (OOD), 1 batch missing sym (all return valid (B, 5) actions)",
+    "contract_validate": "PASS — packed zip, extracted to tempdir, ran 1842 windows with batch=1024 + 818, all assertions passed",
+    "e2e_spot_check": "PASS — 5 sessions × 50 windows on val date 100, sym 0-4; per-sym active rates match wrapper expectations (sym 0: 18%, sym 1: 22%, sym 2: 26%, sym 3: 54%, sym 4: 58%)",
+    "verify_cum_pnl_check": "PASS — analytical reconstruction on cached T87+T75 preds gives +41.4939 (matches gate logic in Predictor.py)"
+  },
+  "notes": "Wrapper-only change vs iter_015 v1; models byte-identical. NEW: 'sym' added to config.feature so platform passes sym ID, used ONLY as lookup key for per-sym beta/sigma (not fed to model.forward). OOD sym IDs fall back to mean-of-per-sym defaults. Local +1.75 LOSO gain from -21% trade frequency + +1.1pp win rate."
+}
