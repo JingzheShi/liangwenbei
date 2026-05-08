@@ -1,0 +1,26 @@
+{
+  "task": "T140c: train seeds 13/42/100 (memory now free) + iter_019 v1/v2 finalize",
+  "v1_zip": "/root/projects/liangwenbei_workdir/submission_050818_iter019_v1_fullretrain.zip",
+  "v2_zip": "/root/projects/liangwenbei_workdir/submission_050818_iter019_v2_fullretrain_conformal.zip",
+  "v1_md5": "942f72de2d50f6863e3ed3efff8fed88",
+  "v2_md5": "af6cc7bf4defd74c8270efab598ae5e1",
+  "v1_size_mb": 14.83,
+  "v2_size_mb": 14.83,
+  "v1_files": 16,
+  "v2_files": 16,
+  "smoke_test_ok": true,
+  "models_trained": [1, 7, 13, 42, 100],
+  "seeds_pretrained": [1, 7],
+  "seeds_new": [13, 42, 100],
+  "bug_fixed": "Removed data_random_seed from params in train_full_memeff.py (cannot change after Dataset.construct())",
+  "model_verification": {
+    "seed1": {"iters": 330, "features": 359},
+    "seed7": {"iters": 330, "features": 359},
+    "seed13": {"iters": 330, "features": 359},
+    "seed42": {"iters": 330, "features": 359},
+    "seed100": {"iters": 330, "features": 359}
+  },
+  "expected_platform_v1": "iter_015_v1 +28.16 + (+1~+3 full-retrain) = +29~+31",
+  "expected_platform_v2": "iter_018_v1 +28.93 + (+1~+3 full-retrain) = +30~+32",
+  "notes": "All 5 seeds trained (330 iters, 359 features). Smoke test: v1 and v2 both OK. No Predictor.py changes. Only LGB .txt files added to pkgs."
+}
