@@ -1,0 +1,32 @@
+{
+  "task": "T92 magnitude sample weight regression revival (R44)",
+  "outcome": "negative",
+  "metrics": {
+    "best_variant": "G_sqrt_offset",
+    "best_variant_5seed_de_asym_loso_equiv": 32.5849,
+    "best_variant_5seed_symmetric_k1.5_loso_equiv": 31.6836,
+    "vs_iter013_de": -3.6451,
+    "vs_iter014_de": -5.6951,
+    "iter013_baseline": 36.23,
+    "iter014_baseline": 38.28
+  },
+  "single_seed_pilot_seed42_k1_cum_pnl": {
+    "T75_class_balanced_baseline": 28.28,
+    "A_linear": 12.6106,
+    "B_sqrt": 23.0790,
+    "C_capped": 21.0935,
+    "D_offset": 18.4188,
+    "E_floor_q50": 16.0942,
+    "F_class_mag_alpha0.5": 22.5518,
+    "F_class_mag_alpha0.1": 25.4228,
+    "G_sqrt_offset": 27.0001
+  },
+  "five_seed_de_asym_loso_equiv": {
+    "T75_class_balanced_baseline_iter013": 36.23,
+    "T92_B_sqrt": 32.2389,
+    "T92_G_sqrt_offset": 32.5849
+  },
+  "notes": "R44 hypothesis falsified: every magnitude-weight scheme (8 variants tested) underperforms T75 class-balanced baseline. Best variant G_sqrt_offset 5-seed DE-asym = +32.58 vs iter_013 +36.23 = -3.65, vs iter_014 +38.28 = -5.70. Reasons: (1) L2 already weights gradient by |residual|, magnitude weight = double-counting → tail overfit; (2) class-balanced weight already encodes coarse magnitude prior (flat ≈ small |Δmid|, dir ≈ large |Δmid|), so finer magnitude weighting adds noise within classes; (3) PnL decided by sign + threshold-crossing not magnitude precision, so biasing fit toward tail samples hurts mid-magnitude classification.",
+  "implications": "R44 'F-C: sample-weight × CE non-alignment' pathway should be rated low-confidence for other revivals using the same mechanic (T45 group-DRO, T66 adversarial). 'F-A magnitude collapse' and 'F-B decision bottleneck' pathways remain valid for T22, T35, T46.",
+  "compliance": "all CRITICAL_CONSTRAINTS §3 checks pass (sym/date never used, stateless, shuffle-invariant, sample weight uses only training-time labels)"
+}

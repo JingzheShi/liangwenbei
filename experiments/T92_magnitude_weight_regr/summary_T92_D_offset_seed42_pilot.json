@@ -1,0 +1,101 @@
+{
+  "task": "T92 mag-weight regr seed=42 variant=D_offset",
+  "seed": 42,
+  "variant": "D_offset",
+  "horizon": 60,
+  "objective": "regression_l2",
+  "split_info": {
+    "strategy": "V4",
+    "train_dates": "0-75",
+    "val_dates": "76-79 (walk-forward last 5%)",
+    "n_train": 1399920,
+    "n_val": 73680
+  },
+  "n_features": 359,
+  "drop_names": [
+    "dualz_ask_diff1",
+    "dualz_bid_diff5",
+    "dualz_ask_diff5",
+    "qrank_W100_spread1",
+    "qrank_W100_spread5",
+    "qrank_W100_spread10",
+    "qrank_W100_cumspread",
+    "kyle_lam_W50",
+    "kyle_lam_W100",
+    "roll_eff_spr_ratio_W100",
+    "liq_asym_top5_W5"
+  ],
+  "best_iter": 116,
+  "train_time_sec": 77.89601159095764,
+  "val": {
+    "mse": 5.2219079407223035e-06,
+    "mae": 0.0015802308917045593,
+    "corr": 0.13753461450332394
+  },
+  "test": {
+    "mse": 3.7299755604180973e-06,
+    "mae": 0.0012244399404153228,
+    "corr": 0.12915592659632394,
+    "ev_gate_k1_cum_pnl": 18.418807438357746,
+    "ev_gate_k1_sum_per_sym": 18.418807438357742,
+    "ev_gate_k1_per_sym": [
+      2.867763760793575,
+      1.6277352829717926,
+      0.24856463944011442,
+      5.614915233657337,
+      8.059828521494925
+    ],
+    "ev_gate_k1_n_active": 268391
+  },
+  "weight_info_train": {
+    "scheme": "D_offset",
+    "eps_w": 1e-06,
+    "abs_ret_mean": 0.00138861940531098,
+    "abs_ret_std": 0.0016397318936680354,
+    "abs_ret_q50": 0.0009071659878827631,
+    "abs_ret_q95": 0.004346251953393221,
+    "q50_used": 0.0009071659878827631,
+    "alpha": 1.0,
+    "mean_pre_norm": 0.0022957853931937435,
+    "mean_post_norm": 0.9999999999999999,
+    "weight_q01": 0.39514407164198145,
+    "weight_q50": 0.7902881432839629,
+    "weight_q99": 3.6467186302956383
+  },
+  "weight_info_val": {
+    "scheme": "D_offset",
+    "eps_w": 1e-06,
+    "abs_ret_mean": 0.001500634185171625,
+    "abs_ret_std": 0.0016849346735435897,
+    "abs_ret_q50": 0.0010727663757279515,
+    "abs_ret_q95": 0.00466911108233035,
+    "q50_used": 0.0009071659878827631,
+    "alpha": 1.0,
+    "mean_pre_norm": 0.002407800173054388,
+    "mean_post_norm": 1.0,
+    "weight_q01": 0.3767613268056161,
+    "weight_q50": 0.8222992861982785,
+    "weight_q99": 3.6436753680034295
+  },
+  "params": {
+    "seed": 42,
+    "horizon": 60,
+    "objective": "regression_l2",
+    "weight_variant": "D_offset",
+    "alpha": 1.0,
+    "eps_w": 1e-06,
+    "q_cap": 0.95,
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "no_wandb": true,
+    "tag": "pilot"
+  }
+}

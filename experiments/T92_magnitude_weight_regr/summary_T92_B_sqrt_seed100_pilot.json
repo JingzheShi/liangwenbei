@@ -1,0 +1,99 @@
+{
+  "task": "T92 mag-weight regr seed=100 variant=B_sqrt",
+  "seed": 100,
+  "variant": "B_sqrt",
+  "horizon": 60,
+  "objective": "regression_l2",
+  "split_info": {
+    "strategy": "V4",
+    "train_dates": "0-75",
+    "val_dates": "76-79 (walk-forward last 5%)",
+    "n_train": 1399920,
+    "n_val": 73680
+  },
+  "n_features": 359,
+  "drop_names": [
+    "dualz_ask_diff1",
+    "dualz_bid_diff5",
+    "dualz_ask_diff5",
+    "qrank_W100_spread1",
+    "qrank_W100_spread5",
+    "qrank_W100_spread10",
+    "qrank_W100_cumspread",
+    "kyle_lam_W50",
+    "kyle_lam_W100",
+    "roll_eff_spr_ratio_W100",
+    "liq_asym_top5_W5"
+  ],
+  "best_iter": 54,
+  "train_time_sec": 40.913936614990234,
+  "val": {
+    "mse": 5.070403403806267e-06,
+    "mae": 0.0015527894720435143,
+    "corr": 0.14135038918471407
+  },
+  "test": {
+    "mse": 3.6115734474151395e-06,
+    "mae": 0.0012190212728455663,
+    "corr": 0.14176093340568172,
+    "ev_gate_k1_cum_pnl": 24.013012394931568,
+    "ev_gate_k1_sum_per_sym": 24.013012394931568,
+    "ev_gate_k1_per_sym": [
+      3.302311098691033,
+      2.1622412897089016,
+      2.0956624036254783,
+      5.786495616448844,
+      10.66630198645731
+    ],
+    "ev_gate_k1_n_active": 237636
+  },
+  "weight_info_train": {
+    "scheme": "B_sqrt",
+    "eps_w": 1e-06,
+    "abs_ret_mean": 0.00138861940531098,
+    "abs_ret_std": 0.0016397318936680354,
+    "abs_ret_q50": 0.0009071659878827631,
+    "abs_ret_q95": 0.004346251953393221,
+    "q50_used": 0.0009071659878827631,
+    "mean_pre_norm": 0.030438905904226078,
+    "mean_post_norm": 1.0,
+    "weight_q01": 3.2852691983950775e-05,
+    "weight_q50": 0.9894966800068851,
+    "weight_q99": 2.8384644838589503
+  },
+  "weight_info_val": {
+    "scheme": "B_sqrt",
+    "eps_w": 1e-06,
+    "abs_ret_mean": 0.001500634185171625,
+    "abs_ret_std": 0.0016849346735435897,
+    "abs_ret_q50": 0.0010727663757279515,
+    "abs_ret_q95": 0.00466911108233035,
+    "q50_used": 0.0009071659878827631,
+    "mean_pre_norm": 0.03197558225843712,
+    "mean_post_norm": 0.9999999999999998,
+    "weight_q01": 3.1273863660016344e-05,
+    "weight_q50": 1.0243163724978253,
+    "weight_q99": 2.7737071939885394
+  },
+  "params": {
+    "seed": 100,
+    "horizon": 60,
+    "objective": "regression_l2",
+    "weight_variant": "B_sqrt",
+    "alpha": 1.0,
+    "eps_w": 1e-06,
+    "q_cap": 0.95,
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "no_wandb": true,
+    "tag": "pilot"
+  }
+}
