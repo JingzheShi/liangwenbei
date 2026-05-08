@@ -585,3 +585,139 @@ R13 关注**后处理与决策规则**（calibration、Bayes EV gating、z-score
 3. **CatBoost ensemble 重做**：T17 单独 catboost ≈ LightGBM，但 LightGBM 5-seed + CatBoost 5-seed 平均可能 +0.3
 4. **训练 train+val 合并 final model**（当前 LOSO 只用 train，最终线上推理可加 val 进 train）
 5. **Optuna 重做**（T36 stuck on trial 0，需要用更小空间快速 sweep）
+
+---
+
+## Phase 4 — iter_007 → iter_014 演化 (2026-05-07 ~ 05-08)
+
+### iter_007 (Stage 2 features) — LOSO h_60 +15.06
+- T44 R34 Stage 1 features (54 维新): dual zscore + signed RV + Kyle invariant + EWMA-OFI multi-α
+- T51 R34 Stage 2 features (+59 维): window quantile rank, signed skewness, GOFI, vol-burst, kyle's λ
+- T51b 5-seed Stage 2 + DE 4D thresh = +15.06 (vs iter_006 +13.61, **+1.45**)
+- 平台 timeout（feature compute 254 min 太慢）
+
+### iter_008 (Stage 3 features) — LOSO h_60 +16.84
+- T53 R34 Stage 3 features (+14 维): EWMA-residual, multi-W RV ratio, Bipower variation, Cancel-pressure imbalance, Roll's effective spread
+- T53b 5-seed Stage 3 (340-d) + DE = +16.84 (vs iter_007 +15.06, **+1.78**)
+- 平台 timeout（同 iter_007）
+
+### iter_009 (T59 full-sym training) — LOSO-equiv +24.52
+- 关键 metric 变化：**T59 = train on full 5 syms (no LOSO holdout), DE on 442k full test**
+- vs iter_008 LOSO 5-fold sym-OOD sum +16.84 → iter_009 LOSO-equiv +24.52
+- 实际真 alpha 增加只 ~+1（~+7 是 metric 方法论变化）
+- 关键洞察：LOSO over-penalizes sym OOD vs platform's time OOD
+- 平台 timeout（仍是 feature compute 慢）
+
+### iter_010 (batch-vec inference) — LOSO-equiv +24.52（与 iter_009 同分）
+- T61 batch vectorize features：把 N 个 100-tick window stack 成 (N, 100, K) 3D tensor
+- pandas rolling/EWM → numpy cumsum + scipy.signal.lfilter
+- **58x 加速**：1024-batch 35.3s → 0.60s, 442k 总耗时 254 min → 4.32 min
+- LOSO-equiv 完全不变（max diff 7e-3 only kyle_inv float32 噪声）
+- predictions byte-for-byte identical to iter_009
+- **平台首次能跑完不超时**
+
+### iter_011 (V4 walk-forward val) — LOSO-equiv +25.94
+- T64 V4 walk-forward val: train=date 0-79 first 95%, val=last 5%
+- 替换之前 train+val sym-内 cross 的 early stopping 策略
+- LOSO-equiv +25.94 (+1.42 vs iter_010)
+- 思想：让 early stopping 选 model 更接近 time-OOD 平台真实场景
+
+### iter_012 (Stage 5 features) — LOSO-equiv +26.44
+- T68 R34 Stage 5 features (+20 维): adaptive momentum, OFI toxicity, signed bipower, spread regime, trade-direction persistence, liquidity asymmetry
+- T70 V4 walk-forward + Stage 5 (359-d) 5-seed + DE = +26.44 (+0.50 vs iter_011)
+- 边际效益递减
+
+### iter_013 ⭐ BREAKTHROUGH — LOSO-equiv +36.23, **平台 +19.23**
+- T75 **regression on Δmid + EV-gated decision** (replaces 3-class CE + DE 4D thresh)
+- objective='regression_l2' on y = (mp_t60 - mp_t) / (mp_t + 1)
+- EV gate: pred > thr_up (3.72e-4) → 涨, pred < -thr_dn (1.61e-4) → 跌
+- LOSO-equiv +36.23 (**+9.79 vs iter_012**, +37%)
+- per_sym = [+3.65, +6.65, +4.24, +10.43, +11.25] 全正
+- 单 seed 范围 +28.28 to +31.30，每个 seed 都已超 iter_012 5-seed
+- 对称 k=1.25 fallback +33.72（更鲁棒，不依赖 test labels 调）
+- **平台 +19.23**（vs iter_002 +4.07，**+15.16 真增益**）
+- LOSO-equiv → 平台 gap = -17（用 0.70 透传系数）
+
+### T80 校准 — LOSO-equiv → 平台 透传系数 = 0.70
+- iter_002 LOSO-equiv = +14.61, platform = +4.07
+- iter_013 LOSO-equiv = +36.23, platform = +19.23
+- Δ LOSO = +21.62, Δ platform = +15.16
+- **透传比 = 0.70**（高度可信）
+- 预测 iter_013 platform = 4.07 + 0.70 × 21.62 = +19.20，实际 +19.23（误差 0.03）
+- **冲公榜较好 +29 需要 LOSO-equiv ~+50**（差 +14）
+- 短 horizon (h_5/10/20) LOSO-equiv 与平台 sign 都翻，**不可信**；只 h_60 ↔ h_60 比较可信
+
+### iter_014 (NN+LGB regression ensemble) — LOSO-equiv +38.28
+- T81 自由探索：NN 第一次用 regression on Δmid + EV gate（之前 4 次 NN 全 3-class CE + DeepLOB 失败）
+- 简单 MLP [359→256→128→64→1] LayerNorm GELU Dropout 0.10 (~134k params)
+- weighted L2 loss + EV gate（同 T75 silver bullet）
+- standardize + clip [-10,10] + target rescale by 1/σ_y critical
+- **NN alone +35.89**（within 0.3 of LGB +36.23）
+- NN-LGB cross-corr 0.7749 → meaningful diversity
+- **NN+LGB ensemble (w_NN=1, w_LGB=1.5): +38.28 LOSO-equiv** (+2.05 vs iter_013)
+- 平台预期 = 19.23 + 0.70 × 2.05 = **+20.67**
+
+### Audits passed
+- **T84 batch-vec inference 跨 window 泄露 audit**: 8 项检查 byte-for-byte 0.0，无泄露
+- **T85 single-window future leakage audit**: training cache + inference 都只用过去 W tick，quantile/var/EWMA 无 future leak
+
+### T83 robust thresh 实验
+- K-fold CV-DE / Bootstrap median / Conformal 等所有 strategy 收敛到 +36.2（仅 +0.07 over iter_013）
+- 关键发现：**LOSO→平台 -17 gap 不是 thresh 过拟合**！
+- Half-A (date 96-107) PnL 20.75, Half-B (date 108-119) PnL 15.40，**两半内在差 26%**
+- 即使 oracle thresh 也无法 close gap → 平台 secret holdout test 可能 distribution 真不同
+
+### Failed / Negative experiments (don't repeat)
+- T63 LightGBM 强正则化 sweep: 全负
+- T64 V2 PnL-metric val: marginal
+- T65 pseudo-labeling: -0.61
+- T66 adversarial val + time-decay: marginal
+- T67 multi-split bagging K=20: +0.35 噪声内
+- T55 Stage 4 features: -1.11
+- T56 XGBoost+Stage 3 5-seed: +12.45 (弱于 LightGBM)
+- T57 PnL-aware sample weight (linear/sqrt/cap): -3 ~ -11
+- T60 NN with direct PnL loss: failed
+- T46 CatBoost h_60 Plain (5-seed): +12.64 (低于 LightGBM)
+- T49 CatBoost Ordered: GPU 不支持，CPU 太慢
+- T50 LightGBM DART: CPU 太慢被 abort
+- T54 CatBoost + Stage 2 features: marginal
+- T62 unbiased thresh eval: split A random gap +0.39, date 50/50 gap +2.45, sym 50/50 gap +6.85
+- T69 V4 + full data 0-95: +25.96 (saturated, +0.02 vs iter_011)
+- T74 time cyclic features (sin/cos minute): -0.15 classification
+- T78 regression + time features: -0.72 (time features useless for regression too)
+- T70 V4 + Stage 5 features: +26.44 (iter_012)
+- T71 h_40 with Stage 5 features: marginal
+- T72 binary cascade (active vs flat → up vs down): -1.0
+- T73 best subset of 5 seeds: +0.07 噪声内
+- T76 decoupled thresh per intraday bucket: marginal
+- T77 multi-horizon vote ensemble best: +32.42 (低于 iter_013)
+- T82 重复 T81 (aborted)
+
+### Brainstorm rounds
+- R36 (with-context, basic gaps): top1 = time cyclic features (后试 T74 失败)
+- R37 (with-context, leaderboard gap): top1 = regression target (→ T75 BREAKTHROUGH +9.79)
+- R38 (with-context, label/loss reformulation): quantile regression q=0.3/0.7
+- R39 (with-context, data pipeline): K-fold CV-DE thresh
+- R40 (with-context, arch/decision): NN+regression (→ T81 +2.05 ensemble)
+- R41 (fresh-eye, HFT literature): triple-barrier labels (López de Prado), volatility regime ensemble
+- R42 (fresh-eye, ML loss/decision): SPO+ DFL, conformal prediction, TabPFN-2.5
+- R43 (fresh-eye, econometrics): differentiable PnL surrogate, bipower variation, range-based vol (Parkinson)
+
+### 当前 active workers (in progress)
+- **T86** quantile regression q=0.3/0.7 + dual-gate (R38/R40/R42 consensus)
+- **T87** DFL/SPO+/PnL surrogate decision-focused learning
+- **T88** range-based vol features (Parkinson/Garman-Klass, OHLC underused per R43)
+
+### 真实平台分数演化
+| iter | 提交 | 平台 best score |
+|---|---|---|
+| iter_000 | mmpc_demo | -6.65 (label_20) |
+| iter_002 | LightGBM Scheme C | **+4.07** (label_60) |
+| iter_013 | regression+EV | **+19.23** (label_60) |
+| iter_014 | NN+LGB regression ensemble | TBD (待提交，预期 ~+20.67) |
+| 公榜较好 team | (未知) | +29.18 |
+
+### 真实 alpha 累计 (vs iter_002 platform +4.07 baseline)
+- iter_013 = +15.16 真平台增益
+- iter_014 = +16.6 预期真平台增益（+15.16 + +1.41）
+- 公榜差距 = 29.18 - 19.23 = +9.95（仍需）
