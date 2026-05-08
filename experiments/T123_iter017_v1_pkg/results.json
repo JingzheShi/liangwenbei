@@ -1,0 +1,56 @@
+{
+  "task": "iter_017 v1 = T87 SPO+ NN + T75 LGB L2 (HYD + monotone + date-decay) stack",
+  "submission_zip": "submission_050817_iter017_v1.zip",
+  "zip_size_mb": 5.4,
+  "n_files": 16,
+  "stack": {
+    "nn": "5x T87 SPO+ DFL NN (warm-started T81, lambda=30, lr=3e-5; reused from iter_015 v1)",
+    "lgb": "5x T123 LGB L2 (objective=regression_l2, 375 dims = 359 schemeP + 16 HYD, monotone constraints on 18 features, date-decay sample weight w=1+1.0*date/79)"
+  },
+  "weights": {"w_nn": 1.0, "w_lgb": 1.5},
+  "thresholds": {
+    "thr_up": 0.000421,
+    "thr_dn": 0.000186,
+    "source": "iter_015 v1 conservative (NOT retuned for iter_017 per task spec)"
+  },
+  "horizons_active": [60],
+  "metrics": {
+    "iter_017_v1_at_iter015_v1_conservative_thr": {
+      "cum_pnl": 40.6959,
+      "per_sym": [3.4550, 5.0573, 4.8572, 11.7798, 15.5467],
+      "n_active": 180243,
+      "n_total": 442080
+    },
+    "iter_015_v1_published_de_loso": {
+      "cum_pnl": 40.13,
+      "per_sym": [4.31, 4.78, 4.86, 11.89, 15.88]
+    },
+    "iter_015_v1_at_same_conservative_thr": {
+      "cum_pnl": 39.0753,
+      "per_sym": [2.98, 5.59, 4.66, 11.93, 13.92]
+    },
+    "delta_vs_iter015_v1_de_opt": 0.5659,
+    "delta_vs_iter015_v1_same_thr": 1.6206,
+    "iter_017_v1_de_loso_optimum_informational": {
+      "cum_pnl": 41.7159,
+      "thr_up": 0.000343,
+      "thr_dn": 0.000217,
+      "per_sym": [4.31, 4.78, 4.86, 11.89, 15.88]
+    }
+  },
+  "compliance": {
+    "shuffle_invariance": "PASS",
+    "sym_99_no_crash": "PASS",
+    "date_not_feature": "PASS (date used only as sample weight at train time)",
+    "sym_not_feature": "PASS",
+    "stateless_predict": "PASS"
+  },
+  "training_per_seed": {
+    "1":   {"best_iter": 93, "val_mse": 5.04e-6, "test_corr": 0.1619, "ev_k1_cum_pnl": 33.0783},
+    "7":   {"best_iter": 78, "val_mse": 5.04e-6, "test_corr": 0.1617, "ev_k1_cum_pnl": 33.5895},
+    "13":  {"best_iter": 79, "val_mse": 5.06e-6, "test_corr": 0.1583, "ev_k1_cum_pnl": 31.1466},
+    "42":  {"best_iter": 89, "val_mse": 5.04e-6, "test_corr": 0.1510, "ev_k1_cum_pnl": 28.7687},
+    "100": {"best_iter": 75, "val_mse": 5.05e-6, "test_corr": 0.1619, "ev_k1_cum_pnl": 32.5656}
+  },
+  "notes": "iter_017 v1 = iter_015 v1 with T75 LGB replaced by T123 LGB (HYD + monotone + date-decay). At iter_015 v1 conservative thresholds: +40.70 cum_pnl, +1.62 over iter_015 v1 at same thresholds. All 5 per-sym positive (min 3.45 on sym=0). NN seeds reused byte-for-byte from iter_015 v1 (no NN retrain). LGB retrained from scratch on 1.4M rows × 375 dims, ~30s/seed on RTX 3090."
+}

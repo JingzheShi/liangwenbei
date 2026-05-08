@@ -1,0 +1,32 @@
+{
+  "task": "T123 iter017_v1 LGB L2 (HYD+monotone+date-decay) seed=100",
+  "seed": 100,
+  "horizon": 60,
+  "objective": "regression_l2",
+  "use_hyd": true,
+  "use_monotone": true,
+  "use_date_decay": true,
+  "date_decay_formula": "sw = sw_class_balanced * (1.0 + 1.0 * date / 79)",
+  "n_constrained": 18,
+  "n_features": 375,
+  "best_iter": 75,
+  "train_time_sec": 23.764445066452026,
+  "val": {
+    "mse": 5.000261808163486e-06,
+    "mae": 0.0015304421540349722,
+    "corr": 0.15747031238225428
+  },
+  "test": {
+    "mae": 0.0011635589180514216,
+    "corr": 0.16194670160077182,
+    "ev_gate_k1_cum_pnl": 32.565618838685,
+    "ev_gate_k1_n_active": 200695,
+    "per_sym_ev_gate": [
+      4.539120199910066,
+      2.9014120512569725,
+      3.601305904656023,
+      8.400114624490055,
+      13.123666058371874
+    ]
+  }
+}

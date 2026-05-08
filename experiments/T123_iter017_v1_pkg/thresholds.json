@@ -1,0 +1,18 @@
+{
+  "_doc": "iter_017 v1: T87 SPO+ DFL NN (5 seed) + T123 LGB L2 (5 seed; HYD 16 dims + monotone constraints on 18 features + date-decay sample weight w=1+1.0*date/79). Stack at w_nn:w_lgb = 1.0:1.5 (same as iter_015 v1). thr_up/thr_dn use iter_015 v1 conservative values (NOT retuned for iter_017) to maintain transmission.",
+  "horizons": [
+    {"h": 5,  "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 10, "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 20, "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 40, "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 60,
+     "thr_up": 0.000421,
+     "thr_dn": 0.000186,
+     "w_nn": 1.0,
+     "w_lgb": 1.5,
+     "active": true,
+     "ensemble_seeds": [1, 7, 13, 42, 100],
+     "_doc": "iter_015 v1 conservative thresholds (4.21e-4, 1.86e-4). Local 442k cum_pnl ~+40.69 (+1.61 over iter_015 v1 same thr) for iter_017 v1 (5xT87+5xT123 LGB)."
+    }
+  ]
+}
