@@ -1,0 +1,94 @@
+{
+  "task": "T146 fix v3_mae conformal thresholds",
+  "old_thr_up": 0.00026046267299443117,
+  "old_thr_dn": 0.00028545826435512497,
+  "new_thr_up": 0.00021285270423820527,
+  "new_thr_dn": 0.00025742239175867594,
+  "old_loso_pnl_no_conformal": 41.2046,
+  "old_loso_pnl_with_conformal": 43.21,
+  "new_loso_pnl_with_conformal": 43.9599,
+  "improvement_over_old_conformal": 0.7499,
+  "de_runs": [
+    {
+      "seed": 1,
+      "thr_up": 0.00021285270423820527,
+      "thr_dn": 0.00025742239175867594,
+      "loso_sum": 43.959930217934016,
+      "nfev": 2879,
+      "elapsed": 15.335760354995728
+    },
+    {
+      "seed": 2,
+      "thr_up": 0.00021285364794530666,
+      "thr_dn": 0.0002574216505236569,
+      "loso_sum": 43.959930217934016,
+      "nfev": 3391,
+      "elapsed": 18.06804394721985
+    },
+    {
+      "seed": 3,
+      "thr_up": 0.0002128534892621429,
+      "thr_dn": 0.0002574232799993991,
+      "loso_sum": 43.959930217934016,
+      "nfev": 3519,
+      "elapsed": 18.75172758102417
+    },
+    {
+      "seed": 4,
+      "thr_up": 0.00021285609571205355,
+      "thr_dn": 0.0002574237802364951,
+      "loso_sum": 43.959930217934016,
+      "nfev": 3391,
+      "elapsed": 18.05364179611206
+    },
+    {
+      "seed": 0,
+      "thr_up": 0.00021285478353054714,
+      "thr_dn": 0.0002574993386783829,
+      "loso_sum": 43.95970766025423,
+      "nfev": 3519,
+      "elapsed": 18.999420404434204
+    }
+  ],
+  "per_sym_band": {
+    "0": 2.4039010000000002e-05,
+    "1": 0.00018849588,
+    "2": 0.00013566647999999998,
+    "3": 0.0,
+    "4": 0.0
+  },
+  "per_sym_new_conformal": [
+    {
+      "sym": 0,
+      "pnl": 4.1557,
+      "n_active": 28972
+    },
+    {
+      "sym": 1,
+      "pnl": 5.4847,
+      "n_active": 28385
+    },
+    {
+      "sym": 2,
+      "pnl": 4.6075,
+      "n_active": 32599
+    },
+    {
+      "sym": 3,
+      "pnl": 11.1572,
+      "n_active": 30137
+    },
+    {
+      "sym": 4,
+      "pnl": 18.5548,
+      "n_active": 49534
+    }
+  ],
+  "v3_mae_v2_zip": "/root/projects/liangwenbei_workdir/submission_050818_iter019_v3_mae_v2.zip",
+  "md5": "a510ff4714cfa6e0e342e5ac78b293eb",
+  "size_mb": 6.542,
+  "files": 18,
+  "smoke_test_ok": true,
+  "expected_platform": "iter_018_v1 +28.93 + (conformal-MAE delta ~+2.01 * transmission ~0.7) ~= +30.4",
+  "note": "Conformal gate: pred > (thr_up + band[sym]). Band = beta*sigma per sym (iter_018 v1 config)."
+}
