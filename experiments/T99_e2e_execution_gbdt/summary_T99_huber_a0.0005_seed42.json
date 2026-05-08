@@ -1,0 +1,43 @@
+{
+  "task": "T99 LGB huber seed=42",
+  "seed": 42,
+  "horizon": 60,
+  "objective": "huber",
+  "tag": "huber_a0.0005",
+  "alpha": 0.0005,
+  "n_features": 359,
+  "best_iter": 477,
+  "train_time_sec": 635.7040858268738,
+  "val": {
+    "mse": 4.941945462633157e-06,
+    "mae": 0.0015088693471625447,
+    "corr": 0.1742621006977006
+  },
+  "test": {
+    "mse": 3.5082402973785065e-06,
+    "mae": 0.0011526336893439293,
+    "corr": 0.1634412257009452,
+    "ev_gate_k1_cum_pnl": 34.65134350559465,
+    "ev_gate_k1_n_active": 259028
+  },
+  "params": {
+    "seed": 42,
+    "horizon": 60,
+    "objective": "huber",
+    "alpha": 0.0005,
+    "spo_lambda_l2": 10.0,
+    "spo_fee_eff": 0.0002,
+    "aug_ratio": 1.0,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "num_boost_round": 600,
+    "early_stopping": 40,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 18,
+    "use_gpu": true,
+    "no_wandb": true,
+    "tag": ""
+  }
+}
