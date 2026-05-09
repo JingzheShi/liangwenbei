@@ -1,0 +1,37 @@
+{
+  "task": "T169 in-row AR(5) TTT confidence calibrator",
+  "v2_baseline_holdout": 146.243,
+  "holdout_dates": "96-119",
+  "variants": {
+    "V1_binary": {
+      "holdout_pnl": 127.226,
+      "delta": -19.017,
+      "zip": "submission_050909_iter019_v2T_AR_V1.zip",
+      "zip_md5": "dceda089988253e44ac820111808b176",
+      "zip_size_mb": 14.14
+    },
+    "V2_sigmoid": {
+      "holdout_pnl": 45.4199,
+      "delta": -100.8231,
+      "zip": "submission_050909_iter019_v2T_AR_V2.zip",
+      "zip_md5": "ac307f3769e5e32226ea516d488fdd9e",
+      "zip_size_mb": 14.14
+    },
+    "V3_abstain": {
+      "holdout_pnl": 38.7544,
+      "delta": -107.4886,
+      "zip": "submission_050909_iter019_v2T_AR_V3.zip",
+      "zip_md5": "5dbba14f756fedcf60697207d8ecc40f",
+      "zip_size_mb": 14.14
+    },
+    "V4_magnitude": {
+      "holdout_pnl": 112.3124,
+      "delta": -33.9306,
+      "zip": "submission_050909_iter019_v2T_AR_V4.zip",
+      "zip_md5": "a37fa37900fde210e3b5b34cfd77a29b",
+      "zip_size_mb": 14.14
+    }
+  },
+  "warning": "Holdout deltas are unreliable; user should ship and observe.",
+  "notes": "All 4 variants show negative holdout delta (-19 to -107). AR(5) R\u00b2 on 5-tick test window appears to be noise rather than signal on LOB data at this time scale. V1_binary (-19) is least harmful; V2_sigmoid and V3_abstain (-101/-107) are most damaging due to systematic pred shrinkage. V2 submits have highest platform risk. Do NOT submit without manual review given v2 is SOTA."
+}
