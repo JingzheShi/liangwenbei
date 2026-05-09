@@ -1,0 +1,55 @@
+{
+  "task": "T155 v2 replica reproducibility test",
+  "training_mode": "T140c ACTUAL config (from summaries): CPU train_full.py(seed1,7,no-gpu,18threads,+data_random_seed) + CPU train_full_memeff.py(seed13,42,100,8threads,no-data_random_seed)",
+  "important_note": "PM hypothesis was WRONG: seeds 1,7 were NOT GPU-trained in T140c (summary shows use_gpu=False). All seeds CPU. Key diff between scripts: data_random_seed param.",
+  "model_diff": {
+    "seed1": {
+      "orig_md5": "d333d23da7ffa2ad4f135407c677a1f3",
+      "repl_md5": "c43d4e2b55ffe88628b3ba726e5ec82f",
+      "md5_match": false,
+      "pred_mae": 0.0,
+      "pred_max_diff": 0.0,
+      "pred_corr": 1.0
+    },
+    "seed7": {
+      "orig_md5": "ebceb3bd30d960af64a23dde99e27158",
+      "repl_md5": "b346a7655620ab5a06cb172f0f18b9e5",
+      "md5_match": false,
+      "pred_mae": 0.0,
+      "pred_max_diff": 0.0,
+      "pred_corr": 1.0
+    },
+    "seed13": {
+      "orig_md5": "83c8146c356e9304fb8e32c20b8e3873",
+      "repl_md5": "e1e4fe0abe8ef0d7a7984576630f45c4",
+      "md5_match": false,
+      "pred_mae": 1.820765744503389e-16,
+      "pred_max_diff": 1.8189894035458565e-12,
+      "pred_corr": 1.0
+    },
+    "seed42": {
+      "orig_md5": "c73b0d6ed3e9ce79ae0a56069a028568",
+      "repl_md5": "b3c4251e1e299ad3dc678c64c15d432b",
+      "md5_match": false,
+      "pred_mae": 0.0,
+      "pred_max_diff": 0.0,
+      "pred_corr": 1.0
+    },
+    "seed100": {
+      "orig_md5": "f42702da2c0ab0c6e658b2705427bfe9",
+      "repl_md5": "679b5aed5bfeedab9d6a9f547b3891a6",
+      "md5_match": false,
+      "pred_mae": 0.0,
+      "pred_max_diff": 0.0,
+      "pred_corr": 1.0
+    }
+  },
+  "ensemble_pred_mae_vs_original": 0.0,
+  "ensemble_pred_corr_vs_original": 0.9999999999999998,
+  "actions_differ_count_per_1000": 0,
+  "v2_replica_zip": "/root/projects/liangwenbei_workdir/submission_050819_iter019_v2_replica.zip",
+  "v2_replica_md5": "89ac7b4d60fa22daecd78a170e6dee23",
+  "v2_replica_size_mb": 14.14,
+  "verdict_hypothesis": "DETERMINISTIC: replica ensemble predictions essentially identical to v2 originals (MAE<1e-5). LGB training IS reproducible. Platform PnL differences must be due to OTHER factors (e.g. feature changes).",
+  "timestamp": "2026-05-09T02:54:38Z"
+}

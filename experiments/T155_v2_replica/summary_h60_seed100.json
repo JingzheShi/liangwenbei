@@ -1,0 +1,21 @@
+{
+  "task": "R_full_retrain (memeff) seed=100",
+  "seed": 100,
+  "horizon": 60,
+  "n_features": 359,
+  "num_boost_round": 330,
+  "train_time_sec": 127.6214017868042,
+  "n_train_full": 4420800,
+  "params": {
+    "seed": 100,
+    "horizon": 60,
+    "num_boost_round": 330,
+    "learning_rate": 0.05,
+    "min_data_in_leaf": 100,
+    "bagging_freq": 5,
+    "num_threads": 8,
+    "aug_lo": 0.8,
+    "aug_hi": 1.2,
+    "no_wandb": true
+  }
+}
