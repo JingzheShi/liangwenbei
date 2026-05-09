@@ -1,0 +1,228 @@
+{
+  "task": "T167 5-way ensemble (T87+T97+T95+v2-LGB+CB)",
+  "T164_baseline_holdout": 43.2375,
+  "T166_baseline_holdout": 43.2898,
+  "v2_baseline_holdout": 41.4939,
+  "configs": {
+    "A_T164": {
+      "total_pnl": 43.2375,
+      "per_sym_pnl": [
+        4.2162,
+        4.9127,
+        4.8397,
+        12.9059,
+        16.3631
+      ],
+      "n_trades": 140189,
+      "label": "T164 baseline T87(1.5)+T97(1.5)+T95(0.9)+LGB(1.0)",
+      "weights": {
+        "w87": 1.5,
+        "w97": 1.5,
+        "w95": 0.9,
+        "wLGB": 1.0,
+        "wCB": 0.0
+      }
+    },
+    "B_T166": {
+      "total_pnl": 43.2898,
+      "per_sym_pnl": [
+        4.4323,
+        5.3764,
+        4.9908,
+        12.6807,
+        15.8097
+      ],
+      "n_trades": 163360,
+      "label": "T166 baseline T87(1.5)+T97(1.5)+LGB(1.0)+CB(1.0)",
+      "weights": {
+        "w87": 1.5,
+        "w97": 1.5,
+        "w95": 0.0,
+        "wLGB": 1.0,
+        "wCB": 1.0
+      }
+    },
+    "C_5way_equal": {
+      "total_pnl": 42.7549,
+      "per_sym_pnl": [
+        4.9322,
+        5.2868,
+        4.7265,
+        12.9119,
+        14.8974
+      ],
+      "n_trades": 138424,
+      "label": "5-way equal T87(1)+T97(1)+T95(1)+LGB(1)+CB(1)",
+      "weights": {
+        "w87": 1.0,
+        "w97": 1.0,
+        "w95": 1.0,
+        "wLGB": 1.0,
+        "wCB": 1.0
+      }
+    },
+    "D_5way_nn_heavy": {
+      "total_pnl": 43.382,
+      "per_sym_pnl": [
+        4.6838,
+        5.2994,
+        4.9547,
+        12.8882,
+        15.5561
+      ],
+      "n_trades": 152913,
+      "label": "5-way nn-heavy T87(1.5)+T97(1.5)+T95(0.5)+LGB(1.0)+CB(1.0)",
+      "weights": {
+        "w87": 1.5,
+        "w97": 1.5,
+        "w95": 0.5,
+        "wLGB": 1.0,
+        "wCB": 1.0
+      }
+    },
+    "E_5way_sym": {
+      "total_pnl": 43.2641,
+      "per_sym_pnl": [
+        4.5643,
+        5.2694,
+        4.8646,
+        12.8506,
+        15.7152
+      ],
+      "n_trades": 147697,
+      "label": "5-way symmetric T87(1.5)+T97(1.5)+T95(0.7)+LGB(1.0)+CB(0.7)",
+      "weights": {
+        "w87": 1.5,
+        "w97": 1.5,
+        "w95": 0.7,
+        "wLGB": 1.0,
+        "wCB": 0.7
+      }
+    },
+    "F_lgbcb_heavy": {
+      "total_pnl": 42.2674,
+      "per_sym_pnl": [
+        5.0699,
+        5.2671,
+        4.6026,
+        12.722,
+        14.6059
+      ],
+      "n_trades": 149284,
+      "label": "5-way LGB+CB heavy T87(1.0)+T97(1.0)+T95(0.5)+LGB(1.5)+CB(1.5)",
+      "weights": {
+        "w87": 1.0,
+        "w97": 1.0,
+        "w95": 0.5,
+        "wLGB": 1.5,
+        "wCB": 1.5
+      }
+    },
+    "G_T164best_CB05": {
+      "total_pnl": 43.1637,
+      "per_sym_pnl": [
+        4.489,
+        5.16,
+        4.8398,
+        12.8822,
+        15.7928
+      ],
+      "n_trades": 143006,
+      "label": "5-way T164-best+CB(0.5) T87(1.5)+T97(1.5)+T95(0.9)+LGB(1.0)+CB(0.5)",
+      "weights": {
+        "w87": 1.5,
+        "w97": 1.5,
+        "w95": 0.9,
+        "wLGB": 1.0,
+        "wCB": 0.5
+      }
+    },
+    "H_T164best_CB10": {
+      "total_pnl": 43.4013,
+      "per_sym_pnl": [
+        4.7768,
+        5.2754,
+        4.8305,
+        12.8962,
+        15.6223
+      ],
+      "n_trades": 145911,
+      "label": "5-way T164-best+CB(1.0) T87(1.5)+T97(1.5)+T95(0.9)+LGB(1.0)+CB(1.0)",
+      "weights": {
+        "w87": 1.5,
+        "w97": 1.5,
+        "w95": 0.9,
+        "wLGB": 1.0,
+        "wCB": 1.0
+      }
+    },
+    "I_T166best_T95_03": {
+      "total_pnl": 43.2863,
+      "per_sym_pnl": [
+        4.5999,
+        5.244,
+        4.9224,
+        12.8243,
+        15.6956
+      ],
+      "n_trades": 156785,
+      "label": "5-way T166-best+T95(0.3) T87(1.5)+T97(1.5)+T95(0.3)+LGB(1.0)+CB(1.0)",
+      "weights": {
+        "w87": 1.5,
+        "w97": 1.5,
+        "w95": 0.3,
+        "wLGB": 1.0,
+        "wCB": 1.0
+      }
+    },
+    "J_T166best_T95_07": {
+      "total_pnl": 43.3153,
+      "per_sym_pnl": [
+        4.7521,
+        5.3218,
+        4.8947,
+        12.8499,
+        15.4969
+      ],
+      "n_trades": 149236,
+      "label": "5-way T166-best+T95(0.7) T87(1.5)+T97(1.5)+T95(0.7)+LGB(1.0)+CB(1.0)",
+      "weights": {
+        "w87": 1.5,
+        "w97": 1.5,
+        "w95": 0.7,
+        "wLGB": 1.0,
+        "wCB": 1.0
+      }
+    },
+    "K_T166best_T95_09": {
+      "total_pnl": 43.4013,
+      "per_sym_pnl": [
+        4.7768,
+        5.2754,
+        4.8305,
+        12.8962,
+        15.6223
+      ],
+      "n_trades": 145911,
+      "label": "5-way T166-best+T95(0.9) T87(1.5)+T97(1.5)+T95(0.9)+LGB(1.0)+CB(1.0)",
+      "weights": {
+        "w87": 1.5,
+        "w97": 1.5,
+        "w95": 0.9,
+        "wLGB": 1.0,
+        "wCB": 1.0
+      }
+    }
+  },
+  "best_config": "H_T164best_CB10",
+  "best_holdout": 43.4013,
+  "delta_vs_T166": 0.1115,
+  "delta_vs_T163": 0.4992,
+  "delta_vs_v2": 1.9074,
+  "threshold_for_pkg": 0.2,
+  "runtime_sec": 0.6,
+  "timestamp": "2026-05-09T07:37:07.123708",
+  "zip": null,
+  "notes": "5-way ensemble (T87+T97+T95+LGB+CB) best config H/K: T87(1.5)+T97(1.5)+T95(0.9)+LGB(1.0)+CB(1.0) = 43.4013. This is +0.1115 vs T166 (43.2898), falling short of +0.20 threshold. Adding T95 to T166-best gives +0.11; adding CB to T164-best gives +0.16 \u2014 marginal improvement from 5-way vs 4-way. T166 pkg (submission_050909_iter019_v2NN_CB.zip) remains the best submission at 43.2898. Config summary: D (nn-heavy T95=0.5)=43.38, H/K (T95=0.9,CB=1.0)=43.40, J (T95=0.7)=43.32. T95 at 0.9 is consistently best for 5-way, as found in T164.",
+  "T166_zip_is_best": "experiments/T166_catboost_l2/pkg_v2NN_CB \u2192 submission_050909_iter019_v2NN_CB.zip"
+}
