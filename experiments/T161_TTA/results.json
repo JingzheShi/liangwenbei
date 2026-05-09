@@ -1,0 +1,28 @@
+{
+  "task": "T161 TTA per-row K=5 augmentation",
+  "v2W_baseline_holdout": 132.0037563528606,
+  "v2W_n_trades": 188222,
+  "method_A_feature_noise": {
+    "K": 5,
+    "sigma": 0.01,
+    "holdout_pnl": 126.53647250370071,
+    "n_trades": 188546,
+    "delta": -5.467283849159884
+  },
+  "method_C_price_scale": {
+    "K": 5,
+    "scale_range": [
+      0.97,
+      1.03
+    ],
+    "note": "feature-level approx: scale price-level raw features only",
+    "n_price_cols": 69,
+    "holdout_pnl": 131.85742384970487,
+    "n_trades": 169838,
+    "delta": -0.146332503155719
+  },
+  "best_method": "method_C",
+  "best_delta": -0.146332503155719,
+  "v2W_TTA_zip": null,
+  "expected_platform": null
+}
