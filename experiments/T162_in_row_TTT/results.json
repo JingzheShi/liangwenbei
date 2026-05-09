@@ -1,0 +1,22 @@
+{
+  "task": "T162 in-row TTT (local context-aware prediction adjustment)",
+  "v2_baseline_holdout": 83.49136221720273,
+  "W3a_momentum_scaling": {
+    "holdout_pnl": 83.19208633969492,
+    "delta": -0.29927587750781015
+  },
+  "W3b_vol_shrinkage": {
+    "holdout_pnl": 81.50655735352899,
+    "delta": -1.9848048636737445
+  },
+  "W3c_combined": {
+    "holdout_pnl": 80.38064944604594,
+    "delta": -3.1107127711567983
+  },
+  "best_method": "W3a",
+  "best_delta": -0.29927587750781015,
+  "v2W_TTT_zip": null,
+  "expected_platform": null,
+  "holdout_dates": "100-119",
+  "notes": "Only h=60 is active in v2. Best wrapper: W3a with delta=-0.2993. No zip (delta < 0.5)."
+}
