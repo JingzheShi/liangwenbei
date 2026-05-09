@@ -1,0 +1,1 @@
+{"status": "done", "step": "T163 complete: zip built, smoke test passed, holdout +1.41 vs v2", "metrics": {"combined_holdout": 42.9021, "delta_vs_v2": 1.4082, "delta_vs_3way": 1.7624}, "timestamp": "2026-05-09T09:00:00"}

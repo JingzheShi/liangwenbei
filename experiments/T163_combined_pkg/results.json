@@ -1,0 +1,33 @@
+{
+  "task": "T163 combined v2NN_T97 + selective agreement filter",
+  "components": [
+    "3-way ensemble (T87 w=1.5 + T97 w=1.5 + LGB w=1.0) from T156c pkg",
+    "selective agreement filter (syms 0/1/2 only) adapted from T158"
+  ],
+  "eval_framework": "T75 LGB + T87/T97 NN prediction parquets, holdout dates 96-119",
+  "v2_baseline_holdout": 41.4939,
+  "v2NN_T97_only_holdout": 41.1397,
+  "v2W_agreement_only_holdout": 41.741,
+  "combined_T163_holdout": 42.9021,
+  "delta_combined_vs_v2": 1.4082,
+  "delta_combined_vs_3way": 1.7624,
+  "delta_combined_vs_v2w": 1.1612,
+  "per_sym_v2": [4.0855, 5.5662, 5.05, 11.9498, 14.8425],
+  "per_sym_T163": [3.9343, 5.0893, 5.0424, 12.4903, 16.3458],
+  "n_filter_applied": 55196,
+  "thresholds": {
+    "thr_up": 0.00029995433796130955,
+    "thr_dn": 0.0002158528296175958,
+    "w_nn": 1.5,
+    "w_nn2": 1.5,
+    "w_lgb": 1.0,
+    "per_sym_beta": {"0": 0.1, "1": 0.4, "2": 0.3, "3": 0.0, "4": 0.0}
+  },
+  "zip_path": "submission_050909_iter019_v2NN_T97_agreement_combined.zip",
+  "md5": "3c7f23f28668f1a479fa8243296c0dab",
+  "size_mb": 17.35,
+  "smoke_test_ok": true,
+  "model_files_byte_identical_to_T156c": true,
+  "expected_platform": "v2 platform ~+34.44 + 1.41 * ~0.7 transmission = ~+35.4",
+  "notes": "3-way alone: -0.35 vs v2 (T75 LGB context). Agreement filter recovers: +1.76 on top of 3-way, net +1.41 combined vs v2. The agreement filter using NN-side = T87+T97 weighted avg vs LGB sign is the key driver."
+}
