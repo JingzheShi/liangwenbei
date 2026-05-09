@@ -108,6 +108,7 @@ def main():
     ap.add_argument("--aug-lo", type=float, default=0.80)
     ap.add_argument("--aug-hi", type=float, default=1.20)
     ap.add_argument("--no-wandb", action="store_true")
+    ap.add_argument("--no-gpu", action="store_true")
     args = ap.parse_args()
 
     H = args.horizon
@@ -213,9 +214,10 @@ def main():
         "bagging_seed": seed + 2,
         "verbose": -1,
         "metric": "l2",
-        "device": "gpu",
-        "gpu_use_dp": False,
     }
+    if not args.no_gpu:
+        params["device"] = "gpu"
+        params["gpu_use_dp"] = False
 
     progress("dataset_construction", seed=seed)
     print(f"  building lgb.Dataset...", flush=True)
