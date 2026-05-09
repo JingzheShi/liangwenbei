@@ -1,0 +1,11 @@
+{
+  "task": "T151 TOD train seed=1",
+  "seed": 1,
+  "horizon": 60,
+  "n_features": 364,
+  "lob_features": 359,
+  "tod_features": 5,
+  "num_boost_round": 330,
+  "train_time_sec": 217.98587346076965,
+  "model_path": "/root/projects/liangwenbei_workdir/experiments/T151_TOD_v9/model_h60_seed1.txt"
+}
