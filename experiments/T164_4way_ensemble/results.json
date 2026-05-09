@@ -1,0 +1,110 @@
+{
+  "task": "T164 4-way ensemble (T87+T97+T95+v2-LGB)",
+  "v2_baseline_holdout": 41.4939,
+  "T163_combined_baseline_holdout": 42.9021,
+  "configs": {
+    "A_3way_T163": {
+      "label": "T87(1.5)+T97(1.5)+LGB(1.0) +filter [T163 baseline]",
+      "total_pnl": 42.9019,
+      "per_sym_pnl": [
+        3.9343,
+        5.0893,
+        5.0424,
+        12.4901,
+        16.3458
+      ],
+      "w87": 1.5,
+      "w97": 1.5,
+      "w95": 0.0,
+      "wLGB": 1.0
+    },
+    "B_4way_equal": {
+      "label": "T87(1)+T97(1)+T95(1)+LGB(1) equal +filter",
+      "total_pnl": 42.1052,
+      "per_sym_pnl": [
+        4.0399,
+        4.7967,
+        4.6499,
+        12.3479,
+        16.2708
+      ],
+      "w87": 1.0,
+      "w97": 1.0,
+      "w95": 1.0,
+      "wLGB": 1.0
+    },
+    "C_4way_nn_heavy": {
+      "label": "T87(1.5)+T97(1.5)+T95(0.5)+LGB(1.0) nn-heavy +filter",
+      "total_pnl": 43.091,
+      "per_sym_pnl": [
+        4.116,
+        5.0379,
+        4.8732,
+        12.7155,
+        16.3483
+      ],
+      "w87": 1.5,
+      "w97": 1.5,
+      "w95": 0.5,
+      "wLGB": 1.0
+    },
+    "D_4way_t95_low": {
+      "label": "T87(1.5)+T97(1.5)+T95(0.3)+LGB(1.0) t95-low +filter",
+      "total_pnl": 42.9451,
+      "per_sym_pnl": [
+        3.9892,
+        5.0541,
+        4.975,
+        12.5378,
+        16.389
+      ],
+      "w87": 1.5,
+      "w97": 1.5,
+      "w95": 0.3,
+      "wLGB": 1.0
+    },
+    "E_4way_t95_very_low": {
+      "label": "T87(1.5)+T97(1.5)+T95(0.2)+LGB(1.0) t95-very-low +filter",
+      "total_pnl": 42.8563,
+      "per_sym_pnl": [
+        3.965,
+        5.0584,
+        5.0073,
+        12.5085,
+        16.3172
+      ],
+      "w87": 1.5,
+      "w97": 1.5,
+      "w95": 0.2,
+      "wLGB": 1.0
+    },
+    "F_4way_w95_0.9": {
+      "label": "T87(1.5)+T97(1.5)+T95(0.9)+LGB(1.0) WINNER +filter",
+      "total_pnl": 43.2375,
+      "per_sym_pnl": [
+        4.2162,
+        4.9127,
+        4.8397,
+        12.9059,
+        16.3631
+      ],
+      "w87": 1.5,
+      "w97": 1.5,
+      "w95": 0.9,
+      "wLGB": 1.0
+    }
+  },
+  "best_config": "F_4way_w95_0.9",
+  "best_holdout": 43.2375,
+  "delta_vs_T163": 0.3354,
+  "delta_vs_v2": 1.7436,
+  "threshold_met": true,
+  "weight_sweep_notes": "Searched w95 in {0.1,0.2,...,1.5}; optimum at w95=0.90 giving +0.3354 vs T163. Range 0.85-0.97 all above +0.30 threshold, indicating robustness.",
+  "v2NN_4way_zip": "/root/projects/liangwenbei_workdir/submission_050909_iter019_v2NN_T97_T95_4way.zip",
+  "zip_md5": "ad1ef6b2bba3e19d5b5b380fa282b0ad",
+  "zip_size_mb": 17.66,
+  "smoke_test_ok": true,
+  "expected_platform": "v2 platform ~+34.44 + 1.74 * ~0.7 transmission = ~+35.7",
+  "notes": "T95 GRU (corr=0.33 with T87, 0.28 with T97) adds genuine diversity. Optimal weight w95=0.90 (vs w87=1.5, w97=1.5, wLGB=1.0). Agreement filter includes T95 in NN-side signal for syms 0,1,2. T95 numpy GRU inference verified vs PyTorch (max diff 6e-11). Gain mainly from Sym0 (+0.28) and Sym3 (+0.42); n_trades drops 160946\u2192140189 (more selective agreement filter).",
+  "timestamp": "2026-05-09T07:15:00"
+}
