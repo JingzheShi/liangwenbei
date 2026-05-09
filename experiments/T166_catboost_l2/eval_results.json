@@ -1,0 +1,115 @@
+{
+  "task": "T166 CatBoost L2 5-seed inner-train ensemble eval",
+  "v2_baseline_holdout": 41.4939,
+  "T163_combined_holdout": 42.9021,
+  "v2_local": 41.4939,
+  "T163_replica_local": 42.9019,
+  "configs": {
+    "A_v2": {
+      "label": "T87+LGB (v2 weights)",
+      "pnl": 41.4939,
+      "per_sym": [
+        4.0855,
+        5.5662,
+        5.05,
+        11.9498,
+        14.8425
+      ]
+    },
+    "B_3way_w105_05": {
+      "label": "T87+LGB+CB (1.0:1.5:0.5)",
+      "pnl": 41.8815,
+      "per_sym": [
+        4.735,
+        5.7952,
+        4.7359,
+        12.2144,
+        14.4011
+      ]
+    },
+    "C_3way_w105_10": {
+      "label": "T87+LGB+CB (1.0:1.5:1.0)",
+      "pnl": 41.5357,
+      "per_sym": [
+        5.0435,
+        5.8557,
+        4.4207,
+        12.2543,
+        13.9616
+      ]
+    },
+    "D_4way_1515107": {
+      "label": "T87+T97+LGB+CB (1.5:1.5:1.0:0.7)",
+      "pnl": 41.6079,
+      "per_sym": [
+        3.9831,
+        4.3695,
+        4.7095,
+        12.6147,
+        15.9311
+      ]
+    },
+    "D2_4way_15151010": {
+      "label": "T87+T97+LGB+CB (1.5:1.5:1.0:1.0)",
+      "pnl": 41.9989,
+      "per_sym": [
+        4.227,
+        4.5377,
+        4.7438,
+        12.6807,
+        15.8097
+      ]
+    },
+    "E_4way_agree": {
+      "label": "T87+T97+LGB+CB (agree filter w=1.5:1.5:1.0:0.7)",
+      "pnl": 43.0445,
+      "per_sym": [
+        4.2867,
+        5.2448,
+        4.9672,
+        12.6147,
+        15.9311
+      ]
+    },
+    "E2_4way_agree_equal": {
+      "label": "T87+T97+LGB+CB (agree filter w=1.5:1.5:1.0:1.0)",
+      "pnl": 43.2898,
+      "per_sym": [
+        4.4323,
+        5.3764,
+        4.9908,
+        12.6807,
+        15.8097
+      ]
+    },
+    "F_T163_replica": {
+      "label": "T163 replica (T87+T97+LGB agree filter)",
+      "pnl": 42.9019,
+      "per_sym": [
+        3.9343,
+        5.0893,
+        5.0424,
+        12.4901,
+        16.3458
+      ]
+    },
+    "G_CB_LGB": {
+      "label": "CB+LGB (v2 weights)",
+      "pnl": 38.3671,
+      "per_sym": [
+        5.2231,
+        6.004,
+        4.071,
+        11.4099,
+        11.6592
+      ]
+    }
+  },
+  "best_config": "E2_4way_agree_equal",
+  "best_holdout": 43.2898,
+  "delta_vs_v2": 1.7959,
+  "delta_vs_T163_ref": 0.3877,
+  "delta_vs_T163_local": 0.3879,
+  "runtime_sec": 0.5,
+  "timestamp": "2026-05-09T07:17:55.239393"
+}

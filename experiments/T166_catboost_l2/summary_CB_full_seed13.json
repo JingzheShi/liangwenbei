@@ -1,0 +1,24 @@
+{
+  "task": "T166 CB FULL RETRAIN seed=13",
+  "seed": 13,
+  "n_total": 2210400,
+  "n_train_used": 4420800,
+  "iterations": 800,
+  "tree_count": 800,
+  "train_time_sec": 30.15206480026245,
+  "cb_params": {
+    "iterations": 800,
+    "learning_rate": 0.05,
+    "depth": 6,
+    "l2_leaf_reg": 2.0,
+    "loss_function": "RMSE",
+    "eval_metric": "RMSE",
+    "random_seed": 13,
+    "bootstrap_type": "Bernoulli",
+    "subsample": 0.8,
+    "early_stopping_rounds": null,
+    "allow_writing_files": false,
+    "task_type": "GPU",
+    "devices": "0"
+  }
+}

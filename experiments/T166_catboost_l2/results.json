@@ -1,0 +1,43 @@
+{
+  "task": "T166 CatBoost L2 5-seed full-retrain ensemble",
+  "eval_framework": "T75 LGB parquets + T87/T97 NN parquets + CB inner-train parquets, holdout dates 96-119",
+  "v2_baseline_holdout": 41.4939,
+  "T163_combined_holdout": 42.9021,
+  "training": {
+    "inner_train": "5-seed CatBoost L2 on inner 0-95 (train+val), 800 iters, aug_a 0.8-1.2, class-balanced weights, GPU RTX 3090",
+    "full_retrain": "5-seed CatBoost L2 on full 0-119 (train+val+test), 800 iters, aug_a 0.8-1.2, GPU RTX 3090",
+    "seeds": [1, 7, 13, 42, 100],
+    "seed_configs": {
+      "1":   {"depth": 6, "l2_leaf_reg": 3.0, "learning_rate": 0.05},
+      "7":   {"depth": 8, "l2_leaf_reg": 5.0, "learning_rate": 0.05},
+      "13":  {"depth": 6, "l2_leaf_reg": 2.0, "learning_rate": 0.05},
+      "42":  {"depth": 7, "l2_leaf_reg": 3.0, "learning_rate": 0.05},
+      "100": {"depth": 8, "l2_leaf_reg": 5.0, "learning_rate": 0.05}
+    },
+    "inner_test_corr": {"1": 0.1562, "7": 0.1479, "13": 0.1594, "42": 0.1554, "100": 0.1508}
+  },
+  "eval_configs": {
+    "A_v2": {"label": "T87+LGB (v2 baseline)", "pnl": 41.4939},
+    "B_3way_w105_05": {"label": "T87+LGB+CB (1.0:1.5:0.5)", "pnl": 41.8815},
+    "C_3way_w105_10": {"label": "T87+LGB+CB (1.0:1.5:1.0)", "pnl": 41.5357},
+    "D_4way_1515107": {"label": "T87+T97+LGB+CB (1.5:1.5:1.0:0.7)", "pnl": 41.6079},
+    "D2_4way_15151010": {"label": "T87+T97+LGB+CB (1.5:1.5:1.0:1.0)", "pnl": 41.9989},
+    "E_4way_agree": {"label": "T87+T97+LGB+CB agree filter (1.5:1.5:1.0:0.7)", "pnl": 43.0445},
+    "E2_4way_agree_equal": {"label": "T87+T97+LGB+CB agree filter (1.5:1.5:1.0:1.0)", "pnl": 43.2898},
+    "F_T163_replica": {"label": "T163 replica T87+T97+LGB agree filter", "pnl": 42.9019},
+    "G_CB_LGB": {"label": "CB+LGB (v2 weights)", "pnl": 38.3671}
+  },
+  "best_config": "E2_4way_agree_equal",
+  "best_holdout": 43.2898,
+  "delta_vs_v2": 1.7959,
+  "delta_vs_T163_ref": 0.3877,
+  "delta_exceeds_threshold": true,
+  "threshold_used": 0.3,
+  "per_sym_notes": "Agreement filter syms {0,1,2}: sign(T87+T97 avg) vs sign(LGB) mismatch -> abstain",
+  "pkg_weights": {"w_nn": 1.5, "w_nn2": 1.5, "w_lgb": 1.0, "w_cb": 1.0},
+  "zip_path": "submission_050909_iter019_v2NN_CB.zip",
+  "zip_md5": "03d33680d4609b5d0c3ab0693073fc40",
+  "zip_size_mb": 23.0,
+  "smoke_test_ok": true,
+  "notes": "CatBoost L2 5-seed (ordered boosting, different binning) provides meaningful diversity vs LGB. Best config: 4-way T87+T97+LGB+CB (1.5:1.5:1.0:1.0) + agreement filter on syms {0,1,2}. T163 replica 42.9019 matches reference 42.9021 confirming correct eval framework. Delta +0.39 > threshold +0.30."
+}

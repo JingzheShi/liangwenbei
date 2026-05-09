@@ -1,0 +1,27 @@
+{
+  "task": "T166 CB L2 inner seed=7",
+  "seed": 7,
+  "horizon": 60,
+  "n_inner": 1768320,
+  "n_train_used": 3536640,
+  "iterations": 800,
+  "tree_count": 800,
+  "train_time_sec": 29.817055702209473,
+  "test_corr": 0.14787588039549077,
+  "test_mse": 3.5955015391664347e-06,
+  "cb_params": {
+    "iterations": 800,
+    "learning_rate": 0.05,
+    "depth": 8,
+    "l2_leaf_reg": 5.0,
+    "loss_function": "RMSE",
+    "eval_metric": "RMSE",
+    "random_seed": 7,
+    "bootstrap_type": "Bernoulli",
+    "subsample": 0.8,
+    "early_stopping_rounds": null,
+    "allow_writing_files": false,
+    "task_type": "GPU",
+    "devices": "0"
+  }
+}
