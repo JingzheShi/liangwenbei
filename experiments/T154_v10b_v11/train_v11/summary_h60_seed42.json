@@ -1,0 +1,11 @@
+{
+  "task": "T154 v11 (259 LOB + 5 TOD = 264 features)",
+  "seed": 42,
+  "horizon": 60,
+  "n_features": 264,
+  "lob_features": 259,
+  "tod_features": 5,
+  "num_boost_round": 330,
+  "train_time_sec": 89.94136667251587,
+  "model_path": "/root/projects/liangwenbei_workdir/experiments/T154_v10b_v11/train_v11/model_h60_seed42.txt"
+}
