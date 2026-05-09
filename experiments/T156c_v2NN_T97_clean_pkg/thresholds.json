@@ -1,0 +1,66 @@
+{
+  "_doc": "iter_018 v1: iter_015 v1 stack (T87 SPO+ NN + T75 LGB) + per-sym beta-calibrated abstain band wrapper from R_conformal_select. Models byte-identical to iter_015 v1; thresholds re-run via DE on combined stack (matches R_conformal_select baseline DE optimum). Wrapper: per-sym beta, sigma_pred precomputed from local val 442k. Verify total_loso = +41.4939 (delta +1.7473 over baseline +39.7467). Compliance: per-sym beta looked up by sym ID (allowed under CRITICAL_CONSTRAINTS - sym used as lookup key only, not fed to model.forward). Fallback beta=0.16 (mean) for OOD sym ID.",
+  "horizons": [
+    {
+      "h": 5,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 10,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 20,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 40,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 60,
+      "thr_up": 0.00029995433796130955,
+      "thr_dn": 0.0002158528296175958,
+      "w_nn": 1.5,
+      "w_nn2": 1.5,
+      "w_lgb": 1.0,
+      "active": true,
+      "ensemble_seeds": [
+        1,
+        7,
+        13,
+        42,
+        100
+      ],
+      "_doc": "iter_019 v2NN_T97: T87 (w=1.5) + T97 (w=1.5) + T75-LGB (w=1.0). T97=multi-head NN converted to npz (nn2_h60_seed*.npz). Thresholds unchanged from iter_018 v1. Local TSH holdout: T87+T97+LGB_nn_heavy=40.64 vs v2 baseline=38.98 (+1.66). Conformal beta={0:0.1,1:0.4,2:0.3,3:0.0,4:0.0}."
+    }
+  ],
+  "conformal_wrapper": {
+    "enabled": true,
+    "per_sym_beta": {
+      "0": 0.1,
+      "1": 0.4,
+      "2": 0.3,
+      "3": 0.0,
+      "4": 0.0
+    },
+    "default_beta_for_ood": 0.16,
+    "per_sym_sigma": {
+      "0": 0.0002403901,
+      "1": 0.0004712397,
+      "2": 0.0004522216,
+      "3": 0.0004235249,
+      "4": 0.0004279811
+    },
+    "default_sigma_for_ood": 0.0003998317,
+    "_doc": "beta = 4-fold CV consensus / V8 in-sample fit from R_conformal_select (REPORT.md). sigma = std(combined_pred) per sym on local val 442k. OOD: beta = mean(per_sym_beta) = 0.16, sigma = mean(per_sym_sigma)."
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "task": "T156b NN swap retry",
+  "available_nns": [
+    "T87",
+    "T81",
+    "T95",
+    "T97"
+  ],
+  "lgb_config": "TSH-FT trained on 0-95 inner, 359 features, LGB params v2",
+  "cross_correlations": {
+    "T87": {
+      "T87": 1.0,
+      "T81": 0.9402,
+      "T95": 0.3309,
+      "T97": 0.8408,
+      "LGB": 0.6028
+    },
+    "T81": {
+      "T87": 0.9402,
+      "T81": 1.0,
+      "T95": 0.3713,
+      "T97": 0.8132,
+      "LGB": 0.6124
+    },
+    "T95": {
+      "T87": 0.3309,
+      "T81": 0.3713,
+      "T95": 1.0,
+      "T97": 0.2791,
+      "LGB": 0.2643
+    },
+    "T97": {
+      "T87": 0.8408,
+      "T81": 0.8132,
+      "T95": 0.2791,
+      "T97": 1.0,
+      "LGB": 0.6034
+    },
+    "LGB": {
+      "T87": 0.6028,
+      "T81": 0.6124,
+      "T95": 0.2643,
+      "T97": 0.6034,
+      "LGB": 1.0
+    }
+  },
+  "diverse_nns_vs_T87": [
+    "T95",
+    "T97"
+  ],
+  "configs": {
+    "v2_baseline": {
+      "label": "T87+LGB (v2 weights)",
+      "total_pnl": 38.9821,
+      "per_sym_pnl": [
+        4.2734,
+        5.4356,
+        4.4308,
+        11.4978,
+        13.3445
+      ]
+    },
+    "T87_standalone": {
+      "label": "T87+LGB (v2 weights)",
+      "total_pnl": 38.9821,
+      "per_sym_pnl": [
+        4.2734,
+        5.4356,
+        4.4308,
+        11.4978,
+        13.3445
+      ]
+    },
+    "T81_standalone": {
+      "label": "T81+LGB (v2 weights)",
+      "total_pnl": 37.6735,
+      "per_sym_pnl": [
+        4.4083,
+        5.1455,
+        4.4283,
+        11.5026,
+        12.1888
+      ]
+    },
+    "T95_standalone": {
+      "label": "T95+LGB (v2 weights)",
+      "total_pnl": 29.215,
+      "per_sym_pnl": [
+        4.4795,
+        3.2106,
+        2.4422,
+        10.8892,
+        8.1935
+      ]
+    },
+    "T97_standalone": {
+      "label": "T97+LGB (v2 weights)",
+      "total_pnl": 36.6374,
+      "per_sym_pnl": [
+        4.1857,
+        4.5811,
+        3.5564,
+        11.5604,
+        12.7538
+      ]
+    },
+    "T87+T95+LGB_equal": {
+      "label": "T87+T95+LGB (equal)",
+      "total_pnl": 39.4411,
+      "per_sym_pnl": [
+        4.4442,
+        4.795,
+        4.2846,
+        12.5626,
+        13.3548
+      ]
+    },
+    "T87+T95+LGB_v2_ext": {
+      "label": "T87+T95+LGB (v2_ext)",
+      "total_pnl": 38.405,
+      "per_sym_pnl": [
+        4.4973,
+        4.7008,
+        4.1571,
+        12.2426,
+        12.8072
+      ]
+    },
+    "T87+T95+LGB_nn_heavy": {
+      "label": "T87+T95+LGB (nn_heavy)",
+      "total_pnl": 40.0877,
+      "per_sym_pnl": [
+        4.316,
+        4.6615,
+        4.4023,
+        12.7472,
+        13.9607
+      ]
+    },
+    "T87+T95+LGB_lgb_heavy": {
+      "label": "T87+T95+LGB (lgb_heavy)",
+      "total_pnl": 37.814,
+      "per_sym_pnl": [
+        4.5474,
+        4.9316,
+        4.0569,
+        11.944,
+        12.334
+      ]
+    },
+    "T87+T97+LGB_equal": {
+      "label": "T87+T97+LGB (equal)",
+      "total_pnl": 39.9155,
+      "per_sym_pnl": [
+        3.6984,
+        4.33,
+        4.545,
+        12.4258,
+        14.9164
+      ]
+    },
+    "T87+T97+LGB_v2_ext": {
+      "label": "T87+T97+LGB (v2_ext)",
+      "total_pnl": 39.6085,
+      "per_sym_pnl": [
+        3.9234,
+        4.8742,
+        4.4229,
+        12.2088,
+        14.1793
+      ]
+    },
+    "T87+T97+LGB_nn_heavy": {
+      "label": "T87+T97+LGB (nn_heavy)",
+      "total_pnl": 40.6436,
+      "per_sym_pnl": [
+        3.5576,
+        4.3669,
+        4.6872,
+        12.6216,
+        15.4103
+      ]
+    },
+    "T87+T97+LGB_lgb_heavy": {
+      "label": "T87+T97+LGB (lgb_heavy)",
+      "total_pnl": 39.029,
+      "per_sym_pnl": [
+        4.1287,
+        5.0894,
+        4.3415,
+        11.8909,
+        13.5785
+      ]
+    },
+    "T87+T81+LGB_v2ext": {
+      "label": "T87+T81+LGB (v2_ext, non-diverse)",
+      "total_pnl": 39.669,
+      "per_sym_pnl": [
+        4.0126,
+        4.9369,
+        4.8502,
+        12.1278,
+        13.7413
+      ]
+    }
+  },
+  "best_config": "T87+T97+LGB_nn_heavy",
+  "best_holdout_pnl": 40.6436,
+  "v2_baseline_local_tsh": 38.9821,
+  "v2_reference_loso_equiv": 41.4939,
+  "delta_vs_v2_local": 1.6615,
+  "delta_vs_v2_ref": -0.8503,
+  "v2NN_zip": "/root/projects/liangwenbei_workdir/submission_050819_iter019_v2NN_T97.zip",
+  "runtime_sec": 121.5,
+  "timestamp": "2026-05-09T06:14:12.418687",
+  "zip_size_mb": 17.0,
+  "zip_note": "T87(w=1.5)+T97-multihead(w=1.5)+LGB(w=1.0), conformal iter018v1, smoke-test PASSED"
+}

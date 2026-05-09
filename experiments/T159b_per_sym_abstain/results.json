@@ -1,0 +1,1369 @@
+{
+  "task": "T159b per-sym beta sweep, TSH-FT (HOLDOUT-validated)",
+  "v2_baseline_inner_pnl": 598.4437345733722,
+  "v2_baseline_holdout_pnl": 59.12957096345854,
+  "best_beta_holdout": {
+    "0": 0.1,
+    "1": 0.4,
+    "2": 0.3,
+    "3": 0.0,
+    "4": 0.0
+  },
+  "best_holdout_pnl": 59.12957096345854,
+  "delta_holdout_vs_baseline": 0.0,
+  "iter_018_baseline_beta": {
+    "0": 0.1,
+    "1": 0.4,
+    "2": 0.3,
+    "3": 0.0,
+    "4": 0.0
+  },
+  "best_inner_pnl": 598.4437345733722,
+  "no_abstain_holdout_pnl": 59.12957096345854,
+  "sigma_per_sym_full": {
+    "0": 0.0004144979674428833,
+    "1": 0.0005075424928452421,
+    "2": 0.0004965570020811816,
+    "3": 0.000585710851848031,
+    "4": 0.00045462817751216284
+  },
+  "sigma_per_sym_holdout_only": {
+    "0": 0.00024039005399316407,
+    "1": 0.00047123970986897727,
+    "2": 0.00045222158684287225,
+    "3": 0.0004235249436031642,
+    "4": 0.00042798113351514205
+  },
+  "sweep_log": [
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.4,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.5,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.6,
+      "holdout_pnl": 58.93805178486501,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.7,
+      "holdout_pnl": 58.37131973162192,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.8,
+      "holdout_pnl": 57.706007916573675,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 0.9,
+      "holdout_pnl": 57.020793258531214,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 1.0,
+      "holdout_pnl": 56.29786431580508,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 1.1,
+      "holdout_pnl": 55.849052106256465,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 1.2,
+      "holdout_pnl": 55.25434171431363,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 1.3,
+      "holdout_pnl": 54.68874360285425,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 1.5,
+      "holdout_pnl": 53.875059299997105,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 0,
+      "beta_tested": 2.0,
+      "holdout_pnl": 53.038449442006936,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.4,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.5,
+      "holdout_pnl": 58.655565225861274,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.6,
+      "holdout_pnl": 58.30565784104733,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.7,
+      "holdout_pnl": 58.1635532156169,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.8,
+      "holdout_pnl": 58.126633991282695,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 0.9,
+      "holdout_pnl": 57.77485451089089,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 1.0,
+      "holdout_pnl": 57.36252387166999,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 1.1,
+      "holdout_pnl": 57.04213623047856,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 1.2,
+      "holdout_pnl": 56.598099595434434,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 1.3,
+      "holdout_pnl": 56.25948732741283,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 1.5,
+      "holdout_pnl": 55.56689999641388,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 1,
+      "beta_tested": 2.0,
+      "holdout_pnl": 53.88540130544487,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.4,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.5,
+      "holdout_pnl": 58.927543714854465,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.6,
+      "holdout_pnl": 58.63709730126959,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.7,
+      "holdout_pnl": 58.384710204435855,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.8,
+      "holdout_pnl": 58.08490468550292,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 0.9,
+      "holdout_pnl": 57.845280942731094,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 1.0,
+      "holdout_pnl": 57.267663218561154,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 1.1,
+      "holdout_pnl": 56.79099453589121,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 1.2,
+      "holdout_pnl": 56.379221783436165,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 1.3,
+      "holdout_pnl": 55.900143878156804,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 1.5,
+      "holdout_pnl": 55.02272861855497,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 2,
+      "beta_tested": 2.0,
+      "holdout_pnl": 53.4921336229419,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.4,
+      "holdout_pnl": 58.97588869672828,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.5,
+      "holdout_pnl": 58.1613295609817,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.6,
+      "holdout_pnl": 57.14833489882872,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.7,
+      "holdout_pnl": 55.86860084295702,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.8,
+      "holdout_pnl": 54.62154052829464,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 0.9,
+      "holdout_pnl": 53.350200308206865,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 1.0,
+      "holdout_pnl": 52.085768132777886,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 1.1,
+      "holdout_pnl": 50.8714521406753,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 1.2,
+      "holdout_pnl": 49.784376511499474,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 1.3,
+      "holdout_pnl": 48.695751090010816,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 1.5,
+      "holdout_pnl": 46.9372194360178,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 3,
+      "beta_tested": 2.0,
+      "holdout_pnl": 44.1842118181808,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.4,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.5,
+      "holdout_pnl": 58.87978108725245,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.6,
+      "holdout_pnl": 57.95100164599396,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.7,
+      "holdout_pnl": 56.73897851512024,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.8,
+      "holdout_pnl": 55.31706040419928,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 0.9,
+      "holdout_pnl": 53.765822181629275,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 1.0,
+      "holdout_pnl": 52.456261270602944,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 1.1,
+      "holdout_pnl": 51.20820800878529,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 1.2,
+      "holdout_pnl": 50.13259330440076,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 1.3,
+      "holdout_pnl": 49.209320064198096,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 1.5,
+      "holdout_pnl": 47.25402062652279,
+      "is_best": false
+    },
+    {
+      "round": 1,
+      "sym": 4,
+      "beta_tested": 2.0,
+      "holdout_pnl": 44.60657343179022,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.4,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.5,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.6,
+      "holdout_pnl": 58.93805178486501,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.7,
+      "holdout_pnl": 58.37131973162192,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.8,
+      "holdout_pnl": 57.706007916573675,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 0.9,
+      "holdout_pnl": 57.020793258531214,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 1.0,
+      "holdout_pnl": 56.29786431580508,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 1.1,
+      "holdout_pnl": 55.849052106256465,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 1.2,
+      "holdout_pnl": 55.25434171431363,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 1.3,
+      "holdout_pnl": 54.68874360285425,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 1.5,
+      "holdout_pnl": 53.875059299997105,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 0,
+      "beta_tested": 2.0,
+      "holdout_pnl": 53.038449442006936,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.4,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.5,
+      "holdout_pnl": 58.655565225861274,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.6,
+      "holdout_pnl": 58.30565784104733,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.7,
+      "holdout_pnl": 58.1635532156169,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.8,
+      "holdout_pnl": 58.126633991282695,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 0.9,
+      "holdout_pnl": 57.77485451089089,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 1.0,
+      "holdout_pnl": 57.36252387166999,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 1.1,
+      "holdout_pnl": 57.04213623047856,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 1.2,
+      "holdout_pnl": 56.598099595434434,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 1.3,
+      "holdout_pnl": 56.25948732741283,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 1.5,
+      "holdout_pnl": 55.56689999641388,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 1,
+      "beta_tested": 2.0,
+      "holdout_pnl": 53.88540130544487,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.4,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.5,
+      "holdout_pnl": 58.927543714854465,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.6,
+      "holdout_pnl": 58.63709730126959,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.7,
+      "holdout_pnl": 58.384710204435855,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.8,
+      "holdout_pnl": 58.08490468550292,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 0.9,
+      "holdout_pnl": 57.845280942731094,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 1.0,
+      "holdout_pnl": 57.267663218561154,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 1.1,
+      "holdout_pnl": 56.79099453589121,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 1.2,
+      "holdout_pnl": 56.379221783436165,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 1.3,
+      "holdout_pnl": 55.900143878156804,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 1.5,
+      "holdout_pnl": 55.02272861855497,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 2,
+      "beta_tested": 2.0,
+      "holdout_pnl": 53.4921336229419,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.4,
+      "holdout_pnl": 58.97588869672828,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.5,
+      "holdout_pnl": 58.1613295609817,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.6,
+      "holdout_pnl": 57.14833489882872,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.7,
+      "holdout_pnl": 55.86860084295702,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.8,
+      "holdout_pnl": 54.62154052829464,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 0.9,
+      "holdout_pnl": 53.350200308206865,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 1.0,
+      "holdout_pnl": 52.085768132777886,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 1.1,
+      "holdout_pnl": 50.8714521406753,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 1.2,
+      "holdout_pnl": 49.784376511499474,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 1.3,
+      "holdout_pnl": 48.695751090010816,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 1.5,
+      "holdout_pnl": 46.9372194360178,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 3,
+      "beta_tested": 2.0,
+      "holdout_pnl": 44.1842118181808,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.0,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.05,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.1,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.15,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.2,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.25,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.3,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.4,
+      "holdout_pnl": 59.12957096345854,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.5,
+      "holdout_pnl": 58.87978108725245,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.6,
+      "holdout_pnl": 57.95100164599396,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.7,
+      "holdout_pnl": 56.73897851512024,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.8,
+      "holdout_pnl": 55.31706040419928,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 0.9,
+      "holdout_pnl": 53.765822181629275,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 1.0,
+      "holdout_pnl": 52.456261270602944,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 1.1,
+      "holdout_pnl": 51.20820800878529,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 1.2,
+      "holdout_pnl": 50.13259330440076,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 1.3,
+      "holdout_pnl": 49.209320064198096,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 1.5,
+      "holdout_pnl": 47.25402062652279,
+      "is_best": false
+    },
+    {
+      "round": 2,
+      "sym": 4,
+      "beta_tested": 2.0,
+      "holdout_pnl": 44.60657343179022,
+      "is_best": false
+    }
+  ]
+}
