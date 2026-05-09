@@ -1,0 +1,45 @@
+{
+  "task": "T173 multi-horizon submission (5 horizons active: h=5/10/20/40/60)",
+  "horizons_used": [5, 10, 20, 40, 60],
+  "models_per_horizon": {
+    "h5":  {"lgb": 5, "cb": 5, "source": "T98 iter_016"},
+    "h10": {"lgb": 5, "cb": 5, "source": "T98 iter_016"},
+    "h20": {"lgb": 5, "cb": 5, "source": "T98 iter_016"},
+    "h40": {"lgb": 5, "cb": 5, "source": "T98 iter_016"},
+    "h60": {"lgb": 5, "nn": 5, "source": "iter_019 v2 fullretrain"}
+  },
+  "ensemble_per_horizon": {
+    "h5":  "lgb_cb_2way (w_lgb=1.552, w_cb=0.423)",
+    "h10": "lgb_cb_2way (w_lgb=0.177, w_cb=0.007)",
+    "h20": "lgb_cb_2way (w_lgb=2.695, w_cb=0.704)",
+    "h40": "lgb_cb_2way (w_lgb=2.821, w_cb=0.952)",
+    "h60": "nn_lgb_2way (w_nn=1.0, w_lgb=1.5) + conformal"
+  },
+  "thresh_per_horizon": {
+    "h5":  {"thr_up": 0.000425604, "thr_dn": 0.000402417},
+    "h10": {"thr_up": 0.000385420, "thr_dn": 0.000298694},
+    "h20": {"thr_up": 0.000452352, "thr_dn": 0.000392895},
+    "h40": {"thr_up": 0.000336669, "thr_dn": 0.000238573},
+    "h60": {"thr_up": 0.000299954, "thr_dn": 0.000215853, "conformal": true}
+  },
+  "loso_equiv": {
+    "h5": 18.16,
+    "h10": 25.15,
+    "h20": 30.10,
+    "h40": 36.38,
+    "h60_local_v2": 34.44
+  },
+  "smoke_test_ok": true,
+  "smoke_test_output": "[2,2,2,2,2] for all 3 batches (random input, all actions in {0,1,2})",
+  "feature_compatibility": "T107 LGB h5-h40 models: 359 features - byte-identical feature_names to v2 LGB h60 model. Confirmed via model header inspection.",
+  "zip": "submission_050909_iter019_v2_multihorizon.zip",
+  "md5": "81c341cf634eb2f0bfb091dd765ebf3f",
+  "size_mb": 51,
+  "constraints_check": {
+    "date_not_used": true,
+    "stateless_predictor": true,
+    "sym_agnostic_forward": true,
+    "sym_only_for_conformal_lookup": true
+  },
+  "expected": "h=60 score should match v2 (+34.44). h=5/10/20/40 get scored independently; iter_016 short-horizon LOSO: h5~18, h10~25, h20~30, h40~36."
+}
