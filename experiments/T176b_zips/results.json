@@ -1,0 +1,75 @@
+{
+  "task": "T176b build 7 variant zips from T176 trained NNs",
+  "variants": {
+    "S1_ep7": {
+      "zip": "submission_050909_iter019_v2N_T87M7_S1_ep7.zip",
+      "md5": "535e23cf83d8549cf0e027fb410b5bc1",
+      "size_mb": 14.16,
+      "smoke_ok": true,
+      "epochs": 7,
+      "lr": "3e-5",
+      "lambda_spo": 30
+    },
+    "S1_ep15": {
+      "zip": "submission_050909_iter019_v2N_T87M7_S1_ep15.zip",
+      "md5": "ccd841240b4cdab0ff978ee8c18175a5",
+      "size_mb": 14.16,
+      "smoke_ok": true,
+      "epochs": 15,
+      "lr": "3e-5",
+      "lambda_spo": 30
+    },
+    "S1_ep20": {
+      "zip": "submission_050909_iter019_v2N_T87M7_S1_ep20.zip",
+      "md5": "51b7a51fc0928080e544f9297e3e2a6b",
+      "size_mb": 14.16,
+      "smoke_ok": true,
+      "epochs": 20,
+      "lr": "3e-5",
+      "lambda_spo": 30
+    },
+    "S2_lr1e-5": {
+      "zip": "submission_050909_iter019_v2N_T87M7_S2_lr1e-5.zip",
+      "md5": "35cd1192414d9bf030c28c3ab255b345",
+      "size_mb": 14.16,
+      "smoke_ok": true,
+      "epochs": 11,
+      "lr": "1e-5",
+      "lambda_spo": 30
+    },
+    "S2_lr1e-4": {
+      "zip": "submission_050909_iter019_v2N_T87M7_S2_lr1e-4.zip",
+      "md5": "2eda37a2277ee6ee0bfb6784e0f556d5",
+      "size_mb": 14.16,
+      "smoke_ok": true,
+      "epochs": 11,
+      "lr": "1e-4",
+      "lambda_spo": 30
+    },
+    "S3_lam10": {
+      "zip": "submission_050909_iter019_v2N_T87M7_S3_lam10.zip",
+      "md5": "f8a7327ca1b3bad0558d8e83f6a80130",
+      "size_mb": 14.16,
+      "smoke_ok": true,
+      "epochs": 11,
+      "lr": "3e-5",
+      "lambda_spo": 10
+    },
+    "S3_lam100": {
+      "zip": "submission_050909_iter019_v2N_T87M7_S3_lam100.zip",
+      "md5": "700bb493ef9e9d4b33e431b41e876edf",
+      "size_mb": 14.16,
+      "smoke_ok": true,
+      "epochs": 11,
+      "lr": "3e-5",
+      "lambda_spo": 100
+    }
+  },
+  "verification": {
+    "thresholds_match_v2_strict": true,
+    "lgb_models_byte_identical_to_v2": true,
+    "outputs_copied": true,
+    "all_smoke_tests_passed": true
+  },
+  "expected_platform": "T170 baseline (ep11/lr3e-5/lam30) = +34.64. Each variant is a perturbation of epochs/lr/lambda_spo. Likely range +33 to +35.5 based on past M7 variance."
+}
