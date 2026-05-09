@@ -1,0 +1,33 @@
+{
+  "task": "T170 T87 SPO+ NN with M7 full-retrain (date 0-119, fixed 11 epochs)",
+  "method": "Retrain T87 SPO+ NN on ALL data (train 0-79 + val 80-95 + test 96-119), fixed 11 epochs (avg T87 best_epoch 9.2 x 1.1), warm-start from T81, same hyperparams as T87 main (lr=3e-5, lambda_spo=30, batch=4096, aug=True)",
+  "seeds": [1, 7, 13, 42, 100],
+  "fixed_epochs": 11,
+  "avg_T87_best_epoch": 9.2,
+  "holdout_eval": {
+    "note": "WARNING: T170 NN trained on 0-119 (includes test 96-119) → in-sample for holdout. Comparison is contaminated. T87 baseline (trained on 0-75) is the clean reference.",
+    "v2_baseline_holdout_pnl": 109.6753,
+    "v2_T87M7_holdout_pnl": 118.1621,
+    "delta_holdout": 8.4869,
+    "per_sym_delta": {
+      "sym0": 0.731,
+      "sym1": 4.135,
+      "sym2": 2.736,
+      "sym3": 0.375,
+      "sym4": 2.042
+    },
+    "v2_documented_platform_holdout_LOSO": 41.49
+  },
+  "warning": "Holdout not predictive of platform; ship to verify. In-sample contamination (NN trained on 96-119 test set). Positive delta is a good sanity check but overestimates true generalization.",
+  "v2N_T87M7_zip": "submission_050909_iter019_v2N_T87M7.zip",
+  "md5": "0f00b95acaf8dd1b17c2f78a09b48102",
+  "size_mb": 14.82,
+  "package": {
+    "lgb_models": "v2 unchanged (R_full_retrain, date 0-119)",
+    "nn_models": "T170_M7 (5 seeds, date 0-119, fixed 11 epochs)",
+    "thresholds": "v2 unchanged (thr_up=0.0003, thr_dn=0.000216)",
+    "conformal_wrapper": "v2 unchanged (per-sym beta)",
+    "ensemble_weights": "w_nn=1.0, w_lgb=0.5 (from v2 config)"
+  },
+  "training_time_per_seed_sec": 52
+}

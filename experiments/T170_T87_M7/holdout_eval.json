@@ -1,0 +1,14 @@
+{
+  "task": "T170 T87 SPO+ NN with M7 full-retrain",
+  "v2_baseline_holdout": 109.675262,
+  "v2_T87M7_holdout": 118.162134,
+  "delta": 8.486872,
+  "warning": "Holdout not predictive: NN trained on 0-119 (in-sample for test). T87 baseline is cleaner (trained on 0-75). Ship to verify actual platform improvement.",
+  "note_v2_documented_holdout": 41.49,
+  "config_used": {
+    "thr_up": 0.00029995433796130955,
+    "thr_dn": 0.0002158528296175958,
+    "w_nn": 1.0,
+    "w_lgb": 0.5
+  }
+}
