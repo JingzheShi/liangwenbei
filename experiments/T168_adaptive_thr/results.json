@@ -1,0 +1,51 @@
+{
+  "task": "T168 per-batch adaptive threshold (TTT-style)",
+  "v2_baseline_holdout": 41.4939,
+  "v2_recomputed_holdout": 41.4939,
+  "eval_notes": "Simulated platform-style batches: size=1024, shuffle seed=42, dates 96-119. T87 NN (w=1.0) + T75 LGB (w=1.5), conformal band per-sym.",
+  "variants": {
+    "V1_multiplicative": {
+      "holdout_pnl": 40.7848,
+      "n_trades": 205061,
+      "delta": -0.7091,
+      "zip_md5": "ca51ead67ebb1e254e41d2aa0df886e4",
+      "zip_size_mb": 15.0,
+      "zip": "submission_050909_iter019_v2T_adaptive_V1.zip",
+      "description": "batch_med/baseline -> adapt_factor -> thr /= adapt_factor. Strong batch -> lower thr (more trades). Cap: thr in [thr/2, thr*2]."
+    },
+    "V2_percentile_anchored": {
+      "holdout_pnl": 35.5869,
+      "n_trades": 87727,
+      "delta": -5.907,
+      "zip_md5": "dc29584667996b561454ab3aca0cf698",
+      "zip_size_mb": 15.0,
+      "zip": "submission_050909_iter019_v2T_adaptive_V2.zip",
+      "description": "thr raised to 75th pct of positives / 25th pct of negatives. Top 25% always trades. Large PnL loss: too conservative on randomized batches."
+    },
+    "V3_confidence_scaled": {
+      "holdout_pnl": 39.6072,
+      "n_trades": 128967,
+      "delta": -1.8867,
+      "zip_md5": "425c9262bead04bc94b9fcb26a8a8778",
+      "zip_size_mb": 15.0,
+      "zip": "submission_050909_iter019_v2T_adaptive_V3.zip",
+      "description": "pred_scaled = pred * clip(|pred|/q75_abs, 0, 1). Low-confidence rows shrunk toward 0. Fewer trades, less PnL."
+    },
+    "V4_hybrid": {
+      "holdout_pnl": 41.4939,
+      "n_trades": 154946,
+      "delta": 0.0,
+      "zip_md5": "35639d4e8631ce84214c701dc7073a19",
+      "zip_size_mb": 15.0,
+      "zip": "submission_050909_iter019_v2T_adaptive_V4.zip",
+      "description": "Adaptive only for extreme batches (ratio>=2x or <=0.5x baseline). On holdout, all shuffled batches fall in normal range -> identical to v2."
+    }
+  },
+  "analysis": {
+    "best_variant": "V4_hybrid (ties v2, zero delta)",
+    "worst_variant": "V2_percentile_anchored (-5.91)",
+    "key_finding": "All variants fail to beat v2 on shuffled holdout batches. Platform shuffles test points, making within-batch statistics noisy/uninformative. V4 correctly identifies this and falls back to original gate for normal batches. V1/V2/V3 lose due to threshold distortion on random batch mixes.",
+    "recommendation": "Do NOT ship V1/V2/V3. V4 is safe (identical to v2). Adaptive thresholding is not beneficial under platform's random shuffle."
+  },
+  "warning": "Holdout deltas are unreliable predictors of platform performance. However, all variants <= v2 suggests no platform benefit."
+}
