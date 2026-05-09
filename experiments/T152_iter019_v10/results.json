@@ -1,0 +1,49 @@
+{
+  "task": "T152 iter_019 v10 = v2 + adversarial-filtered 259 features",
+  "n_features_kept": 259,
+  "n_features_dropped": 100,
+  "tshft_baseline_v2_359": 16.8739,
+  "tshft_v10_259": 36.16794009952564,
+  "tshft_delta": 19.29404009952564,
+  "tshft_n_trades": 176934,
+  "train_times_per_seed": {
+    "1": 281.51864647865295,
+    "7": 182.05981588363647,
+    "13": 165.69008207321167,
+    "42": 186.56318640708923,
+    "100": 97.27534985542297
+  },
+  "model_files": [
+    "model_h60_seed1.txt",
+    "model_h60_seed100.txt",
+    "model_h60_seed13.txt",
+    "model_h60_seed42.txt",
+    "model_h60_seed7.txt"
+  ],
+  "status": "models_trained",
+  "v10_zip": "/root/projects/liangwenbei_workdir/submission_050818_iter019_v10_pruned.zip",
+  "v10_md5": "1ee3f667218c65246e65890933b46eeb",
+  "v10_size_mb": 14.794,
+  "v10_files": [
+    "Predictor.py",
+    "__pycache__",
+    "config.json",
+    "fast_features.py",
+    "fast_features_batch.py",
+    "model_h60_seed1.txt",
+    "model_h60_seed100.txt",
+    "model_h60_seed13.txt",
+    "model_h60_seed42.txt",
+    "model_h60_seed7.txt",
+    "nn_h60_seed1.npz",
+    "nn_h60_seed100.npz",
+    "nn_h60_seed13.npz",
+    "nn_h60_seed42.npz",
+    "nn_h60_seed7.npz",
+    "pruned_features.json",
+    "requirements.txt",
+    "thresholds.json"
+  ],
+  "smoke_test_ok": true,
+  "expected_platform_v10": "v2 +34.44 + (T147 +19.29 tshft * transmission ~0.7) = ~48"
+}
