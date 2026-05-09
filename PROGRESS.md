@@ -174,3 +174,35 @@ class Predictor:
 **我的推荐**：先 B + A 并行——B 不依赖训练，可直接给出"如果什么都不预测=0 分"和"全预测涨=负分"的下限，并且让 A 的迭代有反馈。然后再看 C/D。
 
 等你拍方向后我就去派 worker。
+
+---
+
+## 8. 实验历程摘要（最新）
+
+| Iter | 实验 | 本地 holdout PnL | 平台 PnL | 备注 |
+|---|---|---|---|---|
+| v2 | T87 MLP + T75 LGB | — | +34.44 | **SOTA** |
+| T163 | v2 + T97 MLP | — | −3.70 | MLP太相似，平台有毒 |
+| T172 | v2 + GroupTransformer | **完成** | — (in-sample inflated) | 提交包已构建，需平台验证 |
+
+## 9. T172b 任务完成（2026-05-09）
+
+**目标**：GroupTransformer（特征分组+注意力）+ v2 LGB/MLP 集成，测试架构多样性
+
+**架构**：GroupTransformer (d_model=64, nhead=4, 2 layers, n_tokens=32, CLS token)
+- 输入：359维特征 → Linear(359, 32×64) → (B, 32, 64) super-tokens
+- 2层 TransformerEncoder (pre-norm)
+- CLS token → head FC1 → LN → FC2 → /target_scale
+
+**In-sample 评估（全部 in-sample，transformer 训练于 0-119）**:
+| 变体 | In-sample PnL (96-119) | 备注 |
+|---|---|---|
+| v2 baseline | +109.68 | w_nn=1.0, w_lgb=0.5 |
+| Transformer only | +149.91 | 强in-sample拟合 |
+| Best: 1.0:0.5:1.0 | +164.71 | w_nn=1, w_tr=0.5, w_lgb=1 |
+
+**提交包**：`submission_050909_iter019_v2N_transformer.zip`
+- md5: `1fd4b0815b4fe9950c12771a17c44a3c`
+- Predictor: torch CPU transformer (13x faster than numpy: 372ms vs 4.8s for 5 seeds x 1024)
+- 全部 in-sample，真实性能需平台评测
+- ⚠️ transformer 加入会 inflate holdout，最终效果未知

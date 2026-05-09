@@ -1,0 +1,84 @@
+{
+  "task": "T172b finalize transformer ensemble",
+  "remote_models_synced": true,
+  "v2_baseline_pnl_insample": 109.67526236628481,
+  "transformer_only_pnl_insample": 149.91218657233438,
+  "ensemble_configs": {
+    "1.0:1.0:0.5": {
+      "pnl": 157.00650066969519,
+      "weights": [
+        1.0,
+        1.0,
+        0.5
+      ]
+    },
+    "1.0:0.5:0.5": {
+      "pnl": 157.7502878627167,
+      "weights": [
+        1.0,
+        0.5,
+        0.5
+      ]
+    },
+    "1.5:1.0:0.5": {
+      "pnl": 155.49592410544176,
+      "weights": [
+        1.5,
+        1.0,
+        0.5
+      ]
+    },
+    "1.0:1.0:1.0": {
+      "pnl": 162.49186336128858,
+      "weights": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "1.0:0.5:1.0": {
+      "pnl": 164.7145120531725,
+      "weights": [
+        1.0,
+        0.5,
+        1.0
+      ]
+    },
+    "1.5:1.0:1.0": {
+      "pnl": 160.463678731618,
+      "weights": [
+        1.5,
+        1.0,
+        1.0
+      ]
+    },
+    "2.0:1.0:0.5": {
+      "pnl": 153.06279362813297,
+      "weights": [
+        2.0,
+        1.0,
+        0.5
+      ]
+    },
+    "1.0:2.0:0.5": {
+      "pnl": 154.40263689916466,
+      "weights": [
+        1.0,
+        2.0,
+        0.5
+      ]
+    }
+  },
+  "best_config": "1.0:0.5:1.0",
+  "best_pnl_insample": 164.7145120531725,
+  "delta_vs_v2": 55.0392496868877,
+  "best_weights": {
+    "w_nn": 1.0,
+    "w_tr": 0.5,
+    "w_lgb": 1.0
+  },
+  "warning": "Transformer trained 0-119; holdout in-sample. Platform eval required for true validation.",
+  "inference_notes": "Predictor uses torch CPU for transformer (13x faster than numpy: 372ms vs 4.8s for 5 seeds x 1024 samples). Full Predictor B=1024: ~1259ms.",
+  "zip": "/root/projects/liangwenbei_workdir/experiments/T172_transformer/submission_050909_iter019_v2N_transformer.zip",
+  "md5": "1fd4b0815b4fe9950c12771a17c44a3c"
+}
