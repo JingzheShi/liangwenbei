@@ -1,0 +1,94 @@
+{
+  "task": "T180 OOD density-based abstain wrapper",
+  "T170_baseline_holdout": 149.94767106753025,
+  "T170_n_active": 192884,
+  "ood_detector": {
+    "pca_components": 20,
+    "gmm_components": 5,
+    "train_data": "dates 0-95, 370 features",
+    "train_log_prob_stats": {
+      "mean": -35.303067924104184,
+      "std": 20.22749513651067,
+      "min": -7676.727815716743,
+      "max": -4.88504942302192
+    },
+    "test_log_prob_mean": -31.178814486801862,
+    "test_log_prob_std": 19.364818256086448,
+    "distribution_shift": 4.124253437302322
+  },
+  "variants": {
+    "V1_perc10": {
+      "threshold": -58.663993845151644,
+      "holdout_pnl": 117.63282220349993,
+      "delta": -32.314848864030324,
+      "n_abstained": 35391,
+      "abstain_rate": 0.0800556460369164,
+      "n_active": 170909,
+      "zip": null
+    },
+    "V2_perc20": {
+      "threshold": -51.38423484669555,
+      "holdout_pnl": 92.65465636501133,
+      "delta": -57.29301470251892,
+      "n_abstained": 66491,
+      "abstain_rate": 0.1504049040897575,
+      "n_active": 153936,
+      "zip": null
+    },
+    "V3_perc30": {
+      "threshold": -46.983227583056994,
+      "holdout_pnl": 71.5031583255697,
+      "delta": -78.44451274196055,
+      "n_abstained": 100035,
+      "abstain_rate": 0.22628257328990228,
+      "n_active": 137503,
+      "zip": null
+    }
+  },
+  "best": "V1_perc10",
+  "best_holdout_pnl": 117.63282220349993,
+  "best_delta": -32.314848864030324,
+  "warning": "Holdout != platform; many abstain wrappers hurt platform despite holdout gains",
+  "date_stats_most_ood": [
+    [
+      104,
+      -41.19785057583783
+    ],
+    [
+      100,
+      -37.247375220337695
+    ],
+    [
+      97,
+      -35.904591918850016
+    ],
+    [
+      112,
+      -35.23831819523972
+    ],
+    [
+      103,
+      -34.54461904038578
+    ],
+    [
+      99,
+      -34.162069327276996
+    ],
+    [
+      118,
+      -32.65719130794896
+    ],
+    [
+      105,
+      -31.378862253314967
+    ],
+    [
+      102,
+      -31.353231655132902
+    ],
+    [
+      109,
+      -31.069785679735926
+    ]
+  ]
+}
