@@ -1,0 +1,309 @@
+{
+  "task": "T186 retrain T184/T172b with val + early stop LR sweep",
+  "verdict": "architecture_doesnt_fit",
+  "arch_A_TickTr": {
+    "configs_tested": [
+      {
+        "lr": 0.0003,
+        "batch": 512,
+        "best_epoch": 0,
+        "initial_val_mse": 0.9994496042945011,
+        "best_val_mse": 0.9994496042945011,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -60.584912589237426,
+        "n_trades": 322204,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0001,
+        "batch": 512,
+        "best_epoch": 0,
+        "initial_val_mse": 0.8497055429653806,
+        "best_val_mse": 0.8497055429653806,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -58.85767572207084,
+        "n_trades": 308432,
+        "can_learn": false
+      },
+      {
+        "lr": 3e-05,
+        "batch": 512,
+        "best_epoch": 0,
+        "initial_val_mse": 0.7826384074071849,
+        "best_val_mse": 0.7826384074071849,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -22.404091465603052,
+        "n_trades": 132742,
+        "can_learn": false
+      },
+      {
+        "lr": 1e-05,
+        "batch": 512,
+        "best_epoch": 0,
+        "initial_val_mse": 0.777812380319137,
+        "best_val_mse": 0.777812380319137,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -7.343867852111095,
+        "n_trades": 29778,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0003,
+        "batch": 256,
+        "best_epoch": 0,
+        "initial_val_mse": 1.0547928285995687,
+        "best_val_mse": 1.0547928285995687,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -63.24488570695278,
+        "n_trades": 329836,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0001,
+        "batch": 256,
+        "best_epoch": 0,
+        "initial_val_mse": 0.8691458792324909,
+        "best_val_mse": 0.8691458792324909,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -57.13940322826131,
+        "n_trades": 296294,
+        "can_learn": false
+      },
+      {
+        "lr": 3e-05,
+        "batch": 256,
+        "best_epoch": 0,
+        "initial_val_mse": 0.7911875863406177,
+        "best_val_mse": 0.7911875863406177,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -31.665485754521264,
+        "n_trades": 190918,
+        "can_learn": false
+      },
+      {
+        "lr": 1e-05,
+        "batch": 256,
+        "best_epoch": 0,
+        "initial_val_mse": 0.7776484354343528,
+        "best_val_mse": 0.7776484354343528,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -10.384396827566338,
+        "n_trades": 47709,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0003,
+        "batch": 128,
+        "best_epoch": 0,
+        "initial_val_mse": 1.0760151981929917,
+        "best_val_mse": 1.0760151981929917,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -59.506906253418755,
+        "n_trades": 338307,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0001,
+        "batch": 128,
+        "best_epoch": 0,
+        "initial_val_mse": 0.9520671390193854,
+        "best_val_mse": 0.9520671390193854,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -66.76904885158822,
+        "n_trades": 323945,
+        "can_learn": false
+      },
+      {
+        "lr": 3e-05,
+        "batch": 128,
+        "best_epoch": 0,
+        "initial_val_mse": 0.8039897053484636,
+        "best_val_mse": 0.8039897053484636,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -40.7480911890707,
+        "n_trades": 236610,
+        "can_learn": false
+      },
+      {
+        "lr": 1e-05,
+        "batch": 128,
+        "best_epoch": 0,
+        "initial_val_mse": 0.7786266398978822,
+        "best_val_mse": 0.7786266398978822,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -15.319888103150069,
+        "n_trades": 75273,
+        "can_learn": false
+      }
+    ],
+    "best_config": {
+      "lr": 1e-05,
+      "batch": 256,
+      "best_epoch": 0,
+      "initial_val_mse": 0.7776484354343528,
+      "best_val_mse": 0.7776484354343528,
+      "val_mse_drop_pct": 0.0,
+      "val_pnl": -10.384396827566338,
+      "n_trades": 47709,
+      "can_learn": false
+    },
+    "can_learn": false,
+    "notes": "val MSE drop: best=0.0%"
+  },
+  "arch_B_GroupTr": {
+    "configs_tested": [
+      {
+        "lr": 0.0003,
+        "batch": 512,
+        "best_epoch": 0,
+        "initial_val_mse": 0.8248320828690462,
+        "best_val_mse": 0.8248320828690462,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": -3.4542789981374575,
+        "n_trades": 308618,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0001,
+        "batch": 512,
+        "best_epoch": 0,
+        "initial_val_mse": 0.8009728089843243,
+        "best_val_mse": 0.8009728089843243,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 15.148362591615854,
+        "n_trades": 277934,
+        "can_learn": false
+      },
+      {
+        "lr": 3e-05,
+        "batch": 512,
+        "best_epoch": 0,
+        "initial_val_mse": 0.7680269772877868,
+        "best_val_mse": 0.7680269772877868,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 32.28054322212766,
+        "n_trades": 261544,
+        "can_learn": false
+      },
+      {
+        "lr": 1e-05,
+        "batch": 512,
+        "best_epoch": 1,
+        "initial_val_mse": 0.7673186768947888,
+        "best_val_mse": 0.7667600045439734,
+        "val_mse_drop_pct": 0.07280838687209709,
+        "val_pnl": 31.448966311628478,
+        "n_trades": 266896,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0003,
+        "batch": 256,
+        "best_epoch": 0,
+        "initial_val_mse": 0.8176866399963567,
+        "best_val_mse": 0.8176866399963567,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 2.916438536909313,
+        "n_trades": 310168,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0001,
+        "batch": 256,
+        "best_epoch": 0,
+        "initial_val_mse": 0.8215229826013636,
+        "best_val_mse": 0.8215229826013636,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 5.83638959994923,
+        "n_trades": 286624,
+        "can_learn": false
+      },
+      {
+        "lr": 3e-05,
+        "batch": 256,
+        "best_epoch": 0,
+        "initial_val_mse": 0.7740954448013603,
+        "best_val_mse": 0.7740954448013603,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 27.55185989555175,
+        "n_trades": 267338,
+        "can_learn": false
+      },
+      {
+        "lr": 1e-05,
+        "batch": 256,
+        "best_epoch": 0,
+        "initial_val_mse": 0.7675176263637531,
+        "best_val_mse": 0.7675176263637531,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 30.321247656548003,
+        "n_trades": 263841,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0003,
+        "batch": 128,
+        "best_epoch": 0,
+        "initial_val_mse": 0.8141303709628269,
+        "best_val_mse": 0.8141303709628269,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 12.619837117445815,
+        "n_trades": 288181,
+        "can_learn": false
+      },
+      {
+        "lr": 0.0001,
+        "batch": 128,
+        "best_epoch": 0,
+        "initial_val_mse": 0.8055205865958291,
+        "best_val_mse": 0.8055205865958291,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 6.83599546542796,
+        "n_trades": 287033,
+        "can_learn": false
+      },
+      {
+        "lr": 3e-05,
+        "batch": 128,
+        "best_epoch": 0,
+        "initial_val_mse": 0.7815836028000754,
+        "best_val_mse": 0.7815836028000754,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 23.56751328635054,
+        "n_trades": 270050,
+        "can_learn": false
+      },
+      {
+        "lr": 1e-05,
+        "batch": 128,
+        "best_epoch": 0,
+        "initial_val_mse": 0.7660399429349096,
+        "best_val_mse": 0.7660399429349096,
+        "val_mse_drop_pct": 0.0,
+        "val_pnl": 31.979721790671864,
+        "n_trades": 259036,
+        "can_learn": false
+      }
+    ],
+    "best_config": {
+      "lr": 1e-05,
+      "batch": 128,
+      "best_epoch": 0,
+      "initial_val_mse": 0.7660399429349096,
+      "best_val_mse": 0.7660399429349096,
+      "val_mse_drop_pct": 0.0,
+      "val_pnl": 31.979721790671864,
+      "n_trades": 259036,
+      "can_learn": false
+    },
+    "can_learn": false,
+    "notes": "val MSE drop: best=0.0%"
+  },
+  "comparison": {
+    "T87_baseline_holdout_pnl": 22.0,
+    "best_TickTr_val_pnl": -10.384396827566338,
+    "best_GroupTr_val_pnl": 31.979721790671864,
+    "conclusion": "architecture_doesnt_fit"
+  },
+  "timestamp": "2026-05-10T09:01:36.291287+00:00"
+}

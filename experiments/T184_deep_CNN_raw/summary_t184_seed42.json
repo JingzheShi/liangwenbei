@@ -1,0 +1,46 @@
+{
+  "task": "T184 TickTransformer M7 seed=42",
+  "scheme": "v2",
+  "F_dim": 31,
+  "n_params": 110529,
+  "target_scale": 464.22357783024245,
+  "test_mse": 3.5838754683936713e-06,
+  "test_corr": 0.10096035334201703,
+  "test_ev_gate_k1_pnl": 6.72777682412886,
+  "test_ev_gate_k1_n_active": 207351,
+  "train_time_sec": 51.93852472305298,
+  "epoch_logs": [
+    {
+      "epoch": 0,
+      "train_loss": 1.3620504650567435,
+      "lr": 5e-05,
+      "time": 26.299941062927246
+    },
+    {
+      "epoch": 1,
+      "train_loss": 1.3522178178527327,
+      "lr": 0.0,
+      "time": 25.638529539108276
+    }
+  ],
+  "args": {
+    "scheme": "v2",
+    "window": 100,
+    "seed": 42,
+    "d_model": 64,
+    "n_layers": 2,
+    "nhead": 4,
+    "ff_dim": 256,
+    "dropout": 0.1,
+    "lr": 0.0001,
+    "weight_decay": 0.0001,
+    "batch_size": 512,
+    "epochs": 2,
+    "num_workers": 4,
+    "cuda": "0",
+    "no_wandb": true,
+    "aug_scale": 0.02,
+    "aug_noise": 0.01,
+    "amp": true
+  }
+}
