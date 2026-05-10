@@ -1,0 +1,54 @@
+{
+  "task": "T177 wrapper-only tricks (median, per-sym temp, per-sym thresh)",
+  "T170_baseline_holdout": 149.947671,
+  "T170_baseline_inner": 834.390648,
+  "tricks": {
+    "A_median": {
+      "description": "Median instead of mean across 5 seeds",
+      "inner_pnl": 806.655495,
+      "holdout_pnl": 145.014905,
+      "delta": -4.932766,
+      "n_act_holdout": 192146,
+      "zip": "SKIPPED (delta < 0)"
+    },
+    "B_per_sym_temp": {
+      "description": "Per-sym temperature scaling of combined pred_dmid (tuned on 0-95)",
+      "best_temps": {"0": 1.2, "1": 1.2, "2": 1.2, "3": 1.1, "4": 1.2},
+      "inner_pnl": 855.262341,
+      "holdout_pnl": 154.471117,
+      "delta": 4.523446,
+      "n_act_holdout": 221269,
+      "zip": "submission_050909_iter019_v2N_T87M7_tempB.zip"
+    },
+    "C_per_sym_thresh": {
+      "description": "Per-sym threshold scaling factor (tuned on 0-95)",
+      "best_factors": {"0": 0.7, "1": 0.7, "2": 0.7, "3": 0.9, "4": 0.7},
+      "inner_pnl": 859.468899,
+      "holdout_pnl": 155.116765,
+      "delta": 5.169094,
+      "n_act_holdout": 232891,
+      "zip": "submission_050909_iter019_v2N_T87M7_thrC.zip"
+    },
+    "D_combined": {
+      "description": "All three: median (A) + per-sym temp (B) + per-sym thr_factor (C)",
+      "combo": "median (A) + best_temps (B) + best_thr_factors (C)",
+      "inner_pnl": 839.72216,
+      "holdout_pnl": 151.654632,
+      "delta": 1.706961,
+      "n_act_holdout": 258497,
+      "AB_holdout_pnl": 149.25394,
+      "AC_holdout_pnl": 149.998576,
+      "zip": "submission_050909_iter019_v2N_T87M7_combinedD.zip"
+    }
+  },
+  "best": "C_per_sym_thresh",
+  "best_delta": 5.169094,
+  "insights": {
+    "A_median": "Negative: median ensemble is worse than mean for this dataset (noise reduction hurts signal)",
+    "B_temp": "Positive: all syms benefit from amplifying predictions ~20%, sym3 slightly less (1.1x). Suggests predictions are systematically under-confident",
+    "C_thresh": "Best individual: lowering thresholds 30% for syms 0/1/2/4 (more trading) and 10% for sym3 is profitable. Confirms sym3 is more volatile/noisy",
+    "D_combined": "Sub-additive: median hurts, temp and thresh partly cancel when combined. C alone or B alone are better than D"
+  },
+  "recommendation": "Ship C (per-sym thr_factor) as primary. B is second choice. Skip A and D.",
+  "warning": "Holdout (96-119) != platform eval. T170 M7 NN was trained on 0-119 (includes test). These are local estimates only - submit to verify."
+}

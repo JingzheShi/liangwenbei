@@ -1,0 +1,27 @@
+{
+  "task": "T178 LGB 10-seed bag (M7 retrain 5 new seeds)",
+  "T170_5seed_holdout": 149.947671,
+  "T178_10seed_holdout": 147.777355,
+  "delta": -2.170316,
+  "new_seeds": [
+    200,
+    211,
+    222,
+    233,
+    244
+  ],
+  "training_times_per_seed": {
+    "200": 97.44341516494751,
+    "211": 60.53189706802368,
+    "222": 132.52713227272034,
+    "233": 48.264354944229126,
+    "244": 51.51144242286682
+  },
+  "config": {
+    "thr_up": 0.00029995433796130955,
+    "thr_dn": 0.0002158528296175958,
+    "w_nn": 1.0,
+    "w_lgb": 1.5
+  },
+  "note": "IN-SAMPLE: both LGB and NN trained on 0-119 (includes test 96-119). Delta measures variance reduction from 10-seed bag."
+}
