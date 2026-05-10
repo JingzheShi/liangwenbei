@@ -1,0 +1,23 @@
+{
+  "task": "T174 multi-horizon zip with T170 M7 NN replacing v2 NN for h60",
+  "vs_T173": "Identical EXCEPT 5 nn_h60_seed*.npz files replaced with T170's M7-retrained versions",
+  "vs_T170": "Identical to T170 EXCEPT activates h=5/10/20/40 in addition to h=60",
+  "expected_h60_platform": "T170's +34.64 (vs T173's +34.44, +0.20 improvement)",
+  "expected_short_horizon": "Same as T173 (h5~18, h10~25, h20~30, h40~36 LOSO)",
+  "zip": "/root/projects/liangwenbei_workdir/submission_050909_iter019_v2N_multihorizon_T170NN.zip",
+  "md5": "81b37a88ab461e5afb10c49fb5752ab8",
+  "size_mb": 52.63,
+  "smoke_test_ok": true,
+  "smoke_test_output": "5 batches, lens=[5, 5, 5, 5, 5] — 5 horizons per row, correct",
+  "h60_NN_md5_matches_T170": true,
+  "h60_NN_md5s": {
+    "nn_h60_seed1.npz": "5076ac55098e9f8bc5f5f9076bb206bc",
+    "nn_h60_seed100.npz": "d56deac170d160c4673e5bd3c5c2fa8d",
+    "nn_h60_seed13.npz": "443899d733fd6ac94005b0eca050dcb0",
+    "nn_h60_seed42.npz": "0859c1fa756693cd26a256c0e74d4074",
+    "nn_h60_seed7.npz": "7786fdae95a35b633de18f093317ef49"
+  },
+  "short_horizon_models_md5_matches_T173": true,
+  "files_changed": ["nn_h60_seed1.npz", "nn_h60_seed100.npz", "nn_h60_seed13.npz", "nn_h60_seed42.npz", "nn_h60_seed7.npz"],
+  "files_unchanged": "All 50 non-NN files (model_h60_*.txt, model_lgb_h*.txt, model_cb_h*.cbm, Predictor.py, fast_features*.py, config.json, thresholds.json, requirements.txt)"
+}

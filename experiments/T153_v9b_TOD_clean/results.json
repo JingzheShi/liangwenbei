@@ -1,0 +1,30 @@
+{
+  "task": "T153 iter_019 v9b = v2 + TOD-only (no T150 LOSO changes)",
+  "vs_v9": "v9 had TOD + w_lgb=0.5 + beta_1=0.5; v9b has TOD only with v2 original ensemble weights",
+  "thresholds": {
+    "thr_up": 0.00029995433796130955,
+    "thr_dn": 0.0002158528296175958,
+    "w_nn": 1.0,
+    "w_lgb": 1.5
+  },
+  "per_sym_beta": {
+    "0": 0.10,
+    "1": 0.40,
+    "2": 0.30,
+    "3": 0.00,
+    "4": 0.00
+  },
+  "verification": {
+    "files_identical_to_v9": ["Predictor.py", "fast_features.py", "fast_features_batch.py", "config.json", "model_h60_seed1.txt", "model_h60_seed7.txt", "model_h60_seed13.txt", "model_h60_seed42.txt", "model_h60_seed100.txt", "nn_h60_seed1.npz", "nn_h60_seed7.npz", "nn_h60_seed13.npz", "nn_h60_seed42.npz", "nn_h60_seed100.npz", "requirements.txt"],
+    "files_different_from_v9": ["thresholds.json"],
+    "lgb_num_features": 364,
+    "nn_in_dim": 359,
+    "tod_features_in_lgb": 5,
+    "smoke_test_ok": true
+  },
+  "v9b_zip": "/root/projects/liangwenbei_workdir/submission_050819_iter019_v9b_TOD_clean.zip",
+  "v9b_md5": "54d593aadf96b314cd162307e9e24a4a",
+  "v9b_size_mb": 14.14,
+  "expected_platform_v9b": "v2 +34.44 + TOD trick alone. If TOD helps +1-2 → expect +35-36. If v9 beats v9b → T150 changes (w_lgb=0.5, beta=0.5) are contributing too.",
+  "isolation_purpose": "Compare v9b vs v9 on platform to isolate TOD contribution from T150 threshold changes"
+}

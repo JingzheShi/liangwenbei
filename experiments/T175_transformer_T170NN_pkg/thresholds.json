@@ -1,0 +1,64 @@
+{
+  "_doc": "v2N_Tr: NN(w=1.0)+Transformer(w=0.5)+LGB(w=1.0). Transformer trained 0-119 (in-sample).",
+  "horizons": [
+    {
+      "h": 5,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 10,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 20,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 40,
+      "thr_up": 1.0,
+      "thr_dn": 1.0,
+      "active": false
+    },
+    {
+      "h": 60,
+      "thr_up": 0.00029995433796130955,
+      "thr_dn": 0.0002158528296175958,
+      "w_nn": 1.0,
+      "w_lgb": 1.0,
+      "w_tr": 0.5,
+      "active": true,
+      "ensemble_seeds": [
+        1,
+        7,
+        13,
+        42,
+        100
+      ]
+    }
+  ],
+  "conformal_wrapper": {
+    "enabled": true,
+    "per_sym_beta": {
+      "0": 0.1,
+      "1": 0.5,
+      "2": 0.3,
+      "3": 0.0,
+      "4": 0.0
+    },
+    "default_beta_for_ood": 0.16,
+    "per_sym_sigma": {
+      "0": 0.0002403901,
+      "1": 0.0004712397,
+      "2": 0.0004522216,
+      "3": 0.0004235249,
+      "4": 0.0004279811
+    },
+    "default_sigma_for_ood": 0.0003998317
+  }
+}

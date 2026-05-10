@@ -1,0 +1,19 @@
+{
+  "task": "T175 transformer ensemble zip with T170 M7 NN replacing T87",
+  "vs_T172b": "Identical EXCEPT 5 nn_h60_seed*.npz replaced with T170's M7-retrained (dates 0-119)",
+  "vs_T170": "T170 + transformer 5 seeds added to ensemble (3-way: w_nn=1.0, w_tr=0.5, w_lgb=1.0)",
+  "expected_platform": "Could match T170 +34.64 OR could be toxic like T163 (-3.70). Transformer is high-risk addition.",
+  "nn_h60_md5": {
+    "seed1": "5076ac55098e9f8bc5f5f9076bb206bc",
+    "seed7": "7786fdae95a35b633de18f093317ef49",
+    "seed13": "443899d733fd6ac94005b0eca050dcb0",
+    "seed42": "0859c1fa756693cd26a256c0e74d4074",
+    "seed100": "d56deac170d160c4673e5bd3c5c2fa8d"
+  },
+  "zip": "submission_050909_iter019_v2N_transformer_T170NN.zip",
+  "md5": "5906cb726c311098620cd47168aea3a5",
+  "size_mb": 30.46,
+  "smoke_test_ok": true,
+  "inference_ms_per_100_batch": 3.8,
+  "actions_verified": [0, 1, 2]
+}

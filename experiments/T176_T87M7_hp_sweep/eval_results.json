@@ -1,0 +1,108 @@
+{
+  "task": "T176 T87 NN M7 HP variant sweep",
+  "config": {
+    "thr_up": 0.00029995433796130955,
+    "thr_dn": 0.0002158528296175958,
+    "w_nn": 1.0,
+    "w_lgb": 0.5
+  },
+  "v2_baseline_holdout_pnl": 109.675262,
+  "T170_baseline_holdout_insample": 118.162134,
+  "T170_delta": 8.486872,
+  "variants": {
+    "S1_ep11": {
+      "holdout_pnl": 118.162134,
+      "delta_vs_v2": 8.486872,
+      "delta_vs_T170": 0.0,
+      "config": {
+        "epochs": 11,
+        "lr": 3e-05,
+        "lambda_spo": 30
+      },
+      "note": "T170 baseline (from T170 dir)"
+    },
+    "S1_ep15": {
+      "holdout_pnl": 119.363483,
+      "delta_vs_v2": 9.688221,
+      "delta_vs_T170": 1.201349,
+      "n_act": 190560,
+      "config": {
+        "epochs": 15,
+        "lr": 3e-05,
+        "lambda_spo": 30.0
+      }
+    },
+    "S1_ep20": {
+      "holdout_pnl": 120.483551,
+      "delta_vs_v2": 10.808288,
+      "delta_vs_T170": 2.321417,
+      "n_act": 189060,
+      "config": {
+        "epochs": 20,
+        "lr": 3e-05,
+        "lambda_spo": 30.0
+      }
+    },
+    "S1_ep7": {
+      "holdout_pnl": 117.157181,
+      "delta_vs_v2": 7.481918,
+      "delta_vs_T170": -1.004953,
+      "n_act": 193963,
+      "config": {
+        "epochs": 7,
+        "lr": 3e-05,
+        "lambda_spo": 30.0
+      }
+    },
+    "S2_lr1e-4": {
+      "holdout_pnl": 123.892846,
+      "delta_vs_v2": 14.217583,
+      "delta_vs_T170": 5.730712,
+      "n_act": 186977,
+      "config": {
+        "epochs": 11,
+        "lr": 0.0001,
+        "lambda_spo": 30.0
+      }
+    },
+    "S2_lr1e-5": {
+      "holdout_pnl": 116.187708,
+      "delta_vs_v2": 6.512445,
+      "delta_vs_T170": -1.974426,
+      "n_act": 194611,
+      "config": {
+        "epochs": 11,
+        "lr": 1e-05,
+        "lambda_spo": 30.0
+      }
+    },
+    "S3_lam10": {
+      "holdout_pnl": 118.334561,
+      "delta_vs_v2": 8.659298,
+      "delta_vs_T170": 0.172427,
+      "n_act": 191718,
+      "config": {
+        "epochs": 11,
+        "lr": 3e-05,
+        "lambda_spo": 10.0
+      }
+    },
+    "S3_lam100": {
+      "holdout_pnl": 118.043211,
+      "delta_vs_v2": 8.367948,
+      "delta_vs_T170": -0.118923,
+      "n_act": 192413,
+      "config": {
+        "epochs": 11,
+        "lr": 3e-05,
+        "lambda_spo": 100.0
+      }
+    }
+  },
+  "warning": "Holdout in-sample for all T176 NNs (trained 0-119). Ranking only \u2014 ship to verify.",
+  "top_3_by_holdout_pnl": [
+    "S2_lr1e-4",
+    "S1_ep20",
+    "S1_ep15"
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "_doc": "T173 multi-horizon submission. h=60: iter_019 v2 fullretrain (T127-style NN+LGB+conformal, +34.44 on v2 platform). h=5/10/20/40: T98 iter_016 LGB+CB lgb_cb_2way ensembles with DE-tuned per-horizon thresholds (LOSO: h5=18.16, h10=25.15, h20=30.10, h40=36.38). Conformal wrapper applied to h=60 only (calibrated on iter_015/018 local val 442k). h=5/10/20/40 use plain DE-tuned asymmetric thresholds.",
+  "horizons": [
+    {
+      "h": 5,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000425604,
+      "thr_dn": 0.000402417,
+      "w_lgb": 1.552,
+      "w_cb": 0.423,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 18.1625
+    },
+    {
+      "h": 10,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000385420,
+      "thr_dn": 0.000298694,
+      "w_lgb": 0.177,
+      "w_cb": 0.007,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 25.1481
+    },
+    {
+      "h": 20,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000452352,
+      "thr_dn": 0.000392895,
+      "w_lgb": 2.695,
+      "w_cb": 0.704,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 30.1010
+    },
+    {
+      "h": 40,
+      "active": true,
+      "kind": "lgb_cb_2way",
+      "thr_up": 0.000336669,
+      "thr_dn": 0.000238573,
+      "w_lgb": 2.821,
+      "w_cb": 0.952,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_de_loso_equiv": 36.3850
+    },
+    {
+      "h": 60,
+      "active": true,
+      "kind": "nn_lgb_2way",
+      "thr_up": 0.00029995433796130955,
+      "thr_dn": 0.0002158528296175958,
+      "w_nn": 1.0,
+      "w_lgb": 1.5,
+      "ensemble_seeds": [1, 7, 13, 42, 100],
+      "_doc": "iter_019 v2 fullretrain conformal. DE LOSO-equiv +34.44 on v2 platform."
+    }
+  ],
+  "conformal_wrapper": {
+    "enabled": true,
+    "apply_to_horizons": [60],
+    "per_sym_beta": {"0": 0.10, "1": 0.40, "2": 0.30, "3": 0.00, "4": 0.00},
+    "default_beta_for_ood": 0.16,
+    "per_sym_sigma": {
+      "0": 0.0002403901,
+      "1": 0.0004712397,
+      "2": 0.0004522216,
+      "3": 0.0004235249,
+      "4": 0.0004279811
+    },
+    "default_sigma_for_ood": 0.0003998317,
+    "_doc": "beta/sigma calibrated from R_conformal_select on local val 442k. Applied to h=60 only."
+  }
+}

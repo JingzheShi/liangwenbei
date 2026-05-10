@@ -1,0 +1,18 @@
+{
+  "_doc": "iter_015: T87 SPO+ DFL NN + T75 LGB regression ensemble + asymmetric EV gate. LOSO-equiv +40.13 (vs iter_014 +38.28, +1.85). T87 NN was warm-started from T81 weights and fine-tuned with SPO+ Decision-Focused Learning loss (lambda=30, lr=3e-5, ~6-13 epochs). w_nn:w_lgb = 1.0:1.5 from a sweep across {1:0, 0:1, 1:1, 1.5:1, 1:1.5, 2:1, 1:2, 1:0.5, 0.5:1} + 5 three-way blends. thr_up/thr_dn from DE asymmetric on the 10-predictor combined avg over the local 442k test (date 96-119, 5 sym).",
+  "horizons": [
+    {"h": 5,  "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 10, "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 20, "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 40, "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 60,
+     "thr_up": 0.000358,
+     "thr_dn": 0.000216,
+     "w_nn": 1.0,
+     "w_lgb": 1.5,
+     "active": true,
+     "ensemble_seeds": [1, 7, 13, 42, 100],
+     "_doc": "DE LOSO-equiv optimum on 5-NN(T87) + 5-LGB(T75) combined avg (10 predictors). Symmetric fallback k=1.25 (thr=2.5e-4) gives ~+39 (still > iter_014's +38.28)."
+    }
+  ]
+}
