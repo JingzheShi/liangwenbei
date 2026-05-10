@@ -1,0 +1,16 @@
+{
+  "task": "T183 T87 NN with Xavier random init (no T81 warm-start), M7 retrain",
+  "T170_baseline_holdout_insample": 149.947671,
+  "T183_holdout_insample": 150.573843,
+  "delta_T183_minus_T170": 0.626172,
+  "n_act_T170": 192884,
+  "n_act_T183": 193977,
+  "warning": "Both variants trained on 0-119 (in-sample for test 96-119). Holdout comparison is RELATIVE, not absolute.",
+  "config_used": {
+    "thr_up": 0.00029995433796130955,
+    "thr_dn": 0.0002158528296175958,
+    "w_nn": 1.0,
+    "w_lgb": 1.5,
+    "conformal": true
+  }
+}

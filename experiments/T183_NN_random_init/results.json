@@ -1,0 +1,33 @@
+{
+  "task": "T183 T87 NN with random init (no T81 warm-start), M7 retrain",
+  "T170_baseline_holdout_insample": 149.9477,
+  "T183_holdout_insample": 150.5738,
+  "delta": 0.6262,
+  "interpretation": "Random init slightly outperforms warm-start on in-sample holdout (+0.63). Both trained on 0-119. Difference is negligible, suggesting warm-start was NOT a critical anchor — T87 architecture converges to similar quality regardless of init. High uncertainty: both are in-sample.",
+  "training_config": {
+    "arch": "MLP 256-128-64 + LayerNorm + GELU",
+    "init": "Xavier normal (random, no T81 warm-start)",
+    "epochs": 11,
+    "lr": 3e-5,
+    "lambda_spo": 30,
+    "batch_size": 4096,
+    "aug": "random scale 0.8-1.2 concat",
+    "data_dates": "0-119 (full M7 retrain)",
+    "seeds": [1, 7, 13, 42, 100],
+    "feat_stats_from": "T81 checkpoint (arch + stats only, NOT weights)"
+  },
+  "per_seed_train_times_sec": {
+    "seed1": 46.7,
+    "seed7": 47.2,
+    "seed13": 51.9,
+    "seed42": 49.6,
+    "seed100": 206.5
+  },
+  "zip": "submission_050910_iter019_v2N_T87RandInit.zip",
+  "zip_size_mb": 15,
+  "md5": "3392b8fa77b285609a70c5dc71cb4658",
+  "expected_platform": "T170 +34.64. T183 random-init is close to T170 on in-sample holdout (+0.63 delta), suggesting ~+34 to +35 on platform. High variance experiment — actual platform result could differ meaningfully from T170.",
+  "conclusion": "Warm-start from T81 was NOT a critical ingredient. Random Xavier init reaches comparable quality in 11 epochs with same lr/lambda_spo config. This is good news: future NN experiments don't need T81 dependence.",
+  "n_act_T170": 192884,
+  "n_act_T183": 193977
+}
