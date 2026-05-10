@@ -1,0 +1,40 @@
+{
+  "task": "T179 40-NN ensemble (8 M7 variants x 5 seeds)",
+  "n_nns_total": 40,
+  "n_lgbs": 5,
+  "variants": {
+    "v1": "T170 baseline (ep=11, lr=3e-5, lam=30)",
+    "v2": "S1_ep7 (ep=7)",
+    "v3": "S1_ep15 (ep=15)",
+    "v4": "S1_ep20 (ep=20)",
+    "v5": "S2_lr1e-5 (lr=1e-5)",
+    "v6": "S2_lr1e-4 (lr=1e-4)",
+    "v7": "S3_lam10 (lam=10)",
+    "v8": "S3_lam100 (lam=100)"
+  },
+  "T170_5NN_holdout_insample": 149.9477,
+  "T179_40NN_holdout_insample": 150.5748,
+  "delta_holdout": 0.6271,
+  "inference_time_ms_per_1024": 816.3,
+  "smoke_test_ok": true,
+  "smoke_test_details": {
+    "n_nns_loaded": 40,
+    "n_lgbs_loaded": 5,
+    "real_data_actions": {"0": 71, "1": 725, "2": 204},
+    "nan_check": false,
+    "real_data_timing_1000batches_ms": 2549.8
+  },
+  "zip": "submission_050910_iter019_v2N_40NN_bag.zip",
+  "md5": "032cfeb9610024b5bc19a1eefd0ad024",
+  "size_mb": 32.5,
+  "config_verified": {
+    "w_lgb": 1.5,
+    "w_nn": 1.0,
+    "per_sym_beta_1": 0.40,
+    "conformal_enabled": true,
+    "lgb_unchanged": true,
+    "thresholds_unchanged": true
+  },
+  "expected_platform": "T170 +34.64 + variance reduction. Holdout +0.63 in-sample delta suggests some signal. Caveat: holdout is in-sample for all M7 models (trained 0-119). Platform result will be the true test.",
+  "notes": "40-NN averaging consistent with T170 action distribution. Slightly fewer active trades (192267 vs 192884) due to smoother averaged prediction. Clean implementation: no state, no sym embedding, sym used only for per_sym_beta lookup."
+}

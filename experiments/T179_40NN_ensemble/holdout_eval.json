@@ -1,0 +1,11 @@
+{
+  "task": "T179 40-NN ensemble (8 M7 variants x 5 seeds)",
+  "n_nns_total": 40,
+  "n_lgbs": 5,
+  "T170_5NN_holdout_insample": 149.947671,
+  "T179_40NN_holdout_insample": 150.574772,
+  "delta_holdout": 0.627101,
+  "n_active_T170": 192884,
+  "n_active_T179": 192267,
+  "warning": "IN-SAMPLE: all models trained on 0-119 including test. Mean comparison valid, absolute PnL inflated."
+}
