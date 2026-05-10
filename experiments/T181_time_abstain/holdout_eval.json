@@ -1,0 +1,119 @@
+{
+  "task": "T181 time-window hard abstain (holdout eval)",
+  "T170_baseline_holdout": 149.947671,
+  "T170_n_active": 192884,
+  "variants": {
+    "V1_conservative": {
+      "windows": [
+        {
+          "sess": 0,
+          "lo_min": 0.0,
+          "hi_min": 10.0
+        },
+        {
+          "sess": 0,
+          "lo_min": 90.0,
+          "hi_min": 100.0
+        },
+        {
+          "sess": 1,
+          "lo_min": 0.0,
+          "hi_min": 10.0
+        },
+        {
+          "sess": 1,
+          "lo_min": 90.0,
+          "hi_min": 100.0
+        }
+      ],
+      "n_abstained": 58320,
+      "pct_abstained": 13.192,
+      "holdout_pnl": 126.562057,
+      "delta_vs_T170": -23.385614,
+      "n_active": 166546,
+      "per_sym_delta": {
+        "0": -1.676244,
+        "1": -5.027158,
+        "2": -3.476514,
+        "3": -2.487213,
+        "4": -10.718485
+      },
+      "description": "abstain first 10 min + last 10 min of each session",
+      "am_windows": [
+        "9:40-9:50",
+        "11:10-11:20"
+      ],
+      "pm_windows": [
+        "13:10-13:20",
+        "14:40-14:50"
+      ]
+    },
+    "V2_only_open": {
+      "windows": [
+        {
+          "sess": 0,
+          "lo_min": 0.0,
+          "hi_min": 5.0
+        },
+        {
+          "sess": 1,
+          "lo_min": 0.0,
+          "hi_min": 5.0
+        }
+      ],
+      "n_abstained": 480,
+      "pct_abstained": 0.109,
+      "holdout_pnl": 149.680857,
+      "delta_vs_T170": -0.266814,
+      "n_active": 192655,
+      "per_sym_delta": {
+        "0": -0.012658,
+        "1": -0.088734,
+        "2": -0.041311,
+        "3": -0.018362,
+        "4": -0.105749
+      },
+      "description": "abstain first 5 min of each session only",
+      "am_windows": [
+        "9:40-9:45"
+      ],
+      "pm_windows": [
+        "13:10-13:15"
+      ]
+    },
+    "V3_only_close": {
+      "windows": [
+        {
+          "sess": 0,
+          "lo_min": 95.0,
+          "hi_min": 100.0
+        },
+        {
+          "sess": 1,
+          "lo_min": 95.0,
+          "hi_min": 100.0
+        }
+      ],
+      "n_abstained": 9840,
+      "pct_abstained": 2.226,
+      "holdout_pnl": 147.56523,
+      "delta_vs_T170": -2.382442,
+      "n_active": 188502,
+      "per_sym_delta": {
+        "0": -0.098078,
+        "1": -0.440949,
+        "2": -0.162719,
+        "3": -0.329769,
+        "4": -1.350925
+      },
+      "description": "abstain last 5 min of each session only",
+      "am_windows": [
+        "11:15-11:20"
+      ],
+      "pm_windows": [
+        "14:45-14:50"
+      ]
+    }
+  },
+  "warning": "IN-SAMPLE eval (models trained on 0-119 including test). Delta meaningful, absolute PnL inflated."
+}

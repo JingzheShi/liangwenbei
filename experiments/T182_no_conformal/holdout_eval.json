@@ -1,0 +1,42 @@
+{
+  "task": "T182 no-conformal baseline vs T170 with-conformal",
+  "T170_with_conformal_holdout": 149.947671,
+  "T182_no_conformal_holdout": 156.563727,
+  "delta": 6.616056,
+  "n_active_T170": 192884,
+  "n_active_T182": 231644,
+  "per_sym": {
+    "0": {
+      "T170_pnl": 15.022234,
+      "T182_pnl": 15.178245,
+      "delta": 0.156012,
+      "beta": 0.1
+    },
+    "1": {
+      "T170_pnl": 32.937806,
+      "T182_pnl": 38.280705,
+      "delta": 5.342899,
+      "beta": 0.4
+    },
+    "2": {
+      "T170_pnl": 21.082975,
+      "T182_pnl": 22.200121,
+      "delta": 1.117146,
+      "beta": 0.3
+    },
+    "3": {
+      "T170_pnl": 19.5744,
+      "T182_pnl": 19.5744,
+      "delta": 0.0,
+      "beta": 0.0
+    },
+    "4": {
+      "T170_pnl": 61.330256,
+      "T182_pnl": 61.330256,
+      "delta": 0.0,
+      "beta": 0.0
+    }
+  },
+  "interpretation": "delta>0 means conformal HURTS at this stack level; delta<0 means conformal HELPS",
+  "warning": "IN-SAMPLE: models trained on 0-119 incl. test. Delta comparison valid, absolute PnL inflated."
+}

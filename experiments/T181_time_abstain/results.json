@@ -1,0 +1,45 @@
+{
+  "task": "T181 time-window hard abstain (out-of-model wrapper on T170)",
+  "approach": "Parse 'time' column (HH:MM:SS string, preserved by platform per PDF p13) at inference. Force action=1 (hold) for samples whose last-tick time falls in volatile windows. Time column added to config.json feature list so platform passes it; NOT fed to LGB/NN model forward.",
+  "T170_baseline_holdout_insample": 149.9477,
+  "T170_platform_score": 34.64,
+  "variants": {
+    "V1_conservative": {
+      "description": "Abstain first 10 min + last 10 min of each session",
+      "windows": "AM: [9:40-9:50, 11:10-11:20], PM: [13:10-13:20, 14:40-14:50]",
+      "n_abstained_holdout": 58320,
+      "pct_abstained": 13.19,
+      "holdout_pnl_insample": 126.5621,
+      "delta_vs_T170_holdout": -23.3856,
+      "decision": "NOT recommended (large negative holdout delta; removing too many profitable trades)",
+      "zip": "submission_051010_iter019_v2N_T87M7_TimeAbs_V1.zip"
+    },
+    "V2_only_open": {
+      "description": "Abstain first 5 min of each session only",
+      "windows": "AM: [9:40-9:45], PM: [13:10-13:15]",
+      "n_abstained_holdout": 480,
+      "pct_abstained": 0.11,
+      "holdout_pnl_insample": 149.6809,
+      "delta_vs_T170_holdout": -0.2668,
+      "decision": "Marginal negative holdout delta (-0.27). Nearly neutral — only 1 sample per (sym, session, date) abstained. May be worth platform test as lowest-risk variant.",
+      "zip": "submission_051010_iter019_v2N_T87M7_TimeAbs_V2.zip"
+    },
+    "V3_only_close": {
+      "description": "Abstain last 5 min of each session only",
+      "windows": "AM: [11:15-11:20], PM: [14:45-14:50]",
+      "n_abstained_holdout": 9840,
+      "pct_abstained": 2.23,
+      "holdout_pnl_insample": 147.5652,
+      "delta_vs_T170_holdout": -2.3824,
+      "decision": "Negative holdout delta (-2.38). Not recommended.",
+      "zip": "submission_051010_iter019_v2N_T87M7_TimeAbs_V3.zip"
+    }
+  },
+  "analysis": {
+    "finding": "All 3 variants hurt on in-sample holdout. The T170 model's conformal band already filters low-confidence calls. The remaining active trades (even during open/close volatile periods) are net-profitable in-sample, so abstaining them costs PnL.",
+    "caveat": "IN-SAMPLE evaluation: models trained on dates 0-119, tested on dates 96-119. Absolute PnL inflated. Delta vs T170 is meaningful but still biased — T170 was also trained in-sample, so both see the same data.",
+    "platform_caveat": "Platform = out-of-sample future dates. T170 model may overfit to open/close signals in training -> platform open/close might be noisier -> time abstain could still help on platform.",
+    "recommendation": "Do not submit V1 (too aggressive: -23.4 in-sample). V2 is nearly a no-op (only 480 samples abstained out of 442k). If submitting, V2 is lowest risk. V3 likely not worth it. SOTA T170 at +34.64 remains the best submission."
+  },
+  "notes": "All 3 zips built and sent to outputs. Predictor.py verified: time column parsed but NOT fed to LGB/NN; date not used; no cross-call state; sym-agnostic forward. config.json updated to include 'time' in feature list (156 features total, was 155)."
+}

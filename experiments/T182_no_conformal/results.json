@@ -1,0 +1,20 @@
+{
+  "task": "T182 no-conformal baseline",
+  "T170_with_conformal_holdout": 149.9477,
+  "T182_no_conformal_holdout": 156.5637,
+  "delta": 6.6161,
+  "n_active_T170": 192884,
+  "n_active_T182": 231644,
+  "per_sym_delta": {
+    "sym0": {"beta": 0.1, "delta": 0.156},
+    "sym1": {"beta": 0.4, "delta": 5.3429},
+    "sym2": {"beta": 0.3, "delta": 1.1171},
+    "sym3": {"beta": 0.0, "delta": 0.0},
+    "sym4": {"beta": 0.0, "delta": 0.0}
+  },
+  "zip": "submission_050910_iter019_v2N_T87M7_NoConformal.zip",
+  "md5": "ab788300dd13126c65f97890d2bfe6a8",
+  "smoke_test": "PASS (3 test cases: normal, OOD sym=99, missing sym)",
+  "conclusion": "Conformal HURTS at +34 platform level. T182 (no conformal) > T170 by +6.62 on holdout. Main driver: sym1 (beta=0.4 was over-abstaining on this stack). Recommend submitting T182.",
+  "expected_platform": "T170 is +34.44. If holdout delta holds, T182 could be +34.6 to +35. Directionally: conformal hurts at this stack level (different from iter_015 where it helped +0.77)."
+}
