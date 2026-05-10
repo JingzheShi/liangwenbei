@@ -1,0 +1,32 @@
+{
+  "_doc": "T187 Plan A: REPLACE T87 NN with GroupTransformer (5-seed T172b) in v2 stack. w_nn=0 (no MLP files), w_tr=1.0, w_lgb=1.5. Same v2 conformal betas (beta_1=0.40). LGB = v2 full retrain.",
+  "horizons": [
+    {"h": 5,  "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 10, "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 20, "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {"h": 40, "thr_up": 1.0, "thr_dn": 1.0, "active": false},
+    {
+      "h": 60,
+      "thr_up": 0.00029995433796130955,
+      "thr_dn": 0.0002158528296175958,
+      "w_nn": 0.0,
+      "w_lgb": 1.5,
+      "w_tr": 1.0,
+      "active": true,
+      "ensemble_seeds": [1, 7, 13, 42, 100]
+    }
+  ],
+  "conformal_wrapper": {
+    "enabled": true,
+    "per_sym_beta": {"0": 0.10, "1": 0.40, "2": 0.30, "3": 0.00, "4": 0.00},
+    "default_beta_for_ood": 0.16,
+    "per_sym_sigma": {
+      "0": 0.0002403901,
+      "1": 0.0004712397,
+      "2": 0.0004522216,
+      "3": 0.0004235249,
+      "4": 0.0004279811
+    },
+    "default_sigma_for_ood": 0.0003998317
+  }
+}

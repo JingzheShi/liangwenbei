@@ -1,0 +1,40 @@
+{
+  "task": "T187 GroupTr replace + add to v2 stack",
+  "models_source": "T172b existing (5-seed GroupTransformer trained date 0-119)",
+  "eval_dates": "96-119 (in-sample: both NNs and LGB trained on 0-119)",
+  "warning": "In-sample eval. Platform = true validation.",
+  "T170_insample_reference": 149.95,
+  "v2_baseline": {
+    "holdout_pnl": 148.2124,
+    "weights": "w_nn=1.0 w_lgb=1.5 w_tr=0",
+    "note": "v2 NNs + v2 LGB + v2 betas (beta_1=0.40)"
+  },
+  "grouptr_standalone": {
+    "holdout_pnl": 151.7881,
+    "delta_vs_T170": 1.8381
+  },
+  "plan_A_replace": {
+    "holdout_pnl": 172.1146,
+    "delta_vs_T170": 22.1646,
+    "delta_vs_v2": 23.9023,
+    "weights": "w_tr=1.0 w_lgb=1.5 (no MLP)",
+    "zip": "submission_050910_iter019_v2N_GroupTr_replace.zip",
+    "md5": "4e95ec4e4d61621d55808c7d41376efa"
+  },
+  "plan_B_add_nn_heavy": {
+    "holdout_pnl": 162.5039,
+    "delta_vs_T170": 12.5539,
+    "delta_vs_v2": 14.2915,
+    "weights": "w_nn=1.5 w_tr=1.0 w_lgb=1.0",
+    "zip": "submission_050910_iter019_v2N_GroupTr_add.zip",
+    "md5": "7fb2123311a64970ba7ede06e887fc7c"
+  },
+  "plan_B_add_equal": {
+    "holdout_pnl": 164.6104,
+    "delta_vs_T170": 14.6604,
+    "delta_vs_v2": 16.398,
+    "weights": "w_nn=1.0 w_tr=1.0 w_lgb=1.0",
+    "zip": "submission_050910_iter019_v2N_GroupTr_add_equal.zip",
+    "md5": "edac3c515fb0f87fd5ddb221bee2a54d"
+  }
+}
