@@ -25,7 +25,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -196,6 +196,39 @@ class _BatchedMLPEnsemble:
         out = out.mean(0)            # mean over 50 NNs -> (B,)
         return out.cpu().numpy().astype(np.float32)
 
+    @torch.no_grad()
+    def predict_weighted_sum(self, X_in: np.ndarray, weights: torch.Tensor) -> np.ndarray:
+        """Batched forward for all N NNs; returns sum_i (w_i * pred_i), shape (B,).
+
+        weights: tensor of shape (N,) on same device as model.
+        """
+        if X_in.shape[1] != self.in_dim:
+            Xs = X_in[:, self.keep_idx].astype(np.float32)
+        else:
+            Xs = X_in.astype(np.float32, copy=True)
+
+        h = torch.from_numpy(Xs).to(self._device)
+        h = h.unsqueeze(0).expand(self.N, -1, -1).contiguous()
+        h = (h - self.feat_mean.unsqueeze(1)) / self.feat_std.unsqueeze(1)
+        h = torch.where(torch.isnan(h), torch.zeros_like(h), h)
+        h = torch.clamp(h, -self.clip, self.clip)
+
+        for i in range(len(self.hidden)):
+            h = torch.bmm(h, self.W[i].transpose(-1, -2)) + self.b[i].unsqueeze(1)
+            if self.use_layernorm:
+                mean = h.mean(dim=-1, keepdim=True)
+                var = h.var(dim=-1, keepdim=True, unbiased=False)
+                h = (h - mean) / torch.sqrt(var + 1e-5)
+                h = h * self.LNW[i].unsqueeze(1) + self.LNb[i].unsqueeze(1)
+            h = F.gelu(h, approximate="tanh")
+
+        out = torch.bmm(h, self.WF.transpose(-1, -2)).squeeze(-1)
+        out = out + self.bF
+        out = out / self.target_scale  # (N, B)
+        # Weighted sum over N: weights (N,) -> (N, 1) for broadcast
+        weighted = (out * weights.unsqueeze(1)).sum(0)  # (B,)
+        return weighted.cpu().numpy().astype(np.float32)
+
 
 class _HeterogeneousBatchedEnsemble:
     """Wrapper for NN models with potentially different hidden architectures.
@@ -204,19 +237,32 @@ class _HeterogeneousBatchedEnsemble:
     predict_mean returns the count-weighted mean across all groups.
     """
 
-    def __init__(self, npz_paths: List[str], device: torch.device) -> None:
-        groups: Dict[tuple, List[str]] = {}
-        for path in npz_paths:
+    def __init__(self, npz_paths: List[str], device: torch.device,
+                 weights: Optional[List[float]] = None) -> None:
+        """If weights is provided, must have len(weights) == len(npz_paths) and align by index.
+        Stored per sub-ensemble with the same intra-group order as paths."""
+        groups_paths: Dict[tuple, List[str]] = {}
+        groups_weights: Dict[tuple, List[float]] = {}
+        for i, path in enumerate(npz_paths):
             d = np.load(path, allow_pickle=False)
             key = tuple(d["hidden"].tolist())
-            groups.setdefault(key, []).append(path)
+            groups_paths.setdefault(key, []).append(path)
+            if weights is not None:
+                groups_weights.setdefault(key, []).append(float(weights[i]))
 
         self._sub_ensembles: List[_BatchedMLPEnsemble] = []
         self._sub_sizes: List[int] = []
+        self._sub_weights: List[Optional[torch.Tensor]] = []
         self._total_n = len(npz_paths)
-        for paths in groups.values():
+        for key, paths in groups_paths.items():
             self._sub_ensembles.append(_BatchedMLPEnsemble(paths, device))
             self._sub_sizes.append(len(paths))
+            if weights is not None:
+                self._sub_weights.append(
+                    torch.tensor(groups_weights[key], dtype=torch.float32, device=device))
+            else:
+                self._sub_weights.append(None)
+        self._has_weights = weights is not None
 
     @torch.no_grad()
     def predict_mean(self, X_in: np.ndarray) -> np.ndarray:
@@ -227,6 +273,16 @@ class _HeterogeneousBatchedEnsemble:
             s = sub.predict_sum(X_in)
             acc = s if acc is None else acc + s
         return acc / float(self._total_n)
+
+    @torch.no_grad()
+    def predict_weighted_sum(self, X_in: np.ndarray) -> np.ndarray:
+        """Weighted sum across all NN models using stored per-NN weights."""
+        assert self._has_weights, "predict_weighted_sum requires weights at __init__"
+        acc = None
+        for sub, w in zip(self._sub_ensembles, self._sub_weights):
+            s = sub.predict_weighted_sum(X_in, w)
+            acc = s if acc is None else acc + s
+        return acc
 
 
 def _load_module(here: str, fname: str, mod_name: str):
@@ -277,10 +333,25 @@ class Predictor:
         if "midprice1" in self._raw_col_to_idx:
             self._col_idx["midprice"] = self._raw_col_to_idx["midprice1"]
 
+        # Load per-model weights if present (overrides simple-mean ensemble)
+        per_model_weights_path = os.path.join(here, "per_model_weights.json")
+        self._per_model_weights: Dict[int, Dict[str, Dict[int, float]]] = {}
+        if os.path.isfile(per_model_weights_path):
+            with open(per_model_weights_path) as f:
+                pmw_raw = json.load(f)
+            for h_key, pmw in pmw_raw.items():
+                H = int(h_key.replace("h", ""))
+                self._per_model_weights[H] = {
+                    "nn": dict(zip(pmw["nn_seeds"], pmw["nn_weights"])),
+                    "lgb": dict(zip(pmw["lgb_seeds"], pmw["lgb_weights"])),
+                }
+
         # Load per-horizon LGB ensembles (CPU sequential, already 84ms)
         # and batched NN ensembles (torch bmm, all 50 NNs in one pass)
         self._lgb_lists: Dict[int, List[lgb.Booster]] = {}
+        self._lgb_weights: Dict[int, Optional[np.ndarray]] = {}
         self._nn_batched: Dict[int, _HeterogeneousBatchedEnsemble] = {}
+        self._nn_use_weighted: Dict[int, bool] = {}
         self._weights: Dict[int, Tuple[float, float]] = {}
         for hcfg in self._horizons:
             if not hcfg.get("active", True):
@@ -289,17 +360,36 @@ class Predictor:
             seeds = hcfg.get("ensemble_seeds", [])
             lgb_paths: List[str] = []
             nn_paths: List[str] = []
+            lgb_seeds_used: List[int] = []
+            nn_seeds_used: List[int] = []
             for s in seeds:
                 lp = os.path.join(here, f"model_h{H}_seed{s}.txt")
                 np_ = os.path.join(here, f"nn_h{H}_seed{s}.npz")
                 if os.path.isfile(lp):
                     lgb_paths.append(lp)
+                    lgb_seeds_used.append(s)
                 if os.path.isfile(np_):
                     nn_paths.append(np_)
+                    nn_seeds_used.append(s)
             if lgb_paths:
                 self._lgb_lists[H] = [lgb.Booster(model_file=p) for p in lgb_paths]
+                if H in self._per_model_weights:
+                    lgb_w_map = self._per_model_weights[H]["lgb"]
+                    self._lgb_weights[H] = np.array(
+                        [float(lgb_w_map.get(s, 0.0)) for s in lgb_seeds_used],
+                        dtype=np.float32)
+                else:
+                    self._lgb_weights[H] = None
             if nn_paths:
-                self._nn_batched[H] = _HeterogeneousBatchedEnsemble(nn_paths, self._device)
+                if H in self._per_model_weights:
+                    nn_w_map = self._per_model_weights[H]["nn"]
+                    nn_w_list = [float(nn_w_map.get(s, 0.0)) for s in nn_seeds_used]
+                    self._nn_batched[H] = _HeterogeneousBatchedEnsemble(
+                        nn_paths, self._device, weights=nn_w_list)
+                    self._nn_use_weighted[H] = True
+                else:
+                    self._nn_batched[H] = _HeterogeneousBatchedEnsemble(nn_paths, self._device)
+                    self._nn_use_weighted[H] = False
             self._weights[H] = (float(hcfg.get("w_nn", 1.0)),
                                 float(hcfg.get("w_lgb", 1.0)))
 
@@ -355,7 +445,18 @@ class Predictor:
         return out
 
     @staticmethod
-    def _ensemble_predict_lgb(boosters: List[lgb.Booster], X: np.ndarray) -> np.ndarray:
+    def _ensemble_predict_lgb(boosters: List[lgb.Booster], X: np.ndarray,
+                               weights: Optional[np.ndarray] = None) -> np.ndarray:
+        """If weights given, returns sum_i (w_i * pred_i). Else returns mean over boosters."""
+        if weights is not None:
+            assert len(weights) == len(boosters)
+            acc = None
+            for b, w in zip(boosters, weights):
+                if w == 0.0:
+                    continue
+                p = b.predict(X).astype(np.float32) * float(w)
+                acc = p if acc is None else acc + p
+            return acc if acc is not None else np.zeros(X.shape[0], dtype=np.float32)
         if len(boosters) == 1:
             return boosters[0].predict(X).astype(np.float32, copy=False)
         acc = None
@@ -383,20 +484,31 @@ class Predictor:
             lgbs = self._lgb_lists.get(H)
             nn_ens = self._nn_batched.get(H)
             w_nn, w_lgb = self._weights.get(H, (1.0, 1.0))
+            use_per_model = H in self._per_model_weights
 
-            preds = []
-            ws = []
-            if lgbs and w_lgb > 0:
-                preds.append(self._ensemble_predict_lgb(lgbs, feats))
-                ws.append(w_lgb)
-            if nn_ens is not None and w_nn > 0:
-                preds.append(nn_ens.predict_mean(feats))
-                ws.append(w_nn)
-            if not preds:
-                continue
-            stacked = np.stack(preds, axis=0)  # (M, B)
-            ws_arr = np.array(ws, dtype=np.float32).reshape(-1, 1)
-            pred_dmid = (stacked * ws_arr).sum(axis=0) / ws_arr.sum()
+            if use_per_model:
+                # Per-model weighted sum (weights pre-applied per model). Cross-modal w_nn/w_lgb
+                # from thresholds.json is IGNORED — assumes per-model weights already encode it.
+                pred_dmid = np.zeros(feats.shape[0], dtype=np.float32)
+                if lgbs:
+                    pred_dmid = pred_dmid + self._ensemble_predict_lgb(
+                        lgbs, feats, weights=self._lgb_weights.get(H))
+                if nn_ens is not None and self._nn_use_weighted.get(H, False):
+                    pred_dmid = pred_dmid + nn_ens.predict_weighted_sum(feats)
+            else:
+                preds = []
+                ws = []
+                if lgbs and w_lgb > 0:
+                    preds.append(self._ensemble_predict_lgb(lgbs, feats))
+                    ws.append(w_lgb)
+                if nn_ens is not None and w_nn > 0:
+                    preds.append(nn_ens.predict_mean(feats))
+                    ws.append(w_nn)
+                if not preds:
+                    continue
+                stacked = np.stack(preds, axis=0)  # (M, B)
+                ws_arr = np.array(ws, dtype=np.float32).reshape(-1, 1)
+                pred_dmid = (stacked * ws_arr).sum(axis=0) / ws_arr.sum()
 
             if self._cw_enabled:
                 actions = self._gate_with_band(pred_dmid, hcfg, band_per_row)
