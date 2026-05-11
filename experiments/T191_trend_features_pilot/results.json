@@ -1,0 +1,52 @@
+{
+  "task": "T191: Trend features pilot \u2014 5-NN + 5-LGB on 375-d (370 schemeP + 5 trend, after drop 11 -> feat_dim=364)",
+  "n_features": 364,
+  "n_new_features": 5,
+  "trend_features": [
+    "mean_logret_W10",
+    "mean_logret_W20",
+    "mean_logret_W50",
+    "mean_logret_W100",
+    "mid_pct_change_W100"
+  ],
+  "n_test_rows": 442080,
+  "T191_standalone_holdout_pnl": 140.0973,
+  "T188v2_holdout_pnl": 150.4324,
+  "T191_n_act": 191003,
+  "T188v2_n_act": 192413,
+  "corr_T191_T188v2_pred": 0.9941,
+  "beta_OLS_pooled": 0.9882,
+  "ic_T191_standalone": 0.3337,
+  "ic_T188v2_standalone": 0.3546,
+  "ic_residual_T191_pooled_spearman": -0.1699,
+  "ic_residual_per_sym": {
+    "0": -0.16042567326848256,
+    "1": -0.229721229383507,
+    "2": -0.15861827703249332,
+    "3": -0.1279648706257669,
+    "4": -0.18111648047268036
+  },
+  "corr_per_sym": {
+    "0": 0.9955314392084716,
+    "1": 0.9930636104848916,
+    "2": 0.9935186086190233,
+    "3": 0.9980933219678958,
+    "4": 0.9919495192619315
+  },
+  "beta_per_sym": {
+    "0": 0.9962685541648061,
+    "1": 0.9843096255441767,
+    "2": 0.9863623061504755,
+    "3": 0.9959469420204244,
+    "4": 0.9839353275669808
+  },
+  "verdict": "NONE",
+  "verdict_reasoning": "|IC_residual_pooled|=0.1699 vs thresholds (STRONG>0.02 / WEAK>0.005), corr(T191,T188v2)=0.9941, T191 standalone PnL=140.10",
+  "recommendation_for_user": "KILL \u2014 trend signal already captured by existing 359-d features",
+  "thr_up": 0.0003,
+  "thr_dn": 0.000216,
+  "w_nn": 1.0,
+  "w_lgb": 1.5,
+  "conformal_enabled": true,
+  "note": "Both T191 and T188v2 trained on dates 0-119 -> in-sample for holdout; comparison is RELATIVE"
+}

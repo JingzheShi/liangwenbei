@@ -1,67 +1,66 @@
-# Data — never commit (474M of parquet); /data/ only matches repo-root dataset dir
-/data/
-*.parquet
-*.csv
-*.h5
-*.feather
-*.pkl
 
-# Model artifacts
-*.pt
-*.pth
-*.ckpt
-*.bin
-*.onnx
-*.cbm
-*model*.txt
-*classifier.txt
-*.db
-xgb_model_*.json
-*.npy
-checkpoints/
-runs/
-wandb/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-.ipynb_checkpoints/
-*.egg-info/
-
-# Feature caches & experiment-internal heavy artifacts
-*.npz
-experiments/*/cache/
-data/features_v1/
-
-# OS / IDE
-.DS_Store
-.vscode/
-.idea/
-
-# Logs
-*.log
-logs/
-
-# Submission artifacts
-submission.zip
-submissions/
-# Iter zip 提交包（在 workdir 根的大 zip）
-/submission_*.zip
-
-# But DO commit example weights since they're small reference baselines
 !examples/example_official/best_val_model.pth
 !examples/mmpc_demo/best_model.pt
-
-# DO commit the actual submission zip per iter as archived artifact (typically < 5MB)
 !submission/iter_*/submission.zip
-# 同样 commit iter_000 复用的 demo 权重，便于复现这个 baseline iter
 !submission/iter_000_mmpc_demo/best_model.pt
-
+# But DO commit example weights since they're small reference baselines
+# DO commit the actual submission zip per iter as archived artifact (typically < 5MB)
+# Data — never commit (474M of parquet); /data/ only matches repo-root dataset dir
+# Feature caches & experiment-internal heavy artifacts
+# Iter zip 提交包（在 workdir 根的大 zip）
+# Logs
+# Model artifacts
+# OS / IDE
+# Python
+# Submission artifacts
 # Worker progress / results JSON (regenerated on every worker run)
-worker-progress*.json
-results_*.json
+# 同样 commit iter_000 复用的 demo 权重，便于复现这个 baseline iter
+*$py.class
+*.bin
+*.cbm
+*.ckpt
+*.csv
+*.db
+*.egg-info/
+*.feather
+*.h5
+*.log
+*.npy
+*.npz
+*.onnx
+*.parquet
+*.pkl
+*.pt
+*.pth
+*.py[cod]
+*.pyc
+*.zip
+*classifier.txt
+*model*.txt
+.DS_Store
+.idea/
+.ipynb_checkpoints/
+.venv/
+.vscode/
+/data/
+/submission_*.zip
+T81_pretrained_T191/
+__pycache__/
+checkpoints/
+data/features_v1/
+experiments/*/cache/
+final_pkg/
+logs/
+model_h60_seed*.txt
+models_remote/
+nn_h60_seed*.npz
 research_and_history/research_results.json
 research_and_history/results_*.json
+results_*.json
+runs/
+submission.zip
+submissions/
+venv/
+wandb/
+worker-progress*.json
+xgb_model_*.json
