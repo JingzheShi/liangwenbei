@@ -1,0 +1,61 @@
+{
+  "_doc": "T188v2 50+50 + full-horizon emit. h=60 unchanged (platform SOTA +35.64). h=5/10/20/40 share h=60 ensemble via share_with=60, with thresholds scaled by sqrt(H/60) so shorter horizons trade fewer/smaller signals. Conformal per-sym band reused (same predictions). Platform score = max(per-horizon PnL), so adding shorter horizons can only stay same or improve.",
+  "horizons": [
+    {
+      "h": 5,
+      "share_with": 60,
+      "thr_up": 0.0000866,
+      "thr_dn": 0.0000624,
+      "w_nn": 1.0,
+      "w_lgb": 1.5,
+      "active": true,
+      "_note": "share h=60 ensemble; thresholds = h=60 * sqrt(5/60) = * 0.2887"
+    },
+    {
+      "h": 10,
+      "share_with": 60,
+      "thr_up": 0.0001225,
+      "thr_dn": 0.0000882,
+      "w_nn": 1.0,
+      "w_lgb": 1.5,
+      "active": true,
+      "_note": "share h=60; thresholds = * sqrt(10/60) = * 0.4082"
+    },
+    {
+      "h": 20,
+      "share_with": 60,
+      "thr_up": 0.0001732,
+      "thr_dn": 0.0001247,
+      "w_nn": 1.0,
+      "w_lgb": 1.5,
+      "active": true,
+      "_note": "share h=60; thresholds = * sqrt(20/60) = * 0.5774"
+    },
+    {
+      "h": 40,
+      "share_with": 60,
+      "thr_up": 0.0002449,
+      "thr_dn": 0.0001764,
+      "w_nn": 1.0,
+      "w_lgb": 1.5,
+      "active": true,
+      "_note": "share h=60; thresholds = * sqrt(40/60) = * 0.8165"
+    },
+    {
+      "h": 60,
+      "thr_up": 0.0003,
+      "thr_dn": 0.000216,
+      "w_nn": 1.0,
+      "w_lgb": 1.5,
+      "active": true,
+      "ensemble_seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]
+    }
+  ],
+  "conformal_wrapper": {
+    "enabled": true,
+    "per_sym_beta": {"0": 0.1, "1": 0.4, "2": 0.3, "3": 0.0, "4": 0.0},
+    "per_sym_sigma": {"0": 0.0002403901, "1": 0.0004712397, "2": 0.0004522216, "3": 0.0004235249, "4": 0.0004279811},
+    "default_beta_for_ood": 0.16,
+    "default_sigma_for_ood": 0.0003998317
+  }
+}
