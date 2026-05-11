@@ -1,0 +1,71 @@
+{
+  "task": "T192: Per-model non-negative weight regression on T190 150+150 ensemble",
+  "data_setup": {
+    "weight_learning_set": "schemeP_val.npz dates 80-95 (294,720 rows)",
+    "evaluation_set": "schemeP_test.npz dates 96-119 (442,080 rows)",
+    "warning_in_sample": "BOTH val and test are in-sample for the underlying models (trained on 0-119). OLS on val→test in-sample distribution is expected to overfit shared noise patterns. Does NOT predict OOD platform behavior.",
+    "n_models_per_set": "150 NN + 150 LGB = 300 features"
+  },
+  "variants": {
+    "A_simple_mean": {
+      "config": "w_nn=1.0, w_lgb=1.5 (current production weights)",
+      "val_pnl": 128.535,
+      "test_pnl": 140.6179,
+      "n_act_test": 184361,
+      "is_baseline": true
+    },
+    "B_OLS_2feat_aggregate": {
+      "config": "Learn (w_nn, w_lgb) on aggregate mean preds",
+      "w_nn_learned": -0.9797,
+      "w_lgb_learned": 2.4069,
+      "val_pnl": 179.612,
+      "test_pnl": 190.7708,
+      "n_act_test": 265043,
+      "warning": "w_nn = NEGATIVE (-0.98) — OLS thinks NN is anti-predictive. Pure noise-fitting."
+    },
+    "C_NNLS_300feat": {
+      "config": "scipy.optimize.nnls on 300 model preds, no regularization",
+      "val_pnl": 259.5396,
+      "test_pnl": 288.5068,
+      "n_act_test": 295511,
+      "n_nonzero_NN": 0,
+      "n_nonzero_LGB": 3,
+      "sum_w": 1.4504,
+      "warning": "Only 3 LGB models nonzero, ZERO NN models. Memorizing 3 specific models' val noise."
+    },
+    "D_Lasso_NN_alpha_sweep": {
+      "alpha_1e-8": {"nz": 3, "sum_w": 1.4432, "val_pnl": 259.5133, "test_pnl": 288.4466},
+      "alpha_1e-7": {"nz": 3, "sum_w": 1.3781, "val_pnl": 259.0416, "test_pnl": 287.7548},
+      "alpha_1e-6": {"nz": 3, "sum_w": 0.7270, "val_pnl": 239.9420, "test_pnl": 261.5866},
+      "alpha_1e-5": {"nz": 0, "sum_w": 0.0000, "val_pnl": 0.0, "test_pnl": 0.0, "note": "All weights zeroed, no signal robust to even tiny L1"},
+      "alpha_1e-4": {"nz": 0, "val_pnl": 0.0, "test_pnl": 0.0},
+      "alpha_1e-3": {"nz": 0, "val_pnl": 0.0, "test_pnl": 0.0},
+      "warning": "NO weights survive even α=1e-5 → no robust signal exists"
+    },
+    "E_Ridge_NN_partial": {
+      "alpha_1e-6": {"nz": 3, "sum_w": 1.4504, "val_pnl": 259.5396, "test_pnl": 288.5068, "note": "Identical to NNLS C — Ridge with tiny α has no effect"},
+      "note": "E was killed at α=1e-6 because cvxpy is very slow (676s per α) and remaining α values (1e-4, 1e-2, 1.0) would not change verdict"
+    },
+    "F_NNLS_sum1_constraint": {"status": "skipped — process killed"},
+    "G_per_sym_weights": {"status": "skipped — process killed"}
+  },
+  "verdict": "OVERFIT — DO NOT USE OLS WEIGHTS FOR PRODUCTION",
+  "verdict_reasoning": [
+    "1. B) gives w_nn = NEGATIVE (-0.98). OLS thinks NN is anti-predictive. NN-only T188v2 ablation is +51, so NN clearly has signal — OLS is fitting noise.",
+    "2. C/D) only 3 of 300 weights nonzero. Real ensemble diversity should give dozens of nonzero weights.",
+    "3. Test PnL > Val PnL (288 > 259 in C). Smoking gun. If OLS learned real signal, val should match test or be higher. Test being higher means the noise pattern the 3 LGB models memorized happened to align with both val (80-95) and test (96-119) — pure in-sample artifact.",
+    "4. D) Lasso α=1e-5 zeros ALL weights. No signal is robust to even tiny L1 regularization."
+  ],
+  "comparison_to_known_baselines": {
+    "T170_5plus5_local_holdout": 146.24,
+    "T170_5plus5_platform": 34.64,
+    "T188v2_50plus50_local_holdout": 150.43,
+    "T188v2_50plus50_platform": 35.64,
+    "T190_150plus150_local_holdout": 140.62,
+    "T190_150plus150_platform": 34.59,
+    "T192_OLS_local_holdout": 288.51,
+    "T192_OLS_platform": "predicted to be < 30 (likely much worse than simple mean)"
+  },
+  "recommendation": "KILL the per-model OLS weighting direction. To find signal that actually generalizes OOD: (1) use walk-forward validation where val period is OUTSIDE training period (e.g., train on 0-95, val on 96-119, test on 120+ — but that requires re-training); (2) constrain OLS solution space: sum_w=1 + each w_i >= 1/N (forces honest averaging); (3) test on simulated platform-style OOD (date 120+ data only)",
+  "current_SOTA": "T188v2 50+50 simple-mean = platform +35.64. Do NOT submit T192 weighted variant."
+}
