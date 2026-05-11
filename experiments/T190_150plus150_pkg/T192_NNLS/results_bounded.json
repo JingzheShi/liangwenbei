@@ -1,0 +1,33 @@
+{
+  "task": "T192 bounded NNLS \u2014 w in [uniform/10, uniform*3]",
+  "baseline_simple_mean": {
+    "test_pnl": 159.05358873676798,
+    "n_act": 184361
+  },
+  "H1_all300_bounded": {
+    "w_min": 0.0003333333333333333,
+    "w_max": 0.01,
+    "val_pnl": 188.70358999368517,
+    "test_pnl": 207.9356354728726,
+    "n_act_test": 231862,
+    "delta_vs_simple": 48.88204673610463,
+    "val_test_ratio": 1.1019166910382099,
+    "n_at_min_NN": 150,
+    "n_at_max_NN": 0,
+    "n_interior_NN": 0,
+    "n_at_min_LGB": 30,
+    "n_at_max_LGB": 120,
+    "n_interior_LGB": 0,
+    "sum_w": 1.2600006827028802
+  },
+  "H2_pergroup_bounded": {
+    "w_min": 0.0006666666666666666,
+    "w_max": 0.02,
+    "val_pnl": 212.53507233167832,
+    "test_pnl": 235.29991544865743,
+    "n_act_test": 275254,
+    "delta_vs_simple": 76.24632671188945,
+    "val_test_ratio": 1.1071109952217801,
+    "sum_w": 1.6161031814414932
+  }
+}

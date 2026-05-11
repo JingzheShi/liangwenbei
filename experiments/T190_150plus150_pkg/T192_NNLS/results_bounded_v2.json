@@ -1,0 +1,88 @@
+{
+  "task": "T192 bounded v2 \u2014 production PnL formula + collinearity check",
+  "T190_simple_mean_test_pnl": 140.61794125683144,
+  "collinearity": {
+    "nn_nn_mean_corr": 0.9331479127136632,
+    "lgb_lgb_mean_corr": 0.8432710154076318,
+    "nn_lgb_cross_mean_corr": 0.5794570072235329,
+    "condition_number": 54182.10058922363
+  },
+  "variants": {
+    "baseline_simple_mean": {
+      "test_pnl": 140.61794125683144,
+      "n_act": 184361
+    },
+    "H3_all300_uniform_div10_x2": {
+      "tag": "H3) all-300 [1/3000, 2/300]",
+      "w_min": 0.0003333333333333333,
+      "w_max": 0.006666666666666667,
+      "sum_w": 1.0531592445128333,
+      "val_pnl": 156.13863499469403,
+      "test_pnl": 167.27732922494425,
+      "n_act_test": 197344,
+      "val_test_ratio": 1.0713384885850241,
+      "n_at_min_NN": 135,
+      "n_at_max_NN": 11,
+      "n_int_NN": 4,
+      "n_at_min_LGB": 10,
+      "n_at_max_LGB": 126,
+      "n_int_LGB": 14
+    },
+    "H4_pergroup_uniform_div10_x2": {
+      "tag": "H4) per-group [1/1500, 2/150]",
+      "w_min": 0.0006666666666666666,
+      "w_max": 0.013333333333333334,
+      "sum_w": 1.4669381068248302,
+      "val_pnl": 180.40807731355977,
+      "test_pnl": 193.93635203280672,
+      "n_act_test": 257133,
+      "val_test_ratio": 1.0749870788530937,
+      "n_at_min_NN": 150,
+      "n_at_max_NN": 0,
+      "n_int_NN": 0,
+      "n_at_min_LGB": 49,
+      "n_at_max_LGB": 100,
+      "n_int_LGB": 1
+    },
+    "H5_all300_uniform_div10_x1p5": {
+      "tag": "H5) all-300 [1/3000, 1.5/300]",
+      "w_min": 0.0003333333333333333,
+      "w_max": 0.005,
+      "sum_w": 0.9308292657697893,
+      "val_pnl": 143.2906687182434,
+      "test_pnl": 154.66050054907828,
+      "n_act_test": 175653,
+      "val_test_ratio": 1.0793480268641338,
+      "n_at_min_NN": 0,
+      "n_at_max_NN": 17,
+      "n_int_NN": 133,
+      "n_at_min_LGB": 0,
+      "n_at_max_LGB": 114,
+      "n_int_LGB": 36
+    },
+    "H6_all300_uniform_div2_x1p5": {
+      "tag": "H6) all-300 [1/600, 1.5/300]",
+      "w_min": 0.0016666666666666668,
+      "w_max": 0.005,
+      "sum_w": 1.0096378780068789,
+      "val_pnl": 141.26044001016407,
+      "test_pnl": 152.88225578044148,
+      "n_act_test": 187997,
+      "val_test_ratio": 1.082272260863984,
+      "n_at_min_NN": 136,
+      "n_at_max_NN": 11,
+      "n_int_NN": 3,
+      "n_at_min_LGB": 10,
+      "n_at_max_LGB": 140,
+      "n_int_LGB": 0
+    }
+  },
+  "platform_result": {
+    "submission_zip": "submission_050912_iter019_v2N_150plus150_H4weights_cputorch.zip",
+    "platform_pnl": 31.0,
+    "vs_T188v2_simple_mean": -4.6,
+    "vs_T190_simple_mean": -3.6,
+    "verdict": "OVERFIT_CONFIRMED",
+    "lesson": "Local val\u2192test ratio 1.075 was a smoking gun. Bounded NNLS [1/(10N), 2/N] still overfits when val and test both in-sample for models. Real signal would need walk-forward val (val OUTSIDE training range)."
+  }
+}
