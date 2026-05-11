@@ -225,3 +225,34 @@ class Predictor:
 - Predictor: torch CPU transformer (13x faster than numpy: 372ms vs 4.8s for 5 seeds x 1024)
 - 全部 in-sample，真实性能需平台评测
 - ⚠️ transformer 加入会 inflate holdout，最终效果未知
+
+## 11. T188v2 50+50 mega ensemble (2026-05-11) — 🟢 新 SOTA
+
+**目标**：把 T170 (5 NN T87M7 + 5 LGB v2) 扩到 50 NN + 50 LGB ensemble。
+- 50 个独立 T81-style L2 pretrain (HP 多样性) → 50 个独立 T87 SPO+ M7 fine-tune
+- 50 个 LGB (5 HP × 10 seed) M7 full-retrain on date 0-119
+- 同 v2 thresholds: thr_up=0.0003, thr_dn=0.000216, w_lgb=1.5, w_nn=1.0, conformal per-sym
+
+**本地 holdout (date 96-119, in-sample)**：
+| 模型 | PnL | n_act |
+|---|---|---|
+| T170 (5+5) | +149.96 | 192,821 |
+| T188v2 (50+50) | +150.43 | 192,413 |
+| delta | +0.48 (噪音级) | −408 |
+
+**平台 (OOD)**：
+| 模型 | 平台 PnL |
+|---|---|
+| T170 | +34.64 |
+| **T188v2 (50+50)** | **+35.64 ← 新 SOTA** |
+| **delta** | **+1.00** |
+
+**关键洞察**：
+- in-sample holdout 看不出 ensemble 红利（+0.3% 噪音），OOD 上拿到 +2.9%
+- 50 模型的 variance reduction 在 distribution shift 上才生效
+- NN 50 倍本地 holdout NN-only 反而 −1.4（fine-tune 收敛同一 minimum），但叠加 LGB ensemble + conformal 后整体 +1.0
+- 推断时间：本地 ~7 min（GPU bmm）；平台预计 ~10-15 min（CPU/GPU 看环境）
+
+**zip**：`submission_050911_iter019_v2N_50plus50_optimized.zip` (148MB, MD5 `95993e6250ea56361dfecb62c9123e63`)
+- T188v3 batched bmm 优化版，actions 与原 T188v2 100% 一致 (max diff 6.98e-10)
+- 备用 CPU-only 版（装环境快 ~10x）：`..._cputorch.zip` (148MB, MD5 `c67e4d25665a2a7a12f4f6839cc8d0fe`)

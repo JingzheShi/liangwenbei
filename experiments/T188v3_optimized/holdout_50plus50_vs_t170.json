@@ -1,0 +1,14 @@
+{
+  "T170_5plus5_holdout_pnl": 149.9565,
+  "T188v2_50plus50_holdout_pnl": 150.4324,
+  "delta": 0.4759,
+  "T170_n_act": 192821,
+  "T188v2_n_act": 192413,
+  "thr_up": 0.0003,
+  "thr_dn": 0.000216,
+  "w_nn": 1.0,
+  "w_lgb": 1.5,
+  "conformal_enabled": true,
+  "n_test_rows": 442080,
+  "warning": "BOTH ensembles in-sample (NN/LGB trained on 0-119); only relative comparison meaningful"
+}
