@@ -1,0 +1,20 @@
+{
+  "task": "T189 T170 with GPU inference (NN to torch CUDA)",
+  "smoke_test_cpu_ok": true,
+  "smoke_test_gpu_ok": true,
+  "inference_time_ms_per_1024_batch_cpu_T170_baseline": 855.8,
+  "inference_time_ms_per_1024_batch_gpu_T189": 543.7,
+  "end_to_end_speedup_vs_T170": 1.57,
+  "nn_only_time_ms_per_1024_numpy_cpu": 235.19,
+  "nn_only_time_ms_per_1024_torch_cuda": 12.00,
+  "nn_only_speedup_cuda_vs_numpy": 19.60,
+  "note_bottleneck": "Feature compute (fast_features_batch.py, pure numpy) is the bottleneck at ~600ms/1024. NN inference drops from 235ms to 12ms but overall speedup is 1.57x end-to-end.",
+  "actions_match_T170_baseline": true,
+  "actions_match_note": "Exact integer match on 10-batch smoke test (sym 0-4 coverage). Float32 math identical via F.gelu(approximate=tanh) + F.layer_norm(eps=1e-5).",
+  "zip": "submission_050910_iter019_v2N_T87M7_GPU.zip",
+  "md5": "ff82c74989bd8a174198a21f37dcdfc1",
+  "size_mb": 15.0,
+  "device_tested": "NVIDIA GeForce RTX 3090 (5697 MiB free)",
+  "torch_version": "2.5.1+cu121",
+  "expected_platform": "Should = T170 +34.64 (same models, same logic, just torch CUDA NN inference)"
+}
