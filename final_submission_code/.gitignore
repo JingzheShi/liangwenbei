@@ -10,7 +10,7 @@ outputs/
 *.zip
 
 # LightGBM models
-*.txt
+model_h*_seed*.txt
 
 # Python cache
 __pycache__/
