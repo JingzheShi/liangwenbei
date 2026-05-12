@@ -1,14 +1,16 @@
 #!/bin/bash
 # T188v2 50+50 Full-Horizon Submission Pipeline
-# Usage: ./run_pipeline.sh [DATA_DIR] [CUDA_DEVICE]
+# Usage: ./run_pipeline.sh [DATA_DIR] [CUDA_DEVICE] [LGB_GPU_FLAG]
 # Default DATA_DIR = ./data  (put raw parquet files here)
 # Default CUDA = 0
+# Default LGB_GPU_FLAG = "--gpu" (matches original training; pass "" to use CPU LightGBM)
 #
 # End-to-end: raw parquets -> feature cache -> 50 LGB + 50 NN -> submission zip
 set -e
 
 DATA_DIR=${1:-./data}
 CUDA=${2:-0}
+LGB_GPU_FLAG=${3:---gpu}
 WORKDIR="$(cd "$(dirname "$0")" && pwd)"
 OUT="$WORKDIR/outputs"
 CACHE_DIR="$OUT/cache"
@@ -46,7 +48,7 @@ echo "    M7 full-retrain on dates 0-119, num_boost_round=330"
 echo "    ~30 min on CPU / ~12 min with GPU LightGBM"
 echo ""
 # Use --gpu flag if LightGBM GPU is available (optional)
-bash "$WORKDIR/02_train_lgb/run_all_lgb_seeds.sh" "$CACHE_DIR" "$MODELS_DIR"
+bash "$WORKDIR/02_train_lgb/run_all_lgb_seeds.sh" "$CACHE_DIR" "$MODELS_DIR" "$LGB_GPU_FLAG"
 echo ""
 
 # -------------------------------------------------------
