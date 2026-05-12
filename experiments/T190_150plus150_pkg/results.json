@@ -1,0 +1,36 @@
+{
+  "results": {
+    "T170_5plus5": {
+      "pnl": 146.2351,
+      "n_act": 191697,
+      "n_lgb": 5,
+      "n_nn": 5
+    },
+    "T188v2_50plus50": {
+      "pnl": 150.4324,
+      "n_act": 192413,
+      "n_lgb": 50,
+      "n_nn": 50
+    },
+    "T190_150plus150": {
+      "pnl": 140.6179,
+      "n_act": 184361,
+      "n_lgb": 150,
+      "n_nn": 150
+    }
+  },
+  "deltas": {
+    "T188v2_vs_T170": 4.1973,
+    "T190_vs_T170": -5.6172,
+    "T190_vs_T188v2": -9.8144
+  },
+  "config": {
+    "thr_up": 0.0003,
+    "thr_dn": 0.000216,
+    "w_nn": 1.0,
+    "w_lgb": 1.5,
+    "conformal": true
+  },
+  "n_test_rows": 442080,
+  "warning": "All ensembles in-sample (trained 0-119, tested 96-119); relative comparison only"
+}
