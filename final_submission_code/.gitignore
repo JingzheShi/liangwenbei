@@ -1,0 +1,33 @@
+# Training outputs (too large for git)
+outputs/
+!outputs/.gitkeep
+
+# Feature caches
+*.npz
+
+# Model weights (training artifacts)
+*.pt
+*.zip
+
+# LightGBM models
+*.txt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data (user provides)
+data/
+
+# Logs
+*.log
+train.log
