@@ -1,0 +1,14 @@
+{
+  "model": "lgb",
+  "level": "L2",
+  "seed": 3,
+  "feat_dim": 165,
+  "horizon": 60,
+  "best_iter": 20,
+  "train_time_sec": 5.283443927764893,
+  "val_pnl_h60_sym": 16.08306286728491,
+  "val_thr_sym": 0.00020268583903089164,
+  "val_k_sym": 1.2,
+  "test_pnl_h60_sym": 19.287957889092713,
+  "n_act_test": 107764
+}

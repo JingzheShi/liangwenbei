@@ -1,0 +1,15 @@
+{
+  "model": "nn",
+  "level": "L6",
+  "seed": 3,
+  "feat_dim": 335,
+  "horizon": 60,
+  "best_epoch": 2,
+  "train_time_sec": 28.191060304641724,
+  "target_scale": 0.002154134912416339,
+  "val_pnl_h60_sym": 22.226413066457614,
+  "val_thr_sym": 0.0002384163672104478,
+  "val_k_sym": 0.8,
+  "test_pnl_h60_sym": 32.861648723089424,
+  "n_act_test": 174331
+}
