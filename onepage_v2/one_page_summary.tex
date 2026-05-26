@@ -1,0 +1,201 @@
+% !TEX program = xelatex
+% Single-side, single-page A4 summary for 良文杯 2026 finals
+% Team 792 "超级回天什么时候上映" — 史景喆，清华大学
+% Content distilled from report_full.tex (Features / Model / Results only)
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[a4paper,left=0.40in,right=0.40in,top=0.40in,bottom=0.40in,columnsep=0.18in]{geometry}
+
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont[BoldFont={Noto Serif CJK SC Bold},ItalicFont={Noto Serif CJK SC}]{Noto Serif CJK SC}
+\setCJKsansfont{Noto Sans CJK SC}
+\setCJKmonofont{Noto Sans Mono CJK SC}
+\setmainfont{Nimbus Roman}[
+  Extension={.otf},
+  Path=/usr/share/fonts/opentype/urw-base35/,
+  UprightFont=NimbusRoman-Regular,
+  BoldFont=NimbusRoman-Bold,
+  ItalicFont=NimbusRoman-Italic,
+  BoldItalicFont=NimbusRoman-BoldItalic,
+]
+
+\usepackage[T1]{fontenc}
+%   
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{tabularx}
+\usepackage{pifont}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+
+% Tighten everything
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1pt}
+\setlength{\abovedisplayskip}{1pt}
+\setlength{\belowdisplayskip}{1pt}
+\setlength{\abovedisplayshortskip}{0pt}
+\setlength{\belowdisplayshortskip}{0pt}
+\setlength{\textfloatsep}{2pt}
+\setlength{\intextsep}{2pt}
+\setlength{\floatsep}{2pt}
+\captionsetup{font=scriptsize,skip=1pt,labelfont=bf}
+\setlist[itemize]{leftmargin=*,topsep=0pt,itemsep=0pt,parsep=0pt,labelsep=4pt}
+
+% ICML-like section headings
+\definecolor{icmlblue}{RGB}{0,30,90}
+\definecolor{accred}{RGB}{170,0,0}
+\titleformat{\section}{\normalfont\bfseries\color{icmlblue}\small}{\thesection.}{0.3em}{}
+\titlespacing*{\section}{0pt}{3pt}{1pt}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\twocolumn[{%
+\centering
+{\large\bfseries\color{icmlblue}面向 PnL 目标的 LOB 中间价方向预测：$\Delta$mid 回归 $+$ SPO+ 决策焦点学习 $+$ $50\!\times\!50$ 异质集成}\par
+\vspace{1pt}
+{\footnotesize\itshape 第二届"良文杯"统计建模与 AI 预测挑战赛\,\textemdash\,汇报摘要}\par
+\vspace{2pt}
+{\scriptsize 随机码 \textbf{792} \,\textbar\, 队伍：\textbf{超级回天什么时候上映} \,\textbar\, 作者：\textbf{史景喆}（清华大学）\,\textbar\, 公榜 $-6.65 \to$ \textcolor{accred}{\textbf{$+35.64$}}（增益 \textcolor{accred}{\textbf{$+42.29$}}），\textbf{公榜 \#1}，私榜 \textbf{\#1}（待组委会公布分数）}\par
+\vspace{3pt}
+}]
+
+\scriptsize
+
+\section{摘要}
+
+我们将赛题理解为：在少量股票样本上训练、在其他股票上预测的、带有交易成本的期望收益预测问题；研究过程紧盯\textbf{正确性、有效性、范化性}。最终方案以因子工程 + L2 $\Delta$mid 回归 + SPO+ 决策焦点学习 (DFL) + 50 NN $\times$ 50 LightGBM 异质集成构成，\textbf{公榜累计收益率 $+35.6$（baseline $-6.7$），公榜与私榜均为决赛参赛队伍第一}。
+
+我们同时基于 Claude Code 的 Agent Harness 构建了 Manager-Worker 多 Agent 架构、并集成至飞书 IM，实现\textbf{正确性、高效性、可追溯性}的 Coding Agent 研究流程：一周内完成约 200 组本地实验、约 200 次 commit。代码开源于 \url{https://github.com/JingzheShi/liangwenbei}。
+
+
+
+
+% =========================================================
+\section{Problem}
+
+数据：5 只匿名 A 股 $\times$ 120 交易日 $\times$ 上午/下午各 2001 ticks（3s/tick），共 1200 parquet（约 474 MB），154 维原始字段（OHLC / 10 档 LOB 报价与挂单量 / 6 类订单流强度・指示・加速度 / 衍生 spread・imbalance 等）；1192 文件无 NaN、8 文件涨停日深档 ask 含少量缺失（pipeline 用 \texttt{isfinite} 兜底）。
+评分：单笔 $\mathrm{pnl}_i^{(h)}=\frac{(\hat a_i-1)\Delta\mathrm{mp}_h^{(i)} - 10^{-4}|\hat a_i-1|((\mathrm{mp}_{t+h}{+}1)+(\mathrm{mp}_t{+}1))}{\mathrm{mp}_t+1}$，$\hat a\in\{0,1,2\}$；买/卖才扣 $\sim 0.02\%$ 双边手续费。总分 $\mathrm{Score}=\max_{h\in\{5,10,20,40,60\}}\sum_i \mathrm{pnl}_i^{(h)}$，5 horizon 取最大——本文以 $h=60$ 为主线。
+
+
+% =========================================================
+\section{因子工程}
+\paragraph{六大家族，359 维。}以 154 维原始字段为底，叠加 216 维派生量、按 KS 检验丢弃 11 个分布偏移敏感列，得到 SchemeP 359 维：\textbf{LOB 派生}（$\sim$30 维：midprice / spread / imbalance / 微价格）、\textbf{多尺度 OFI}（$\sim$50 维：MLOFI / EWMA-OFI 多 $\alpha$ / Kyle $\lambda$ rolling，$W\!\in\!\{5,20,50,100\}$）、\textbf{订单流强度}（$\sim$30 维：6 类订单 \texttt{intst/ind/acc} + cancel pressure）、\textbf{微结构波动}（$\sim$25 维：signed RV / bipower / Roll / vol-burst）、\textbf{窗口统计}（$\sim$60 维：100-tick z-score / dual-z / quantile rank）、\textbf{不对称性}（$\sim$30 维：bid/ask asymmetry / GOFI / EWMA residual）。
+
+\paragraph{窗口内 z-score (stock-agnostic)。}所有统计量在 100-tick 切片内做自适应 z-score——跨 stock 分布差异被切片内归一化吸收，避免任何 per-stock 统计量。我们尝试过全局 z-score（全训练集 mean/std），在跨 stock 留一验证上明显更差。
+
+\paragraph{方向对称增强 (aug\_a)。}训练时把每个样本与其"bid/ask 互换且 label 反转"的镜像样本拼接，训练集扩大 $2\times$。物理上 LOB 在 bid/ask 互换且标签反向后对应同一市场状态——强制学到方向对称表示，显著降低单边偏差。
+
+\paragraph{重尾压制。}\texttt{amount\_delta}（唯一未官方归一化字段，量级 $10^3$--$10^6$）在 \texttt{raw\_last} 处做保号 log：$v\mapsto\operatorname{sign}(v)\log(1+|v|)$。
+
+% =========================================================
+\section{模型工程}
+
+最终模型由 LightGBM 与 MLP 两类基础模型构成，族内 simple mean，跨族固定权重。
+
+\paragraph{NN：4-layer MLP。}$359 \to 256 \to 128 \to 64 \to 1$，LayerNorm + GELU + Dropout（$\sim$120k 参数）。LayerNorm 在 sample 级归一化，杜绝 batch 间数据污染。我们刻意不使用 RNN/Transformer/CNN——窗口内因子已蒸馏 100-tick 时序信息，更复杂架构反带来 in-sample 拟合膨胀。这与近期 tabular DL 文献一致：适当训练下纯 MLP 在 LOB / 表格上即可达到 SOTA。
+
+\paragraph{LGB：L2 $\Delta$mid 回归。}\texttt{objective=regression\_l2}，目标
+\begin{equation}\label{eq:label}
+y = \frac{\mathrm{mp}_{t+60} - \mathrm{mp}_t}{\mathrm{mp}_t + 1}.
+\end{equation}
+以 h=60 三分类标签频率倒数为样本权重（class-balanced），使稀疏的涨/跌样本获更高梯度。
+
+
+\section{训练和模型集成}
+
+\paragraph{树模型：$\Delta$mid L2 回归。}相比 3-class CE，L2 回归保留 $\Delta$mid 的幅度信息，决策层能权衡交易成本与潜在收益；单 LGB 单 seed 下 CE 反而略胜，但在 50$\times$50 集成内 L2 提供与 NN+SPO+ 兼容的连续 $\Delta$mid 信号，决策层能权衡幅度，最终公榜 $+35.64$。详见 \S 实验结果 大 ablation 表 row 1 vs 2 / 4 vs 5。
+
+\paragraph{神经网络：SPO+ 决策焦点学习 (DFL)。}L2 回归梯度未直接对齐离散决策。两阶段微调：Phase 1 以 L2 预训练 MLP；Phase 2 warm-start 联合 L2 + SPO+ surrogate。给定单边手续费率 $f$，oracle $z^{\star}(y)=\operatorname{sign}(y)\,\mathbf{1}[|y|>f]$；SPO+ surrogate（1D 三动作改写）与联合损失：
+\[
+\ell_{\mathrm{SPO+}}(\hat y,y;f) = \mathrm{ReLU}(|2\hat y{-}y|-f) - z^{\star}(y)(2\hat y{-}y) + f|z^{\star}(y)|,
+\]
+\[
+L = (\hat y-y)^2 + \lambda\,\ell_{\mathrm{SPO+}},\quad \lambda=30,\ \mathrm{lr}=3{\times}10^{-5},\ 11\,\mathrm{ep}.
+\]
+
+\paragraph{全量数据 retrain。}调参/早停阶段使用 \texttt{train 0--79 / val 80--95}；最终提交将训练区推到 \texttt{date 0--119} 全量，iteration 数取部分训练的 $1.1\times$。
+
+\paragraph{集成。}5 组超参 $\times$ 10 seed 训练 50 LGB 与 50 MLP，跨族固定 $\mathrm{LGB:NN}=3:2$ 的 simple mean。\emph{不在 OOF 上学决策参数与权重}：NN-NN avg corr $0.93$、LGB-LGB $0.84$、设计矩阵条件数 $5.4{\times}10^{4}$，bounded NNLS 学权重 in-sample $+180/+194$ 但公榜 $-4.64$——病态共线性下 simple mean 是数学上的 OOD 稳健最优。
+
+
+
+
+% =========================================================
+\section{执行侧}
+
+集成预测 $\hat y$ 通过非对称 EV gate 解码为离散动作：
+\[
+\hat a =
+\begin{cases}
++1\,(\text{买}), & \hat y > +\theta_{\mathrm{up}},\\[-1pt]
+-1\,(\text{卖}), & \hat y < -\theta_{\mathrm{dn}},\\[-1pt]
+\phantom{+}0\,(\text{不出手}), & \text{otherwise.}
+\end{cases}
+\]
+$\theta_{\mathrm{up}}=3.00{\times}10^{-4}$、$\theta_{\mathrm{dn}}=2.16{\times}10^{-4}$ 由验证集 2D DE 搜出后冻结。两者不对称（涨方阈值更高）以匹配训练样本的正向漂移偏差。详见 \S 实验结果 大 ablation 表 row 12 (sym) vs 13 (asym) 的本地 V4 对照。
+
+% =========================================================
+\section{实验结果}
+
+\paragraph{大 ablation 表（V4 walk-forward，13 组消融）。}所有 row 共享同一数据切分：train 0--79，val 80--95（早停 / 阈值搜索），test 96--119（最终评分；任何超参均仅在 val 上学，test 集从不参与调参）。指标为 $\mathrm{Score}^{(h=60)}_{\text{test}} = \sum_{i\in\mathrm{test}}\mathrm{pnl}_i^{(60)}$（平台公式，0.02\% 双边手续费）。
+
+\begin{center}
+\setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{1.02}
+\begin{tabularx}{\linewidth}{@{}c >{\raggedright\arraybackslash}X r r@{}}
+\toprule
+\# & Setting & Test PnL & $\Delta$ vs prev \\
+\midrule
+1  & 154 raw + LGB CE (3-class), high-conf gate                                    & $+22.40$              & --- \\
+2  & 154 raw + LGB regression L2, sym EV gate                                      & $+19.14$              & $-3.26$ \\
+3  & 226-d SchemeC + LGB L2, sym EV                                                & $+24.50$              & $+5.36$ \\
+4  & 370-d SchemeP (no drop) + LGB L2, sym EV                                      & $+31.40$              & $+6.90$ \\
+5  & 359-d SchemeP (drop 11 KS-fail) + LGB L2                                      & $+27.84$              & $-3.56$ \\
+6  & row 5 $+$ window $z$-score (global per-feat)                                  & $+27.67$              & $-0.17$ \\
+7  & row 6 $+$ bid/ask mirror flip aug                                             & $+26.38$              & $-1.30$ \\
+8  & row 7 $+$ sign-log1p on rawlast magnitudes                                    & $+27.33$              & $+0.96$ \\
+8.5 & NN MLP$[359{-}256{-}128{-}64{-}1]$ L2, \emph{no} mirror flip aug             & $+33.57$              & $+6.24$ \\
+9  & NN MLP$[359{-}256{-}128{-}64{-}1]$ L2 $+$ aug                                 & $+34.93$              & $+1.36$ \\
+10 & row 9 $+$ SPO+ DFL fine-tune (Phase 2 M7, 11 ep)                              & $+30.19$              & $-4.74$ \\
+12 & NN+SPO + LGB (1+1) ensemble, sym EV                                           & $\mathbf{+36.64}$ (SOTA) & $+6.45$ \\
+13 & NN+SPO + LGB (1+1) ensemble, asym EV (2D DE on val)                           & $+36.53$              & $-0.11$ \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{\textbf{大 ablation：12 组特征 $\times$ 模型 $\times$ 训练目标 $\times$ 决策层 V4 walk-forward 对照.} LGB 行采用项目 \texttt{HP\_CONFIGS[0]}（\texttt{lr=0.05, leaves=127, min\_leaf=100, $\lambda_2$=1.0}），train 0--79 / val 80--95 早停 / test 96--119。Row 11 已移出（M7 \texttt{fixed=330} 单模反过拟合到 $+22.92$，最终方案靠 50 seeds 集成抵消）；row 8.5 vs 9 隔离 mirror flip aug（NN $+1.36$）。Rows 1--2 特征瓶颈；3--5 SchemeP 大跳但 drop-11 单模 test 反负，集成下噪声覆盖；6--8 aug 对 LGB 有限对 NN 必要；row 8.5 单 MLP $+6.24$（架构 $+$ log1p 主因）；row 10 SPO+ 单 NN 降 test 但 row 12 集成 SOTA $+36.64$；row 13 asym 未兑现 test（DE 限制 $[0.7,1.5]\theta_{\mathrm{sym}}$）。Rows 4--5 rerun $\pm 2.5$ 波动归因 GPU LGB 原子操作非确定性。}
+\end{center}
+
+\begin{center}
+\setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\linewidth}{@{}l c r r >{\raggedright\arraybackslash}X@{}}
+\toprule
+Board & $h$ & Cum.\ PnL & $\alpha$/trade & Notes \\
+\midrule
+Public  & $60$ & $35.64$ & $1.91{\times}10^{-4}$ & \#1（公榜最高）\\
+Private & $60$ & $41.61$ & $2.39{\times}10^{-4}$ & \#1（私榜整体最高）\\
+Private & $40$ & $38.65$ & $1.94{\times}10^{-4}$ & \#1（私榜 $h{=}40$ 最高）\\
+\bottomrule
+\end{tabularx}
+\captionof{table}{\textbf{Leaderboard.} 本队（792 - 超级回天什么时候上映）在公榜（$h{=}60$）与私榜（$h{=}60$、$h{=}40$）均位列第一。}
+\end{center}
+
+\paragraph{多 horizon 阈值缩放。}5 个 horizon 共享同一套 $h{=}60$ 回归预测；阈值 $(\theta_{\mathrm{up}}, \theta_{\mathrm{dn}})$ 按 $\sqrt{h/60}$ 缩放到 $h\!\in\!\{5,10,20,40\}$。这使得 $h{=}40$ 也在私榜上拿到第一（$+38.65$），而无需为短 horizon 单独训练模型。
+
+\section{Coding Agent 在量化中的使用}
+
+\paragraph{系统设计。}基于 Claude Code 的 Agent Harness 构建 Manager-Worker 双层架构并集成至飞书 IM：(i) \textbf{IM 直连}——手机/电脑通过飞书与 Agent 交互、获取实验结果与调试信息，无需切换 IDE；(ii) \textbf{Manager-Worker 分层}——Manager 接受指令并与人类反馈，派遣多个 Worker 执行具体实验；Worker 的细节不污染 Manager 上下文；(iii) \textbf{GitHub + WandB} 完成代码与实验的版本/可视化管理。
+
+\paragraph{三条经验原则。}(1) Agent 对\emph{宽且浅}的工作高效——批量调研、并行 ablation、跨实验归并表格化；(2) \emph{窄且深}的研究决策仍依赖人类先验——例如"决策参数不在 OOF 上学"、"公榜是唯一 OOD 裁判"、"in-sample val/test ratio 1.075 是危险信号"这类判断须由人类作出；(3) \textbf{硬约束必须以"协议"形式写入每个 worker 的 prompt}——本项目中 \texttt{CRITICAL\_CONSTRAINTS.md} 的三条约束若未被注入，worker 可能在不知情时违反平台协议（如将 \texttt{sym} 加入 LightGBM 特征列）。"约束即合同"是 agent-driven research 的必要工程实践。
+
+\paragraph{效率。}一周内完成约 200 组本地实验、约 200 次 commit，公榜从 baseline $-6.7$ 提升到 $+35.6$，公榜/私榜均第一。
+
+
+
+\end{document}
+
