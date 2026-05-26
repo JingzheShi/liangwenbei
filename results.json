@@ -1,105 +1,30 @@
 {
-  "task": "数据处理 pipeline (EDA + split + LOBDataset)",
-  "deliverables": {
-    "src/data/split.py": "get_split() 支持 local_debug / submission；get_file_path() 校验三元组",
-    "src/data/dataset.py": "LOBDataset：1842 sample/session, window=100, 5 head, return_midprices/return_meta 可选",
-    "src/data/test_dataset.py": "10 个单元测试全部通过",
-    "src/data/eda.py": "扫描 1200 文件 ~10s，产出 eda_report.md + 6 张图",
-    "analysis/eda_report.md": "中文 EDA 报告",
-    "analysis/eda_stats.json": "机器可读的全部 EDA 数字"
-  },
+  "task": "rerun NN row 1-13 with unified implementation + rebuild ensemble row 18-21",
   "metrics": {
-    "files_seen": 1200,
-    "files_expected": 1200,
-    "total_rows": 2401200,
-    "files_with_nan": 8,
-    "files_with_inf": 0,
-    "files_with_time_violation": 0,
-    "files_with_midprice_zero": 0,
-    "files_with_midprice_nan": 0,
-    "pct_tick_unchanged": 0.7092441666666667,
-    "label_dist_overall": {
-      "label_5": {
-        "0_down": 295291,
-        "1_flat": 1829098,
-        "2_up": 276811,
-        "p_down": 0.12297642845244044,
-        "p_flat": 0.761743295019157,
-        "p_up": 0.11528027652840246
-      },
-      "label_10": {
-        "0_down": 439218,
-        "1_flat": 1562603,
-        "2_up": 399379,
-        "p_down": 0.18291604197901049,
-        "p_flat": 0.6507592037314676,
-        "p_up": 0.1663247542895219
-      },
-      "label_20": {
-        "0_down": 322666,
-        "1_flat": 1772362,
-        "2_up": 306172,
-        "p_down": 0.13437697817757788,
-        "p_flat": 0.7381151091121106,
-        "p_up": 0.1275079127103115
-      },
-      "label_40": {
-        "0_down": 489292,
-        "1_flat": 1468591,
-        "2_up": 443317,
-        "p_down": 0.20376978177577879,
-        "p_flat": 0.6116071131101116,
-        "p_up": 0.18462310511410962
-      },
-      "label_60": {
-        "0_down": 589498,
-        "1_flat": 1288974,
-        "2_up": 522728,
-        "p_down": 0.24550141595868732,
-        "p_flat": 0.5368040979510245,
-        "p_up": 0.2176944860902882
-      }
-    },
-    "random_baseline_per_trade_pnl": {
-      "label_5": -0.00019999984016706593,
-      "label_10": -0.0001999996865400966,
-      "label_20": -0.00019999939227825217,
-      "label_40": -0.00019999888411150265,
-      "label_60": -0.000199998393006324
-    },
-    "always_up_per_trade_pnl": {
-      "label_5": -0.00020159816950677468,
-      "label_10": -0.00020313428557481659,
-      "label_20": -0.00020607660975812726,
-      "label_40": -0.0002111577690843041,
-      "label_60": -0.00021606832976513968
-    },
-    "always_down_per_trade_pnl": {
-      "label_5": -0.00019840151082735718,
-      "label_10": -0.00019686508750537665,
-      "label_20": -0.00019392217479837707,
-      "label_40": -0.00018883999913870124,
-      "label_60": -0.00018392845624750828
-    },
-    "fee_per_trade": 0.00019973157279981214,
-    "dataset_sample_counts": {
-      "local_debug": {
-        "train_sessions": 800,
-        "val_sessions": 160,
-        "test_sessions": 240,
-        "samples_per_session": 1842,
-        "train_samples": 1473600,
-        "val_samples": 294720,
-        "test_samples": 442080
-      },
-      "submission": {
-        "train_sessions": 960,
-        "val_sessions": 240,
-        "samples_per_session": 1842,
-        "train_samples": 1768320,
-        "val_samples": 442080
-      }
-    }
+    "nn_runs": 65,
+    "rows": 13,
+    "seeds_per_row": 5,
+    "ensemble_rows": 4,
+    "pages": 1,
+    "row1_mean": 0.6940, "row1_std": 0.1335,
+    "row2_mean": 0.5238, "row2_std": 0.4754,
+    "row3_mean": 23.4049, "row3_std": 1.8988,
+    "row4_mean": 23.3304, "row4_std": 1.5414,
+    "row5_mean": 25.9023, "row5_std": 1.9825,
+    "row6_mean": 29.4933, "row6_std": 1.3842,
+    "row7_mean": 28.9843, "row7_std": 3.0037,
+    "row8_mean": 29.6820, "row8_std": 1.1736,
+    "row9_mean": 34.3178, "row9_std": 1.5998,
+    "row10_mean": 32.7491, "row10_std": 0.6921,
+    "row11_mean": 35.1545, "row11_std": 1.4076,
+    "row12_mean": 34.4382, "row12_std": 1.3928,
+    "row13_mean": 30.2660, "row13_std": 1.9754,
+    "row18_test_pnl": 36.0787,
+    "row19_test_pnl_sym": 37.2376,
+    "row20_test_pnl_asym": 35.8597,
+    "row21_test_pnl_sym": 41.5991,
+    "row21_test_pnl_asym": 40.8918,
+    "sota_new": 41.5991
   },
-  "notes": "完整性：1200/1200 文件齐全，时间戳全部连续，midprice 无 0/NaN。8 个文件有 NaN（仅 ask 侧深档，源于 sym=1/3 涨停日），最严重 (1,91,pm) 65% tick 涨停。瞎猜{跌,涨}所有 horizon 期望 PnL ≈ -0.02% (= 单笔手续费)。midprice 70.9% tick 不动；label_5/10 (α=0.05%) p_flat=76%/65%, label_20/40/60 (α=0.1%) p_flat=74%/61%/54%。label_10 和 label_60 出手机会最多，建议重点优化。LOBDataset(window=100, max_horizon=60)：每 session 1842 样本；local_debug: train=1.47M / val=294k / test=442k；submission: train=1.77M / val=442k。测试 10/10 通过，包括跨 session 边界检查、midprice 一致性、DataLoader 烟测。"
+  "notes": "Unified NN implementation rerun: rows 1-13 used identical training code (lr=3e-4, dropout=0.10, batch=4096, max_ep=25, patience=6, AdamW+CosineAnnealingLR, class-balanced sample weights, target_scale=std(y_reg_tr)). Row 13 M7 retrain on best_ep*1.1 epochs with V4 sym threshold. Row 11=35.15 is best single-NN config (mirror flip without log1p); row 12=34.44 with sign-log1p; row 13 M7 -> 30.27 (NN M7 not effective, consistent with project history). Ensembles use w_NN:w_LGB=1.0:1.5; row 21 SOTA sym=41.60; asym=40.89 (overfits val DE)."
 }

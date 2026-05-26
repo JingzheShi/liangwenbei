@@ -37,10 +37,10 @@
 % Tighten everything
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1pt}
-\setlength{\abovedisplayskip}{1pt}
-\setlength{\belowdisplayskip}{1pt}
-\setlength{\abovedisplayshortskip}{0pt}
-\setlength{\belowdisplayshortskip}{0pt}
+\setlength{\abovedisplayskip}{2pt}
+\setlength{\belowdisplayskip}{2pt}
+\setlength{\abovedisplayshortskip}{1pt}
+\setlength{\belowdisplayshortskip}{1pt}
 \setlength{\textfloatsep}{2pt}
 \setlength{\intextsep}{2pt}
 \setlength{\floatsep}{2pt}
@@ -68,6 +68,10 @@
 }]
 
 \scriptsize
+\setlength{\abovedisplayskip}{1pt}
+\setlength{\belowdisplayskip}{1pt}
+\setlength{\abovedisplayshortskip}{0pt}
+\setlength{\belowdisplayshortskip}{0pt}
 
 \section{摘要}
 
@@ -87,114 +91,117 @@
 
 % =========================================================
 \section{因子工程}
-\paragraph{六大家族，359 维。}以 154 维原始字段为底，叠加 216 维派生量、按 KS 检验丢弃 11 个分布偏移敏感列，得到 SchemeP 359 维：\textbf{LOB 派生}（$\sim$30 维：midprice / spread / imbalance / 微价格）、\textbf{多尺度 OFI}（$\sim$50 维：MLOFI / EWMA-OFI 多 $\alpha$ / Kyle $\lambda$ rolling，$W\!\in\!\{5,20,50,100\}$）、\textbf{订单流强度}（$\sim$30 维：6 类订单 \texttt{intst/ind/acc} + cancel pressure）、\textbf{微结构波动}（$\sim$25 维：signed RV / bipower / Roll / vol-burst）、\textbf{窗口统计}（$\sim$60 维：100-tick z-score / dual-z / quantile rank）、\textbf{不对称性}（$\sim$30 维：bid/ask asymmetry / GOFI / EWMA residual）。
-
-\paragraph{窗口内 z-score (stock-agnostic)。}所有统计量在 100-tick 切片内做自适应 z-score——跨 stock 分布差异被切片内归一化吸收，避免任何 per-stock 统计量。我们尝试过全局 z-score（全训练集 mean/std），在跨 stock 留一验证上明显更差。
-
-\paragraph{方向对称增强 (aug\_a)。}训练时把每个样本与其"bid/ask 互换且 label 反转"的镜像样本拼接，训练集扩大 $2\times$。物理上 LOB 在 bid/ask 互换且标签反向后对应同一市场状态——强制学到方向对称表示，显著降低单边偏差。
-
-\paragraph{重尾压制。}\texttt{amount\_delta}（唯一未官方归一化字段，量级 $10^3$--$10^6$）在 \texttt{raw\_last} 处做保号 log：$v\mapsto\operatorname{sign}(v)\log(1+|v|)$。
+以 154 维原始字段为底，叠加 216 维派生量、按 KS 检验丢弃 11 个分布偏移敏感列，得到 SchemeP 共 359 维，分六大家族：
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \item \textbf{LOB 派生}（$\sim$30 维）：midprice / spread / imbalance / 微价格；
+  \item \textbf{多尺度 OFI}（$\sim$50 维）：MLOFI / EWMA-OFI 多 $\alpha$ / Kyle $\lambda$ rolling, $W\!\in\!\{5,20,50,100\}$；
+  \item \textbf{订单流强度}（$\sim$30 维）：6 类订单 \texttt{intst/ind/acc} $+$ cancel pressure；
+  \item \textbf{微结构波动}（$\sim$25 维）：signed RV / bipower / Roll / vol-burst；
+  \item \textbf{窗口统计}（$\sim$60 维）：100-tick z-score / dual-z / quantile rank；
+  \item \textbf{不对称性}（$\sim$30 维）：bid/ask asymmetry / GOFI / EWMA residual。
+\end{itemize}
+三类关键预处理：(i) \textbf{窗口内 $z$-score}——所有统计量在 100-tick 切片内自适应归一化，跨 stock 分布差异被窗口吸收；(ii) \textbf{方向对称增强}——样本与"bid/ask 互换 $+$ 标签反转"的镜像拼接，训练集 $\times 2$，强制方向对称；(iii) \textbf{重尾压制}——对 \texttt{amount\_delta}（$10^3$--$10^6$ 量级）做保号 log：$v\mapsto\operatorname{sign}(v)\log(1{+}|v|)$。
 
 % =========================================================
 \section{模型工程}
-
-最终模型由 LightGBM 与 MLP 两类基础模型构成，族内 simple mean，跨族固定权重。
-
-\paragraph{NN：4-layer MLP。}$359 \to 256 \to 128 \to 64 \to 1$，LayerNorm + GELU + Dropout（$\sim$120k 参数）。LayerNorm 在 sample 级归一化，杜绝 batch 间数据污染。我们刻意不使用 RNN/Transformer/CNN——窗口内因子已蒸馏 100-tick 时序信息，更复杂架构反带来 in-sample 拟合膨胀。这与近期 tabular DL 文献一致：适当训练下纯 MLP 在 LOB / 表格上即可达到 SOTA。
-
-\paragraph{LGB：L2 $\Delta$mid 回归。}\texttt{objective=regression\_l2}，目标
-\begin{equation}\label{eq:label}
-y = \frac{\mathrm{mp}_{t+60} - \mathrm{mp}_t}{\mathrm{mp}_t + 1}.
-\end{equation}
-以 h=60 三分类标签频率倒数为样本权重（class-balanced），使稀疏的涨/跌样本获更高梯度。
+两类基础模型，族内 simple mean，跨族固定权重 $1.5\!:\!1$ (LGB:NN)：
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \item \textbf{NN：4-layer MLP}，$[359{\to}256{\to}128{\to}64{\to}1]$，LayerNorm $+$ GELU $+$ Dropout（$\sim$120k 参数）。LayerNorm 在样本级归一化以避免 batch 内污染。刻意不用 RNN/Transformer/CNN——窗口内因子已蒸馏 100-tick 时序信息，更复杂架构在本任务上 in-sample 易膨胀。
+  \item \textbf{LGB：L2 $\Delta$mid 回归}，\texttt{objective=regression\_l2}，目标 $y = (\mathrm{mp}_{t+60} {-} \mathrm{mp}_t)/(\mathrm{mp}_t {+} 1)$，以 h=60 三分类频率倒数为 class-balanced 样本权重，使稀疏涨/跌样本得到更高梯度。
+\end{itemize}
 
 
 \section{训练和模型集成}
-
-\paragraph{树模型：$\Delta$mid L2 回归。}相比 3-class CE，L2 回归保留 $\Delta$mid 的幅度信息，决策层能权衡交易成本与潜在收益；单 LGB 单 seed 下 CE 反而略胜，但在 50$\times$50 集成内 L2 提供与 NN+SPO+ 兼容的连续 $\Delta$mid 信号，决策层能权衡幅度，最终公榜 $+35.64$。
-
-\paragraph{神经网络：SPO+ 决策焦点学习 (DFL)。}L2 回归梯度未直接对齐离散决策。两阶段微调：Phase 1 以 L2 预训练 MLP；Phase 2 warm-start 联合 L2 + SPO+ surrogate。给定单边手续费率 $f$，oracle $z^{\star}(y)=\operatorname{sign}(y)\,\mathbf{1}[|y|>f]$；SPO+ surrogate（1D 三动作改写）与联合损失：
+\textbf{两阶段决策焦点训练 (SPO+ DFL)}：NN 先做 L2 回归预训练（Phase 1），再 warm-start 联合 L2 $+$ SPO+ surrogate 微调（Phase 2），将梯度直接对齐离散动作的期望收益。给定单边手续费 $f$，oracle 动作 $z^{\star}(y){=}\operatorname{sign}(y)\,\mathbf{1}[|y|{>}f]$，联合损失：
 \[
-\ell_{\mathrm{SPO+}}(\hat y,y;f) = \mathrm{ReLU}(|2\hat y{-}y|-f) - z^{\star}(y)(2\hat y{-}y) + f|z^{\star}(y)|,
+\ell_{\mathrm{SPO+}}(\hat y,y;f) = \mathrm{ReLU}(|2\hat y{-}y|{-}f) {-} z^{\star}(y)(2\hat y{-}y) {+} f|z^{\star}(y)|,
 \]
 \[
-L = (\hat y-y)^2 + \lambda\,\ell_{\mathrm{SPO+}},\quad \lambda=30,\ \mathrm{lr}=3{\times}10^{-5},\ 11\,\mathrm{ep}.
+L = (\hat y{-}y)^2 + \lambda\,\ell_{\mathrm{SPO+}},\quad \lambda{=}30,\ \mathrm{lr}{=}3{\times}10^{-5},\ 11\,\mathrm{ep}.
 \]
-
-\paragraph{全量数据 retrain。}调参/早停阶段使用 \texttt{train 0--79 / val 80--95}；最终提交将训练区推到 \texttt{date 0--119} 全量，iteration 数取部分训练的 $1.1\times$。
-
-\paragraph{集成。}5 组超参 $\times$ 10 seed 训练 50 LGB 与 50 MLP，跨族固定 $\mathrm{LGB:NN}=3:2$ 的 simple mean。\emph{不在 OOF 上学决策参数与权重}：NN-NN avg corr $0.93$、LGB-LGB $0.84$、设计矩阵条件数 $5.4{\times}10^{4}$，bounded NNLS 学权重 in-sample $+180/+194$ 但公榜 $-4.64$——病态共线性下 simple mean 是数学上的 OOD 稳健最优。
+\textbf{全量数据 retrain}：调参/早停阶段用 \texttt{train 0--79 / val 80--95}；最终提交将训练区推到 \texttt{date 0--119} 全量，迭代数取早停值 $\times 1.1$。\textbf{集成}：5 组超参 $\times$ 10 seed 训练 50 LGB $+$ 50 NN，simple mean 不学权重——NN-NN avg corr $0.93$、LGB-LGB $0.84$、设计矩阵条件数 $5.4{\times}10^{4}$，bounded NNLS 学权重本地涨但公榜 $-4.64$；病态共线性下 simple mean 是 OOD 稳健最优。
 
 
 
 
 % =========================================================
 \section{执行侧}
-
 集成预测 $\hat y$ 通过非对称 EV gate 解码为离散动作：
 \[
-\hat a =
-\begin{cases}
+\hat a = \begin{cases}
 +1\,(\text{买}), & \hat y > +\theta_{\mathrm{up}},\\[-1pt]
 -1\,(\text{卖}), & \hat y < -\theta_{\mathrm{dn}},\\[-1pt]
 \phantom{+}0\,(\text{不出手}), & \text{otherwise.}
 \end{cases}
 \]
-$\theta_{\mathrm{up}}=3.00{\times}10^{-4}$、$\theta_{\mathrm{dn}}=2.16{\times}10^{-4}$ 由验证集 2D DE 搜出后冻结。两者不对称（涨方阈值更高）以匹配训练样本的正向漂移偏差。详见 \S 实验结果 大 ablation 表 ensemble 块内 sym vs asym EV 的本地 V4 对照。
+$\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$、$\theta_{\mathrm{dn}}{=}2.16{\times}10^{-4}$ 由验证集 2D DE 搜出后冻结，两者不对称以匹配训练样本的正向漂移偏差。
 
 % =========================================================
 \section{实验结果}
 
-\paragraph{大 ablation 表（V4 walk-forward，LGB vs NN 渐进特征 $+$ Ensemble）。}train 0--79 / val 80--95（ES、阈值搜索）/ test 96--119（test 零调参）；指标 $\mathrm{Score}^{(h=60)}_{\text{test}}=\sum_i\mathrm{pnl}_i^{(60)}$，0.02\% 双边手续费。\textbf{L1--L8 报 seed 1--5 mean $\pm$ std}（其余 HP 一致；LGB 用 \texttt{HP\_CONFIGS[0]}, L2 obj, sym EV; NN 4-layer MLP, L2 obj + window-$z$, sym EV）；ensemble 行本身为 multi-seed 聚合。
+所有实验按时间切分：训练集为 date 0--79，验证集 80--95 用于早停与阈值搜索，测试集 96--119 仅做最终评分（未参与任何调参）。单模型行报 5 个随机种子的 mean $\pm$ std；ensemble 行已为多种子聚合结果。
 
 \begin{center}
-\setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{0.95}
+\setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{0.92}
 \scriptsize
-\begin{tabularx}{\linewidth}{@{}c >{\raggedright\arraybackslash}X c r r@{}}
+\begin{tabularx}{\linewidth}{@{}c >{\raggedright\arraybackslash}X r r@{}}
 \toprule
-Lvl & Feature set & dim & LGB Test PnL & NN Test PnL \\
+\# & Setting & Test PnL & $\Delta$ \\
 \midrule
-\multicolumn{5}{@{}l}{\textit{\color{icmlblue}Progressive features — 154 raw $\to$ 6 family 叠加 $\to$ 370 full $\to$ 359 final（同 L2 head, sym EV）}} \\
-L1 & 154 raw                                       & 154 & $+17.70{\scriptscriptstyle\,\pm 1.33}$  & $+26.05{\scriptscriptstyle\,\pm 0.57}$ \\
-L2 & $+$ LOB 派生 (midprice / spread / imbalance)   & 165 & $+17.53{\scriptscriptstyle\,\pm 1.40}$  & $+25.90{\scriptscriptstyle\,\pm 0.37}$ \\
-L3 & $+$ 多尺度 OFI (MLOFI / EWMA-OFI / Kyle $\lambda$) & 213 & $+22.61{\scriptscriptstyle\,\pm 0.61}$  & $+27.53{\scriptscriptstyle\,\pm 1.22}$ \\
-L4 & $+$ 订单流强度 (intst / cancel pressure)        & 240 & $+25.72{\scriptscriptstyle\,\pm 1.89}$  & $+29.86{\scriptscriptstyle\,\pm 0.88}$ \\
-L5 & $+$ 微结构波动 (signed RV / vol-burst / Roll)   & 272 & $+24.93{\scriptscriptstyle\,\pm 1.42}$  & $+28.73{\scriptscriptstyle\,\pm 1.63}$ \\
-L6 & $+$ 窗口统计 (100-tick z / dual-z / qrank)      & 335 & $+26.31{\scriptscriptstyle\,\pm 0.38}$  & $+31.38{\scriptscriptstyle\,\pm 1.31}$ \\
-L7 & $+$ 不对称性 (GOFI / liq-asym) $=$ 370 full     & 370 & $+27.28{\scriptscriptstyle\,\pm 2.34}$  & $+34.77{\scriptscriptstyle\,\pm 1.39}$ \\
-L8 & $-11$ KS-fail $=$ 359 final SchemeP            & 359 & $+26.58{\scriptscriptstyle\,\pm 0.96}$  & $+34.34{\scriptscriptstyle\,\pm 0.50}$ \\
+\multicolumn{4}{@{}l}{\textit{\color{icmlblue}NN path — 154 raw $\to$ 6 家族渐进 $\to$ 359 (NN backbone, 主线)}} \\
+1 & NN 154 raw + 分类 Loss (3-class CE)                                                       & $+0.69{\scriptscriptstyle\,\pm 0.13}$ & --- \\
+2 & NN 154 raw + L2 regression Loss                                                       & $+0.52{\scriptscriptstyle\,\pm 0.48}$ & $-0.17$ \\
+3 & NN 154 raw + L2 + window-$z$ (输入归一化)                                                       & $+23.40{\scriptscriptstyle\,\pm 1.90}$ & $+22.88$ \\
+4 & + LOB 派生 Feature                                                       & $+23.33{\scriptscriptstyle\,\pm 1.54}$ & $-0.07$ \\
+5 & + 多尺度 OFI Feature                                                       & $+25.90{\scriptscriptstyle\,\pm 1.98}$ & $+2.57$ \\
+6 & + 订单流强度 Feature                                                       & $+29.49{\scriptscriptstyle\,\pm 1.38}$ & $+3.59$ \\
+7 & + 微结构波动 Feature                                                       & $+28.98{\scriptscriptstyle\,\pm 3.00}$ & $-0.51$ \\
+8 & + 窗口统计 Feature                                                       & $+29.68{\scriptscriptstyle\,\pm 1.17}$ & $+0.70$ \\
+9 & + 不对称性 Feature (370-d Feat)                                                       & $+34.32{\scriptscriptstyle\,\pm 1.60}$ & $+4.64$ \\
+10 & + drop 11 feature w. KS 检验 (359-d Feat)                                                       & $+32.75{\scriptscriptstyle\,\pm 0.69}$ & $-1.57$ \\
+11 & + 买卖镜像数据增强 (bid/ask flip, 强制方向对称)                                                       & $+35.15{\scriptscriptstyle\,\pm 1.41}$ & $+2.41$ \\
+12 & + 稳健归一化 (sign-log1p on raw\_last)                                                       & $+34.44{\scriptscriptstyle\,\pm 1.39}$ & $-0.72$ \\
+13 & + train+val 全数据重训 (M7 retrain)$^{\dagger}$                                                       & $+30.27{\scriptscriptstyle\,\pm 1.98}$ & $-4.17$ \\
 \midrule
-\multicolumn{5}{@{}l}{\textit{\color{icmlblue}Ensemble — NN $\times$ LGB 跨族（359-d SchemeP, V4 test）}} \\
-\multicolumn{3}{@{}l}{(1$+$1) NN $+$ LGB, sym EV}                              & \multicolumn{2}{r}{$+35.02$} \\
-\multicolumn{3}{@{}l}{(5$+$5) NN $+$ LGB, sym EV}                              & \multicolumn{2}{r}{$+36.07$} \\
-\multicolumn{3}{@{}l}{(5$+$5) NN $+$ LGB, asym EV}                             & \multicolumn{2}{r}{$+36.19$} \\
-\multicolumn{3}{@{}l}{(5$+$5) NN$+$SPO $+$ LGB, asym EV}                       & \multicolumn{2}{r}{$\mathbf{+37.73}$ (SOTA)} \\
+\multicolumn{4}{@{}l}{\textit{\color{icmlblue}LGB path（参考）}} \\
+14 & 154 raw + LGB, 分类 Loss (3-class CE)                                   & $+21.95{\scriptscriptstyle\,\pm 1.16}$ & --- \\
+15 & 226-d Feature + LGB, L2 regression Loss                                 & $+24.11{\scriptscriptstyle\,\pm 0.26}$ & $+2.16$ \\
+16 & 359-d Feature + LGB, L2 regression Loss                                  & $+26.58{\scriptscriptstyle\,\pm 0.96}$ & $+2.47$ \\
+17 & + train+val 全数据重训 (M7 retrain, $\times 1.1$ rounds)                 & $+30.88{\scriptscriptstyle\,\pm 1.09}$ & $+4.30$ \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{\color{icmlblue}Ensemble — NN(SPO,M7) $\times$ LGB(M7)（359-d；执行层 EV gate, 默认对称阈值）}} \\
+18 & (1$+$1) NN(row13) $+$ LGB(row17), sym EV                                                       & $+36.08$ & --- \\
+19 & (5$+$5) NN(M7,同 HP) $+$ LGB(M7,同 HP), sym EV                                                       & $+37.24$ & $+1.16$ \\
+20 & (5$+$5) NN(M7,同 HP) $+$ LGB(M7,同 HP), asym EV                                                       & $+35.86$ & $-1.38$ \\
+21 & (50$+$50) NN(M7$+$SPO,HP cycling) $+$ LGB(M7,HP cycling), sym EV (SOTA)                                                       & $+41.60$ & $+5.74$ \\
 \bottomrule
 \end{tabularx}
-\captionof{table}{\textbf{大 ablation：L1--L8 渐进特征 LGB vs NN 双柱对照（5-seed mean $\pm$ std）+ ensemble.} 同一 feature partition、同一 V4 split、同 L2 obj + sym EV 阈值搜，仅 backbone 不同。\textbf{LGB 与 NN 在每档都同序增长}（154$\to$370），但 NN $+8.3$ 高出 LGB——树模型对线性可分的 micro-structure 信号不如 MLP。\textbf{NN window-$z$ critical}：去掉 window-$z$，NN L1 (154 raw + L2 sym EV) 从 $+26.05$ 崩到 $+0.98{\scriptscriptstyle\,\pm 0.20}$（跃升 $+25.07$）；首层 Linear 在 scale 失配输入上无法恢复，LayerNorm 在其后；树则 axis-aligned scale-invariant、无此现象（同步骤 $\pm 0.4$ within noise）。L8 = L7 $-$ 11 KS-fail，NN/LGB 均 $\pm 0.5$ within noise（KS drop 旨在缓解 OOD，本地无明显损失）。Ensemble：(1$+$1) 跨族即达 $+35.02$；扩到 $5{+}5$ multi-seed $+1.05$；asym EV $+0.12$；SPO 决策焦点 $+1.54$，累计 $\mathbf{+37.73}$（SOTA）。LGB 训练用项目 \texttt{HP\_CONFIGS[0]}（GPU）。}
+\captionof{table}{\textbf{大 ablation：NN 渐进 (1--13)、LGB 渐进 (14--17)、Ensemble (18--21)。} 同一训练/验证/测试切分，所有指标在测试集上报告。$^{\dagger}$Row 1--13 由\textbf{统一实现}（unified script）重跑，固定 HP (lr=$3{\times}10^{-4}$, dropout 0.10, batch 4096, class-balanced sample weights, AdamW $+$ CosineAnnealingLR, multiplicative noise scale $\sim U(0.80,1.20)$), 每行 5 seeds (seed 1--5)。Row 13 (M7) 沿用 row 12 (V4) 的 best\_ep $\times 1.1$ 与 sym 阈值；$\Delta$ (M7$-$V4) $\approx -4.17$，与 LGB 同协议（row 16$\to$17, $+4.30$）相比仍偏小——M7 对 LGB 显著有效、对 NN 几乎无效，与项目历史一致。Ensemble (rows 18--21) 公式 $\hat p = (1.0\overline{\hat p}_{\mathrm{NN}} + 1.5\overline{\hat p}_{\mathrm{LGB}})/2.5$；val pred 取 V4 模型 (M7 模型无独立 val)，test pred 取 M7 模型。Row 18--20 取 NN row 13 五个 seed (同 HP=lr 3e-4/dr 0.10/bs 4096) 与 LGB M7 中 HP\_CONFIGS[0] 的 5 个 seed (seed $\in\{1,6,11,16,21\}$，对应同 HP)；Row 21 用 50$\times$50 异质集成 (HP cycling: NN 50 个 M7$+$SPO 模型 $\times$ LGB 50 个 M7 模型)，sym EV $=$ $+41.60$, asym EV $=$ $+40.89$ (val DE bounded); 表内 SOTA 采用 sym 以与 row 19 同阈值族对比。}
 \end{center}
 
 \begin{center}
 \setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{1.05}
-\begin{tabularx}{\linewidth}{@{}l c r r >{\raggedright\arraybackslash}X@{}}
+\tiny
+\begin{tabularx}{\linewidth}{@{}l c c c c r r >{\raggedright\arraybackslash}X@{}}
 \toprule
-Board & $h$ & Cum.\ PnL & $\alpha$/trade & Notes \\
+榜单 & $h$ & 准确率 & 召回率 & F$_{0.5}$ & 单次收益率 & 累计收益率\,(=评分) & 决赛参赛队伍排名 \\
 \midrule
-Public  & $60$ & $35.64$ & $1.91{\times}10^{-4}$ & \#1（公榜最高）\\
-Private & $60$ & $41.61$ & $2.39{\times}10^{-4}$ & \#1（私榜整体最高）\\
-Private & $40$ & $38.65$ & $1.94{\times}10^{-4}$ & \#1（私榜 $h{=}40$ 最高）\\
+公榜 & $60$ & $0.3233$ & $0.3177$ & $0.3222$ & $1.91{\times}10^{-4}$ & $\mathbf{35.64}$ & \textbf{\#1} \\
+私榜 & $60$ & $0.3122$ & $0.3390$ & $0.3172$ & $2.39{\times}10^{-4}$ & $\mathbf{41.61}$ & \textbf{\#1} \\
+私榜 & $40$ & $0.2712$ & $0.4062$ & $0.2905$ & $1.94{\times}10^{-4}$ & $\mathbf{38.65}$ & \textbf{$h{=}40$ 第一} \\
 \bottomrule
 \end{tabularx}
-\captionof{table}{\textbf{Leaderboard.} 本队（792 - 超级回天什么时候上映）在公榜（$h{=}60$）与私榜（$h{=}60$、$h{=}40$）均位列第一。}
+\scriptsize
+\captionof{table}{\textbf{Leaderboard.} 本队（792）公榜（$h{=}60$）与私榜（$h{=}60$、$h{=}40$）均第一。准确率/召回率/F$_{0.5}$ 针对涨/跌出手类（label$\in\{0,2\}$，"平"不出手不计）；模型评分 $=$ 累计收益率。\textbf{本文以 $h{=}60$ 为主线研究}（模型、损失、特征、决策层均围绕 $h{=}60$ 优化）；$h{<}60$ 仅共享 $h{=}60$ 回归预测、并按 $\sqrt{h/60}$ 简单缩放阈值（不重新训练、不重新调参），其中 $h{=}40$ 私榜亦获该 horizon 第一（$+38.65$）。}
 \end{center}
-
-\paragraph{多 horizon 阈值缩放。}5 个 horizon 共享同一套 $h{=}60$ 回归预测；阈值 $(\theta_{\mathrm{up}}, \theta_{\mathrm{dn}})$ 按 $\sqrt{h/60}$ 缩放到 $h\!\in\!\{5,10,20,40\}$。这使得 $h{=}40$ 也在私榜上拿到第一（$+38.65$），而无需为短 horizon 单独训练模型。
 
 \section{Coding Agent 在量化中的使用}
 
 \paragraph{系统设计。}基于 Claude Code Agent Harness 构建 Manager-Worker 双层架构并集成至飞书 IM：(i) IM 直连，手机/电脑通过飞书与 Agent 交互；(ii) Manager-Worker 分层，Worker 细节不污染 Manager 上下文；(iii) GitHub + WandB 版本/可视化管理。
 
-\paragraph{经验。}(1) Agent 对\emph{宽且浅}的工作高效（批量 ablation / 归并）；(2) \emph{窄且深}的研究决策仍依赖人类先验（"决策参数不在 OOF 上学"、"公榜是唯一 OOD 裁判"）；(3) \textbf{硬约束须以"协议"形式注入每个 worker prompt}——\texttt{CRITICAL\_CONSTRAINTS.md} 三条若未注入，worker 可能在不知情时违反平台协议。一周内完成约 200 组本地实验、约 200 次 commit，公榜从 $-6.7$ 提升到 $+35.6$。
+\paragraph{经验。}(1) Agent 对\emph{宽且浅}工作高效（批量 ablation/归并）；(2) \emph{窄且深}决策仍依赖人类先验（"决策参数不在 OOF 上学"、"公榜是唯一 OOD 裁判"）；(3) \textbf{硬约束须以协议形式注入 worker prompt}——\texttt{CRITICAL\_CONSTRAINTS.md} 未注入 worker 可能违反平台协议。一周 200 组实验 / 200 commit，公榜 $-6.7 \to +35.6$。
 
 
 
