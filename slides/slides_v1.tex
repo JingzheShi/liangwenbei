@@ -1,15 +1,9 @@
 % !TEX program = xelatex
-% 5-minute beamer slides v2 for 第二届"良文杯" finals
-% Author: 史景喆 (清华大学)
+% 5-minute beamer slides for 第二届"良文杯" finals
+% Team 792 "超级回天什么时候上映" — 史景喆 (清华大学)
 % Public LB #1 / Private LB #1
 %
-% v2 changes (per PM feedback):
-%   1. Title: drop full team-name line; keep "史景喆（清华）".
-%   2. Factor engineering: rich 2-col (6 families detail + Feature_Img).
-%   3. SPO+: vertical figure + Phase 1/2 emphasis + 2 benefits.
-%   4. Ensemble & Execution merged on 1 slide with top progression hl.
-%   5. Models split into 2 slides (NN arch table + GBDT same-family table).
-%   6. Waterfall: color-grouped by domain (feat / ens).
+% Note: Coding Agent section is intentionally OUT of scope.
 
 \documentclass[aspectratio=169,11pt]{beamer}
 
@@ -38,9 +32,6 @@
 \definecolor{lblue}{RGB}{40,120,210}
 \definecolor{accred}{RGB}{170,0,0}
 \definecolor{lightgray}{RGB}{238,238,238}
-\definecolor{featblue}{RGB}{59,130,196}
-\definecolor{modorange}{RGB}{232,144,69}
-\definecolor{ensgreen}{RGB}{78,163,109}
 
 \setbeamercolor{frametitle}{fg=icmlblue}
 \setbeamercolor{title}{fg=icmlblue}
@@ -54,12 +45,12 @@
 \setbeamerfont{frametitle}{series=\bfseries,size=\large}
 \setbeamerfont{footline}{size=\tiny}
 
-% slim footline: short author label only
+% kill the default nav bar in infolines, keep just author / title / pages
 \setbeamertemplate{footline}{%
   \leavevmode%
   \hbox{%
     \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.25ex,dp=1ex,leftskip=1.2ex]{author in head/foot}%
-      \scriptsize 史景喆（清华）%
+      \scriptsize 队伍 792 · 超级回天什么时候上映 · 史景喆（清华）%
     \end{beamercolorbox}%
     \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
       \scriptsize 良文杯 2026 决赛 ·\ 公榜\,\#1\,·\,私榜\,\#1%
@@ -84,18 +75,19 @@
 \usepackage{xcolor}
 \usepackage{pifont}
 
-% ---------- Highlight macros ----------
+% ---------- Highlight macro (matches onepage \hl) ----------
 \newcommand{\hl}[1]{\textcolor{lblue}{\textbf{#1}}}
 \newcommand{\rhl}[1]{\textcolor{accred}{\textbf{#1}}}
 \newcommand{\sn}[1]{\textsuperscript{\tiny #1}}
 
+% tight itemize
 \setbeamertemplate{itemize item}{\raisebox{0.18ex}{\scalebox{0.7}{\(\blacktriangleright\)}}}
 \setbeamertemplate{itemize subitem}{\raisebox{0.18ex}{\scalebox{0.6}{\(\bullet\)}}}
 
 \title{\bfseries 面向 PnL 目标的 LOB 中间价方向预测}
 \subtitle{$\Delta$mid 回归\,$+$\,SPO+ 决策焦点学习\,$+$\,$50\!\times\!50$ 异质集成}
-\author{史景喆}
-\institute{\small 清华大学}
+\author{史景喆\,\,\,\, 清华大学}
+\institute{\small 队伍 \textbf{792}\,:\,\,\,超级回天什么时候上映}
 \date{\small 第二届"良文杯"统计建模与 AI 预测挑战赛\,·\,决赛汇报}
 
 \begin{document}
@@ -107,27 +99,28 @@
   \vfill
   \begin{center}
     {\Large\bfseries\color{icmlblue} 面向 PnL 目标的 LOB 中间价方向预测}\\[6pt]
-    {\large $\Delta$mid 回归 \,$+$\, SPO+ 决策焦点学习 \,$+$\, $50\!\times\!50$ 异质集成}\\[20pt]
+    {\large $\Delta$mid 回归 \,$+$\, SPO+ 决策焦点学习 \,$+$\, $50\!\times\!50$ 异质集成}\\[18pt]
 
     \begin{tikzpicture}
       \draw[lblue, line width=1.2pt] (0,0) -- (8,0);
-    \end{tikzpicture}\\[14pt]
+    \end{tikzpicture}\\[10pt]
 
-    {\Large \textbf{史景喆}\,（清华）}\\[24pt]
+    {\large \textbf{史景喆}\,\, 清华大学}\\[4pt]
+    {\small 队伍随机码 \textbf{792}\,\,\textbar\,\,队伍：\textbf{超级回天什么时候上映}}\\[18pt]
 
     \begin{tikzpicture}
       \node[draw=icmlblue, line width=0.9pt, fill=icmlblue!5,
-            inner sep=10pt, rounded corners=3pt] {
+            inner sep=8pt, rounded corners=3pt] {
         \begin{minipage}{0.78\textwidth}
           \centering
           \large
-          公榜 $-6.65 \to$ \rhl{$+35.64$}\,\, （baseline 之上增益 \rhl{$+42.29$}）\\[4pt]
+          公榜 $-6.65 \to$ \rhl{$+35.64$}\,\, （baseline 之上增益 \rhl{$+42.29$}）\\[3pt]
           \textbf{公榜 \#1\,\,\textbar\,\,私榜 \#1}（$h{=}60$）\,\textbar\,\, $h{=}40$ 私榜亦第一
         \end{minipage}
       };
     \end{tikzpicture}
 
-    \vspace{14pt}
+    \vspace{12pt}
     {\footnotesize 第二届"良文杯"统计建模与 AI 预测挑战赛 · 决赛汇报}
   \end{center}
   \vfill
@@ -136,7 +129,7 @@
 % =========================================================
 % Slide 2 — Problem & Scoring
 % =========================================================
-\begin{frame}{Problem 与评分 —— 带交易成本的「期望收益预测」题}
+\begin{frame}{Problem 与评分 —— 这是一道带交易成本的「期望收益预测」题}
   \begin{columns}[T,onlytextwidth]
     \column{0.50\textwidth}
     \textbf{\color{icmlblue}数据}
@@ -183,38 +176,25 @@
 \end{frame}
 
 % =========================================================
-% Slide 4 — Factor engineering (rich, 2-col)
+% Slide 4 — Feature families
 % =========================================================
-\begin{frame}{因子工程：六大家族 —— F1 + F3 合计占 LGB gain \hl{75.5\%}}
-  \vspace{-6pt}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.58\textwidth}
-    \scriptsize
-    \begin{itemize}\setlength{\itemsep}{1pt}\setlength{\topsep}{0pt}\setlength{\parsep}{0pt}
-      \item \hl{F1 LOB 派生}\,\,(105 维,\,\rhl{gain 40.4\%})\\
-        \tiny 10 档 bid/ask 价+量、OHLC、\textbf{WMP 微价格}、\texttt{bid\_diff}/\texttt{ask\_diff}\,;\,\emph{snapshot 表示,\,F2--F6 派生底座}
-      \item \hl{F2 多尺度 OFI}\,\,(50 维,\,gain 5.5\%)\\
-        \tiny MLOFI / EWMA-OFI 多 $\alpha$ / Kyle $\lambda$ rolling $W{=}5/20/50/100$\,;\,\emph{5--100 tick 多窗口订单流不平衡}
-      \item \hl{F3 订单流强度}\,\,(45 维,\,\rhl{gain 35.1\%})\\
-        \tiny 6 类事件 \texttt{lb/la/mb/ma/cb/ca} $\times$ \texttt{intst/ind/acc} + EWMA + cancel\,;\,\emph{撮合层多空压力,\,\rhl{Top-4 因子全在此族}（\texttt{ma\_intst} gain $0.90$ 全特征第一）}
-      \item \hl{F4 微结构波动}\,\,(29 维,\,gain 7.5\%)\\
-        \tiny signed RV / bipower / Roll spread / vol-burst + \texttt{volume\_delta}\,;\,\emph{波动放大$\to$方向转折概率上升}
-      \item \hl{F5 窗口统计}\,\,(67 维,\,gain 5.2\%)\\
-        \tiny 100-tick z-score / dual-z / quantile rank\,;\,\emph{单族贡献低,\,\rhl{与所有族 $|\rho|{\le}0.07$,\,OOD 稳健性 anchor}}
-      \item \hl{F6 不对称性}\,\,(74 维,\,gain 6.3\%)\\
-        \tiny bid/ask rate L1--L10 + bsize/asize rate + GOFI + EWMA residual\,;\,\emph{买卖侧异质性}
-    \end{itemize}
-
-    \column{0.40\textwidth}
-    \vspace{-2pt}
-    \begin{center}
-      \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{Feature_Img.pdf}
-    \end{center}
-  \end{columns}
+\begin{frame}{因子工程：六大家族 —— F1 + F3 占 LGB gain 75.5\%}
   \vspace{-2pt}
-  \begin{center}\tiny\itshape
-    \hl{F1 + F3 = 75.5\% gain} 是预测主力\,;\,\hl{F5} 与其他族近正交（$|\rho|{\le}0.07$）\,$\Rightarrow$\,\textbf{OOD 红利的"方差源去相关"通道}\,。
+  \begin{center}
+    \includegraphics[width=0.95\linewidth,height=0.70\textheight,keepaspectratio]{Feature_Img.pdf}
   \end{center}
+  \vspace{-4pt}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.62\textwidth}
+    \scriptsize
+    \begin{itemize}\setlength{\itemsep}{-1pt}\setlength{\topsep}{0pt}\setlength{\parsep}{0pt}
+      \item \hl{F1 LOB 派生 (40.4\% gain)}\,:\,\,10 档报价/挂单量 + WMP + spread
+      \item \hl{F3 订单流强度 (35.1\% gain)}\,:\,\,\texttt{ma/mb/la/lb\_intst} + EWMA
+    \end{itemize}
+    \column{0.36\textwidth}
+    \scriptsize\itshape
+    Top-10 因子全在 F1+F3；F5 与其它族 $|\rho|\!\le\!0.07$，\textbf{正交补强}。
+  \end{columns}
 \end{frame}
 
 % =========================================================
@@ -263,163 +243,94 @@
   \vspace{6pt}
   \begin{center}
     \footnotesize\itshape
-    共同主题：\textbf{在输入侧让模型"看不见"非平稳分布偏移}\,，这是 OOD 上能稳的根本。
+    共同主题：\textbf{在输入侧让模型"看不见"非平稳分布偏移}，这是 OOD 上能稳的根本。
   \end{center}
 \end{frame}
 
 % =========================================================
-% Slide 6 — Models (A): NN arch comparison
+% Slide 6 — Models: NN + LGB heterogeneous
 % =========================================================
-\begin{frame}{模型工程 (A)：NN 架构对比 —— \emph{为什么用 4-layer MLP，不用更复杂的}}
-  \vspace{-2pt}
-  \begin{center}
-    \setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.20}
-    \footnotesize
-    \begin{tabular}{@{}lrlr@{}}
-      \toprule
-      \textbf{架构} & \textbf{参数量} & \textbf{Test PnL ($h{=}60$)} & \textbf{备注} \\
-      \midrule
-      \rhl{MLP (主线)}    & 134k  & \rhl{$+34.44 \pm 1.39$}\,\,(5 seeds) & 4-layer $[256/128/64]$ \\
-      ResMLP             & 1.15M & $+26.72 \pm 3.96$\,\,(5 seeds)        & 加深 + residual,\,高方差\,(-7.7 PnL) \\
-      MLP-Mixer          & 2.08M & $+30.18$\,\,(2 seeds, \texttt{best\_ep=0}) & 参数量大反而 in-sample 过拟合 \\
-      FT-Transformer     & --    & \textbf{OOM}\,(batch 2048,\,16 GiB)    & 359-token 全 attention 炸显存 \\
-      \bottomrule
-    \end{tabular}
-  \end{center}
+\begin{frame}{模型工程：异质 NN $+$ LGB —— 故意不用 RNN/Transformer/CNN}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+    \begin{block}{\hl{NN}\,\, : 4-layer MLP}
+      \scriptsize
+      $[359\to 256\to 128\to 64\to 1]$\,\, ($\sim$120k 参数)\\
+      LayerNorm $+$ GELU $+$ Dropout\\[2pt]
+      \textbf{LayerNorm 走样本级}\,\,$\Rightarrow$ 避免 batch 内污染\\[3pt]
+      \textit{为什么不用更复杂架构？}\\
+      \scriptsize\color{black!70}
+      window-$z$ + 6 家族派生已经把 100-tick 时序信息蒸馏成静态因子，\\
+      RNN/Transformer/CNN 容易 in-sample 膨胀，OOD 反而退化。
+    \end{block}
 
-  \vspace{4pt}
+    \column{0.48\textwidth}
+    \begin{block}{\hl{LGB}\,\, : L2 $\Delta$mid 回归}
+      \scriptsize
+      \texttt{objective = regression\_l2}\\
+      目标 $y = (\mathrm{mp}_{t+60}-\mathrm{mp}_t)/(\mathrm{mp}_t+1)$\\[3pt]
+      \textbf{class-balanced 样本权重}\,\,(h=60 三类频率倒数)\\
+      \,\,$\Rightarrow$ 稀疏涨/跌样本得到更高梯度\\[3pt]
+      \textit{为什么 L2 而不是 3-class CE？}\\
+      \scriptsize\color{black!70}
+      回归保留连续置信度,\\ETUD 阈值层可在执行侧二次决策；分类把信息提前 collapse。
+    \end{block}
+  \end{columns}
+  \vspace{6pt}
+  \begin{center}\small
+    族内 simple mean，跨族固定权重 \hl{$\mathrm{LGB}:\mathrm{NN}=1.5:1$}（GBDT 在表格数据上略强 $\Rightarrow$ 略重）
+  \end{center}
+\end{frame}
+
+% =========================================================
+% Slide 7 — SPO+ DFL
+% =========================================================
+\begin{frame}{训练核心：SPO+ 决策焦点学习 —— 把梯度对齐离散动作的期望收益}
+  \vspace{-4pt}
   \begin{columns}[T,onlytextwidth]
     \column{0.55\textwidth}
+    \includegraphics[width=\linewidth]{spo_intuition.pdf}
+
+    \column{0.45\textwidth}
     \scriptsize
-    \textbf{\color{icmlblue}观察}
-    \begin{itemize}\setlength{\itemsep}{1pt}
-      \item 100-tick 时序信息已被 aggregate features 蒸馏（\texttt{intst/OFI/RV}\dots）\,$\Rightarrow$ raw-tick conv/attention \rhl{in-sample 高,\,OOD 退}
-      \item T184 TickTransformer / T185 hybrid CNN：V4 验证 MSE drop $0\%$,\,verdict \texttt{architecture\_doesn't\_fit}
-      \item T172 GroupTransformer in-sample $+149.91$,\,但训练含测试日期污染,\,\textbf{PM 主动未提交}
-    \end{itemize}
-
-    \column{0.42\textwidth}
-    \scriptsize
-    \begin{block}{\color{icmlblue}与近期文献一致}
-      \scriptsize
-      \textbf{TLOB / MLPLOB} (Zhang et al.\ 2024,\,\emph{When MLPs beat the LOB Transformers})\,—— 当窗口时序已被 aggregate feature 蒸馏，\textbf{纯 MLP 在 LOB 上可达 SOTA}。\\[2pt]
-      与我们观察一致 $\Rightarrow$ 最终冻结 \hl{4-layer MLP $+$ SPO+ DFL}。
-    \end{block}
-  \end{columns}
-\end{frame}
-
-% =========================================================
-% Slide 7 — Models (B): GBDT same-family comparison
-% =========================================================
-\begin{frame}{模型工程 (B)：GBDT 同族对比 —— \emph{为什么用 LightGBM,\,不用 XGBoost / CatBoost}}
-  \vspace{-2pt}
-  \begin{center}
-    \setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.25}
-    \scriptsize
-    \begin{tabular}{@{}p{2.4cm}p{2.4cm}p{4.0cm}p{4.3cm}@{}}
-      \toprule
-      \textbf{GBDT} & \textbf{Eval} & \textbf{结果} & \textbf{为什么没选} \\
-      \midrule
-      \rhl{LightGBM (主线)}           & V4 walk-forward   & \rhl{$+30.88 \pm 1.09$} (50 seed M7) & GPU 训快 $\sim\!3.2\times$,\,L2 + 359 维 SchemeP \\
-      XGBoost L2 (T18)               & LOSO 5-fold       & ceiling $\approx +22$,\,parity LGB      & 同族无增益,\,速度劣 \\
-      CatBoost L2 5-seed (T17/T89)   & LOSO-eq + 公榜     & LOSO $+40.13$,\,NN--CB corr $0.77$       & 与 NN 主线\rhl{高度共线}\,;\,iter\_016 公榜 $-3.08$ \\
-      \bottomrule
-    \end{tabular}
-  \end{center}
-
-  \vspace{6pt}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.50\textwidth}
-    \scriptsize
-    \textbf{\color{icmlblue}核心观察}
-    \begin{itemize}\setlength{\itemsep}{1pt}
-      \item GBDT 同族都 \textbf{saturate 在 LightGBM L2 + 359 维 SchemeP} 这个组合
-      \item CatBoost \emph{看似强}（LOSO $+40.13$）但 NN--CB corr $0.77$,\,\textbf{加进 ensemble 反伤公榜 $-3.08$}（共线性,\,无方差减少红利）
-      \item XGBoost L2 与 LightGBM L2 持平,\,但 \texttt{gpu\_hist} 速度劣
-    \end{itemize}
-
-    \column{0.46\textwidth}
-    \scriptsize
-    \begin{block}{\color{icmlblue}为什么 L2 而不是 3-class CE?}
-      \scriptsize
-      回归保留\textbf{连续置信度}\,，ETUD 阈值层在执行侧二次决策\,；分类把信息提前 collapse,\,且费率门槛 $f$ 不在 loss 里。\\[2pt]
-      \,\,$\Rightarrow$ L2 $+$ ETUD 是 \rhl{决策延后绑定}的最简实现。
-    \end{block}
-  \end{columns}
-\end{frame}
-
-% =========================================================
-% Slide 8 — SPO+ DFL (with vertical fig + Phase 1/2 emphasis)
-% =========================================================
-\begin{frame}{训练核心：SPO+ 决策焦点学习 —— Phase 1 L2 预训练 $\to$ Phase 2 SPO+ finetune}
-  \vspace{-6pt}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.40\textwidth}
-    \vspace{-4pt}
-    \includegraphics[width=\linewidth,height=0.84\textheight,keepaspectratio]{spo_intuition.pdf}
-
-    \column{0.60\textwidth}
-    \scriptsize
-    \textbf{\color{icmlblue}两阶段训练流程}
-    \begin{enumerate}\setlength{\itemsep}{2pt}
-      \item \hl{Phase 1 —— L2 回归预训练}\\
-        \scriptsize 目标 $y=(\mathrm{mp}_{t+60}-\mathrm{mp}_t)/(\mathrm{mp}_t+1)$\,；\,光滑二次损失,\,逼近真值,\,提供\textbf{良好初值}
-      \item \hl{Phase 2 —— SPO+ joint finetune}\\
-        \scriptsize warm-start,\,\textbf{全量数据}(train+val,\,0--119) L2 $+$ SPO+ surrogate 联合优化\\
-        \scriptsize lr $3{\times}10^{-5}$,\,11 ep,\,$\lambda{=}30$
-    \end{enumerate}
-
-    \vspace{2pt}
+    \textbf{\color{icmlblue}核心问题：}\\
+    L2 回归追真值，但评分只关心\textbf{动作 $\hat a$ 是否越过费率门槛 $f$}\,。\\[4pt]
     \textbf{\color{icmlblue}SPO+ surrogate (Elmachtoub \& Grigas 2022)：}
     \[
       \ell_{\mathrm{SPO+}} = \mathrm{ReLU}\!\big(|2\hat y{-}y|{-}f\big) - z^{\!\star}(y)(2\hat y{-}y) + f|z^{\!\star}(y)|
     \]
-
-    \vspace{1pt}
-    \textbf{\color{icmlblue}两个好处}
+    \[
+      L = (\hat y-y)^2 + \lambda\,\ell_{\mathrm{SPO+}},\,\, \lambda{=}30
+    \]
+    \vspace{2pt}
+    \textbf{\color{icmlblue}两阶段：}
     \begin{itemize}\setlength{\itemsep}{1pt}
-      \item \hl{(1) SPO+}\,—— 梯度从"预测准"对齐到"PnL 高"\,；让 NN 明确感知\textbf{执行端的非对称买卖 reward}（费率门槛 $f$ 处的 kink）
-      \item \hl{(2) 全量数据 finetune}\,—— Phase 2 在 train+val 0--119 上做（与 \textbf{M7 retrain 同思路}），把验证集数据收回训练
+      \item Phase 1 — pure L2 回归预训练
+      \item Phase 2 — warm-start 联合 L2 $+$ SPO+ 微调 (lr $3{\times}10^{-5}$, 11 ep)
     \end{itemize}
-
-    \vspace{1pt}
-    \begin{center}
-      \rhl{$+3.54$ PnL}\,\,（最大单一训练 trick 增益）
-    \end{center}
+    \vspace{2pt}
+    \rhl{$+3.54$ PnL}（最大单一训练 trick 增益）
   \end{columns}
 \end{frame}
 
 % =========================================================
-% Slide 9 — Ensemble + Execution merged (with top progression hl)
+% Slide 8 — Ensemble + Execution
 % =========================================================
 \begin{frame}{集成 \& 执行：$50\!\times\!50$ simple-mean $+$ ETUD 非对称阈值}
-  \vspace{-4pt}
-  % top progression highlight
-  \begin{center}
-    \footnotesize
-    \fcolorbox{icmlblue!50}{icmlblue!5}{%
-      \begin{minipage}{0.96\textwidth}
-        \centering
-        \textbf{Onepage Table 1 行 17$\to$20 累计进展}:\,\,
-        $(5{+}5)$ ensemble $+37.12$ \,$\to$\, $+$\hl{ETUD} $37.90$ \,$\to$\, $+$\hl{SPO+} $41.44$ \,$\to$\, $+$\hl{$50{\times}50$ HP cycling} \rhl{$41.58$ (SOTA)}
-      \end{minipage}}
-  \end{center}
-  \vspace{2pt}
-
   \begin{columns}[T,onlytextwidth]
     \column{0.52\textwidth}
     \begin{block}{\hl{50 NN $+$ 50 LGB 异质集成}}
       \scriptsize
       5 组 HP $\times$ 10 seed = 50 NN + 50 LGB\\
-      \textbf{simple mean，不学权重}\,;\,跨族权重 \hl{NN $:$ LGB $=$ 1.0 $:$ 1.5}\\[3pt]
+      \textbf{simple mean，不学权重}\\[3pt]
       为什么？\\
-      \,\,$\bullet$ NN--NN avg $|\rho|=0.93$,\,LGB--LGB $0.84$\\
+      \,\,$\bullet$ NN--NN avg $|\rho|=0.93$，LGB--LGB $0.84$\\
       \,\,$\bullet$ 设计矩阵条件数 $5.4{\times}10^{4}$（病态共线）\\
       \,\,$\bullet$ bounded NNLS 本地涨,\,公榜 \rhl{$-4.64$}\\[3pt]
       \textbf{OOD 上 simple mean 是稳健最优}
     \end{block}
 
-    \column{0.46\textwidth}
+    \column{0.45\textwidth}
     \begin{block}{\hl{ETUD —— 非对称执行阈值}}
       \scriptsize
       \vspace{-4pt}
@@ -432,34 +343,34 @@
       \end{cases}
       \]
       \vspace{-2pt}
-      \rhl{$\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$}\,,\,\,\rhl{$\theta_{\mathrm{dn}}{=}2.16{\times}10^{-4}$}\\[2pt]
-      \textbf{ratio $0.8$ 约束 2D DE 搜索},\,验证集冻结\\
-      不对称匹配训练样本正向漂移\\
-      $\Rightarrow$ 避免 wide-DE 在 OOF 上过拟合
+      $\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$\\
+      $\theta_{\mathrm{dn}}{=}2.16{\times}10^{-4}$\\[3pt]
+      由验证集 \textbf{2D DE 搜出后冻结}\\
+      不对称匹配训练样本正向漂移
     \end{block}
   \end{columns}
-  \vspace{2pt}
-  \begin{center}\scriptsize\itshape
-    决策参数\textbf{不在 OOF 上学权重}\,，只在执行侧用 1 个二维阈值搜——OOD 上"简单 = 稳健"的延伸。
+  \vspace{4pt}
+  \begin{center}\small\itshape
+    决策参数\textbf{不在 OOF 上学权重}\,，只在执行侧用 1 个二维阈值搜——这是 OOD 上"简单 = 稳健"的延伸。
   \end{center}
 \end{frame}
 
 % =========================================================
-% Slide 10 — Big ablation waterfall (re-drawn, color-grouped)
+% Slide 9 — Big ablation waterfall
 % =========================================================
-\begin{frame}{大消融 waterfall —— 按领域上色：\textcolor{featblue}{Feature} $\to$ \textcolor{ensgreen}{Ensemble \& Execution}}
+\begin{frame}{大消融 waterfall —— 从 $+0.52$ 到 $+41.58$ 的 9 步关键跳跃}
   \begin{center}
-    \vspace{-4pt}
+    \vspace{-2pt}
     \includegraphics[width=0.98\linewidth]{waterfall.pdf}
   \end{center}
-  \vspace{-8pt}
+  \vspace{-6pt}
   \begin{center}\scriptsize
-    \textbf{3 个高 ROI trick}\,\,：\hl{window-$z$ +22.88}（Feature/OOD）\,·\,\hl{F6 不对称性 +4.64}（Feature）\,·\,\hl{SPO+ DFL +3.54}（Ensemble\&Exec）
+    \textbf{3 个高 ROI trick}\,\,：\hl{window-$z$ +22.88}（输入侧 OOD）\,·\,\hl{SPO+ DFL +3.54}（训练侧决策对齐）\,·\,\hl{F6 不对称性 +4.64}（因子）
   \end{center}
 \end{frame}
 
 % =========================================================
-% Slide 11 — Leaderboard
+% Slide 10 — Leaderboard
 % =========================================================
 \begin{frame}{Leaderboard —— 公榜 \#1 / 私榜 \#1 / $h{=}40$ 私榜亦第一}
   \vspace{-4pt}
@@ -493,7 +404,7 @@
 \end{frame}
 
 % =========================================================
-% Slide 12 — Takeaways
+% Slide 11 — Takeaways
 % =========================================================
 \begin{frame}{Takeaways —— 5 条对未来 LOB 实盘有迁移价值的经验}
   \vspace{2pt}
@@ -511,7 +422,7 @@
 \end{frame}
 
 % =========================================================
-% Slide 13 — Closing
+% Slide 12 — Closing
 % =========================================================
 \begin{frame}[plain]
   \vfill
@@ -528,12 +439,12 @@
       \small 起点 baseline：& \small $-6.65$\,\,$\Rightarrow$\,\,净增益 \rhl{$+42.29$}\\
     \end{tabular}\\[18pt]
 
-    {\small 史景喆 （清华大学）}\\[6pt]
+    {\small 队伍 \textbf{792} ·\,\,超级回天什么时候上映\,\,· \,\,史景喆（清华大学）}\\[6pt]
     {\footnotesize\itshape 代码开源\,:\,\,\texttt{github.com/JingzheShi/liangwenbei}}
   \end{center}
   \vfill
   \begin{center}\tiny\color{black!55}
-    References:\,\, Cont \& Kukanov (2014) OFI\,\,·\,\,Stoikov (2014) WMP\,\,·\,\,Elmachtoub \& Grigas (2022) SPO+\,\,·\,\,Zhang et al.\,(2024) TLOB/MLPLOB
+    References:\,\, Cont \& Kukanov (2014) OFI\,\,·\,\,Stoikov (2014) WMP\,\,·\,\,Elmachtoub \& Grigas (2022) SPO+\,\,·\,\,Gorishniy et al.\ (2021) FT-Transformer
   \end{center}
 \end{frame}
 

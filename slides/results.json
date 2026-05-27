@@ -1,9 +1,24 @@
 {
-  "task": "良文杯 5min beamer slides (xelatex + xeCJK)",
+  "task": "slides v2 大改 — 6 项 PM 反馈落地",
   "metrics": {
-    "n_slides": 12,
-    "pdf_kb": 1166,
-    "n_new_figures": 2
+    "n_slides": 13,
+    "pdf_kb": 1188,
+    "v1_n_slides": 12
   },
-  "notes": "12 张 16:9 beamer 幻灯片 (5 min 节奏): Title / Problem+评分硬约束 / Pipeline (用 onepage Pipeline_Img) / 6 家族 (用 onepage Feature_Img) / 三类预处理 (window-z +22.88 + 镜像 + sign-log1p) / NN+LGB 异质模型 / SPO+ DFL (新做 spo_intuition.pdf) / 50x50 集成 + ETUD / 大消融 waterfall (新做 waterfall.pdf, 从 0.52 到 41.58 的 9 步跳跃) / Leaderboard 三行 (公榜 35.64 / 私榜 41.61 / h=40 38.65) / 5 条 Takeaways / 谢评委. 新增图: waterfall.pdf + spo_intuition.pdf (matplotlib CJK Noto Sans). 不讲 Coding Agent. 关键数字全部能在 one_page_summary.tex 找到对应 (window-z +22.88, F1+F3=75.5%, SPO+ DFL +3.54, 50x50 SOTA 41.58, 公榜 35.64)."
+  "changes": {
+    "1_title_slide": "删除『队伍 792 · 超级回天什么时候上映 · 史景喆（清华）』长 author 行；改为『史景喆（清华）』一行；footer 同步缩短。公榜 #1 / 私榜 #1 highlight 框保留。",
+    "2_factor_engineering": "重写为 2-列（左 6 家族详解，右 Feature_Img）；每族标出 dim/gain%，并写出代表因子 + 作用解释；强调 F1+F3=75.5% gain 主力 & F5 |ρ|≤0.07 OOD anchor。",
+    "3_spo_dfl": "spo_intuition.pdf 改为竖置 2-subplot（上 L2 / 下 SPO+），Phase 1 / Phase 2 流程分点写清，并强调 2 个好处：(1) SPO+ 决策对齐 (2) 全量数据 finetune（M7 retrain 同思路）。",
+    "4_ensemble_execution": "保持单页，顶部新增 highlight 框写 onepage Table 行 17→20 累计：37.12→37.90→41.44→41.58。ETUD 加 ratio=0.8 ratio-constrained DE 说明。",
+    "5_models_split_to_2_pages": "Slide 6 = NN arch 对比表（MLP/ResMLP/Mixer/FT-Tx 实测，引用 TLOB/MLPLOB 2024）；Slide 7 = GBDT 同族对比表（LightGBM/XGBoost/CatBoost，CatBoost 共线性公榜 -3.08）。",
+    "6_waterfall_redrawn": "waterfall.pdf 按领域上色 grouped（Feature 域蓝 / Ensemble&Execution 域绿）；起点 +0.52 → 终点 41.58；label y-offset 错位防重叠；累计值斜体下方标注。"
+  },
+  "files": {
+    "slides_v2_tex": "slides.tex (13 slides)",
+    "slides_v2_pdf": "slides.pdf",
+    "spo_fig_v2": "spo_intuition.pdf (vertical 2-subplot)",
+    "waterfall_v2": "waterfall.pdf (domain-grouped)",
+    "v1_backup": ["slides_v1.tex", "slides_v1.pdf"]
+  },
+  "notes": "xelatex + xeCJK + Noto Serif CJK SC, 16:9 beamer, 13 pages, ~1.2 MB. 编译 0 error / 0 overfull。无 emoji，关键数字 \\hl{} 蓝色 + \\rhl{} 红色加粗。3 数据 anchor：onepage v50 Table 1、nn_arch_ablation runs（mlp 5-seed mean=34.44 std=1.39, resmlp mean=26.72 std=3.96, mixer 30.18 2-seed, ft OOM）、factor_families_report summary.json（105/50/45/29/67/74 dim, 40.4/5.5/35.1/7.5/5.2/6.3% gain）。"
 }

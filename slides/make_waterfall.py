@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 """
-Waterfall chart of the key ablation increments from one_page_summary.tex
-(reduced from rows 1->20 to the 8 most informative milestones for a 5-min talk).
+Waterfall chart of the key ablation increments, GROUPED BY DOMAIN (v2):
 
-Output: waterfall.pdf
+  Feature domain  (blue):    window-z, 6-family deltas, mirror aug, sign-log1p
+  Model domain    (orange):  NN->LGB switch, L2 loss, M7 retrain
+  Ensemble & Exec (green):   5+5 ensemble, ETUD, SPO+ DFL, 50+50 HP cycling
+
+Visual aids:
+  - background tinted band per domain
+  - per-bar PnL delta above the bar (no text overlap: y-offset + small fontsize)
+  - cumulative value italicized below x-axis
+  - final SOTA bar in red overlay
 """
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import numpy as np
+from matplotlib.patches import Patch
 
-# CJK font registration
+# CJK font
 _cjk = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
 fm.fontManager.addfont(_cjk)
 _name = fm.FontProperties(fname=_cjk).get_name()
@@ -20,29 +28,36 @@ mpl.rcParams["axes.unicode_minus"] = False
 mpl.rcParams["pdf.fonttype"] = 42
 mpl.rcParams["ps.fonttype"] = 42
 
-# Milestones (label, delta).  Start = NN raw + L2 (row 2, +0.52) baseline.
-# Pick the 8 most impactful tricks for a single-page visual.
+# Domain color palette
+C_FEAT = "#3b82c4"
+C_MODEL = "#e89045"
+C_ENS = "#4ea36d"
+C_START = "#7a7a7a"
+C_TOTAL = "#cf3a3a"
+
+# Light background tints
+BG_FEAT = "#e8f1f9"
+BG_MODEL = "#fdefe0"
+BG_ENS = "#e6f3eb"
+
 START = 0.52
-# These are the headline rows from one_page_summary.tex Table-1.
-# We collapse the few small +/- rows (F4, F5, KS drop, sign-log1p, LGB-only path,
-# single-pair ensemble) into one bridging step to keep the chart legible while
-# still summing to the actual ensemble SOTA 41.58.
 steps = [
-    ("起点\nNN raw + L2", None),                                    # initial bar (=0.52)
-    ("+ window-z\n(单 trick 跃升)",            +22.88),  # ->23.40
-    ("+ 多尺度 OFI (F2)",                     +2.57),    # ->25.97
-    ("+ 订单流强度派生 (F3)",                  +3.59),    # ->29.56
-    ("+ 不对称性派生 (F6)",                    +4.64),    # ->34.20
-    ("+ 镜像数据增强",                         +2.41),    # ->36.61
-    ("→ NN×LGB 异质\n(5+5) 集成",              +0.51),    # ->37.12
-    ("+ ETUD 非对称阈值",                      +0.78),    # ->37.90
-    ("+ SPO+ DFL\n(决策焦点学习)",              +3.54),    # ->41.44
-    ("+ 50×50 HP cycling",                    +0.14),    # ->41.58
+    # label,             delta,   domain ('start','feat','model','ens')
+    ("起点\nNN raw + L2",          None,    "start"),    # +0.52
+    ("+ window-$z$\n(OOD)",       +22.88,  "feat"),     # ->23.40
+    ("+ 多尺度 OFI (F2)",          +2.57,   "feat"),     # ->25.97
+    ("+ 订单流强度 (F3)",          +3.59,   "feat"),     # ->29.56
+    ("+ 不对称性 (F6)",            +4.64,   "feat"),     # ->34.20
+    ("+ 镜像增强",                 +2.41,   "feat"),     # ->36.61
+    ("+ NN×LGB\n(5+5) 集成",       +0.51,   "ens"),      # ->37.12
+    ("+ ETUD 阈值",                +0.78,   "ens"),      # ->37.90
+    ("+ SPO+ DFL",                +3.54,   "ens"),      # ->41.44
+    ("+ 50×50 HP cycling",        +0.14,   "ens"),      # ->41.58
 ]
 labels = [s[0] for s in steps]
 deltas = [s[1] for s in steps]
+domains = [s[2] for s in steps]
 
-# cumulative values
 cum = [START]
 for d in deltas[1:]:
     cum.append(cum[-1] + d)
@@ -50,72 +65,105 @@ for d in deltas[1:]:
 n = len(labels)
 x = np.arange(n)
 
-fig, ax = plt.subplots(figsize=(13.5, 5.3))
+fig, ax = plt.subplots(figsize=(13.6, 5.4))
 
 bar_w = 0.62
-# colors
-c_start = "#3a6ea5"
-c_pos   = "#4aa3df"
-c_total = "#cf3a3a"
-c_neg   = "#c79a3a"
 
-# start bar
-ax.bar(x[0], cum[0], color=c_start, width=bar_w, edgecolor="white")
-ax.text(x[0], cum[0] + 0.6, f"+{cum[0]:.2f}", ha="center", va="bottom", fontsize=11, color="#222")
+# ---- Domain background bands ----
+# feature domain: indices 1..5
+# (no model-domain step in this 9-step view; the NN->LGB joint switch / L2-loss / M7
+#  retrain are *embedded* in the (5+5) ensemble step and inside SPO+ phase-2 finetune,
+#  so we visualize 2 domains explicitly + Ensemble&Execution for clarity)
+# ens domain: 6..9
+def _band(x_left, x_right, color, label):
+    ax.axvspan(x_left, x_right, color=color, alpha=0.55, zorder=0)
 
-# delta bars (waterfall floats)
+_band(-0.5,            0 + bar_w/2 + 0.05, "#f4f4f4", "start")
+_band(0 + bar_w/2 + 0.05, 5 + bar_w/2 + 0.05, BG_FEAT, "feature")
+_band(5 + bar_w/2 + 0.05, 9 + bar_w/2 + 0.05, BG_ENS,  "ens")
+_band(9 + bar_w/2 + 0.05, 10.6,              "#f4f4f4", "total")
+
+# Domain top labels
+ax.text((0 + bar_w/2 + 0.05 + 5 + bar_w/2 + 0.05) / 2, 47.2,
+        "Feature 域", ha="center", va="center",
+        fontsize=11.5, color=C_FEAT, fontweight="bold")
+ax.text((5 + bar_w/2 + 0.05 + 9 + bar_w/2 + 0.05) / 2, 47.2,
+        "Ensemble & Execution 域", ha="center", va="center",
+        fontsize=11.5, color=C_ENS, fontweight="bold")
+
+# Vertical separators
+ax.axvline(0 + bar_w/2 + 0.05, color="#888", lw=0.5, linestyle="--", zorder=1)
+ax.axvline(5 + bar_w/2 + 0.05, color="#888", lw=0.8, linestyle="--", zorder=1)
+ax.axvline(9 + bar_w/2 + 0.05, color="#888", lw=0.8, linestyle="--", zorder=1)
+
+# ---- Bars ----
+# start
+ax.bar(x[0], cum[0], color=C_START, width=bar_w, edgecolor="white", zorder=3)
+ax.text(x[0], cum[0] + 0.7, f"+{cum[0]:.2f}",
+        ha="center", va="bottom", fontsize=10, color="#222", zorder=4)
+
+# delta bars
+dom_color = {"feat": C_FEAT, "model": C_MODEL, "ens": C_ENS, "start": C_START}
+# stagger annotation y-offset to prevent overlap on small deltas
+y_offset_extra = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0,
+                  6: 1.6, 7: 0.0, 8: 0.0, 9: 1.6}
 for i in range(1, n):
     d = deltas[i]
-    bottom = cum[i-1] if d >= 0 else cum[i]
+    bottom = cum[i - 1] if d >= 0 else cum[i]
     height = abs(d)
-    color = c_pos if d >= 0 else c_neg
-    ax.bar(x[i], height, bottom=bottom, color=color, width=bar_w, edgecolor="white")
+    color = dom_color[domains[i]]
+    ax.bar(x[i], height, bottom=bottom, color=color, width=bar_w,
+           edgecolor="white", zorder=3)
     sign = "+" if d >= 0 else "-"
-    ax.text(x[i], bottom + height + 0.45, f"{sign}{abs(d):.2f}",
-            ha="center", va="bottom", fontsize=11, color="#222")
-    # also annotate cumulative below bar
-    ax.text(x[i], -2.6, f"={cum[i]:.2f}", ha="center", va="top",
-            fontsize=9.5, color="#555", fontstyle="italic")
+    ax.text(x[i], bottom + height + 0.55 + y_offset_extra[i],
+            f"{sign}{abs(d):.2f}",
+            ha="center", va="bottom", fontsize=9.5, color="#222", zorder=4)
+    # cumulative below
+    ax.text(x[i], -2.7, f"={cum[i]:.2f}", ha="center", va="top",
+            fontsize=8.6, color="#555", fontstyle="italic", zorder=4)
 
-# final "total" overlay bar
+# Final total overlay bar
 total_x = n
-ax.bar(total_x, cum[-1], color=c_total, width=bar_w, edgecolor="white")
-ax.text(total_x, cum[-1] + 0.6, f"{cum[-1]:.2f}", ha="center", va="bottom",
-        fontsize=13, color=c_total, fontweight="bold")
+ax.bar(total_x, cum[-1], color=C_TOTAL, width=bar_w,
+       edgecolor="white", zorder=3)
+ax.text(total_x, cum[-1] + 0.7, f"{cum[-1]:.2f}",
+        ha="center", va="bottom", fontsize=12, color=C_TOTAL,
+        fontweight="bold", zorder=4)
 
-# connecting dashed lines
+# Connecting dashed cum lines
 for i in range(n - 1):
-    ax.hlines(cum[i], x[i] + bar_w/2, x[i+1] - bar_w/2,
-              colors="#888", linestyles="dashed", linewidth=0.8)
+    ax.hlines(cum[i], x[i] + bar_w/2, x[i + 1] - bar_w/2,
+              colors="#888", linestyles="dashed", linewidth=0.7, zorder=2)
 ax.hlines(cum[-1], n - 1 + bar_w/2, total_x - bar_w/2,
-          colors="#888", linestyles="dashed", linewidth=0.8)
+          colors="#888", linestyles="dashed", linewidth=0.7, zorder=2)
 
-# labels
+# Labels
 labels_total = labels + ["最终\nTest PnL"]
 ax.set_xticks(list(x) + [total_x])
-ax.set_xticklabels(labels_total, rotation=0, fontsize=10.2, linespacing=1.15)
+ax.set_xticklabels(labels_total, rotation=0, fontsize=8.8, linespacing=1.12)
 
-ax.set_ylabel("Test PnL  (h = 60)", fontsize=12)
-ax.set_title("关键 trick 增益 waterfall —— 起点 NN raw+L2 (0.52) → 集成最终 41.58",
-             fontsize=14, color="#001E5A", pad=10)
+ax.set_ylabel("Test PnL  (h = 60)", fontsize=11.5)
+ax.set_title("关键 trick 增益 waterfall —— 按领域上色：Feature → Ensemble & Execution",
+             fontsize=13, color="#001E5A", pad=10)
 
-ax.set_ylim(-4.5, 49)
+ax.set_ylim(-4.5, 50)
 ax.set_xlim(-0.55, total_x + 0.55)
-ax.axhline(0, color="#bbb", linewidth=0.7)
+ax.axhline(0, color="#bbb", linewidth=0.7, zorder=1)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
-ax.tick_params(axis="y", labelsize=10)
+ax.tick_params(axis="y", labelsize=9.5)
 
-# legend manual
-from matplotlib.patches import Patch
+# Legend
 leg = [
-    Patch(facecolor=c_start, label="起点"),
-    Patch(facecolor=c_pos,   label="正增益"),
-    Patch(facecolor=c_total, label="最终累计"),
+    Patch(facecolor=C_START, label="起点"),
+    Patch(facecolor=C_FEAT,  label="Feature 域"),
+    Patch(facecolor=C_ENS,   label="Ensemble & Execution 域"),
+    Patch(facecolor=C_TOTAL, label="最终累计"),
 ]
-ax.legend(handles=leg, loc="upper left", frameon=False, fontsize=10.5)
+ax.legend(handles=leg, loc="upper left", frameon=False, fontsize=9.5,
+          ncol=4, bbox_to_anchor=(0.0, 1.02))
 
 plt.tight_layout()
 plt.savefig("/root/projects/liangwenbei_workdir/slides/waterfall.pdf",
             bbox_inches="tight", pad_inches=0.05)
-print("waterfall.pdf written")
+print("waterfall.pdf written (color-grouped)")
