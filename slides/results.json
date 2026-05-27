@@ -1,0 +1,9 @@
+{
+  "task": "良文杯 5min beamer slides (xelatex + xeCJK)",
+  "metrics": {
+    "n_slides": 12,
+    "pdf_kb": 1166,
+    "n_new_figures": 2
+  },
+  "notes": "12 张 16:9 beamer 幻灯片 (5 min 节奏): Title / Problem+评分硬约束 / Pipeline (用 onepage Pipeline_Img) / 6 家族 (用 onepage Feature_Img) / 三类预处理 (window-z +22.88 + 镜像 + sign-log1p) / NN+LGB 异质模型 / SPO+ DFL (新做 spo_intuition.pdf) / 50x50 集成 + ETUD / 大消融 waterfall (新做 waterfall.pdf, 从 0.52 到 41.58 的 9 步跳跃) / Leaderboard 三行 (公榜 35.64 / 私榜 41.61 / h=40 38.65) / 5 条 Takeaways / 谢评委. 新增图: waterfall.pdf + spo_intuition.pdf (matplotlib CJK Noto Sans). 不讲 Coding Agent. 关键数字全部能在 one_page_summary.tex 找到对应 (window-z +22.88, F1+F3=75.5%, SPO+ DFL +3.54, 50x50 SOTA 41.58, 公榜 35.64)."
+}
