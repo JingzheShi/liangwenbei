@@ -1,0 +1,29 @@
+{
+  "task": "因子报告 v4 格式修复+术语表",
+  "metrics": {
+    "n_pages": 18,
+    "n_factor_tables": 6,
+    "n_glossary_entries": 26,
+    "max_table_width_overflow": "none",
+    "pdf_size_kb": 732,
+    "overfull_hbox_count": 0,
+    "F1_share_pct": 40.42,
+    "F2_share_pct": 5.49,
+    "F3_share_pct": 35.08,
+    "F4_share_pct": 7.51,
+    "F5_share_pct": 5.18,
+    "F6_share_pct": 6.33,
+    "F1_plus_F3_pct": 75.50,
+    "top_single_feature": "ma_intst",
+    "top_single_feature_gain": 0.945,
+    "family_raw_vs_derived": {
+      "F1": {"n_raw": 94, "n_der": 11, "raw_pct": 96.5, "der_pct": 3.5, "gain_raw": 5.327, "gain_der": 0.196},
+      "F2": {"n_raw": 0,  "n_der": 50, "raw_pct": 0.0,  "der_pct": 100.0, "gain_raw": 0.000, "gain_der": 0.750},
+      "F3": {"n_raw": 18, "n_der": 27, "raw_pct": 82.6, "der_pct": 17.4, "gain_raw": 3.958, "gain_der": 0.835},
+      "F4": {"n_raw": 2,  "n_der": 27, "raw_pct": 0.6,  "der_pct": 99.4, "gain_raw": 0.006, "gain_der": 1.020},
+      "F5": {"n_raw": 0,  "n_der": 67, "raw_pct": 0.0,  "der_pct": 100.0, "gain_raw": 0.000, "gain_der": 0.708},
+      "F6": {"n_raw": 40, "n_der": 34, "raw_pct": 45.8, "der_pct": 54.2, "gain_raw": 0.396, "gain_der": 0.468}
+    }
+  },
+  "notes": "v4 改造: (1) 新增 §2 术语与缩写 表 (\\tab:glossary), 26 条 acronym -> 中英全称, 字号 footnotesize, 紧凑 tabularx, 不与正文同字号; (2) 每个 F1-F6 subsection 因子清单从 inline 长文本改为 4-列 tabularx 表 (前缀/物理含义/维度/raw-der 备注), 字号 small, tabularx 自动换行, 0 个 overfull hbox; (3) 每张表 caption 含合计公式 + raw vs der 分拆; (4) F1=12 行, F2=5 行, F3=5 行, F4=9 行, F5=6 行, F6=4 行; (5) 摘要 / F1-F6 subsection title / 关键术语首次出现时就地用 (English + 中文) 括号短注 OFI/MLOFI/GOFI/WMP/RV/BV/EWMA/LGB/NN/OOD; (6) 删除 F4 原 inline 公式段 (19pt overfull, 19pt overflow), 因子表内已含同公式; (7) raw-cat 表内 'LOB simple aggregates' 行短化以消除 0.6pt overflow. PDF: 18 页, 750 KB, xelatex+xeCJK 编译 0 overfull box, 仅一个 4.9k 的 underfull (软警告, 无视觉影响). v3 已备份为 factor_families_report_v3.tex / _v3.pdf."
+}

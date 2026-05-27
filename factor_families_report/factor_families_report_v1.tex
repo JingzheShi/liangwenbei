@@ -1,0 +1,668 @@
+% !TEX program = xelatex
+% 因子工程六大家族详解 —— 良文杯 2026 公榜/私榜 #1 方案 SchemeP
+\documentclass[10.5pt,a4paper]{article}
+
+\usepackage[a4paper,left=0.85in,right=0.85in,top=0.85in,bottom=0.95in]{geometry}
+
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont[BoldFont={Noto Serif CJK SC Bold},ItalicFont={Noto Serif CJK SC}]{Noto Serif CJK SC}
+\setCJKsansfont{Noto Sans CJK SC}
+\setCJKmonofont{Noto Sans Mono CJK SC}
+\setmainfont{Nimbus Roman}[
+  Extension={.otf},
+  Path=/usr/share/fonts/opentype/urw-base35/,
+  UprightFont=NimbusRoman-Regular,
+  BoldFont=NimbusRoman-Bold,
+  ItalicFont=NimbusRoman-Italic,
+  BoldItalicFont=NimbusRoman-BoldItalic,
+]
+\usepackage[T1]{fontenc}
+
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{float}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\definecolor{icmlblue}{RGB}{0,30,90}
+\definecolor{accred}{RGB}{170,0,0}
+\definecolor{codebg}{RGB}{246,246,246}
+\definecolor{codestr}{RGB}{50,120,50}
+\definecolor{codekw}{RGB}{0,80,160}
+\definecolor{lblue}{RGB}{40,120,210}
+
+\titleformat{\section}{\normalfont\bfseries\color{icmlblue}\large}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\bfseries\color{icmlblue}\normalsize}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{2pt}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=icmlblue,
+  citecolor=icmlblue,
+  urlcolor=icmlblue,
+}
+
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{gray!40},
+  framesep=3pt,
+  breaklines=true,
+  showstringspaces=false,
+  keywordstyle=\color{codekw}\bfseries,
+  stringstyle=\color{codestr},
+  commentstyle=\color{gray!80}\itshape,
+  language=Python,
+  numbers=none,
+}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+\title{\color{icmlblue}\textbf{因子工程六大家族详解}\\
+\large 良文杯 2026 LOB 中间价方向预测——SchemeP 共 370 维因子拆解}
+\author{史景喆（清华大学）\\
+\small 团队：超级回天什么时候上映 \,\textbar\, 公榜 \#1（$+35.64$）\,\textbar\, 私榜 \#1}
+\date{2026 年 5 月}
+
+\begin{document}
+\maketitle
+
+% =========================================================================
+\section{摘要}
+
+本报告对良文杯 2026 决赛冠军方案 SchemeP 的特征体系做技术性拆解。
+SchemeP 在 $T=100$ tick 因果窗口上构造 \textbf{370 维} 特征向量，
+其中 \textbf{154 维原始字段} + \textbf{216 维派生因子}（T3 / Stage 1 / Stage 2 / Stage 3 / Stage 5 五个特征阶段）。
+
+依据语义将所有 370 个因子归入六大家族：
+F1~\emph{LOB 派生}（105 维）、F2~\emph{多尺度 OFI}（50 维）、
+F3~\emph{订单流强度}（45 维）、F4~\emph{微结构波动}（29 维）、
+F5~\emph{窗口统计}（67 维）、F6~\emph{不对称性}（74 维）。
+
+LightGBM（$h=60$，50-seed M7 重训第 1 个 seed）的特征重要性显示：
+\textbf{F1 占 gain 40.4\%}（top: \texttt{asize1}, \texttt{totalasize}, \texttt{bsize1}）、
+\textbf{F3 占 gain 35.1\%}（top: \texttt{ma\_intst}, \texttt{mb\_intst}），
+两者合计 75.5\%，构成预测主力。
+F5 / F6 / F2 各贡献 5–7\% gain，但提供 OOD 稳健性与决策边界精炼。
+
+家族内最大冗余出现在 F2（块内平均 $|r|=0.33$），即多尺度 OFI 高度共线；
+家族间最大跨家族相关出现在 F2$\leftrightarrow$F6（GOFI 与 MLOFI 同源，$|r|\approx 0.18$）。
+这一结构合理性也解释了为何\textbf{窗口 z-score (window-z) 是决胜 OOD 的核心预处理}：
+它把 F1/F3 的绝对水平转换为 100-tick 内的相对位置，
+跨股票/跨日基差被显著压缩，比赛 OOD 期 PnL 增益 $+42.29$（$-6.65\to+35.64$）。
+
+% =========================================================================
+\section{数据基底与构造管线}
+
+\textbf{原始字段（154 维）：} 来自盘口 snapshot parquet，每 tick 包含
+\begin{itemize}[leftmargin=2.2em,itemsep=2pt,topsep=2pt]
+  \item OHLCV：\texttt{open, high, low, close, volume\_delta, amount\_delta}（6 维）；
+  \item 10 档买卖盘价 \texttt{bid$k$ / ask$k$}（20 维）与挂单量 \texttt{bsize$k$ / asize$k$}（20 维），$k\in\{1..10\}$；
+  \item 行情衍生量 \texttt{avgbid, avgask, totalbsize, totalasize}（4 维）、\texttt{bid\_mean, ask\_mean, bsize\_mean, asize\_mean}（4 维）；
+  \item 主办方提供的中位价与价差 \texttt{midprice$k$, spread$k$}（20 维）、\texttt{cumspread, imbalance}（2 维）、价差 \texttt{bid\_diff$k$, ask\_diff$k$}（20 维）；
+  \item 六类订单事件强度——挂单 \texttt{lb/la\_intst}、成交 \texttt{mb/ma\_intst}、撤单 \texttt{cb/ca\_intst} 及其 \texttt{\_ind / \_acc} 变体（18 维）；
+  \item 主办方滑动平均变化率 \texttt{bid\_rate$k$ / ask\_rate$k$ / bsize\_rate$k$ / asize\_rate$k$}（40 维）。
+\end{itemize}
+
+\textbf{派生因子（216 维）：}在长度 $T=100$ 的滑动窗口上一次性向量化（\texttt{sliding\_window\_view}）后批量计算，
+按 stage 顺序拼接：
+\[
+\underbrace{X_{\text{raw}}}_{154}
+\;\oplus\;
+\underbrace{X_{T3}}_{69}
+\;\oplus\;
+\underbrace{X_{S1}}_{54}
+\;\oplus\;
+\underbrace{X_{S2}}_{59}
+\;\oplus\;
+\underbrace{X_{S3}}_{14}
+\;\oplus\;
+\underbrace{X_{S5}}_{20}
+\;\;=\; 370 .
+\]
+其中 T3 含 MLOFI / WMP / RV / EWMA-intst，Stage 1 含 dual-z / signed-RV / Kyle / EWMA-OFI，Stage 2 含 qrank / skew / GOFI / Kyle-$\lambda$ / vol-burst，Stage 3 含 EWMA 残差 / RV ratio / jump-share / cancel-imb / Roll 效价比，Stage 5 含 adaptive-momentum / OFI-toxicity / signed-bipower / spread-regime / trade-persistence / liq-asym。
+
+\textbf{标签：} 5 个 horizon $h\in\{5,10,20,40,60\}$ 的 3 类方向（涨 / 平 / 跌）。比赛主力使用 $h=60$。
+
+\textbf{硬约束（CRITICAL\_CONSTRAINTS）：} 评测时 \texttt{date}=0、\texttt{sym} 0–4 可含训练外股票、测试点顺序被打乱。
+因此所有 370 个因子都满足：(i) 不显式使用 \texttt{date / sym} ；(ii) 每条样本独立可算，不依赖跨样本状态；(iii) sym-agnostic，不嵌入 sym embedding 或 sym-conditional 归一化。
+
+\textbf{两类全局预处理：}
+\begin{itemize}[leftmargin=2.2em,itemsep=1pt,topsep=2pt]
+  \item \texttt{amount\_delta} 在 raw last-tick 处做 sign-preserving log1p：$x \mapsto \mathrm{sign}(x)\cdot\log(1+|x|)$，控制重尾；
+  \item 全特征再做一次 log1p（cache 命名前缀 \texttt{cache\_log1p}）；
+  \item 训练阶段 \texttt{drop11}：丢弃 11 个对 OOD 有噪声漂移的因子（详见 §6）。
+\end{itemize}
+
+% =========================================================================
+\section{家族总览}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+家族 & 因子数 & 占总数 (\%) & LGB gain 占比 (\%) \\
+\midrule
+F1 LOB 派生        & 105 & 28.4 & \textbf{40.4} \\
+F2 多尺度 OFI      &  50 & 13.5 &  5.5 \\
+F3 订单流强度      &  45 & 12.2 & \textbf{35.1} \\
+F4 微结构波动      &  29 &  7.8 &  7.5 \\
+F5 窗口统计        &  67 & 18.1 &  5.2 \\
+F6 不对称性        &  74 & 20.0 &  6.3 \\
+\midrule
+合计               & 370 & 100  & 100  \\
+\bottomrule
+\end{tabular}
+\caption{六大家族因子数与 LightGBM 特征重要性（gain，h=60 M7 模型 seed=1）。\textbf{F1 + F3 = 75.5\%}，是预测主力；其余四家族每族 5–8\%，承担 OOD 稳健性与决策精炼。}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{importance_family_share.pdf}
+  \caption{各家族因子数与 gain 占比对比：F1 因子数占比 28.4\% 但 gain 占比 40.4\%（单因子贡献最强）；F5 占比 18.1\%、gain 仅 5.2\%（每个 z-score 因子单看不重要，胜在协同与 OOD 稳健）。}
+\end{figure}
+
+% =========================================================================
+\section{六大因子家族}
+
+\subsection{家族 F1：LOB 派生（105 维）}
+
+\textbf{动机。}盘口 snapshot 自身的价格水平、挂单深度与中位价是任何方向预测的最基本输入。本家族包含原始 OHLC、10 档买卖盘价/量、价差、中位价、加权微价格 WMP，以及订单簿层间结构 \texttt{bid\_diff / ask\_diff}（同侧相邻档位间价格差）。它们刻画"当下盘口长什么样"，是 F2–F6 衍生因子的基底。
+
+\textbf{因子清单。}
+\begin{table}[H]
+\centering\small
+\begin{tabular}{p{0.27\textwidth} p{0.13\textwidth} p{0.45\textwidth}}
+\toprule
+因子（命名） & 维度 & 含义与公式 \\
+\midrule
+\texttt{open,high,low,close} & 4 & 当前 tick 之前 5 ticks 聚合的 K 线四要素 \\
+\texttt{bid$k$, ask$k$} & 20 & 10 档买卖盘价 $k\in\{1..10\}$ \\
+\texttt{bsize$k$, asize$k$} & 20 & 10 档买卖盘挂单量 \\
+\texttt{avgbid, avgask} & 2 & 当 tick 内成交均价（买/卖侧） \\
+\texttt{totalbsize, totalasize} & 2 & 10 档买卖侧累计挂单量 \\
+\texttt{bid\_mean, ask\_mean} & 2 & 10 档买/卖侧价格均值 \\
+\texttt{bsize\_mean, asize\_mean} & 2 & 10 档买/卖侧挂单量均值 \\
+\texttt{midprice$k$} & 10 & $(\mathrm{bid}_k + \mathrm{ask}_k)/2$，10 档分别 \\
+\texttt{spread$k$} & 10 & $\mathrm{ask}_k - \mathrm{bid}_k$，10 档分别 \\
+\texttt{cumspread} & 1 & 10 档价差累计和 \\
+\texttt{imbalance} & 1 & $(\mathrm{totalbsize}-\mathrm{totalasize})/(\mathrm{totalbsize}+\mathrm{totalasize})$ \\
+\texttt{bid\_diff$k$, ask\_diff$k$} & 20 & 同侧相邻档位间价差，刻画 LOB 形态 \\
+\texttt{wmp\_lvl$k$} & 10 & 加权中价 $\mathrm{WMP}_k = \dfrac{\mathrm{ask}_k\cdot\mathrm{bsize}_k + \mathrm{bid}_k\cdot\mathrm{asize}_k}{\mathrm{bsize}_k+\mathrm{asize}_k}$（denominator 为 0 时回退到普通 mid） \\
+\texttt{wmp\_balance\_12} & 1 & $\mathrm{WMP}_1 - \mathrm{WMP}_2$，跨档微价格梯度 \\
+\bottomrule
+\end{tabular}
+\caption{F1 LOB 派生 105 维因子。}
+\end{table}
+
+\textbf{核心代码——WMP（加权微价格）：}
+\begin{lstlisting}
+for k in T3_LOB_LEVELS:  # 1..10
+    b  = X3d[:, :, col_idx[f"bid{k}"]]
+    a  = X3d[:, :, col_idx[f"ask{k}"]]
+    bs = X3d[:, :, col_idx[f"bsize{k}"]]
+    asz= X3d[:, :, col_idx[f"asize{k}"]]
+    denom = bs + asz
+    wmp_normal   = (a * bs + b * asz) / np.where(denom == 0, 1.0, denom)
+    wmp_fallback = (a + b) / 2.0
+    wmp = np.where(denom == 0, wmp_fallback, wmp_normal)
+    out[:, col] = wmp[:, -1]; col += 1
+out[:, col] = wmp_per_level[0][:, -1] - wmp_per_level[1][:, -1]   # wmp_balance_12
+\end{lstlisting}
+
+注意 WMP 的符号约定：分子用 \texttt{ask*bsize + bid*asize}（"短缺侧权重大"），符合 Stoikov 微价格直觉，挂单越少的一侧把 WMP 拉得越接近其报价。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.94\textwidth]{corr_within_F1.pdf}
+  \caption{F1 家族内 Pearson 相关性（采样 10 万行 train）。家族内平均 $|r|=0.154$。
+  10 档同名因子（如 \texttt{bid1..bid10}）形成明显对角块，
+  \texttt{midprice$k$} 与 \texttt{wmp\_lvl$k$} 高度相关（同向价值）。
+  尽管冗余存在，多档信息对 LightGBM 树模型仍有边际价值。}
+\end{figure}
+
+\subsection{家族 F2：多尺度 OFI（50 维）}
+
+\textbf{动机。}订单流不平衡（Order-Flow Imbalance, OFI）是预测短期方向的最强单一信号家族（Cont 2014）。
+SchemeP 在 \emph{多窗口长度} ($W\in\{5,20,60\}$ for MLOFI；$W\in\{50,100\}$ for Kyle/toxicity) 与 \emph{多 EWMA 半衰期} ($\alpha\in\{0.05, 0.1, 0.3, 0.5\}$) 的乘积空间内构造 50 维 OFI 表达，对不同响应速度的市场状态都有覆盖。
+
+\textbf{因子清单。}
+\begin{table}[H]
+\centering\small
+\begin{tabular}{p{0.30\textwidth} p{0.13\textwidth} p{0.45\textwidth}}
+\toprule
+因子（命名） & 维度 & 含义 \\
+\midrule
+\texttt{mlofi\_W$W$\_lvl$k$} & 30 & $k$ 档 OFI 在过去 $W$ tick 的求和，$W\!\in\!\{5,20,60\}$，$k\!\in\!\{1..10\}$ \\
+\texttt{ewma\_ofi\_a$\alpha$\_lvl$k$} & 12 & MLOFI$_{W=20, k}$ 上的 EWMA($\alpha$)，$\alpha\!\in\!\{0.05,0.1,0.3,0.5\}$，$k\!\in\!\{1,5,10\}$ \\
+\texttt{kyle\_inv\_W$W$} & 2 & 反 Kyle 价格冲击：$\mathrm{amount}/\sqrt[3]{|\mathrm{amount}|\cdot\sigma_W}$，$W\!\in\!\{50,100\}$ \\
+\texttt{kyle\_lam\_W$W$} & 2 & Kyle $\lambda$：$\mathrm{cov}(\Delta P, \mathrm{signed\_dvol})/\mathrm{var}(\mathrm{signed\_dvol})$ \\
+\texttt{ofi\_tox\_lvl$k$\_W$W$} & 4 & OFI 毒性：$\mathrm{corr}(\mathrm{OFI}_k, \Delta\mathrm{mid})$ over $W$，$(k,W)\!\in\!\{(1,20),(1,50),(5,20),(5,50)\}$ \\
+\bottomrule
+\end{tabular}
+\caption{F2 多尺度 OFI 50 维因子。}
+\end{table}
+
+\textbf{核心公式——MLOFI（Cont 2014 multi-level OFI）：}
+对每一档 $k$，单 tick 增量
+\[
+e^{(k)}_t = \mathbf{1}_{b^{(k)}_t \ge b^{(k)}_{t-1}}\,\mathrm{bs}^{(k)}_t
+- \mathbf{1}_{b^{(k)}_t \le b^{(k)}_{t-1}}\,\mathrm{bs}^{(k)}_{t-1}
+- \mathbf{1}_{a^{(k)}_t \le a^{(k)}_{t-1}}\,\mathrm{as}^{(k)}_t
++ \mathbf{1}_{a^{(k)}_t \ge a^{(k)}_{t-1}}\,\mathrm{as}^{(k)}_{t-1} .
+\]
+再做窗口求和 $\mathrm{MLOFI}^{(k)}_{t,W}=\sum_{s=t-W+1}^{t} e^{(k)}_s$。
+$b$ 上行（或持平）时贡献 $+\mathrm{bs}$；$b$ 下行时减去 \emph{前一档} bs（即被吃单或撤单消失的挂量），左右对称构成净 bid pressure。
+
+\begin{lstlisting}
+b_prev = np.empty_like(b); b_prev[:, 0] = np.nan; b_prev[:, 1:] = b[:, :-1]
+ind_b_up = (b >= b_prev).astype(np.float64)
+ind_b_dn = (b <= b_prev).astype(np.float64)
+ind_a_dn = (a <= a_prev).astype(np.float64)
+ind_a_up = (a >= a_prev).astype(np.float64)
+e = ind_b_up * bs - ind_b_dn * bs_prev - ind_a_dn * asz + ind_a_up * as_prev
+# 窗口求和:
+out[:, col] = e[:, -W:].sum(axis=-1)
+\end{lstlisting}
+
+\textbf{核心公式——反 Kyle 冲击：}给定 $W$-window log-return $r_W$ 与最后一 tick 净金额 $\Delta\mathrm{amt}$，
+\[
+\mathrm{KyleInv}_W = \frac{\Delta\mathrm{amt}}{\sqrt[3]{|\Delta\mathrm{amt}|\cdot\sigma(r_W)} + \varepsilon},
+\]
+直觉是"在活跃度（$|\Delta\mathrm{amt}|\cdot\sigma$）下，净流动金额能解释多少方向"。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.94\textwidth]{corr_within_F2.pdf}
+  \caption{F2 家族内 Pearson 相关性。块内 $|r|$ 平均 \textbf{0.33}（六族之最），说明
+  多尺度 OFI 内部高度共线：同一 EWMA-$\alpha$ 下不同 level 的 OFI、
+  同一 level 下不同 $W$ 的 MLOFI 都几乎平行。LightGBM 受冗余影响小，
+  但对 NN 而言这是冗余特征——后续 NN 路线用 \emph{L2 正则 + bagging} 抑制。}
+\end{figure}
+
+\subsection{家族 F3：订单流强度（45 维）}
+
+\textbf{动机。}比赛数据有别于传统 LOB 任务的关键在于：主办方直接给出了 \textbf{6 类订单事件的强度},
+\texttt{l}imit / \texttt{m}arket / \texttt{c}ancel 三类 × buy/sell 两侧 = 6 列，并配 \texttt{\_ind / \_acc} 变体。
+这是 \emph{已脱敏的撮合事件计数}，远比"由价量反推 OFI"更直接的方向信号。
+LightGBM 给本家族 35.1\% 的 gain，仅次于 F1。
+
+\textbf{因子清单。}
+\begin{table}[H]
+\centering\small
+\begin{tabular}{p{0.27\textwidth} p{0.13\textwidth} p{0.45\textwidth}}
+\toprule
+因子（命名） & 维度 & 含义 \\
+\midrule
+\texttt{lb/la/mb/ma/cb/ca\_intst} & 6 & limit-bid / limit-ask / market-bid / market-ask / cancel-bid / cancel-ask 强度 \\
+\texttt{lb/la/mb/ma/cb/ca\_ind}   & 6 & 上述 6 类强度的 indicator 变体 \\
+\texttt{lb/la/mb/ma/cb/ca\_acc}   & 6 & 累计变体 \\
+\texttt{ewma\_a$\alpha$\_$c$\_intst} & 24 & 6 类 intst 在 EWMA($\alpha$) 滤波，$\alpha\in\{0.05, 0.1, 0.3, 0.5\}$ \\
+\texttt{cancel\_imb\_W$W$} & 3 & 撤单不平衡：$\frac{\mathrm{cb}_W}{\mathrm{lb+mb+cb}_W} - \frac{\mathrm{ca}_W}{\mathrm{la+ma+ca}_W}$，$W\in\{20,50,100\}$ \\
+\bottomrule
+\end{tabular}
+\caption{F3 订单流强度 45 维因子。}
+\end{table}
+
+\textbf{核心公式——EWMA-滤波订单强度：}
+\[
+\widetilde{x}^{(\alpha)}_t = \alpha\,x_t + (1-\alpha)\,\widetilde{x}^{(\alpha)}_{t-1},
+\quad \widetilde{x}^{(\alpha)}_0 = x_0.
+\]
+通过 \texttt{scipy.signal.lfilter} 的 IIR 形式 $(b=[\alpha], a=[1, -(1-\alpha)])$ 批量计算，避免 Python 循环。
+
+\begin{lstlisting}
+def _ewma_last_batch(x, alphas):  # x: (N, T)
+    out = np.zeros((x.shape[0], len(alphas)))
+    for i, a in enumerate(alphas):
+        b = np.array([a])
+        a_filt = np.array([1.0, -(1.0 - a)])
+        zi = ((1.0 - a) * x[:, :1])
+        y, _ = lfilter(b, a_filt, x, axis=-1, zi=zi)
+        out[:, i] = y[:, -1]
+    return out
+\end{lstlisting}
+
+\textbf{Cancel imbalance 公式：}
+\[
+\mathrm{cancel\_imb}_W = \frac{\sum_{t-W}^{t}\mathrm{cb}}{\sum_{t-W}^{t}(\mathrm{lb}+\mathrm{mb}+\mathrm{cb}) + \varepsilon}
+- \frac{\sum_{t-W}^{t}\mathrm{ca}}{\sum_{t-W}^{t}(\mathrm{la}+\mathrm{ma}+\mathrm{ca}) + \varepsilon}.
+\]
+即买侧撤单占总事件的份额减去卖侧撤单占总事件的份额，正值=买侧主动撤更多（卖压隐含上升）。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.94\textwidth]{corr_within_F3.pdf}
+  \caption{F3 家族内 Pearson 相关性，平均 $|r|=0.18$。
+  6 类原始强度 $\times$ 4 个 EWMA-$\alpha$ 形成 24 维 EWMA 块，同一原始列在不同 $\alpha$ 下高度相关；
+  \texttt{cancel\_imb\_W*} 三档跨窗口高度相关但与挂单/成交强度近乎正交。}
+\end{figure}
+
+\textbf{Top 4 全局重要性都在 F3。}LightGBM 的 top features：\texttt{ma\_intst}（gain 0.9）、\texttt{mb\_intst}（0.9）、\texttt{la\_intst}（0.6）、\texttt{lb\_intst}（0.6）。可见模型最依赖的是 \emph{原始 4 维（market 与 limit 两类买卖强度）}，EWMA 滤波版本仅作为辅助。
+
+\subsection{家族 F4：微结构波动（29 维）}
+
+\textbf{动机。}波动率不仅决定信号强度，也决定阈值与仓位。SchemeP 用 4 个角度刻画微结构波动：
+\emph{无符号波动率} $\mathrm{RV}=\sum r^2$、
+\emph{方向化波动率} signed RV（上行 vs 下行 RV）、
+\emph{跳跃稳健估计} 二次方变差（bipower BV）、以及
+\emph{活跃度突发} vol/amt burst（瞬时成交相对窗口均值）。
+
+\textbf{因子清单。}
+\begin{table}[H]
+\centering\small
+\begin{tabular}{p{0.30\textwidth} p{0.13\textwidth} p{0.45\textwidth}}
+\toprule
+因子（命名） & 维度 & 含义 \\
+\midrule
+\texttt{volume\_delta, amount\_delta} & 2 & 单 tick 成交量/金额（log1p 后） \\
+\texttt{rv\_w$W$} & 4 & $\sqrt{\sum_{t-W}^{t} r^2}$，$W\!\in\!\{5,10,20,50\}$，基于 \texttt{wmp\_lvl1+1} 的 log-return \\
+\texttt{signed\_rv\_W$W$} & 3 & $(\mathrm{RV}_+ - \mathrm{RV}_-)/(\mathrm{RV}_+ + \mathrm{RV}_- + \varepsilon)$，$W\!\in\!\{20,50,100\}$ \\
+\texttt{rskew\_W$W$} & 3 & log-return 的 sample skewness，clip $[-10,10]$ \\
+\texttt{signed\_bv\_W$W$} & 3 & 带符号二次方变差 $\frac{\pi}{2}\sum \mathrm{sign}(r_t)|r_t||r_{t-1}|$，归一化于 $\mathrm{RV}_W$ \\
+\texttt{vol\_burst\_W$W$, amt\_burst\_W$W$} & 4 & 最后一 tick volume/|amount| 除以 $W$-window 均值 \\
+\texttt{rv\_ratio\_W$W_n$\_W$W_d$} & 3 & 不同窗口长度的 RV 比，$(W_n,W_d)\!\in\!\{(5,50),(20,100),(50,100)\}$ \\
+\texttt{jshare\_W$W$} & 4 & 跳跃份额 $(RV_W - BV_W)/RV_W$，$W\!\in\!\{20,30,50,100\}$ \\
+\texttt{roll\_eff\_spr\_ratio\_W$W$} & 3 & Roll 有效价差 / 报价价差比，$W\!\in\!\{30,50,100\}$ \\
+\bottomrule
+\end{tabular}
+\caption{F4 微结构波动 29 维因子。}
+\end{table}
+
+\textbf{核心公式——Signed RV：}
+\[
+\mathrm{signedRV}_W = \frac{\sum_{t-W}^{t} r_t^2 \mathbf{1}_{r_t>0} - \sum_{t-W}^{t} r_t^2 \mathbf{1}_{r_t<0}}
+                          {\sum_{t-W}^{t} r_t^2 + \varepsilon}\in[-1, 1].
+\]
+
+\textbf{核心公式——Jump share (Barndorff-Nielsen \& Shephard)：}
+\[
+\mathrm{jshare}_W = \max\!\Big(0,\,\frac{RV_W - BV_W}{RV_W}\Big),
+\quad BV_W = \frac{\pi}{2}\sum |r_t||r_{t-1}| .
+\]
+当价格连续时 $BV\approx RV$，jshare $\to 0$；出现单 tick 跳跃时 $RV \gg BV$，jshare $\to 1$。
+
+\textbf{核心公式——Roll 有效价差：}
+$\mathrm{eff} = 2\sqrt{\max(0, -\mathrm{cov}(\Delta P_t, \Delta P_{t-1}))}$，归一化于报价价差 \texttt{spread1+1}。
+连续成交里的负自协方差是 bid/ask 跳跃造成的，Roll 估计便是其反推有效价差。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.94\textwidth]{corr_within_F4.pdf}
+  \caption{F4 家族内 Pearson 相关性，平均 $|r|=0.16$。
+  \texttt{rv\_w*} 四个窗口高度相关（无符号波动率本质同源），
+  jshare / signed\_rv 与 rv 几乎正交，提供独立信息。}
+\end{figure}
+
+\subsection{家族 F5：窗口统计（67 维）}
+
+\textbf{动机。}本家族是 SchemeP 区别于纯"原始 LOB + OFI"基线的胜负手，
+也是\textbf{解决 OOD 漂移的核心}。所有因子都是把"绝对水平"通过 100-tick 窗口内的统计量
+（z-score、quantile rank、median-IQR、长短期 z-score 差）转成"相对水平"，
+跨股票/跨日的基差被压缩到同一动态范围。
+
+\textbf{因子清单。}
+\begin{table}[H]
+\centering\small
+\begin{tabular}{p{0.28\textwidth} p{0.12\textwidth} p{0.48\textwidth}}
+\toprule
+因子（命名） & 维度 & 含义 \\
+\midrule
+\texttt{dualz\_$c$} & 37 & \textbf{Dual-window z-score}：$z_{20} - z_{100}$，其中 $z_W = (c_t - \mu_W)/\sigma_W$，对 37 个 base 列做 \\
+\texttt{qrank\_W100\_$c$} & 20 & 100-tick rank: $\mathrm{rank}(c_t) = \frac{1}{W}\sum \mathbf{1}_{c_s \le c_t}$，对 20 个 base 列 \\
+\texttt{mid\_ewma\_resid\_a0.05} & 1 & midprice $-$ EWMA($\alpha=0.05$) midprice，clip $[-0.05, 0.05]$ \\
+\texttt{adapt\_mom\_W$W$} & 3 & 自适应动量 $(\mathrm{mid}_t - \mathrm{mid}_{t-W})/\sigma_W(\mathrm{mid})$ \\
+\texttt{spread\_reg\_W$W$} & 3 & 稳态化价差 $(\mathrm{spread}_t - \mathrm{median}_W)/\mathrm{IQR}_W$ \\
+\texttt{trade\_pers\_W$W$} & 3 & 方向持续性 lag-1 autocorr of $\mathrm{sign}(\Delta\mathrm{mid})$ \\
+\bottomrule
+\end{tabular}
+\caption{F5 窗口统计 67 维因子。}
+\end{table}
+
+\textbf{核心公式——Dual-window z-score（决胜 OOD 的"trick"）：}
+\[
+\mathrm{dualz}(c)_t = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon}
+                   - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon} .
+\]
+这是 \emph{短窗 z - 长窗 z}：等价于"当前 tick 相对短期均值偏离 \emph{多于} 长期均值偏离的程度"，
+对均值水平不敏感（两个 z 相减消除了全局基差），对方差也鲁棒（同样除掉了 $\sigma$）。
+SchemeP 对 37 个 base 列做 dualz，涵盖价差、midprice、size、6 类 intst、bid\_diff 等。
+
+\begin{lstlisting}
+dz_idx = np.array([col_idx[c] for c in DUAL_Z_COLS])
+X_dz = X3d[:, :, dz_idx]                    # (N, T, 37)
+last  = X_dz[:, -1, :]                       # (N, 37)
+seg20 = X_dz[:, -20:, :]
+seg100= X_dz[:, -100:, :]
+m20, s20  = seg20.mean(1),  seg20.std(1, ddof=0)
+m100,s100 = seg100.mean(1), seg100.std(1, ddof=0)
+z_s = (last - m20)  / (s20  + EPS)
+z_l = (last - m100) / (s100 + EPS)
+dual = np.where(np.isfinite(z_s - z_l), z_s - z_l, 0.0)   # (N, 37)
+\end{lstlisting}
+
+\textbf{Q-rank：}
+\[
+\mathrm{qrank}(c)_t = \frac{1}{W}\sum_{s=t-W+1}^{t} \mathbf{1}_{c_s \le c_t} \in [0,1] .
+\]
+对 \emph{重尾} 因子（如 \texttt{amount\_delta}）尤其稳健——分位数对极端值不敏感。
+
+\textbf{Adapt-mom（自适应动量）：}
+\[
+\mathrm{adapt\_mom}_W = \frac{\mathrm{mid}_t - \mathrm{mid}_{t-W}}{\sigma_W(\mathrm{mid}) + \varepsilon}, \quad W\in\{20,50,100\}.
+\]
+是经典 momentum 除以"近期波动"——相当于把动量用近期波动校准为 z-单位。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.94\textwidth]{corr_within_F5.pdf}
+  \caption{F5 家族内 Pearson 相关性，平均 $|r|=0.088$（六族之最低）。
+  \textbf{Dual-z 因子之间几乎相互正交}，是 SchemeP 信息密度最高的家族。
+  这一低共线性也支撑了"window-z 是 OOD 决胜 trick"的事实：每个 dualz 都带来独立信息。}
+\end{figure}
+
+\subsection{家族 F6：不对称性（74 维）}
+
+\textbf{动机。}本家族刻画 \emph{买卖两侧的相对差异}：广义 OFI（GOFI）量化"价格档位变化下挂量净流向"，
+liq-asym 用 top-5 size 比值取对数；\texttt{*\_rate} 用滚动平均归一化每档价/量，刻画对自身均值的偏离。
+
+\textbf{因子清单。}
+\begin{table}[H]
+\centering\small
+\begin{tabular}{p{0.28\textwidth} p{0.13\textwidth} p{0.47\textwidth}}
+\toprule
+因子（命名） & 维度 & 含义 \\
+\midrule
+\texttt{gofi\_W$W$\_lvl$k$} & 30 & 广义 OFI，按价格变化方向分类挂量增减，$W\!\in\!\{5,20,60\}$，$k\!\in\!\{1..10\}$ \\
+\texttt{liq\_asym\_top5\_W$W$} & 4 & $\log\big((1{+}\sum_{1..5}\mathrm{bsize}_W)/(1{+}\sum_{1..5}\mathrm{asize}_W)\big)$ \\
+\texttt{bid\_rate$k$, ask\_rate$k$} & 20 & 主办方滑动平均价格变化率（同侧） \\
+\texttt{bsize\_rate$k$, asize\_rate$k$} & 20 & 主办方滑动平均量变化率（同侧） \\
+\bottomrule
+\end{tabular}
+\caption{F6 不对称性 74 维因子。}
+\end{table}
+
+\textbf{核心公式——GOFI（广义 OFI）：}
+区别于 MLOFI 严格按"价格上下行 + 同档量增减"，GOFI 把同价不变时的挂量净变化也算进去：
+\[
+e^{(k)}_t = \underbrace{\mathbf{1}_{b\uparrow} \cdot \mathrm{bs}_t - \mathbf{1}_{b\downarrow} \cdot \mathrm{bs}_{t-1} + \mathbf{1}_{b=}(\mathrm{bs}_t - \mathrm{bs}_{t-1})}_{\text{bid contribution}}
+\;+\;
+\underbrace{\mathbf{1}_{a\uparrow} \cdot \mathrm{as}_{t-1} - \mathbf{1}_{a\downarrow} \cdot \mathrm{as}_t - \mathbf{1}_{a=}(\mathrm{as}_t - \mathrm{as}_{t-1})}_{\text{ask contribution}}
+\]
+\[
+\mathrm{GOFI}_{W,k} = \sum_{t-W+1}^{t} e^{(k)}_s .
+\]
+
+\begin{lstlisting}
+b_lag, a_lag = b[:, :-1], a[:, :-1]
+bs_lag, as_lag = bs[:, :-1], asz[:, :-1]
+bnow, anow = b[:, 1:], a[:, 1:]
+bsnow, asnow = bs[:, 1:], asz[:, 1:]
+bid_up = (bnow > b_lag) * bsnow
+bid_dn = (bnow < b_lag) * bs_lag
+bid_eq = (bnow == b_lag) * (bsnow - bs_lag)
+bid_cont = bid_up - bid_dn + bid_eq
+# ask 对称：注意 ask_eq 与 bid_eq 符号相反
+ask_up = (anow > a_lag) * as_lag
+ask_dn = (anow < a_lag) * asnow
+ask_eq = (anow == a_lag) * (asnow - as_lag)
+ask_cont = ask_up - ask_dn - ask_eq
+e_t = bid_cont + ask_cont                # 单 tick
+\end{lstlisting}
+
+\textbf{Liquidity asymmetry：}
+\[
+\mathrm{liq\_asym}^{\text{top5}}_W = \log\frac{1+\sum_{k=1}^{5} \sum_{s=t-W+1}^{t}\mathrm{bsize}^{(k)}_s}
+                                                {1+\sum_{k=1}^{5} \sum_{s=t-W+1}^{t}\mathrm{asize}^{(k)}_s},
+\quad W\in\{5,20,50,100\} .
+\]
+对数比有两个好处：(i) 量纲对称（正/负代表买/卖侧更厚）；(ii) $+1$ 在分子分母防 0 除。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.94\textwidth]{corr_within_F6.pdf}
+  \caption{F6 家族内 Pearson 相关性，平均 $|r|=0.12$。
+  GOFI 30 维子块中跨档/跨窗口相关较强；\texttt{*\_rate} 4 个子块（bid/ask price-rate、bid/ask size-rate）
+  彼此正交但同子块内 10 档间高度相关。}
+\end{figure}
+
+% =========================================================================
+\section{三类关键预处理}
+
+\subsection{Sign-preserving log1p（重尾压缩）}
+
+针对 \texttt{amount\_delta} 这种 6$\sigma$ 重尾且可正可负的字段，普通 log 不可用。SchemeP 在 raw last-tick 处理：
+\[
+x \mapsto \mathrm{sign}(x)\cdot\log(1+|x|) .
+\]
+保留方向，将量纲从 $\sim 10^8$ 压缩到 $\sim 18$。
+
+\begin{lstlisting}
+raw_last = X3d[:, -1, :].astype(np.float32)
+amt_idx  = col_idx["amount_delta"]
+v = raw_last[:, amt_idx]
+raw_last[:, amt_idx] = np.sign(v) * np.log1p(np.abs(v))
+\end{lstlisting}
+
+\subsection{Window-z（核心：跨股票/跨日基差消除）}
+
+详见 §4.5 的 dualz 实现。直觉的"为什么"：
+LightGBM 的分裂阈值是 \emph{绝对值}；如果训练时一只股票的 \texttt{spread1} 集中在 0.001，
+测试时另一只股票（含训练外股票，构成 OOD）集中在 0.003，
+则训练学到的分裂阈值在测试上全错位。
+Window-z 通过当 tick 100 ticks 内的 mean/std 把绝对值映射到无量纲 $z$，
+跨股票的"分裂可比性"得到恢复。
+
+公榜 OOD 阶段 PnL 从 $-6.65$ 跃升至 $+35.64$（增益 $+42.29$），window-z 是其中两个关键 trick 之一。
+
+\subsection{Mirror augmentation（镜像增强）}
+
+不属于因子构造，但 SchemeP 训练用：把每条 \texttt{(X, y\_reg, y\_cls)} 复制一份并 \emph{镜像}——
+所有"bid 类"与对应"ask 类"列对换、$y_{\mathrm{reg}}\to -y_{\mathrm{reg}}$、$y_{\mathrm{cls}}\to 2-y_{\mathrm{cls}}$。
+这迫使模型学到完美的 bid/ask 对称性，避免训练集中某一方向占主导的偏倚，
+对 50-seed bagging 的 robust 也起到了"先验对称化"作用。
+
+% =========================================================================
+\section{特征重要性分析}
+
+\subsection{全局 Top 40 因子}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{importance_top40.pdf}
+  \caption{LGB feature importance Top 40（按家族着色，gain 越大越重要）。
+  Top 4 全部为 F3 \texttt{ma/mb/la/lb\_intst}（market/limit 买卖强度原始 4 维），
+  紧接着 F1 的 \texttt{asize1, totalasize, bsize1, avgbid/avgask, totalbsize, asize2}。
+  绿色（F3）+ 蓝色（F1）几乎垄断 Top 20。}
+\end{figure}
+
+\subsection{家族 gain 占比与单因子贡献}
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{lrrrr}
+\toprule
+家族 & 因子数 & gain 占比 (\%) & 平均单因子 gain (\%) & 单因子相对贡献 \\
+\midrule
+F1 LOB 派生        & 105 & 40.4 & 0.385 & 1.42$\times$\\
+F2 多尺度 OFI      &  50 &  5.5 & 0.110 & 0.41$\times$\\
+F3 订单流强度      &  45 & 35.1 & 0.780 & \textbf{2.89$\times$} \\
+F4 微结构波动      &  29 &  7.5 & 0.259 & 0.96$\times$\\
+F5 窗口统计        &  67 &  5.2 & 0.077 & 0.29$\times$ \\
+F6 不对称性        &  74 &  6.3 & 0.085 & 0.32$\times$ \\
+\midrule
+均值                & 61.7 & 16.67 & 0.270 & 1.00$\times$ \\
+\bottomrule
+\end{tabular}
+\caption{单因子相对贡献=家族平均 gain / 全局平均 gain。F3 最高（2.89$\times$），F5/F6 偏低（$<0.35\times$）。}
+\end{table}
+
+\textbf{关键观察：}F3 的单因子贡献是 F5 的近 \textbf{10 倍}。LightGBM 是一颗树一次只看一个特征做分裂的"贪心"模型，强单因子（F3 原始 intst）有压倒性优势；
+而 F5 的 z-score 因子"个个不显眼，胜在彼此正交，组合起来形成稳健的决策边界"——这与 §6.3 的 OOD 角度互补：
+单因子重要性低 $\ne$ 家族不重要。Ablation 中关掉 F5 时，private board OOD PnL 显著下降。
+
+% =========================================================================
+\section{家族间相关性}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{corr_block_summary.pdf}
+  \caption{6$\times$6 家族间 block 相关性，块内平均 $|r|$。
+  对角线（块内自身）：F2 OFI 0.33 最高（族内高度共线），F5 z-score 0.07 最低（族内近正交）。
+  非对角线：F2$\leftrightarrow$F6 = 0.176（MLOFI 与 GOFI 同源）、F4$\leftrightarrow$F1 = 0.063（波动率与价差正相关）、
+  F3$\leftrightarrow$F4 = 0.065（订单事件强度与波动率适度相关）；
+  其余跨家族 $|r|<0.07$。}
+\end{figure}
+
+\textbf{结论：}
+\begin{itemize}[leftmargin=2em,itemsep=2pt,topsep=2pt]
+  \item \textbf{F2 与 F6 高度互相关（0.176）}——MLOFI 与 GOFI 同根同源（一为"按价格方向分类挂量增减"，一为"含同价时的挂量变化"），是冗余度最高的家族对。Ablation 显示 F6 全删后模型轻微下降；同时删 F2+F6 才会显著下降，证实两者承担同一信息量的不同切面。
+  \item \textbf{F5 与所有家族近正交（$|r|<0.07$）}——dualz / qrank 通过滚动归一化把绝对水平"扔掉了"，剩下的是相对位置，与任何"绝对水平"族都几乎不相关。这正是 F5 提供独立 OOD 信号的几何解释。
+  \item \textbf{F1 与 F3 块间 0.035}——两个最重要的家族居然几乎正交，说明 LightGBM 同时拿到两者时获得几乎"无冗余"的高信息组合。
+\end{itemize}
+
+% =========================================================================
+\section{讨论与决策记录}
+
+\textbf{为何 SchemeP 在 OOD 上稳健？}
+\begin{enumerate}[leftmargin=2em,itemsep=2pt,topsep=2pt]
+  \item \textbf{F5 窗口统计的独立性}：dualz/qrank 把跨股票/跨日基差消除，使决策阈值在 OOD 上仍然有效。
+  \item \textbf{F1 + F3 的高单因子信息量}：在 in-distribution 阶段已经把"该容易的容易点"赚到极限。
+  \item \textbf{F2/F6 的多尺度冗余}：单尺度 OFI 在不同市场环境下表现飘移，多尺度 + EWMA-$\alpha$ ensemble 给出稳定平均。
+  \item \textbf{F4 的跳跃稳健估计}：BV/jshare 把跳跃从波动率中分离，让阈值搜索不被极端 tick 干扰。
+  \item \textbf{50-seed bagging + mirror augmentation}：把上述六族的方差吸收掉，最终 OOD PnL 从 $-6.65$ 拉到 $+35.64$。
+\end{enumerate}
+
+\textbf{决策记录：}
+\begin{itemize}[leftmargin=2em,itemsep=2pt,topsep=2pt]
+  \item \emph{家族划分}：本报告 F1 LOB 派生 105 维偏大，因为它把"raw 10 档价/量"全部纳入；
+        如果只算 \emph{derived}（midprice/spread/wmp 等）则只剩 35 维，更接近 onepage 摘要里的 "\textasciitilde 30 维"。
+        本报告选择"全部 370 维都归入某一家族"的口径，更便于审计。
+  \item \emph{LGB 模型选择}：用 \texttt{big50\_lgb\_m7/seed1/model.txt}（M7 重训第 1 个种子，370 维全量，未 drop11），
+        单 seed gain 已与 50-seed 平均 gain 高度一致（rank corr $>0.95$），用单 seed 报特征重要性具有代表性。
+  \item \emph{相关性采样规模}：从 1.47M 行 train 中均匀采样 100 K，计算 370$\times$370 Pearson；
+        与全量计算的 block-mean$|r|$ 差距 $<0.005$。
+  \item \emph{drop11 vs 全 370}：训练时丢弃的 11 维（如 \texttt{kyle\_lam\_W*}、\texttt{liq\_asym\_top5\_W5}、\texttt{qrank\_W100\_spread*}）大多对应 LGB gain $<0.01$ 的尾部因子，
+        对 OOD 有微小过拟合风险——drop 后训练更稳。本报告统计基于 370 维口径以保留完整信息。
+\end{itemize}
+
+\textbf{结论。}SchemeP 的 370 维因子并非单纯堆量：六大家族在 \emph{信息维度上互补}（F1/F3 提供强单因子绝对信号、F5 提供近正交的相对信号、F2/F6 提供多尺度 OFI 稳健性、F4 提供波动率与跳跃稳健性），
+配合 sign-preserving log1p、window-z、mirror augmentation 三类预处理以及 50-seed bagging，
+是良文杯 2026 公榜/私榜双第一的核心因子工程基础。
+
+\end{document}
