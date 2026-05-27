@@ -32,6 +32,7 @@
 \usepackage{pifont}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{graphicx}
 \usepackage{url}
 
 % Tighten everything
@@ -47,9 +48,14 @@
 \captionsetup{font=scriptsize,skip=1pt,labelfont=bf}
 \setlist[itemize]{leftmargin=*,topsep=0pt,itemsep=0pt,parsep=0pt,labelsep=4pt}
 
-% ICML-like section headings
+% Section/title color: dark blue. Trick highlight: light blue.
 \definecolor{icmlblue}{RGB}{0,30,90}
 \definecolor{accred}{RGB}{170,0,0}
+\definecolor{lblue}{RGB}{40,120,210}
+\newcommand{\hl}[1]{\textcolor{lblue}{\textbf{#1}}}
+\newcommand{\hlA}[1]{\hl{#1}}
+\newcommand{\hlB}[1]{\hl{#1}}
+\newcommand{\hlC}[1]{\hl{#1}}
 \titleformat{\section}{\normalfont\bfseries\color{icmlblue}\small}{\thesection.}{0.3em}{}
 \titlespacing*{\section}{0pt}{3pt}{1pt}
 
@@ -79,6 +85,16 @@
 
 我们同时基于 Claude Code 的 Agent Harness 构建了 Manager-Worker 多 Agent 架构、并集成至飞书 IM，实现\textbf{正确性、高效性、可追溯性}的 Coding Agent 研究流程：一周内完成约 200 组本地实验、约 200 次 commit。代码开源于 \url{https://github.com/JingzheShi/liangwenbei}。
 
+\begin{center}
+\vspace{-3pt}
+\includegraphics[width=\linewidth]{Pipeline_Img.png}\\[2pt]
+\begin{minipage}{0.97\linewidth}
+\scriptsize\itshape
+Fig.~1：方案 pipeline 概览——Data $\to$ 6 家族 Feature $\to$ NN(MLP) 与 LGB(L2 回归) 异质 Model $\to$ Ensemble $\to$ Execution（ETUD 阈值学习）$\to$ Label。
+\end{minipage}
+\vspace{-2pt}
+\end{center}
+
 
 
 
@@ -94,41 +110,58 @@
 以 154 维原始字段为底，叠加 216 维派生量、按 KS 检验丢弃 11 个分布偏移敏感列，得到 SchemeP 共 359 维，分六大家族：
 \begin{itemize}
   \setlength{\itemsep}{0pt}
-  \item \textbf{LOB 派生}（$\sim$30 维）：midprice / spread / imbalance / 微价格；
-  \item \textbf{多尺度 OFI}（$\sim$50 维）：MLOFI / EWMA-OFI 多 $\alpha$ / Kyle $\lambda$ rolling, $W\!\in\!\{5,20,50,100\}$；
-  \item \textbf{订单流强度}（$\sim$30 维）：6 类订单 \texttt{intst/ind/acc} $+$ cancel pressure；
-  \item \textbf{微结构波动}（$\sim$25 维）：signed RV / bipower / Roll / vol-burst；
-  \item \textbf{窗口统计}（$\sim$60 维）：100-tick z-score / dual-z / quantile rank；
-  \item \textbf{不对称性}（$\sim$30 维）：bid/ask asymmetry / GOFI / EWMA residual。
+  \item \hlA{LOB 派生}（$\sim$30 维）：midprice / spread / imbalance / 微价格；
+  \item \hlA{多尺度 OFI}（$\sim$50 维）：MLOFI / EWMA-OFI 多 $\alpha$ / Kyle $\lambda$ rolling, $W\!\in\!\{5,20,50,100\}$；
+  \item \hlA{订单流强度}（$\sim$30 维）：6 类订单 \texttt{intst/ind/acc} $+$ cancel pressure；
+  \item \hlA{微结构波动}（$\sim$25 维）：signed RV / bipower / Roll / vol-burst；
+  \item \hlA{窗口统计}（$\sim$60 维）：100-tick z-score / dual-z / quantile rank；
+  \item \hlA{不对称性}（$\sim$30 维）：bid/ask asymmetry / GOFI / EWMA residual。
 \end{itemize}
-三类关键预处理：(i) \textbf{窗口内 $z$-score}——所有统计量在 100-tick 切片内自适应归一化，跨 stock 分布差异被窗口吸收；(ii) \textbf{方向对称增强}——样本与"bid/ask 互换 $+$ 标签反转"的镜像拼接，训练集 $\times 2$，强制方向对称；(iii) \textbf{重尾压制}——对 \texttt{amount\_delta}（$10^3$--$10^6$ 量级）做保号 log：$v\mapsto\operatorname{sign}(v)\log(1{+}|v|)$。
+三类关键预处理：
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \item \hlA{window-$z$ score}（输入归一化）——所有统计量在 100-tick 切片内自适应归一化，跨 stock 分布差异被窗口吸收；
+  \item \hlA{买卖镜像数据增强}——样本与"bid/ask 互换 $+$ 标签反转"的镜像拼接，训练集 $\times 2$，强制方向对称；
+  \item \hlA{稳健归一化}（重尾压制）——对 \texttt{amount\_delta}（$10^3$--$10^6$ 量级）做保号 log：$v\mapsto\operatorname{sign}(v)\log(1{+}|v|)$。
+\end{itemize}
+
+\begin{center}
+\vspace{-2pt}
+\includegraphics[width=\linewidth]{Feature_Img.pdf}\\[1pt]
+\begin{minipage}{0.97\linewidth}
+\scriptsize\itshape
+Fig.~2：因子工程概览。\textbf{左}：六家族维度占比（浅）与 LGB gain\% 贡献（深）——\hl{F1+F3 共 75.5\%} 占主导；\textbf{中}：Top-10 因子全部落在 F3 订单流强度（4）与 F1 LOB 派生（6）；\textbf{右}：家族间 |corr| block-mean，F5 窗口统计与其它族均接近正交（$\leq 0.07$），为 OOD 稳健性提供 anchor。
+\end{minipage}
+\vspace{-2pt}
+\end{center}
 
 % =========================================================
 \section{模型工程}
 两类基础模型，族内 simple mean，跨族固定权重 $1.5\!:\!1$ (LGB:NN)：
 \begin{itemize}
   \setlength{\itemsep}{0pt}
-  \item \textbf{NN：4-layer MLP}，$[359{\to}256{\to}128{\to}64{\to}1]$，LayerNorm $+$ GELU $+$ Dropout（$\sim$120k 参数）。LayerNorm 在样本级归一化以避免 batch 内污染。刻意不用 RNN/Transformer/CNN——窗口内因子已蒸馏 100-tick 时序信息，更复杂架构在本任务上 in-sample 易膨胀。
-  \item \textbf{LGB：L2 $\Delta$mid 回归}，\texttt{objective=regression\_l2}，目标 $y = (\mathrm{mp}_{t+60} {-} \mathrm{mp}_t)/(\mathrm{mp}_t {+} 1)$，以 h=60 三分类频率倒数为 class-balanced 样本权重，使稀疏涨/跌样本得到更高梯度。
+  \item \hlB{NN}：4-layer MLP，$[359{\to}256{\to}128{\to}64{\to}1]$，LayerNorm $+$ GELU $+$ Dropout（$\sim$120k 参数）。LayerNorm 在样本级归一化以避免 batch 内污染。刻意不用 RNN/Transformer/CNN——窗口内因子已蒸馏 100-tick 时序信息，更复杂架构在本任务上 in-sample 易膨胀。
+  \item \hlB{LGB}：L2 $\Delta$mid 回归，\texttt{objective=regression\_l2}，目标 $y = (\mathrm{mp}_{t+60} {-} \mathrm{mp}_t)/(\mathrm{mp}_t {+} 1)$，以 h=60 三分类频率倒数为 class-balanced 样本权重，使稀疏涨/跌样本得到更高梯度。
 \end{itemize}
 
 
 \section{训练和模型集成}
-\textbf{两阶段决策焦点训练 (SPO+ DFL)}：NN 先做 L2 回归预训练（Phase 1），再 warm-start 联合 L2 $+$ SPO+ surrogate 微调（Phase 2），将梯度直接对齐离散动作的期望收益。给定单边手续费 $f$，oracle 动作 $z^{\star}(y){=}\operatorname{sign}(y)\,\mathbf{1}[|y|{>}f]$，联合损失：
+\hlC{两阶段决策焦点训练 (SPO+ DFL)}：NN 先做 L2 回归预训练（Phase 1），再 warm-start 联合 L2 $+$ SPO+ surrogate 微调（Phase 2），将梯度直接对齐离散动作的期望收益。给定单边手续费 $f$，oracle 动作 $z^{\star}(y){=}\operatorname{sign}(y)\,\mathbf{1}[|y|{>}f]$，联合损失：
 \[
 \ell_{\mathrm{SPO+}}(\hat y,y;f) = \mathrm{ReLU}(|2\hat y{-}y|{-}f) {-} z^{\star}(y)(2\hat y{-}y) {+} f|z^{\star}(y)|,
 \]
 \[
 L = (\hat y{-}y)^2 + \lambda\,\ell_{\mathrm{SPO+}},\quad \lambda{=}30,\ \mathrm{lr}{=}3{\times}10^{-5},\ 11\,\mathrm{ep}.
 \]
-\textbf{全量数据 retrain}：调参/早停阶段用 \texttt{train 0--79 / val 80--95}；最终提交将训练区推到 \texttt{date 0--119} 全量，迭代数取早停值 $\times 1.1$。\textbf{集成}：5 组超参 $\times$ 10 seed 训练 50 LGB $+$ 50 NN，simple mean 不学权重——NN-NN avg corr $0.93$、LGB-LGB $0.84$、设计矩阵条件数 $5.4{\times}10^{4}$，bounded NNLS 学权重本地涨但公榜 $-4.64$；病态共线性下 simple mean 是 OOD 稳健最优。
+\par\hlC{全量数据重训练}：调参/早停阶段用 \texttt{train 0--79 / val 80--95}；最终提交将训练区推到 \texttt{date 0--119} 全量，迭代数取早停值 $\times 1.1$。
+\par\hlC{模型集成}：5 组超参 $\times$ 10 seed 训练 50 LGB $+$ 50 NN，simple mean 不学权重——NN-NN avg corr $0.93$、LGB-LGB $0.84$、设计矩阵条件数 $5.4{\times}10^{4}$，bounded NNLS 学权重本地涨但公榜 $-4.64$；病态共线性下 simple mean 是 OOD 稳健最优。
 
 
 
 
 % =========================================================
 \section{执行侧}
-集成预测 $\hat y$ 通过非对称 EV gate 解码为离散动作：
+\hlC{非对称阈值 (ETUD)}：集成预测 $\hat y$ 通过非对称 EV gate 解码为离散动作：
 \[
 \hat a = \begin{cases}
 +1\,(\text{买}), & \hat y > +\theta_{\mathrm{up}},\\[-1pt]
@@ -150,35 +183,34 @@ $\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$、$\theta_{\mathrm{dn}}{=}2.16{\tim
 \toprule
 \# & Setting & Test PnL & $\Delta$ \\
 \midrule
-\multicolumn{4}{@{}l}{\textit{\color{icmlblue}NN path — 154 raw $\to$ 6 家族渐进 $\to$ 359 (NN backbone, 主线)}} \\
+\multicolumn{4}{@{}l}{\textit{\color{icmlblue}Neural Network path}} \\
 1 & NN 154 raw + 分类 Loss (3-class CE)                                                       & $+0.69{\scriptscriptstyle\,\pm 0.13}$ & --- \\
-2 & NN 154 raw + L2 regression Loss                                                       & $+0.52{\scriptscriptstyle\,\pm 0.48}$ & $-0.17$ \\
-3 & NN 154 raw + L2 + window-$z$ (输入归一化)                                                       & $+23.40{\scriptscriptstyle\,\pm 1.90}$ & $+22.88$ \\
-4 & + LOB 派生 Feature                                                       & $+23.33{\scriptscriptstyle\,\pm 1.54}$ & $-0.07$ \\
-5 & + 多尺度 OFI Feature                                                       & $+25.90{\scriptscriptstyle\,\pm 1.98}$ & $+2.57$ \\
-6 & + 订单流强度 Feature                                                       & $+29.49{\scriptscriptstyle\,\pm 1.38}$ & $+3.59$ \\
-7 & + 微结构波动 Feature                                                       & $+28.98{\scriptscriptstyle\,\pm 3.00}$ & $-0.51$ \\
-8 & + 窗口统计 Feature                                                       & $+29.68{\scriptscriptstyle\,\pm 1.17}$ & $+0.70$ \\
-9 & + 不对称性 Feature (370-d Feat)                                                       & $+34.32{\scriptscriptstyle\,\pm 1.60}$ & $+4.64$ \\
-10 & + drop 11 feature w. KS 检验 (359-d Feat)                                                       & $+32.75{\scriptscriptstyle\,\pm 0.69}$ & $-1.57$ \\
-11 & + 买卖镜像数据增强 (bid/ask flip, 强制方向对称)                                                       & $+35.15{\scriptscriptstyle\,\pm 1.41}$ & $+2.41$ \\
-12 & + 稳健归一化 (sign-log1p on raw\_last)                                                       & $+34.44{\scriptscriptstyle\,\pm 1.39}$ & $-0.72$ \\
-13 & + train+val 全数据重训 (M7 retrain)$^{\dagger}$                                                       & $+30.27{\scriptscriptstyle\,\pm 1.98}$ & $-4.17$ \\
+2 & NN 154 raw + \hlB{L2 regression Loss}                                                  & $+0.52{\scriptscriptstyle\,\pm 0.48}$ & $-0.17$ \\
+3 & NN 154 raw + L2 + \hlA{window-$z$}（输入归一化）                                          & $+23.40{\scriptscriptstyle\,\pm 1.90}$ & $+22.88$ \\
+4 & + \hlA{LOB 派生} Feature                                                                & $+23.33{\scriptscriptstyle\,\pm 1.54}$ & $-0.07$ \\
+5 & + \hlA{多尺度 OFI} Feature                                                              & $+25.90{\scriptscriptstyle\,\pm 1.98}$ & $+2.57$ \\
+6 & + \hlA{订单流强度} Feature                                                              & $+29.49{\scriptscriptstyle\,\pm 1.38}$ & $+3.59$ \\
+7 & + \hlA{微结构波动} Feature                                                              & $+28.98{\scriptscriptstyle\,\pm 3.00}$ & $-0.51$ \\
+8 & + \hlA{窗口统计} Feature                                                                & $+29.68{\scriptscriptstyle\,\pm 1.17}$ & $+0.70$ \\
+9 & + \hlA{不对称性} Feature (370-d Feat)                                                   & $+34.32{\scriptscriptstyle\,\pm 1.60}$ & $+4.64$ \\
+10 & + \hlA{drop 11 Feature w. KS 检验} (359-d Feat)                                         & $+32.75{\scriptscriptstyle\,\pm 0.69}$ & $-1.57$ \\
+11 & + \hlA{买卖镜像数据增强} (bid/ask flip, 强制方向对称)                                    & $+35.15{\scriptscriptstyle\,\pm 1.41}$ & $+2.41$ \\
+12 & + \hlA{稳健归一化} (sign-log1p on raw\_last)                                            & $+34.44{\scriptscriptstyle\,\pm 1.39}$ & $-0.72$ \\
 \midrule
-\multicolumn{4}{@{}l}{\textit{\color{icmlblue}LGB path（参考）}} \\
-14 & 154 raw + LGB, 分类 Loss (3-class CE)                                   & $+21.95{\scriptscriptstyle\,\pm 1.16}$ & --- \\
-15 & 226-d Feature + LGB, L2 regression Loss                                 & $+24.11{\scriptscriptstyle\,\pm 0.26}$ & $+2.16$ \\
-16 & 359-d Feature + LGB, L2 regression Loss                                  & $+26.58{\scriptscriptstyle\,\pm 0.96}$ & $+2.47$ \\
-17 & + train+val 全数据重训 (M7 retrain, $\times 1.1$ rounds)                 & $+30.88{\scriptscriptstyle\,\pm 1.09}$ & $+4.30$ \\
+\multicolumn{4}{@{}l}{\textit{\color{icmlblue}Gradient Boost Model path}} \\
+13 & \hl{LGB} 154 raw + 分类 Loss (3-class CE)                                   & $+21.95{\scriptscriptstyle\,\pm 1.16}$ & --- \\
+14 & \hl{LGB} 359-d Feature + \hl{L2 regression Loss}                              & $+26.58{\scriptscriptstyle\,\pm 0.96}$ & $+4.63$ \\
+15 & + \hl{train+val 全数据重训 ($\times 1.1$ rounds)}                & $+30.88{\scriptscriptstyle\,\pm 1.09}$ & $+4.30$ \\
 \midrule
-\multicolumn{4}{@{}l}{\textit{\color{icmlblue}Ensemble — NN(SPO,M7) $\times$ LGB(M7)（359-d；执行层 EV gate, 默认对称阈值）}} \\
-18 & (1$+$1) NN(row13) $+$ LGB(row17), sym EV                                                       & $+36.08$ & --- \\
-19 & (5$+$5) NN(M7,同 HP) $+$ LGB(M7,同 HP), sym EV                                                       & $+37.24$ & $+1.16$ \\
-20 & (5$+$5) NN(M7,同 HP) $+$ LGB(M7,同 HP), asym EV                                                       & $+35.86$ & $-1.38$ \\
-21 & (50$+$50) NN(M7$+$SPO,HP cycling) $+$ LGB(M7,HP cycling), sym EV (SOTA)                                                       & $+41.60$ & $+5.74$ \\
+\multicolumn{4}{@{}l}{\textit{\color{icmlblue}Ensemble — NN $\times$ LGB（359-d, M7-retrained 基模型）}} \\
+16 & (1$+$1) NN(row M7) $+$ LGB(row 15)                                                       & $+36.32$ & --- \\
+17 & \hlC{(5$+$5, 1 HP $\times$ 5 seeds)} NN(M7) $+$ LGB(M7, HP$_0$)                                            & $+37.12$ & $+0.80$ \\
+18 & (5$+$5) $+$ \hlC{Execution Threshold Up/Down (ETUD)}                                                       & $+37.90$ & $+0.78$ \\
+19 & (5$+$5) $+$ \hlC{(SPO$+$ DFL)} $+$ ETUD                                                                    & $+41.44$ & $+3.54$ \\
+20 & \hlC{(50$+$50, HP cycling)} NN(SPO$+$ DFL) $+$ LGB $+$ ETUD & $\textbf{+41.58}$ & $+0.14$ \\
 \bottomrule
 \end{tabularx}
-\captionof{table}{\textbf{大 ablation：NN 渐进 (1--13)、LGB 渐进 (14--17)、Ensemble (18--21)。} 同一训练/验证/测试切分，所有指标在测试集上报告。$^{\dagger}$Row 1--13 由\textbf{统一实现}（unified script）重跑，固定 HP (lr=$3{\times}10^{-4}$, dropout 0.10, batch 4096, class-balanced sample weights, AdamW $+$ CosineAnnealingLR, multiplicative noise scale $\sim U(0.80,1.20)$), 每行 5 seeds (seed 1--5)。Row 13 (M7) 沿用 row 12 (V4) 的 best\_ep $\times 1.1$ 与 sym 阈值；$\Delta$ (M7$-$V4) $\approx -4.17$，与 LGB 同协议（row 16$\to$17, $+4.30$）相比仍偏小——M7 对 LGB 显著有效、对 NN 几乎无效，与项目历史一致。Ensemble (rows 18--21) 公式 $\hat p = (1.0\overline{\hat p}_{\mathrm{NN}} + 1.5\overline{\hat p}_{\mathrm{LGB}})/2.5$；val pred 取 V4 模型 (M7 模型无独立 val)，test pred 取 M7 模型。Row 18--20 取 NN row 13 五个 seed (同 HP=lr 3e-4/dr 0.10/bs 4096) 与 LGB M7 中 HP\_CONFIGS[0] 的 5 个 seed (seed $\in\{1,6,11,16,21\}$，对应同 HP)；Row 21 用 50$\times$50 异质集成 (HP cycling: NN 50 个 M7$+$SPO 模型 $\times$ LGB 50 个 M7 模型)，sym EV $=$ $+41.60$, asym EV $=$ $+40.89$ (val DE bounded); 表内 SOTA 采用 sym 以与 row 19 同阈值族对比。}
+\captionof{table}{控制变量消融实验：使用提供的数据进行训练/验证/测试集划分，所有指标在测试集上报告。Row 1--15 由5次相同超参数实验估算测试集PnL和不确定度，Row 16--20 为多模型集成。本表格主要目的为清晰展示各特征、模型、训练方法的增益，并非公榜/私榜成绩，也不完全符合我的研究顺序。}
 \end{center}
 
 \begin{center}

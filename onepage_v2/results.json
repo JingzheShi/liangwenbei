@@ -1,0 +1,14 @@
+{
+  "task": "onepage feature figure (Fig.2)",
+  "metrics": {
+    "design_choice": "B",
+    "n_panels": 3,
+    "n_pages_after": 1,
+    "figure_height_cm": 5.0,
+    "figure_width_cm": 9.8,
+    "figure_size_kb": 33.4,
+    "final_pdf_pages": 1,
+    "final_pdf_kb": 1097
+  },
+  "notes": "3-panel横向并排：P1=6家族paired bars(#dim浅色 + gain%深色), P2=Top-10因子横向bars按家族着色(F3 4个 + F1 6个 = top10全部), P3=6x6家族block-corr heatmap(F5与其它族均≤0.07近正交,作OOD稳健性anchor). matplotlib PDF矢量输出,Noto Sans CJK SC字体显式注册. 插入§因子工程末尾,xelatex编译后仍为1页. Caption在minipage里点出F1+F3=75.5%和F5正交两个核心读图点."
+}
