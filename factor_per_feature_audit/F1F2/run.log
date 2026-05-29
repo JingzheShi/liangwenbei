@@ -1,0 +1,29 @@
+[14:58:22] Loaded 370 feature names from schemeP_feat_names.txt
+[14:58:22] Built metadata for 155 F1+F2 features
+[14:58:22] Resolved dim_in_X for all 155 features
+[14:58:22] Loading train cache (155 cols + sym + date)...
+[14:58:24]   train.X shape=(1473600, 155) loaded in 2.7s
+[14:58:25]   val.X shape=(294720, 155) loaded in 0.5s
+[14:58:26]   test.X shape=(442080, 155) loaded in 0.8s
+[14:58:26] Ref pool: 200,000 train rows
+[14:58:26]   sym=0: 294,720 rows in train, sub=50,000
+[14:58:26]   sym=1: 294,720 rows in train, sub=50,000
+[14:58:26]   sym=2: 294,720 rows in train, sub=50,000
+[14:58:26]   sym=3: 294,720 rows in train, sub=50,000
+[14:58:26]   sym=4: 294,720 rows in train, sub=50,000
+[14:58:26]   bucket sizes: b0=50000, b1=50000, b2=50000, b3=50000, b4=50000, b5=50000, b14=50000
+[14:58:26]   val_sub=50000, test_sub=50000
+[14:58:26] Starting per-feature stats loop (155 features) ...
+[14:58:34]   [20/155] ask6: psi_stock_max=0.239, psi_date_tv=0.036, psi_date_tt=0.091
+[14:58:43]   [40/155] asize6: psi_stock_max=9.235, psi_date_tv=0.034, psi_date_tt=0.030
+[14:58:52]   [60/155] spread2: psi_stock_max=19.104, psi_date_tv=1.311, psi_date_tt=1.208
+[14:58:58]   [80/155] ask_diff2: psi_stock_max=17.042, psi_date_tv=2.995, psi_date_tt=3.369
+[14:59:06]   [100/155] wmp_lvl6: psi_stock_max=0.139, psi_date_tv=0.050, psi_date_tt=0.138
+[14:59:18]   [120/155] mlofi_W20_lvl5: psi_stock_max=0.549, psi_date_tv=0.006, psi_date_tt=0.041
+[14:59:30]   [140/155] ewma_ofi_a0.3_lvl1: psi_stock_max=0.320, psi_date_tv=0.010, psi_date_tt=0.019
+[14:59:39] All 155 features processed in 73.3s
+[14:59:39] Wrote /root/projects/liangwenbei_workdir/factor_per_feature_audit/F1F2/per_feature_audit.json
+[14:59:39] Wrote /root/projects/liangwenbei_workdir/factor_per_feature_audit/F1F2/F1F2_summary.json
+[14:59:39] Wrote per_feature_audit.md
+[14:59:41] WandB init failed: permission denied
+[14:59:41] RESULT: task=F1F2_audit metrics={n_features=155, max_psi_stock=19.15, max_psi_date=7.46, mean_nan_pct=0.0256, ks_drop_hits=2} notes=F1+F2 audit done in 79.2s; kyle_lam_W50/W100 confirmed in KS-drop

@@ -1,0 +1,11 @@
+{
+  "task": "F1F2_per_feature_audit",
+  "metrics": {
+    "n_features": 155,
+    "max_psi_stock": 19.153737,
+    "max_psi_date": 7.456992,
+    "mean_nan_pct": 0.02559630322580645,
+    "ks_drop_hits": 2
+  },
+  "notes": "F1+F2 (105+50) audit complete; kyle_lam_W50/W100 confirmed as KS-drop hits in scope."
+}
