@@ -1,0 +1,5824 @@
+# F5+F6 Per-Feature Audit
+
+_Generated: 141 features, F5=67, F6=74, KS-drop hits=8._
+
+## Verdict legend
+
+- `stable`: max PSI < 0.10
+- `mild_drift`: 0.10 ≤ PSI < 0.25
+- `strong_drift`: PSI ≥ 0.25
+
+## High-level summary
+
+| metric | value |
+|---|---|
+| n_features_audited | 141 |
+| KS-drop-11 hits | 8 |
+| mean NaN% (train) | 0.0135 |
+| max PSI cross-stock | 9.5377 |
+| max PSI cross-date  | 0.4725 |
+| dualz (all 37) PSI cross-stock (mean / median) | 0.9581 / 0.1153 (18/37 stable) |
+| dualz (kept after KS-drop) PSI cross-stock (mean / median) | 0.4883 / 0.081 (18/34 stable) |
+| qrank_W100 (all 20) PSI cross-stock (mean / median) | 1.0576 / 0.2058 (4/20 stable) |
+| qrank_W100 (kept after KS-drop) PSI cross-stock (mean / median) | 0.1898 / 0.1698 (4/16 stable) |
+| dualz PSI cross-date (median) | 0.0066 |
+| qrank_W100 PSI cross-date (median) | 0.0097 |
+
+## F5 — 窗口统计 (67 features)
+
+### F5.1 dualz family (37 features, 决胜 OOD trick)
+
+### dualz_spread1
+
+- **CN**: 双窗口 z-score - 一档价差
+- **EN**: Dual-window z-score on Level-1 spread (ask1-bid1)
+- **family / type**: F5 / derived
+- **X column**: 223
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.2004629068302829, 0.19332959542842698, 0.6876000995052187, 1.6271984690951573, 0.8643326410352508]
+- PSI max=1.6271984690951573, mean=0.7145847423788674
+- KS  max=0.28974
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.02616868410806506, train→test=0.031863503241983566
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002434252597854068, 0.006795979896234178, 0.005039322419760919, 0.003978966840717789, 0.024902207878389763, 0.030384072019825868]
+- KS  train→val=0.040974999999999984, train→test=0.04342499999999999
+- verdict: **stable**
+
+### dualz_spread5
+
+- **CN**: 双窗口 z-score - 五档价差
+- **EN**: Dual-window z-score on Level-5 spread (ask5-bid5)
+- **family / type**: F5 / derived
+- **X column**: 224
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.21631021385606414, 0.23952630855576865, 2.3065757925493577, 2.2519327747262166, 1.0517743661652403]
+- PSI max=2.3065757925493577, mean=1.2132238911705295
+- KS  max=0.301015
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0239049478195915, train→test=0.02255331346481083
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.003949633640783262, 0.005687571549930656, 0.009078984686107842, 0.009745686214898524, 0.022747045334204657, 0.022703556954543725]
+- KS  train→val=0.06618499999999994, train→test=0.036965000000000026
+- verdict: **stable**
+
+### dualz_spread10
+
+- **CN**: 双窗口 z-score - 十档价差
+- **EN**: Dual-window z-score on Level-10 spread (ask10-bid10)
+- **family / type**: F5 / derived
+- **X column**: 225
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.16863243964002692, 0.2540676628903401, 1.0489400274750385, 2.267834842219508, 2.34979965022649]
+- PSI max=2.34979965022649, mean=1.2178549244902808
+- KS  max=0.29909
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.013688246458139932, train→test=0.03200987041116081
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.003518191505560577, 0.005429766303173209, 0.014712875644399718, 0.0019486569065226417, 0.0133744351842531, 0.033506433424744735]
+- KS  train→val=0.05035999999999996, train→test=0.047355000000000036
+- verdict: **stable**
+
+### dualz_cumspread
+
+- **CN**: 双窗口 z-score - 累计十档价差
+- **EN**: Dual-window z-score on Cumulative 10-level spread
+- **family / type**: F5 / derived
+- **X column**: 226
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.18760396525131512, 0.4438722447170037, 2.4359190330414133, 2.142985468777852, 2.4578347926404156]
+- PSI max=2.4578347926404156, mean=1.5336431008856
+- KS  max=0.303905
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.018593000561428246, train→test=0.02836283927230981
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004987242610918818, 0.006747129454181317, 0.00789924081390787, 0.008015293283008335, 0.01802047921248651, 0.026611160709856994]
+- KS  train→val=0.03639000000000003, train→test=0.03962500000000002
+- verdict: **stable**
+
+### dualz_bid1
+
+- **CN**: 双窗口 z-score - 一档买价
+- **EN**: Dual-window z-score on Best bid price
+- **family / type**: F5 / derived
+- **X column**: 227
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.03264666619832794, 0.03586676810611582, 0.0421599422311811, 0.2969225117760893, 0.03775453437065097]
+- PSI max=0.2969225117760893, mean=0.08907008453647303
+- KS  max=0.13095
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.020014488486131365, train→test=0.0399225969394442
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0022795998067768955, 0.0009041011012474534, 0.007286387711282777, 0.006889292513211512, 0.02006701529567151, 0.038371682593753224]
+- KS  train→val=0.03517500000000007, train→test=0.05643500000000001
+- verdict: **stable**
+
+### dualz_ask1
+
+- **CN**: 双窗口 z-score - 一档卖价
+- **EN**: Dual-window z-score on Best ask price
+- **family / type**: F5 / derived
+- **X column**: 228
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.033779155502437326, 0.03623873000875697, 0.0442526087511144, 0.29918194341530474, 0.042978594418655834]
+- PSI max=0.29918194341530474, mean=0.09128620641925385
+- KS  max=0.1330225
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.019430360372267263, train→test=0.03672881169279825
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0031677835311877895, 0.0009801856226202275, 0.006534219091866514, 0.006682502753210159, 0.0194590651240562, 0.03698254287555238]
+- KS  train→val=0.030525000000000024, train→test=0.049634999999999985
+- verdict: **stable**
+
+### dualz_bid_mean
+
+- **CN**: 双窗口 z-score - 十档买价均值
+- **EN**: Dual-window z-score on Mean of 10-level bid prices
+- **family / type**: F5 / derived
+- **X column**: 229
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.037242666064558144, 0.040156604190499684, 0.05251023589734981, 0.3230546300670436, 0.044503930073997486]
+- PSI max=0.3230546300670436, mean=0.09949361325868974
+- KS  max=0.1350575
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.015094373735429427, train→test=0.025999663784878706
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.00168845533872206, 0.0008056566125944653, 0.0033836677139296102, 0.008356791106760542, 0.016514864023307704, 0.026984266012910065]
+- KS  train→val=0.035995, train→test=0.04738500000000001
+- verdict: **stable**
+
+### dualz_ask_mean
+
+- **CN**: 双窗口 z-score - 十档卖价均值
+- **EN**: Dual-window z-score on Mean of 10-level ask prices
+- **family / type**: F5 / derived
+- **X column**: 230
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.03574315328327275, 0.03332253975822795, 0.044953161561518275, 0.3087062601699179, 0.04272848862578647]
+- PSI max=0.3087062601699179, mean=0.09309072067974468
+- KS  max=0.1334975
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.020005510508513992, train→test=0.046063344635231866
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0033020478551052035, 0.0007744344058519141, 0.003124186581021821, 0.00635600431533288, 0.019667607179361748, 0.0449377819438533]
+- KS  train→val=0.026565000000000005, train→test=0.0509
+- verdict: **stable**
+
+### dualz_midprice1
+
+- **CN**: 双窗口 z-score - 一档中间价
+- **EN**: Dual-window z-score on Level-1 midprice (bid1+ask1)/2
+- **family / type**: F5 / derived
+- **X column**: 231
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.03398461799558176, 0.03309948562001562, 0.041041710467035364, 0.304916782677821, 0.03947747198467888]
+- PSI max=0.304916782677821, mean=0.09050401374902653
+- KS  max=0.13218999999999997
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.01759873549199702, train→test=0.03474815223204352
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.00280224801283801, 0.0006755994138072591, 0.006144624441123477, 0.008732361399873817, 0.016113182901543826, 0.035498831828093325]
+- KS  train→val=0.03336499999999998, train→test=0.05373500000000003
+- verdict: **stable**
+
+### dualz_midprice2
+
+- **CN**: 双窗口 z-score - 二档中间价
+- **EN**: Dual-window z-score on Level-2 midprice (bid2+ask2)/2
+- **family / type**: F5 / derived
+- **X column**: 232
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.03340261457534941, 0.03183200705013283, 0.044545610673005026, 0.31146308088509167, 0.040743897504517616]
+- PSI max=0.31146308088509167, mean=0.09239744213761932
+- KS  max=0.13299
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.014130939684248986, train→test=0.02875768067807385
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002963144821405551, 0.0014437974697717397, 0.0030467792086986837, 0.006850579345951222, 0.013142383223534268, 0.02824667228149068]
+- KS  train→val=0.03334999999999999, train→test=0.05402000000000001
+- verdict: **stable**
+
+### dualz_midprice5
+
+- **CN**: 双窗口 z-score - 五档中间价
+- **EN**: Dual-window z-score on Level-5 midprice
+- **family / type**: F5 / derived
+- **X column**: 233
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.031995178951347195, 0.03215130123942306, 0.042716262019390584, 0.3104724953258139, 0.03858659761297966]
+- PSI max=0.3104724953258139, mean=0.09118436702979088
+- KS  max=0.1359225
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.019232176320886724, train→test=0.03165333729608954
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0020103181175241077, 0.0010550981363911397, 0.004642851672170524, 0.0073723954060056765, 0.020517921344095726, 0.03176645963023357]
+- KS  train→val=0.02998500000000004, train→test=0.052705
+- verdict: **stable**
+
+### dualz_midprice10
+
+- **CN**: 双窗口 z-score - 十档中间价
+- **EN**: Dual-window z-score on Level-10 midprice
+- **family / type**: F5 / derived
+- **X column**: 234
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.031507270502789585, 0.031355308606538755, 0.04052140532958408, 0.31324318882378727, 0.03753965363020267]
+- PSI max=0.31324318882378727, mean=0.09083336537858047
+- KS  max=0.13265500000000002
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.014370292330491313, train→test=0.028393735932351387
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0019752011772077417, 0.0011177888072916782, 0.005418799235771156, 0.00709787905669202, 0.01360965677394701, 0.03242733400516722]
+- KS  train→val=0.03441000000000005, train→test=0.051685000000000036
+- verdict: **stable**
+
+### dualz_bsize1
+
+- **CN**: 双窗口 z-score - 一档买量
+- **EN**: Dual-window z-score on Best-bid size
+- **family / type**: F5 / derived
+- **X column**: 235
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0374533991656713, 0.01258338916671995, 0.15224995950133638, 0.2569028711545949, 0.09187345092957605]
+- PSI max=0.2569028711545949, mean=0.11021261398357973
+- KS  max=0.11961
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0021047946426566793, train→test=0.00954546675035503
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.003016080101565585, 0.0031781605183384626, 0.00047247014881582545, 0.00029482187877722293, 0.0022868355477616534, 0.00968525370640898]
+- KS  train→val=0.012054999999999996, train→test=0.026285000000000003
+- verdict: **stable**
+
+### dualz_bsize_mean
+
+- **CN**: 双窗口 z-score - 十档买量均值
+- **EN**: Dual-window z-score on Mean of 10-level bid sizes
+- **family / type**: F5 / derived
+- **X column**: 236
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0036924889360128413, 0.000465952845307535, 0.011832354253128088, 0.021665033286676544, 0.010364191299612937]
+- PSI max=0.021665033286676544, mean=0.009604004124147589
+- KS  max=0.034195
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.000751367342199146, train→test=0.0014647591791385067
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0006471677175343728, 0.0007946121367296564, 0.0006315365336363897, 0.000589259981436214, 0.0007665525570108888, 0.0011793088861763597]
+- KS  train→val=0.00797500000000001, train→test=0.011929999999999996
+- verdict: **stable**
+
+### dualz_totalbsize
+
+- **CN**: 双窗口 z-score - 买侧总量
+- **EN**: Dual-window z-score on Total bid size (sum 10 levels)
+- **family / type**: F5 / derived
+- **X column**: 237
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0005204980637087641, 0.0004199985340117812, 0.000947868773912781, 0.001352196426878908, 0.0017792769739943368]
+- PSI max=0.0017792769739943368, mean=0.0010039677545013142
+- KS  max=0.01252999999999993
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0003287880598912213, train→test=0.0002634243848499197
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0002826568381508805, 0.0005062494043523346, 0.00047592515633773067, 0.00015856703588653515, 0.00019963686838243047, 0.00032467049878555414]
+- KS  train→val=0.0063750000000000195, train→test=0.003985000000000016
+- verdict: **stable**
+
+### dualz_asize1
+
+- **CN**: 双窗口 z-score - 一档卖量
+- **EN**: Dual-window z-score on Best-ask size
+- **family / type**: F5 / derived
+- **X column**: 238
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.028521909066614896, 0.005496481255432456, 0.14216309574301067, 0.2366992320792307, 0.0895254247272774]
+- PSI max=0.2366992320792307, mean=0.10048122857431323
+- KS  max=0.11400749999999993
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.002412575965797817, train→test=0.010160656015610342
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0010132927451171057, 0.003459922169212357, 0.00012781569992649283, 0.0009069355342009349, 0.002488904755745573, 0.01060833759945385]
+- KS  train→val=0.009635000000000005, train→test=0.024870000000000003
+- verdict: **stable**
+
+### dualz_asize_mean
+
+- **CN**: 双窗口 z-score - 十档卖量均值
+- **EN**: Dual-window z-score on Mean of 10-level ask sizes
+- **family / type**: F5 / derived
+- **X column**: 239
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.004889561797100404, 0.0006579921427700087, 0.014433648610739945, 0.02384440230747425, 0.012751564953472742]
+- PSI max=0.02384440230747425, mean=0.01131543396231147
+- KS  max=0.033115000000000006
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0011550510106522406, train→test=0.0025463876247894183
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.00035656032287207057, 0.00025258838061917766, 0.0005249648641471373, 0.0002211765544067432, 0.001441283748539433, 0.002243719189497074]
+- KS  train→val=0.009035000000000015, train→test=0.014020000000000005
+- verdict: **stable**
+
+### dualz_totalasize
+
+- **CN**: 双窗口 z-score - 卖侧总量
+- **EN**: Dual-window z-score on Total ask size (sum 10 levels)
+- **family / type**: F5 / derived
+- **X column**: 240
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0010024352591243022, 0.0004596199917234505, 0.0020139138023088504, 0.0016935637121111803, 0.0016249346973812714]
+- PSI max=0.0020139138023088504, mean=0.001358893492529811
+- KS  max=0.013712500000000016
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.00030157784230324064, train→test=0.0009665389889589636
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.00015397059027544204, 0.00023437003994962636, 0.00022874889737022554, 0.0002473512575217319, 0.0006450686182676254, 0.0006170599957849273]
+- KS  train→val=0.005695000000000006, train→test=0.013830000000000009
+- verdict: **stable**
+
+### dualz_volume_delta
+
+- **CN**: 双窗口 z-score - 成交量增量
+- **EN**: Dual-window z-score on Volume traded since previous snapshot
+- **family / type**: F5 / derived
+- **X column**: 241
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.006556410656784988, 0.011492486071598026, 0.030901879881132525, 0.018034217668522635, 0.01576037179393769]
+- PSI max=0.030901879881132525, mean=0.016549073214395173
+- KS  max=0.049647499999999956
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0011272174137378715, train→test=0.004861351856839716
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0014586024007733989, 0.0017127651452932798, 0.0002504265134138654, 0.0004671729202148913, 0.0012016157996300536, 0.0047216070528695135]
+- KS  train→val=0.015170000000000017, train→test=0.02683000000000002
+- verdict: **stable**
+
+### dualz_amount_delta
+
+- **CN**: 双窗口 z-score - 成交额增量
+- **EN**: Dual-window z-score on Notional traded since previous snapshot
+- **family / type**: F5 / derived
+- **X column**: 242
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.007270919685710145, 0.012109504510697222, 0.02905003775382931, 0.01923733974285525, 0.013864637988502604]
+- PSI max=0.02905003775382931, mean=0.016306487936318902
+- KS  max=0.050675000000000026
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0010183278050946581, train→test=0.005210694196349868
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0009900798069196306, 0.0017419879995589059, 0.00048567606270990285, 0.0004861846361275019, 0.0007157396682124077, 0.004367887237730709]
+- KS  train→val=0.015335000000000099, train→test=0.02723500000000001
+- verdict: **stable**
+
+### dualz_imbalance
+
+- **CN**: 双窗口 z-score - 一档量不平衡
+- **EN**: Dual-window z-score on Order-book imbalance (bsize1-asize1)/(bsize1+asize1)
+- **family / type**: F5 / derived
+- **X column**: 243
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0011700795769749935, 0.0005187643731314757, 0.009104484009349278, 0.018107164554910696, 0.006299430789013069]
+- PSI max=0.018107164554910696, mean=0.007039984660675904
+- KS  max=0.03139500000000006
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.001188953351614081, train→test=0.0010271079355610717
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.00048141886323177, 0.0002433077115964682, 0.00043506698368398085, 0.0003081949682221007, 0.0013584021448651644, 0.0012880104780300398]
+- KS  train→val=0.007979999999999987, train→test=0.007870000000000016
+- verdict: **stable**
+
+### dualz_lb_intst
+
+- **CN**: 双窗口 z-score - 挂买强度
+- **EN**: Dual-window z-score on Limit-bid order intensity
+- **family / type**: F5 / derived
+- **X column**: 244
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.006887507682385054, 0.024148409410342683, 0.08438427551224831, 0.03192770464287191, 0.008091374420493297]
+- PSI max=0.08438427551224831, mean=0.03108785433366825
+- KS  max=0.07343
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0013144817376679768, train→test=0.007208885516300691
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0037014006313643363, 0.0012287007517614154, 0.0009711364929281712, 0.00038036658850000874, 0.001244281025140257, 0.007063723335601142]
+- KS  train→val=0.010514999999999997, train→test=0.021785000000000027
+- verdict: **stable**
+
+### dualz_la_intst
+
+- **CN**: 双窗口 z-score - 挂卖强度
+- **EN**: Dual-window z-score on Limit-ask order intensity
+- **family / type**: F5 / derived
+- **X column**: 245
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.016113700083779207, 0.019116811334688708, 0.06469107690550063, 0.02561814941459433, 0.018940617750465898]
+- PSI max=0.06469107690550063, mean=0.02889607109780576
+- KS  max=0.06621250000000001
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0014924811900795271, train→test=0.008444242603936794
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002718937621502083, 0.0022404631357803633, 0.00038322970009406477, 0.0010364817443828376, 0.0019535382585928102, 0.008073381095187638]
+- KS  train→val=0.013844999999999996, train→test=0.023920000000000052
+- verdict: **stable**
+
+### dualz_mb_intst
+
+- **CN**: 双窗口 z-score - 市价买强度
+- **EN**: Dual-window z-score on Market-bid order intensity
+- **family / type**: F5 / derived
+- **X column**: 246
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.006843701009335658, 0.02085579808070337, 0.04802210146539829, 0.01346562323578157, 0.009764647895923982]
+- PSI max=0.04802210146539829, mean=0.019790374337428574
+- KS  max=0.05821750000000003
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0006684860583646856, train→test=0.006061299515561136
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0013664829957341904, 0.001967830256638925, 0.00031823815602612744, 0.0005497859591611445, 0.0005408750285169254, 0.006585147653397886]
+- KS  train→val=0.009175000000000044, train→test=0.017430000000000057
+- verdict: **stable**
+
+### dualz_ma_intst
+
+- **CN**: 双窗口 z-score - 市价卖强度
+- **EN**: Dual-window z-score on Market-ask order intensity
+- **family / type**: F5 / derived
+- **X column**: 247
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.012319330694038974, 0.01243296712929557, 0.035034337195897276, 0.014656739419651147, 0.01407203167987485]
+- PSI max=0.035034337195897276, mean=0.01770308122375156
+- KS  max=0.04938750000000003
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0009662363771731134, train→test=0.004195948937499064
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0026393426306577424, 0.0030517920203558977, 0.0004647101856933964, 0.0004510648471776376, 0.0010861317800244825, 0.004702118830149874]
+- KS  train→val=0.00902500000000006, train→test=0.017125
+- verdict: **stable**
+
+### dualz_cb_intst
+
+- **CN**: 双窗口 z-score - 撤买强度
+- **EN**: Dual-window z-score on Cancel-bid order intensity
+- **family / type**: F5 / derived
+- **X column**: 248
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.009508792455773657, 0.025131236734122618, 0.11532043461490153, 0.037325716796253544, 0.010485323093151998]
+- PSI max=0.11532043461490153, mean=0.03955430073884067
+- KS  max=0.07909249999999998
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.001343390001088645, train→test=0.006793915656843988
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002327233497629339, 0.0017875982110386855, 0.0007112962182017672, 0.0003605405740782943, 0.0010769867722261693, 0.0057936574218245135]
+- KS  train→val=0.012149999999999994, train→test=0.025685000000000013
+- verdict: **stable**
+
+### dualz_ca_intst
+
+- **CN**: 双窗口 z-score - 撤卖强度
+- **EN**: Dual-window z-score on Cancel-ask order intensity
+- **family / type**: F5 / derived
+- **X column**: 249
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.01700369080713965, 0.022219449745153757, 0.07762312693941167, 0.039904473959212615, 0.02128418270735932]
+- PSI max=0.07762312693941167, mean=0.035606984831655406
+- KS  max=0.06546000000000002
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0003205568870192542, train→test=0.0063718059641969405
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002141218014851078, 0.0014658781028103962, 0.00030122941192195767, 0.000574392926288754, 0.0002500564171298024, 0.007455258137107402]
+- KS  train→val=0.0031250000000000444, train→test=0.017134999999999984
+- verdict: **stable**
+
+### dualz_lb_acc
+
+- **CN**: 双窗口 z-score - 挂买累积
+- **EN**: Dual-window z-score on Limit-bid cumulative count
+- **family / type**: F5 / derived
+- **X column**: 250
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0013733104497079711, 0.004779327937680827, 0.009761140311166618, 0.00199752670861314, 0.0014783807753707928]
+- PSI max=0.009761140311166618, mean=0.0038779372365078703
+- KS  max=0.019267499999999993
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0008236784827732369, train→test=0.0031537050813445705
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0005420535025863738, 0.0004153728262452089, 0.0002387298827879106, 0.0002394781196135947, 0.0009384967073788352, 0.002379145544508178]
+- KS  train→val=0.00655, train→test=0.011495000000000005
+- verdict: **stable**
+
+### dualz_la_acc
+
+- **CN**: 双窗口 z-score - 挂卖累积
+- **EN**: Dual-window z-score on Limit-ask cumulative count
+- **family / type**: F5 / derived
+- **X column**: 251
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.006026104881563677, 0.0034564962042579967, 0.007214291671496139, 0.0011815140327877613, 0.0050530365078414385]
+- PSI max=0.007214291671496139, mean=0.004586288659589402
+- KS  max=0.016827499999999995
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0009548440705190621, train→test=0.004491267443554681
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.001084247865058604, 0.000574815968620591, 0.00048122905971020587, 0.0007113164253354402, 0.0015357934315129841, 0.004743388253518438]
+- KS  train→val=0.007205000000000017, train→test=0.01305999999999996
+- verdict: **stable**
+
+### dualz_mb_acc
+
+- **CN**: 双窗口 z-score - 市价买累积
+- **EN**: Dual-window z-score on Market-bid cumulative count
+- **family / type**: F5 / derived
+- **X column**: 252
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0022242780420439544, 0.008420128712971577, 0.012255016043902483, 0.001972989266052062, 0.003295012269121432]
+- PSI max=0.012255016043902483, mean=0.005633484866818301
+- KS  max=0.023787500000000072
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0003555684591551565, train→test=0.004707525266467152
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0018454941231438127, 0.0008833863391126011, 0.00028409322664745164, 0.0007217758168970343, 0.0004983413936624486, 0.0045101755142320735]
+- KS  train→val=0.005110000000000003, train→test=0.012525000000000008
+- verdict: **stable**
+
+### dualz_ma_acc
+
+- **CN**: 双窗口 z-score - 市价卖累积
+- **EN**: Dual-window z-score on Market-ask cumulative count
+- **family / type**: F5 / derived
+- **X column**: 253
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.003169817704294637, 0.005450527486091204, 0.008011660394508954, 0.0031737144428790904, 0.0038562879484247]
+- PSI max=0.008011660394508954, mean=0.0047324015952397176
+- KS  max=0.016907499999999992
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0005843925592714627, train→test=0.004039852288009126
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0012530555382507438, 0.0009287619063801117, 0.0002464237139033468, 0.00043186643715071855, 0.0003757381548593501, 0.005048222142063739]
+- KS  train→val=0.0043199999999999905, train→test=0.014849999999999974
+- verdict: **stable**
+
+### dualz_cb_acc
+
+- **CN**: 双窗口 z-score - 撤买累积
+- **EN**: Dual-window z-score on Cancel-bid cumulative count
+- **family / type**: F5 / derived
+- **X column**: 254
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.001721900457800449, 0.014321619489976088, 0.020168976782345013, 0.0037160454553600442, 0.002799674626188296]
+- PSI max=0.020168976782345013, mean=0.008545643362333977
+- KS  max=0.03054750000000006
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0004922473921128348, train→test=0.004843141301956971
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0007349346591271025, 0.000659327254168117, 0.00034740799314475506, 0.00023719680179644777, 0.000811942731100652, 0.005004907842166154]
+- KS  train→val=0.005370000000000041, train→test=0.012924999999999992
+- verdict: **stable**
+
+### dualz_ca_acc
+
+- **CN**: 双窗口 z-score - 撤卖累积
+- **EN**: Dual-window z-score on Cancel-ask cumulative count
+- **family / type**: F5 / derived
+- **X column**: 255
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0023730577518715767, 0.010859622623831356, 0.017055098633871772, 0.0023704327891848234, 0.005415726122248149]
+- PSI max=0.017055098633871772, mean=0.007614787584201535
+- KS  max=0.026322500000000026
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0002979233485002619, train→test=0.004959473861658648
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0022397414748338835, 0.0008239035431526737, 0.00027009329778785737, 0.00032195230012632464, 0.0006007968166964895, 0.0049554287849026745]
+- KS  train→val=0.003945000000000004, train→test=0.01423000000000002
+- verdict: **stable**
+
+### dualz_bid_diff1
+
+- **CN**: 双窗口 z-score - 一档买价一阶差分
+- **EN**: Dual-window z-score on Δbid1 (this tick - prev tick)
+- **family / type**: F5 / derived
+- **X column**: 256
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.48159590934673735, 0.07279539855929644, 1.3846152592283647, 4.272871001181228, 1.6160584781573364]
+- PSI max=4.272871001181228, mean=1.5655872092945926
+- KS  max=0.30572750000000004
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.039019559361346885, train→test=0.04932810629820542
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.011422934801719417, 0.007726721727567258, 0.004348995990194853, 0.013923266822548965, 0.03655965804644116, 0.053026977728303254]
+- KS  train→val=0.060460000000000014, train→test=0.04844999999999999
+- verdict: **stable**
+
+### dualz_ask_diff1
+
+- **CN**: 双窗口 z-score - 一档卖价一阶差分
+- **EN**: Dual-window z-score on Δask1 (this tick - prev tick)
+- **family / type**: F5 / derived
+- **X column**: 257
+- **KS-drop-11**: YES
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.3463183900917908, 0.08535231469110016, 1.6068642978181227, 3.2279697388616806, 1.7449700491785867]
+- PSI max=3.2279697388616806, mean=1.4022949581282562
+- KS  max=0.32213250000000004
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.03605087752087899, train→test=0.02925675120277477
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.006817533677759771, 0.016890538011519577, 0.007517787727630052, 0.01053008435488691, 0.03403441550969231, 0.027561341456485883]
+- KS  train→val=0.06207499999999999, train→test=0.04921500000000001
+- verdict: **stable**
+
+**Notes**: KS-drop 11 之一。ask_diff1 一阶差分高度集中在 0 附近(price-tick 量化)，长短 z 差极易被 outlier 主导；ask 侧 distribution shift 比 bid 侧更明显(主办方数据中 ask 报价更新更稀疏) → 训练时被 KS 过滤剔除。
+
+### dualz_bid_diff5
+
+- **CN**: 双窗口 z-score - 五档买价一阶差分
+- **EN**: Dual-window z-score on Δbid5
+- **family / type**: F5 / derived
+- **X column**: 258
+- **KS-drop-11**: YES
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [1.071617076995479, 0.052686698863248324, 1.0732145371134783, 6.079927546602985, 1.452645957726158]
+- PSI max=6.079927546602985, mean=1.9460183634602697
+- KS  max=0.2590625
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.06325556578777393, train→test=0.05321549044191725
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.011619307809238368, 0.005242075993141018, 0.007612414124925692, 0.025767010050048566, 0.06287560726402171, 0.055738848766059335]
+- KS  train→val=0.08398500000000003, train→test=0.05304499999999995
+- verdict: **stable**
+
+**Notes**: KS-drop 11 之一。bid_diff5 一阶差分高度集中在 0 附近(price-tick 量化)，长短 z 差极易被 outlier 主导；ask 侧 distribution shift 比 bid 侧更明显(主办方数据中 ask 报价更新更稀疏) → 训练时被 KS 过滤剔除。
+
+### dualz_ask_diff5
+
+- **CN**: 双窗口 z-score - 五档卖价一阶差分
+- **EN**: Dual-window z-score on Δask5
+- **family / type**: F5 / derived
+- **X column**: 259
+- **KS-drop-11**: YES
+- **code_loc**: `fast_features_batch.py:275-291 (compute_stage1_batch -> dual_z block)`
+
+**Formula**: $\mathrm{dualz}_t(c) = \frac{c_t - \mu_{20}(c)}{\sigma_{20}(c)+\varepsilon} - \frac{c_t - \mu_{100}(c)}{\sigma_{100}(c)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+seg20 = X[:, -20:, col]; seg100 = X[:, -100:, col]
+z_short = (X[:,-1,col] - seg20.mean(-1)) / (seg20.std(-1)+EPS)
+z_long  = (X[:,-1,col] - seg100.mean(-1)) / (seg100.std(-1)+EPS)
+dualz = np.where(np.isfinite(z_short-z_long), z_short-z_long, 0.0)
+```
+
+**Physical meaning**: 短窗(20) z-score 减长窗(100) z-score。两 z 相减消除了 base column 的全局水平差异和方差差异，使得跨股(sym)、跨日的 z-score 单位可比 — 这是跨股泛化的几何基础。信号本身衡量【最近 20 tick 异常程度】相对于【最近 100 tick 基线异常程度】的偏离。
+
+**NaN handling**:
+- Formula layer: EPS=1e-12 加在分母防 0；np.where(np.isfinite(dual), dual, 0.0) 兜底。因此恒为 finite (不会出 NaN/Inf)。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（实际上 dualz 几乎无 NaN，故无影响）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.8218392554736852, 0.062434073455174446, 1.5552236251098224, 9.537720064482638, 2.0920860461946544]
+- PSI max=9.537720064482638, mean=2.813860612943195
+- KS  max=0.28137999999999996
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.06425841994843748, train→test=0.0641146936932526
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.01907877492548065, 0.006787159247303632, 0.01388019982539667, 0.01312848289386709, 0.0646354220016937, 0.06356800740462307]
+- KS  train→val=0.09105500000000005, train→test=0.072025
+- verdict: **stable**
+
+**Notes**: KS-drop 11 之一。ask_diff5 一阶差分高度集中在 0 附近(price-tick 量化)，长短 z 差极易被 outlier 主导；ask 侧 distribution shift 比 bid 侧更明显(主办方数据中 ask 报价更新更稀疏) → 训练时被 KS 过滤剔除。
+
+### F5.2 qrank_W100 family (20 features)
+
+### qrank_W100_spread1
+
+- **CN**: 100-tick 分位 rank - 一档价差
+- **EN**: 100-tick empirical quantile rank of Level-1 spread
+- **family / type**: F5 / derived
+- **X column**: 277
+- **KS-drop-11**: YES
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [1.087869696487386, 0.31267023737450883, 0.7723753985869781, 6.155321843887977, 0.7611517888528032]
+- PSI max=6.155321843887977, mean=1.8178777930379304
+- KS  max=0.573915
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.005793391790711322, train→test=0.014527949521606465
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002385742330424248, 0.0097209601585879, 0.0039809248301406475, 0.005182266834255575, 0.0059985294971741, 0.015061133806539617]
+- KS  train→val=0.05276000000000003, train→test=0.074295
+- verdict: **stable**
+
+**Notes**: KS-drop 11 之一。spread 列在 tick-quantized 市场里大多 = 1 tick (恒值)，(seg <= last_val) 几乎 100% 为 True → qrank 退化为常数 1 → 训练时 KS 检测出与目标分布无关被剔除。
+
+### qrank_W100_spread5
+
+- **CN**: 100-tick 分位 rank - 五档价差
+- **EN**: 100-tick empirical quantile rank of Level-5 spread
+- **family / type**: F5 / derived
+- **X column**: 278
+- **KS-drop-11**: YES
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.5115079500023217, 0.15055143504150437, 0.6158818490637383, 6.366967527889991, 0.5971385509499822]
+- PSI max=6.366967527889991, mean=1.6484094625895076
+- KS  max=0.5804325
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.006307774446870475, train→test=0.012668343130376812
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0006632338744374544, 0.008084691005530137, 0.0021176996798667044, 0.003730570585655395, 0.007137189752247429, 0.012430008319575449]
+- KS  train→val=0.05559499999999995, train→test=0.07572000000000001
+- verdict: **stable**
+
+**Notes**: KS-drop 11 之一。spread 列在 tick-quantized 市场里大多 = 1 tick (恒值)，(seg <= last_val) 几乎 100% 为 True → qrank 退化为常数 1 → 训练时 KS 检测出与目标分布无关被剔除。
+
+### qrank_W100_spread10
+
+- **CN**: 100-tick 分位 rank - 十档价差
+- **EN**: 100-tick empirical quantile rank of Level-10 spread
+- **family / type**: F5 / derived
+- **X column**: 279
+- **KS-drop-11**: YES
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.4227416062089653, 0.13710441148300034, 0.5755923385207911, 2.6265614503000423, 0.5294453455532012]
+- PSI max=2.6265614503000423, mean=0.8582890304132
+- KS  max=0.5734400000000001
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0072877720288638355, train→test=0.013695782882360584
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.00035271764951678156, 0.006131680092960141, 0.0021525094815417084, 0.003051359176764312, 0.008137039363672542, 0.013438332943222737]
+- KS  train→val=0.05229499999999998, train→test=0.07419999999999993
+- verdict: **stable**
+
+**Notes**: KS-drop 11 之一。spread 列在 tick-quantized 市场里大多 = 1 tick (恒值)，(seg <= last_val) 几乎 100% 为 True → qrank 退化为常数 1 → 训练时 KS 检测出与目标分布无关被剔除。
+
+### qrank_W100_cumspread
+
+- **CN**: 100-tick 分位 rank - 累计十档价差
+- **EN**: 100-tick empirical quantile rank of Cumulative 10-level spread
+- **family / type**: F5 / derived
+- **X column**: 280
+- **KS-drop-11**: YES
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.3769267667828439, 0.23183386762701885, 0.5437380334753079, 2.9665444328055117, 0.5135652300619887]
+- PSI max=2.9665444328055117, mean=0.9265216661505342
+- KS  max=0.6029
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.005417795018053988, train→test=0.009087714605709623
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0006614493905486599, 0.006999236622736305, 0.0037558483059890635, 0.002710061574315187, 0.004786734476902674, 0.008629882372424102]
+- KS  train→val=0.055580000000000074, train→test=0.07103999999999999
+- verdict: **stable**
+
+**Notes**: KS-drop 11 之一。spread 列在 tick-quantized 市场里大多 = 1 tick (恒值)，(seg <= last_val) 几乎 100% 为 True → qrank 退化为常数 1 → 训练时 KS 检测出与目标分布无关被剔除。
+
+### qrank_W100_amount_delta
+
+- **CN**: 100-tick 分位 rank - 成交额增量
+- **EN**: 100-tick empirical quantile rank of Trade notional delta
+- **family / type**: F5 / derived
+- **X column**: 281
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.013589052378630746, 0.07014262791164608, 0.10665287140335429, 0.011544364075970705, 0.013205261498677241]
+- PSI max=0.10665287140335429, mean=0.04302683545365581
+- KS  max=0.12352750000000001
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.003902789192694509, train→test=0.06036485604370299
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.010942946556070006, 0.01024881801591593, 0.001446184975435099, 0.0008982194818518377, 0.005021984698168065, 0.06146710117552533]
+- KS  train→val=0.028034999999999977, train→test=0.09707500000000002
+- verdict: **stable**
+
+### qrank_W100_volume_delta
+
+- **CN**: 100-tick 分位 rank - 成交量增量
+- **EN**: 100-tick empirical quantile rank of Trade volume delta
+- **family / type**: F5 / derived
+- **X column**: 282
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.006112186451553307, 0.05852920829953151, 0.07713241465970053, 0.0056518538188139065, 0.00649063451349349]
+- PSI max=0.07713241465970053, mean=0.030783259548618554
+- KS  max=0.10119000000000003
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0033111912523341737, train→test=0.05851643764169538
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.012638754382353096, 0.011697909212569335, 0.0012779593321751836, 0.0014896617113100618, 0.003911026345932722, 0.05635641119149186]
+- KS  train→val=0.024005, train→test=0.09668499999999997
+- verdict: **stable**
+
+### qrank_W100_imbalance
+
+- **CN**: 100-tick 分位 rank - 一档量不平衡
+- **EN**: 100-tick empirical quantile rank of OB imbalance
+- **family / type**: F5 / derived
+- **X column**: 283
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0021530001992631624, 0.00032658618661337213, 0.006994019161985708, 0.014894575354688612, 0.006788766441989337]
+- PSI max=0.014894575354688612, mean=0.006231389468908039
+- KS  max=0.027847500000000025
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.0006715386288535781, train→test=0.0006948401511657244
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0007222719240642329, 0.0005907314957572499, 0.0002249395307453324, 0.0006369442317881116, 0.0009032873660616864, 0.0009433416683902387]
+- KS  train→val=0.006064999999999987, train→test=0.006670000000000009
+- verdict: **stable**
+
+### qrank_W100_totalbsize
+
+- **CN**: 100-tick 分位 rank - 买侧总量
+- **EN**: 100-tick empirical quantile rank of Total bid size
+- **family / type**: F5 / derived
+- **X column**: 284
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.001385308311914237, 0.00712798170544392, 0.004812487984828109, 0.0075135209081313966, 0.002233452141290753]
+- PSI max=0.0075135209081313966, mean=0.004614550210321683
+- KS  max=0.032372500000000026
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.00012711169884344176, train→test=0.00047863404343903755
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0004026889396021866, 0.0005225638196098845, 0.0006454043190833934, 0.0004855957325654724, 5.627534638664582e-05, 0.001012942432373138]
+- KS  train→val=0.004375000000000018, train→test=0.005950000000000011
+- verdict: **stable**
+
+### qrank_W100_totalasize
+
+- **CN**: 100-tick 分位 rank - 卖侧总量
+- **EN**: 100-tick empirical quantile rank of Total ask size
+- **family / type**: F5 / derived
+- **X column**: 285
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0013428255420671693, 0.005934886065257899, 0.0021517195597533464, 0.00946891023894228, 0.006271933140984994]
+- PSI max=0.00946891023894228, mean=0.005034054909401138
+- KS  max=0.03536249999999996
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=0.00046481173357216935, train→test=0.0031461690322192957
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0027478640445024118, 0.00039315049484954013, 0.0005998578282992382, 0.0017582712071620905, 0.0005309088518655385, 0.003454259860586513]
+- KS  train→val=0.007539999999999991, train→test=0.019340000000000024
+- verdict: **stable**
+
+### qrank_W100_lb_intst
+
+- **CN**: 100-tick 分位 rank - 挂买强度
+- **EN**: 100-tick empirical quantile rank of Limit-bid intensity
+- **family / type**: F5 / derived
+- **X column**: 286
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.025532254875889483, 0.12012262449122107, 0.1605684741307073, 0.004055129881961193, 0.005727475800365114]
+- PSI max=0.1605684741307073, mean=0.06320119183602882
+- KS  max=0.15498000000000003
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.009542600556773674, train→test=0.06177473414639655
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.016108174745746485, 0.006165062749899283, 0.0037657552026038135, 0.001837187872520099, 0.010394661588288345, 0.060273563804986746]
+- KS  train→val=0.04260499999999989, train→test=0.10841499999999993
+- verdict: **stable**
+
+### qrank_W100_la_intst
+
+- **CN**: 100-tick 分位 rank - 挂卖强度
+- **EN**: 100-tick empirical quantile rank of Limit-ask intensity
+- **family / type**: F5 / derived
+- **X column**: 287
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.10055283332044075, 0.09361211213593906, 0.12196925806744427, 0.005693046286743919, 0.02847508572349784]
+- PSI max=0.12196925806744427, mean=0.07006046710681316
+- KS  max=0.14489000000000002
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.012671568163070865, train→test=0.07956557492245095
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.009927040376368516, 0.013487745181924055, 0.004812068324846286, 0.003463413553180426, 0.012874373400455328, 0.08034226842695089]
+- KS  train→val=0.05011499999999991, train→test=0.11729499999999998
+- verdict: **stable**
+
+### qrank_W100_mb_intst
+
+- **CN**: 100-tick 分位 rank - 市价买强度
+- **EN**: 100-tick empirical quantile rank of Market-bid intensity
+- **family / type**: F5 / derived
+- **X column**: 288
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.015301595559699071, 0.1258996767880608, 0.19825641098231378, 0.022302496619618823, 0.02069509070705487]
+- PSI max=0.19825641098231378, mean=0.07649105413134946
+- KS  max=0.19001
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.0048775732919835914, train→test=0.08480441633541576
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.016699714461614664, 0.020060197734635327, 0.0019153728440957272, 0.0027745269464600937, 0.004364298879466581, 0.08012686362780887]
+- KS  train→val=0.02760000000000007, train→test=0.12043500000000001
+- verdict: **stable**
+
+### qrank_W100_ma_intst
+
+- **CN**: 100-tick 分位 rank - 市价卖强度
+- **EN**: 100-tick empirical quantile rank of Market-ask intensity
+- **family / type**: F5 / derived
+- **X column**: 289
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.01860110447470467, 0.06367236186513257, 0.15684311658174135, 0.017300985372915738, 0.017119874900069835]
+- PSI max=0.15684311658174135, mean=0.05470748863891284
+- KS  max=0.16645
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.00877040243800574, train→test=0.08411927705086447
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.020148276456479406, 0.0171359344372669, 0.002701498056854162, 0.0009947177874978206, 0.008266574440681906, 0.07940390400962793]
+- KS  train→val=0.03990500000000008, train→test=0.12525000000000003
+- verdict: **stable**
+
+### qrank_W100_cb_intst
+
+- **CN**: 100-tick 分位 rank - 撤买强度
+- **EN**: 100-tick empirical quantile rank of Cancel-bid intensity
+- **family / type**: F5 / derived
+- **X column**: 290
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04298377194620122, 0.22553419115809561, 0.38583810032847843, 0.04574145558406783, 0.031543891530885285]
+- PSI max=0.38583810032847843, mean=0.14632828210954568
+- KS  max=0.26287
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0019812949109899755, train→test=0.06029367342185228
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.01573208006990174, 0.011380285395647479, 0.00630072208938116, 0.003072969020589584, 0.001930420604700498, 0.058618165464413535]
+- KS  train→val=0.02008500000000002, train→test=0.10449999999999998
+- verdict: **stable**
+
+### qrank_W100_ca_intst
+
+- **CN**: 100-tick 分位 rank - 撤卖强度
+- **EN**: 100-tick empirical quantile rank of Cancel-ask intensity
+- **family / type**: F5 / derived
+- **X column**: 291
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04288067940038851, 0.20984240363887374, 0.28927110370153997, 0.02740650735701505, 0.03849529416452949]
+- PSI max=0.28927110370153997, mean=0.12157919765246934
+- KS  max=0.22802
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0013646276792939113, train→test=0.07822982534343036
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.02172929941344924, 0.01840483293661047, 0.0010336440715816705, 0.0013646697680115445, 0.002224593016958618, 0.07973397928262949]
+- KS  train→val=0.011260000000000048, train→test=0.12036999999999998
+- verdict: **stable**
+
+### qrank_W100_lb_acc
+
+- **CN**: 100-tick 分位 rank - 挂买累积
+- **EN**: 100-tick empirical quantile rank of Limit-bid cumulative
+- **family / type**: F5 / derived
+- **X column**: 292
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04468169577579235, 0.21678785106113635, 0.2737547421613872, 0.0033581077144813655, 0.013606828799672323]
+- PSI max=0.2737547421613872, mean=0.11043784510249392
+- KS  max=0.22266999999999998
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.012163190403717421, train→test=0.08108143143620261
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.03197892491285817, 0.010118038913677525, 0.002467296347470435, 0.0035725191495508605, 0.011208705992858638, 0.08511910370563468]
+- KS  train→val=0.04532999999999998, train→test=0.11907000000000001
+- verdict: **stable**
+
+### qrank_W100_la_acc
+
+- **CN**: 100-tick 分位 rank - 挂卖累积
+- **EN**: 100-tick empirical quantile rank of Limit-ask cumulative
+- **family / type**: F5 / derived
+- **X column**: 293
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.1444382386869314, 0.1267527652328166, 0.17908046937508634, 0.011521103702518899, 0.04465390775556928]
+- PSI max=0.17908046937508634, mean=0.1012892969505845
+- KS  max=0.1811975
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.015504534419441461, train→test=0.10337742970188743
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.02225576696012562, 0.018287798979336613, 0.003094024970560147, 0.002184107193564089, 0.015796305066156494, 0.10826205305807704]
+- KS  train→val=0.04883499999999996, train→test=0.131035
+- verdict: **mild_drift**
+
+### qrank_W100_mb_acc
+
+- **CN**: 100-tick 分位 rank - 市价买累积
+- **EN**: 100-tick empirical quantile rank of Market-bid cumulative
+- **family / type**: F5 / derived
+- **X column**: 294
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.025281874862271018, 0.19053664360796257, 0.3070282242181886, 0.016940539487367557, 0.02053651744845421]
+- PSI max=0.3070282242181886, mean=0.1120647599248488
+- KS  max=0.2356725
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.00425641683124638, train→test=0.11078843646433134
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.02601742602628975, 0.028498722661480715, 0.0020053659294975135, 0.0016116874058839867, 0.004397681504318917, 0.11222915992586822]
+- KS  train→val=0.026344999999999952, train→test=0.13556999999999997
+- verdict: **mild_drift**
+
+### qrank_W100_ma_acc
+
+- **CN**: 100-tick 分位 rank - 市价卖累积
+- **EN**: 100-tick empirical quantile rank of Market-ask cumulative
+- **family / type**: F5 / derived
+- **X column**: 295
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.03808823475300136, 0.07071694761823417, 0.21339643242270778, 0.011414176411140519, 0.01294133363836647]
+- PSI max=0.21339643242270778, mean=0.06931142496869006
+- KS  max=0.19813999999999998
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.009810248866902354, train→test=0.10265110074077123
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.03841734390506222, 0.025439752600397797, 0.003072332279121789, 0.002423606446745188, 0.009645101582740536, 0.10042985078491741]
+- KS  train→val=0.03701999999999994, train→test=0.133185
+- verdict: **mild_drift**
+
+### qrank_W100_midprice
+
+- **CN**: 100-tick 分位 rank - 中间价
+- **EN**: 100-tick empirical quantile rank of Midprice (bid1+ask1)/2
+- **family / type**: F5 / derived
+- **X column**: 296
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:354-372 (compute_stage2_batch -> qrank block)`
+
+**Formula**: $\mathrm{qrank}_t^W(c) = \frac{1}{W}\sum_{i=t-W+1}^{t} \mathbb{1}[c_i \le c_t]$
+
+**Numpy pseudo**:
+```python
+seg = X[:, -100:, col].astype(np.float32)
+last = seg[:, -1:]
+qrank = (seg <= last).mean(axis=-1)
+```
+
+**Physical meaning**: 当前值在过去 100 tick 中的分位（empirical rank ∈ [1/W, 1]）。对绝对水平不敏感，对单调变换(e.g. log)不变；天然 sym-agnostic。但对 tick-quantized 列(spread 常 = 1 tick)，几乎所有 tick 都等于 last → qrank ≈ 1 → 退化为常数(死特征)。
+
+**NaN handling**:
+- Formula layer: 比较运算返回 bool，mean 后必定 finite ∈ [1/W, 1]，无 NaN 风险。
+- NN pipeline: window-z 或 raw 路径；nan_to_num(0) (rerun_13rows.py:271-285)
+- LGB pipeline: 不动；LGB 内置 missing routing（无 NaN）。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.016095413048004617, 0.03784171330238395, 0.11405623339757234, 0.535726294407988, 0.10042776253776389]
+- PSI max=0.535726294407988, mean=0.16082948333874256
+- KS  max=0.35752500000000004
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.007524030721726084, train→test=0.012221247351821311
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002355674274082109, 0.0003316915573411581, 0.0007597888164137612, 0.002795322751436061, 0.006306388815038703, 0.013484281330184339]
+- KS  train→val=0.0482800000000001, train→test=0.06324000000000007
+- verdict: **stable**
+
+### F5.3 misc derived (10 features: mid_ewma_resid + adapt_mom + spread_reg + trade_pers)
+
+### mid_ewma_resid_a0.05
+
+- **CN**: 中间价 EWMA 残差 α=0.05
+- **EN**: Midprice EWMA residual (α=0.05)
+- **family / type**: F5 / derived
+- **X column**: 336
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:499-504 (compute_stage3_batch -> ewma_resid block)`
+
+**Formula**: $\mathrm{resid}_t = m_t - \mathrm{EWMA}_{\alpha=0.05}(m)_t,\quad y_t = \alpha m_t + (1-\alpha)y_{t-1}$
+
+**Numpy pseudo**:
+```python
+ewma = _ewma_last_batch(midprice, (0.05,))[:, 0]
+resid = midprice[:, -1] - ewma
+resid = np.clip(np.where(np.isfinite(resid), resid, 0.0), -0.05, 0.05)
+```
+
+**Physical meaning**: 当前中间价对其长期 EWMA 趋势(α=0.05 → 半衰约 14 tick)的偏离。正值 = 短期偏强 / 高于慢均线；负值 = 短期偏弱。经验阈 ±5% clip，剔除极端价跳。
+
+**NaN handling**:
+- Formula layer: lfilter EWMA 在 mid 数值上恒输出 finite；np.where(np.isfinite, resid, 0.0) + clip(-0.05, 0.05) 双重兜底。
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04068133622949351, 0.09831212073992722, 0.08136305564791228, 0.49171364243913485, 0.13525518081016702]
+- PSI max=0.49171364243913485, mean=0.16946506717332696
+- KS  max=0.155385
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.029216933977044588, train→test=0.07233848788307504
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.011393807925125062, 0.010711631996322319, 0.0057765574128858, 0.014525497338852814, 0.030466351009805503, 0.07170136586263616]
+- KS  train→val=0.03127499999999994, train→test=0.05461500000000008
+- verdict: **stable**
+
+### adapt_mom_W20
+
+- **CN**: 自适应动量 W=20
+- **EN**: Volatility-adaptive momentum, window=20
+- **family / type**: F5 / derived
+- **X column**: 350
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:615-622 (compute_stage5_batch -> adapt_mom block)`
+
+**Formula**: $\mathrm{adapt\_mom}_t^W = \frac{m_t - m_{t-W}}{\sigma_W(m)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+last = mid[:, -1]; ref = mid[:, -20]
+sd = mid[:, -20:].std(axis=-1) + EPS
+v = np.clip(np.where(np.isfinite((last-ref)/sd), (last-ref)/sd, 0.0), -10, 10)
+```
+
+**Physical meaning**: 过去 20 tick 的中间价位移除以同窗口波动率 → 动量信号的 σ-规整版。波动率高的时段同等位移会得到更小的 |signal|，所以本质是【风险调整后的动量】。Sym-agnostic：σ 自动按 sym 的波动尺度归一化。
+
+**NaN handling**:
+- Formula layer: EPS 防 0；np.where(isfinite) 兜底；clip(-10,10).
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.03621678952236776, 0.03454189757475818, 0.352692719961137, 1.0026712441170886, 0.2823384911925281]
+- PSI max=1.0026712441170886, mean=0.3416922284735759
+- KS  max=0.2568375
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.009420962701515746, train→test=0.02297439137343796
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0010670877380529668, 0.0018737595919504414, 0.000906409606790233, 0.0017554515929763795, 0.009021312154842698, 0.023040620221119197]
+- KS  train→val=0.025305000000000022, train→test=0.03837499999999994
+- verdict: **stable**
+
+### adapt_mom_W50
+
+- **CN**: 自适应动量 W=50
+- **EN**: Volatility-adaptive momentum, window=50
+- **family / type**: F5 / derived
+- **X column**: 351
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:615-622 (compute_stage5_batch -> adapt_mom block)`
+
+**Formula**: $\mathrm{adapt\_mom}_t^W = \frac{m_t - m_{t-W}}{\sigma_W(m)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+last = mid[:, -1]; ref = mid[:, -50]
+sd = mid[:, -50:].std(axis=-1) + EPS
+v = np.clip(np.where(np.isfinite((last-ref)/sd), (last-ref)/sd, 0.0), -10, 10)
+```
+
+**Physical meaning**: 过去 50 tick 的中间价位移除以同窗口波动率 → 动量信号的 σ-规整版。波动率高的时段同等位移会得到更小的 |signal|，所以本质是【风险调整后的动量】。Sym-agnostic：σ 自动按 sym 的波动尺度归一化。
+
+**NaN handling**:
+- Formula layer: EPS 防 0；np.where(isfinite) 兜底；clip(-10,10).
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.030197674324106947, 0.036695620156295794, 0.1659687480082352, 0.7714052013444211, 0.147414980080388]
+- PSI max=0.7714052013444211, mean=0.2303364447826894
+- KS  max=0.23064250000000003
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.01080513639546537, train→test=0.02642736468403071
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.003689157391679144, 0.0013320375343886482, 0.002468297105654357, 0.0027306209690755954, 0.010724207245245148, 0.0250536426289229]
+- KS  train→val=0.028514999999999957, train→test=0.04811500000000002
+- verdict: **stable**
+
+### adapt_mom_W100
+
+- **CN**: 自适应动量 W=100
+- **EN**: Volatility-adaptive momentum, window=100
+- **family / type**: F5 / derived
+- **X column**: 352
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:615-622 (compute_stage5_batch -> adapt_mom block)`
+
+**Formula**: $\mathrm{adapt\_mom}_t^W = \frac{m_t - m_{t-W}}{\sigma_W(m)+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+last = mid[:, -1]; ref = mid[:, -100]
+sd = mid[:, -100:].std(axis=-1) + EPS
+v = np.clip(np.where(np.isfinite((last-ref)/sd), (last-ref)/sd, 0.0), -10, 10)
+```
+
+**Physical meaning**: 过去 100 tick 的中间价位移除以同窗口波动率 → 动量信号的 σ-规整版。波动率高的时段同等位移会得到更小的 |signal|，所以本质是【风险调整后的动量】。Sym-agnostic：σ 自动按 sym 的波动尺度归一化。
+
+**NaN handling**:
+- Formula layer: EPS 防 0；np.where(isfinite) 兜底；clip(-10,10).
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.01720146628403563, 0.020138045722607648, 0.09187833785852824, 0.5597807561360868, 0.0842387342592575]
+- PSI max=0.5597807561360868, mean=0.15464746805210317
+- KS  max=0.189075
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.006683523292407581, train→test=0.022293403019659562
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002929249512936615, 0.0010131811664282422, 0.004740670463316124, 0.0026891852877135446, 0.008210889463794613, 0.02069047078574031]
+- KS  train→val=0.024859999999999993, train→test=0.04941499999999999
+- verdict: **stable**
+
+### spread_reg_W20
+
+- **CN**: 价差稳健 z 分位 W=20
+- **EN**: Robust spread regime z-score, window=20
+- **family / type**: F5 / derived
+- **X column**: 360
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:689-699 (compute_stage5_batch -> spread regime block)`
+
+**Formula**: $\mathrm{spread\_reg}_t^W = \frac{s_t - \mathrm{median}_W(s)}{\mathrm{IQR}_W(s)}$
+
+**Numpy pseudo**:
+```python
+seg = spread1[:, -20:]
+med = np.median(seg, -1); iqr = np.quantile(seg, .75, -1) - np.quantile(seg, .25, -1)
+denom = np.where(iqr > EPS, iqr, np.inf)
+v = np.clip((spread1[:, -1] - med) / denom, -10, 10)
+```
+
+**Physical meaning**: 当前 spread 相对最近 20 tick 的稳健中位数偏离，用 IQR 归一化。正 = 价差异常加宽(流动性收紧)，负 = 异常窄。IQR=0(spread 在窗口内全等)时 denom=∞ → v=0，避免 outlier 爆炸；这种 case 在小盘股很常见。
+
+**NaN handling**:
+- Formula layer: iqr==0 → denom=inf → 0；np.where(isfinite) 兜底；clip(±10).
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.48598446610739865, 0.03830721823984673, 0.3562525083161829, 1.2963010652263556, 0.3867016687441145]
+- PSI max=1.2963010652263556, mean=0.5127093853267797
+- KS  max=0.21014750000000001
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0010359845874063018, train→test=0.0021814585259694254
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0016325180848564586, 0.0003726592514779145, 0.0004720206002784994, 0.0010338034597211466, 0.0010972729604089924, 0.002216524248494862]
+- KS  train→val=0.013905, train→test=0.018179999999999974
+- verdict: **stable**
+
+### spread_reg_W50
+
+- **CN**: 价差稳健 z 分位 W=50
+- **EN**: Robust spread regime z-score, window=50
+- **family / type**: F5 / derived
+- **X column**: 361
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:689-699 (compute_stage5_batch -> spread regime block)`
+
+**Formula**: $\mathrm{spread\_reg}_t^W = \frac{s_t - \mathrm{median}_W(s)}{\mathrm{IQR}_W(s)}$
+
+**Numpy pseudo**:
+```python
+seg = spread1[:, -50:]
+med = np.median(seg, -1); iqr = np.quantile(seg, .75, -1) - np.quantile(seg, .25, -1)
+denom = np.where(iqr > EPS, iqr, np.inf)
+v = np.clip((spread1[:, -1] - med) / denom, -10, 10)
+```
+
+**Physical meaning**: 当前 spread 相对最近 50 tick 的稳健中位数偏离，用 IQR 归一化。正 = 价差异常加宽(流动性收紧)，负 = 异常窄。IQR=0(spread 在窗口内全等)时 denom=∞ → v=0，避免 outlier 爆炸；这种 case 在小盘股很常见。
+
+**NaN handling**:
+- Formula layer: iqr==0 → denom=inf → 0；np.where(isfinite) 兜底；clip(±10).
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6545882316305788, 0.031648101687336186, 0.3868167828996174, 1.5890043413508674, 0.41637220112189977]
+- PSI max=1.5890043413508674, mean=0.6156859317380599
+- KS  max=0.23195999999999997
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.00178122809574945, train→test=0.0016061454234712186
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0017327793478402068, 0.0010749517080344293, 0.0004805994235594505, 0.0015780721464431634, 0.0017451443964881619, 0.0014320236447525302]
+- KS  train→val=0.019940000000000013, train→test=0.019495000000000012
+- verdict: **stable**
+
+### spread_reg_W100
+
+- **CN**: 价差稳健 z 分位 W=100
+- **EN**: Robust spread regime z-score, window=100
+- **family / type**: F5 / derived
+- **X column**: 362
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:689-699 (compute_stage5_batch -> spread regime block)`
+
+**Formula**: $\mathrm{spread\_reg}_t^W = \frac{s_t - \mathrm{median}_W(s)}{\mathrm{IQR}_W(s)}$
+
+**Numpy pseudo**:
+```python
+seg = spread1[:, -100:]
+med = np.median(seg, -1); iqr = np.quantile(seg, .75, -1) - np.quantile(seg, .25, -1)
+denom = np.where(iqr > EPS, iqr, np.inf)
+v = np.clip((spread1[:, -1] - med) / denom, -10, 10)
+```
+
+**Physical meaning**: 当前 spread 相对最近 100 tick 的稳健中位数偏离，用 IQR 归一化。正 = 价差异常加宽(流动性收紧)，负 = 异常窄。IQR=0(spread 在窗口内全等)时 denom=∞ → v=0，避免 outlier 爆炸；这种 case 在小盘股很常见。
+
+**NaN handling**:
+- Formula layer: iqr==0 → denom=inf → 0；np.where(isfinite) 兜底；clip(±10).
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.860046667029559, 0.04028665144962374, 0.4207727088746467, 3.5102575834340084, 0.43908842280230787]
+- PSI max=3.5102575834340084, mean=1.054090406718029
+- KS  max=0.2451975
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0017814748211301338, train→test=0.0008201123434735534
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.001872059661841351, 0.001824328392120559, 0.0009136116873920201, 0.003435871952884869, 0.0021295082333879023, 0.0014983951696796493]
+- KS  train→val=0.01993500000000001, train→test=0.020464999999999983
+- verdict: **stable**
+
+### trade_pers_W20
+
+- **CN**: 成交方向持续度 W=20
+- **EN**: Trade-direction persistence, window=20
+- **family / type**: F5 / derived
+- **X column**: 363
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:701-719 (compute_stage5_batch -> trade_pers block)`
+
+**Formula**: $\mathrm{trade\_pers}_t^W = \mathrm{Corr}\big(\mathrm{sign}(\Delta m)_{t-W:t},\ \mathrm{sign}(\Delta m)_{t-W-1:t-1}\big)$
+
+**Numpy pseudo**:
+```python
+sign_dm = np.sign(np.diff(mid, prepend=mid[:,:1]))
+sign_lag = np.roll(sign_dm, 1, -1); sign_lag[:,0]=0
+x = sign_dm[:, -20:]; y = sign_lag[:, -20:]
+v = pearson_corr(x, y) → clip(-1, 1)
+```
+
+**Physical meaning**: 中间价方向序列 sign(Δm) 与其滞后 1 tick 的 Pearson 相关 = 一阶自相关。正 = 方向连续(动量市场)；负 = 方向反转(均值回归 / market-making)；0 = 随机游走。
+
+**NaN handling**:
+- Formula layer: denom = sqrt(sxx*syy)+EPS 防 0；np.where(isfinite, v, 0) 兜底；clip(±1).
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.08084660717457437, 0.05773599707423984, 0.24885504053986107, 1.057886356911068, 0.21175446201572728]
+- PSI max=1.057886356911068, mean=0.3314156927430941
+- KS  max=0.3105075
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.018559485570415403, train→test=0.032635607713538295
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0027080607695314125, 0.004305295151083775, 0.0012129381583326757, 0.0024711580330844937, 0.017690266653122667, 0.03426775544098887]
+- KS  train→val=0.062020000000000075, train→test=0.07976
+- verdict: **stable**
+
+### trade_pers_W50
+
+- **CN**: 成交方向持续度 W=50
+- **EN**: Trade-direction persistence, window=50
+- **family / type**: F5 / derived
+- **X column**: 364
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:701-719 (compute_stage5_batch -> trade_pers block)`
+
+**Formula**: $\mathrm{trade\_pers}_t^W = \mathrm{Corr}\big(\mathrm{sign}(\Delta m)_{t-W:t},\ \mathrm{sign}(\Delta m)_{t-W-1:t-1}\big)$
+
+**Numpy pseudo**:
+```python
+sign_dm = np.sign(np.diff(mid, prepend=mid[:,:1]))
+sign_lag = np.roll(sign_dm, 1, -1); sign_lag[:,0]=0
+x = sign_dm[:, -50:]; y = sign_lag[:, -50:]
+v = pearson_corr(x, y) → clip(-1, 1)
+```
+
+**Physical meaning**: 中间价方向序列 sign(Δm) 与其滞后 1 tick 的 Pearson 相关 = 一阶自相关。正 = 方向连续(动量市场)；负 = 方向反转(均值回归 / market-making)；0 = 随机游走。
+
+**NaN handling**:
+- Formula layer: denom = sqrt(sxx*syy)+EPS 防 0；np.where(isfinite, v, 0) 兜底；clip(±1).
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.10478031480322879, 0.13643375512792147, 0.49550366747547686, 1.522253639419894, 0.4880737154727203]
+- PSI max=1.522253639419894, mean=0.5494090184598482
+- KS  max=0.260185
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.041781900773292094, train→test=0.06881906353761401
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0035003443438585725, 0.004086886883630084, 0.0030023347969134018, 0.0062877589255529755, 0.04387166767711465, 0.07220152863313901]
+- KS  train→val=0.07534000000000002, train→test=0.09509999999999996
+- verdict: **stable**
+
+### trade_pers_W100
+
+- **CN**: 成交方向持续度 W=100
+- **EN**: Trade-direction persistence, window=100
+- **family / type**: F5 / derived
+- **X column**: 365
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:701-719 (compute_stage5_batch -> trade_pers block)`
+
+**Formula**: $\mathrm{trade\_pers}_t^W = \mathrm{Corr}\big(\mathrm{sign}(\Delta m)_{t-W:t},\ \mathrm{sign}(\Delta m)_{t-W-1:t-1}\big)$
+
+**Numpy pseudo**:
+```python
+sign_dm = np.sign(np.diff(mid, prepend=mid[:,:1]))
+sign_lag = np.roll(sign_dm, 1, -1); sign_lag[:,0]=0
+x = sign_dm[:, -100:]; y = sign_lag[:, -100:]
+v = pearson_corr(x, y) → clip(-1, 1)
+```
+
+**Physical meaning**: 中间价方向序列 sign(Δm) 与其滞后 1 tick 的 Pearson 相关 = 一阶自相关。正 = 方向连续(动量市场)；负 = 方向反转(均值回归 / market-making)；0 = 随机游走。
+
+**NaN handling**:
+- Formula layer: denom = sqrt(sxx*syy)+EPS 防 0；np.where(isfinite, v, 0) 兜底；clip(±1).
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.10594612560385776, 0.1908728255353138, 0.2894527400982776, 1.4643273626890876, 0.3590525457867325]
+- PSI max=1.4643273626890876, mean=0.4819303199426538
+- KS  max=0.1945675
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.05405320516339828, train→test=0.08451007526613169
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0028536680232537728, 0.003260384029386409, 0.006865131076527965, 0.012847506032322042, 0.05550839354296718, 0.08122501985346474]
+- KS  train→val=0.10127999999999998, train→test=0.1104
+- verdict: **stable**
+
+## F6 — 不对称性 (74 features)
+
+### F6.1 raw rate fields (40 features, 主办方直接给)
+
+### bid_rate1
+
+- **CN**: 买价滑动平均变化率 第1档
+- **EN**: Sliding-mean rate-of-change of bid_1
+- **family / type**: F6 / raw
+- **X column**: 114
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate1)'
+feat = raw_input[:, name2idx['bid_rate1']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate1：第 1 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.4071901640798366, 0.36895802376554054, 0.16194954998153935, 0.6832303861213762, 0.5145991462672836]
+- PSI max=0.6832303861213762, mean=0.42718545404311525
+- KS  max=0.1095225
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.3890518789322751, train→test=0.38484243247294775
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0032634838426546173, 0.002777390993850266, 0.0012866928459088437, 0.004439087219918068, 0.36574067461003845, 0.3607577764083602]
+- KS  train→val=0.01747499999999999, train→test=0.020065
+- verdict: **strong_drift**
+
+### bid_rate2
+
+- **CN**: 买价滑动平均变化率 第2档
+- **EN**: Sliding-mean rate-of-change of bid_2
+- **family / type**: F6 / raw
+- **X column**: 115
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate2)'
+feat = raw_input[:, name2idx['bid_rate2']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate2：第 2 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.3909688312669533, 0.35277646801889984, 0.15523608850862597, 0.6664667212019465, 0.5088885230482327]
+- PSI max=0.6664667212019465, mean=0.41486732640893165
+- KS  max=0.11351499999999992
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.39849399969046784, train→test=0.3930599317696862
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0035320623718207737, 0.004020802220894752, 0.0017315082402413647, 0.013125345951296837, 0.37343139345753484, 0.36820756520144277]
+- KS  train→val=0.020019999999999927, train→test=0.020224999999999993
+- verdict: **strong_drift**
+
+### bid_rate3
+
+- **CN**: 买价滑动平均变化率 第3档
+- **EN**: Sliding-mean rate-of-change of bid_3
+- **family / type**: F6 / raw
+- **X column**: 116
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate3)'
+feat = raw_input[:, name2idx['bid_rate3']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate3：第 3 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.4539989648434473, 0.41402091897873183, 0.15284514673785735, 0.7307420477626413, 0.5807836612343119]
+- PSI max=0.7307420477626413, mean=0.4664781479113979
+- KS  max=0.11846499999999993
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.37597236360370756, train→test=0.37472822428334623
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002393098513948399, 0.0033987553609414836, 0.0023915982176846945, 0.01349524767368007, 0.35261255705199884, 0.3511557407895223]
+- KS  train→val=0.019665000000000002, train→test=0.020894999999999997
+- verdict: **strong_drift**
+
+### bid_rate4
+
+- **CN**: 买价滑动平均变化率 第4档
+- **EN**: Sliding-mean rate-of-change of bid_4
+- **family / type**: F6 / raw
+- **X column**: 117
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate4)'
+feat = raw_input[:, name2idx['bid_rate4']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate4：第 4 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.4433256962642842, 0.40376504542204805, 0.1614590361776719, 0.7154570926616287, 0.5553766441244732]
+- PSI max=0.7154570926616287, mean=0.45587670293002125
+- KS  max=0.12245499999999998
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.3867457433636146, train→test=0.3868059183569973
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0026644791148254243, 0.0029135905637428148, 0.002370477812873436, 0.008356525315266854, 0.36325667963255337, 0.3626044402810643]
+- KS  train→val=0.020245, train→test=0.021670000000000078
+- verdict: **strong_drift**
+
+### bid_rate5
+
+- **CN**: 买价滑动平均变化率 第5档
+- **EN**: Sliding-mean rate-of-change of bid_5
+- **family / type**: F6 / raw
+- **X column**: 118
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate5)'
+feat = raw_input[:, name2idx['bid_rate5']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate5：第 5 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.4560831440119723, 0.4188913426318263, 0.1621508472162607, 0.7332415269943946, 0.584320067339664]
+- PSI max=0.7332415269943946, mean=0.4709373856388236
+- KS  max=0.1243225
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.44453457170051663, train→test=0.44644771369398784
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0014243517568522644, 0.0029388064231777, 0.0009821741701029176, 0.0006041333063810504, 0.4168071793359546, 0.4186113523176352]
+- KS  train→val=0.018450000000000008, train→test=0.021444999999999936
+- verdict: **strong_drift**
+
+### bid_rate6
+
+- **CN**: 买价滑动平均变化率 第6档
+- **EN**: Sliding-mean rate-of-change of bid_6
+- **family / type**: F6 / raw
+- **X column**: 119
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate6)'
+feat = raw_input[:, name2idx['bid_rate6']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate6：第 6 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.5046457889621355, 0.46503547432581227, 0.17635182448737347, 0.7855687176559188, 0.22042670838134895]
+- PSI max=0.7855687176559188, mean=0.4304057027625178
+- KS  max=0.12143000000000004
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.47135381701283835, train→test=0.47252413740271404
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0028513554922476743, 0.0012188568735301496, 0.0002288039298874728, 0.00033849783612045737, 0.4432843911199989, 0.4428524523294016]
+- KS  train→val=0.019440000000000013, train→test=0.020440000000000014
+- verdict: **strong_drift**
+
+### bid_rate7
+
+- **CN**: 买价滑动平均变化率 第7档
+- **EN**: Sliding-mean rate-of-change of bid_7
+- **family / type**: F6 / raw
+- **X column**: 120
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate7)'
+feat = raw_input[:, name2idx['bid_rate7']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate7：第 7 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.5189692064177888, 0.4823733144331982, 0.17132230749777766, 0.7968459591484518, 0.18741067548603715]
+- PSI max=0.7968459591484518, mean=0.43138429259665073
+- KS  max=0.12368250000000003
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0018332703617671645, train→test=0.01386222693441184
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0023639862205362587, 0.0015848520215685862, 0.00012769413834595175, 0.00021591427466777607, 0.002099818564691732, 0.015574853214706037]
+- KS  train→val=0.01961999999999997, train→test=0.020784999999999998
+- verdict: **stable**
+
+### bid_rate8
+
+- **CN**: 买价滑动平均变化率 第8档
+- **EN**: Sliding-mean rate-of-change of bid_8
+- **family / type**: F6 / raw
+- **X column**: 121
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate8)'
+feat = raw_input[:, name2idx['bid_rate8']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate8：第 8 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.5125415216870377, 0.4756933448300942, 0.17448782752600378, 0.7911993070606137, 0.18091443199772098]
+- PSI max=0.7911993070606137, mean=0.42696728662029415
+- KS  max=0.12085999999999997
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.014121388752524295, train→test=0.0597451032599708
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0024824004207740415, 0.0016240414835745887, 0.0002240685781321018, 0.00028918525705931303, 0.016319985310048173, 0.05909878622698113]
+- KS  train→val=0.02012999999999998, train→test=0.020669999999999966
+- verdict: **stable**
+
+### bid_rate9
+
+- **CN**: 买价滑动平均变化率 第9档
+- **EN**: Sliding-mean rate-of-change of bid_9
+- **family / type**: F6 / raw
+- **X column**: 122
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate9)'
+feat = raw_input[:, name2idx['bid_rate9']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate9：第 9 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.5247026126382636, 0.48808832850234624, 0.1689058478925681, 0.8042743541574595, 0.16915087429245548]
+- PSI max=0.8042743541574595, mean=0.4310244034966185
+- KS  max=0.1254375000000001
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.008606770943729363, train→test=0.030412623987442718
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0020363740392564224, 0.0014217721144880481, 0.00017331965731494042, 0.0002603766317379435, 0.008258459318064652, 0.03041433836198238]
+- KS  train→val=0.01994499999999999, train→test=0.021314999999999973
+- verdict: **stable**
+
+### bid_rate10
+
+- **CN**: 买价滑动平均变化率 第10档
+- **EN**: Sliding-mean rate-of-change of bid_10
+- **family / type**: F6 / raw
+- **X column**: 123
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bid_rate10)'
+feat = raw_input[:, name2idx['bid_rate10']]
+```
+
+**Physical meaning**: 主办方给的 bid_rate10：第 10 档买侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.5160227759846447, 0.4767402144849917, 0.1768260368121249, 0.794102222803775, 0.18711814441873711]
+- PSI max=0.794102222803775, mean=0.43016187890085467
+- KS  max=0.1234225000000001
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.001451021323568294, train→test=0.014116024283592595
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.001221176222432008, 0.0019801048465564975, 0.00011965325226931461, 0.0004601125661034609, 0.0019140191569100493, 0.013309698520628768]
+- KS  train→val=0.019785000000000053, train→test=0.02199999999999991
+- verdict: **stable**
+
+### ask_rate1
+
+- **CN**: 卖价滑动平均变化率 第1档
+- **EN**: Sliding-mean rate-of-change of ask_1
+- **family / type**: F6 / raw
+- **X column**: 124
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate1)'
+feat = raw_input[:, name2idx['ask_rate1']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate1：第 1 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0395%, val=0.4235%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.44653659907280735, 0.4058919455993478, 0.21419868151371593, 0.7209968406583147, 0.5221912086917244]
+- PSI max=0.7209968406583147, mean=0.461963055107182
+- KS  max=0.1068821401776604
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.446669748291652, train→test=0.44397815515194566
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0024185162060900147, 0.003452332999592016, 0.00016947995163223888, 0.0005250733924572601, 0.4190343401730453, 0.41678811540438127]
+- KS  train→val=0.02217166681048524, train→test=0.020517510167024328
+- verdict: **strong_drift**
+
+### ask_rate2
+
+- **CN**: 卖价滑动平均变化率 第2档
+- **EN**: Sliding-mean rate-of-change of ask_2
+- **family / type**: F6 / raw
+- **X column**: 125
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate2)'
+feat = raw_input[:, name2idx['ask_rate2']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate2：第 2 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0551%, val=0.4235%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.56554488173175, 0.5253876320185815, 0.21131227916889575, 0.846473866610618, 0.13159574481158637]
+- PSI max=0.846473866610618, mean=0.4560628808682864
+- KS  max=0.1150578279442955
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.004011155431563911, train→test=0.010932954115789258
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002250283658085815, 0.002156107833351133, 0.00019511877017832504, 0.0004508305998043148, 0.004458512586491715, 0.010678030188877433]
+- KS  train→val=0.023418258146496215, train→test=0.020072337937831766
+- verdict: **stable**
+
+### ask_rate3
+
+- **CN**: 卖价滑动平均变化率 第3档
+- **EN**: Sliding-mean rate-of-change of ask_3
+- **family / type**: F6 / raw
+- **X column**: 126
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate3)'
+feat = raw_input[:, name2idx['ask_rate3']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate3：第 3 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0687%, val=0.4235%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6259621646565939, 0.5857728033195895, 0.2014283280816485, 0.9012726625278044, 0.12393934885139626]
+- PSI max=0.9012726625278044, mean=0.48767506148740647
+- KS  max=0.11670681946675071
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0014081583841037556, train→test=0.0059170715974929695
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004378789146950966, 0.0035967172078628182, 0.0015724132762896532, 0.001966763302572284, 0.0012928830399839076, 0.006120366017775124]
+- KS  train→val=0.021032671202429354, train→test=0.02177455812603815
+- verdict: **stable**
+
+### ask_rate4
+
+- **CN**: 卖价滑动平均变化率 第4档
+- **EN**: Sliding-mean rate-of-change of ask_4
+- **family / type**: F6 / raw
+- **X column**: 127
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate4)'
+feat = raw_input[:, name2idx['ask_rate4']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate4：第 4 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0753%, val=0.4238%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6877249959561081, 0.6474875608306849, 0.18537409703769764, 0.9678419263498538, 0.12462857063051555]
+- PSI max=0.9678419263498538, mean=0.522611430160972
+- KS  max=0.11893639866298389
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0012708861799745454, train→test=0.006209506068806299
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.005730956728105483, 0.0035668308447982205, 0.0006745746903621804, 0.0018443731121580759, 0.0014711703974416466, 0.006732413489161237]
+- KS  train→val=0.021550357137661208, train→test=0.022755179439963164
+- verdict: **stable**
+
+### ask_rate5
+
+- **CN**: 卖价滑动平均变化率 第5档
+- **EN**: Sliding-mean rate-of-change of ask_5
+- **family / type**: F6 / raw
+- **X column**: 128
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate5)'
+feat = raw_input[:, name2idx['ask_rate5']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate5：第 5 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.082%, val=0.4238%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6618370036221126, 0.6238144590368518, 0.18156172266900045, 0.9371734812638726, 0.12802790836463093]
+- PSI max=0.9371734812638726, mean=0.5064829149912937
+- KS  max=0.11934805021768505
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0017810547142995189, train→test=0.005763301489231849
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004990899916281662, 0.002958571802970892, 0.0004702306360245058, 0.004179976542098262, 0.0016084195769160753, 0.005895640396928176]
+- KS  train→val=0.020118343011933645, train→test=0.021636380764130395
+- verdict: **stable**
+
+### ask_rate6
+
+- **CN**: 卖价滑动平均变化率 第6档
+- **EN**: Sliding-mean rate-of-change of ask_6
+- **family / type**: F6 / raw
+- **X column**: 129
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate6)'
+feat = raw_input[:, name2idx['ask_rate6']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate6：第 6 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0902%, val=0.4238%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6821577951561724, 0.6401277557322227, 0.1605817892671827, 0.9638032825946604, 0.13565843662555313]
+- PSI max=0.9638032825946604, mean=0.5164658118751583
+- KS  max=0.11785946521414953
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.002249504542973317, train→test=0.004605462564815157
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004584125402543274, 0.0026788497564258053, 0.00038055897650117395, 0.003379592020276211, 0.002082290024143318, 0.004336065153947752]
+- KS  train→val=0.020941785461584164, train→test=0.020628181035690696
+- verdict: **stable**
+
+### ask_rate7
+
+- **CN**: 卖价滑动平均变化率 第7档
+- **EN**: Sliding-mean rate-of-change of ask_7
+- **family / type**: F6 / raw
+- **X column**: 130
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate7)'
+feat = raw_input[:, name2idx['ask_rate7']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate7：第 7 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.1002%, val=0.4248%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6870419418008036, 0.6477259823172337, 0.15763149814125108, 0.96756851051916, 0.1392116891176403]
+- PSI max=0.96756851051916, mean=0.5198359243792177
+- KS  max=0.1181380237423178
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0027240031560312713, train→test=0.005636654688886773
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0036406951160455267, 0.0019051977767956577, 0.0001520733692262651, 0.004427644745217156, 0.0030821139854259084, 0.004361362134404165]
+- KS  train→val=0.01942485737658052, train→test=0.021655687022327674
+- verdict: **stable**
+
+### ask_rate8
+
+- **CN**: 卖价滑动平均变化率 第8档
+- **EN**: Sliding-mean rate-of-change of ask_8
+- **family / type**: F6 / raw
+- **X column**: 131
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate8)'
+feat = raw_input[:, name2idx['ask_rate8']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate8：第 8 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.1262%, val=0.4255%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6964403955845495, 0.6547614705169295, 0.1597054818401948, 0.9760753733811229, 0.14050268765799695]
+- PSI max=0.9760753733811229, mean=0.5254970817961587
+- KS  max=0.11903637865438527
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0027527123454480443, train→test=0.00417195679916067
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.005424923067477237, 0.0016468862811938796, 0.000184536630888494, 0.002390642929546468, 0.002554970738354504, 0.0036812360385817104]
+- KS  train→val=0.019870379872336988, train→test=0.020978905104007614
+- verdict: **stable**
+
+### ask_rate9
+
+- **CN**: 卖价滑动平均变化率 第9档
+- **EN**: Sliding-mean rate-of-change of ask_9
+- **family / type**: F6 / raw
+- **X column**: 132
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate9)'
+feat = raw_input[:, name2idx['ask_rate9']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate9：第 9 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.1462%, val=0.4268%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6702596748784869, 0.6285497639889004, 0.15412552317793804, 0.952074971004349, 0.13646394444439938]
+- PSI max=0.952074971004349, mean=0.5082947754988147
+- KS  max=0.12053657863638184
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0014430300843962902, train→test=0.005639593772880794
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004967596447441793, 0.0018914056710156685, 7.629619201130814e-05, 0.0043815984232239485, 0.0014789812344811152, 0.006387782606926997]
+- KS  train→val=0.018603629575991848, train→test=0.022338422660330398
+- verdict: **stable**
+
+### ask_rate10
+
+- **CN**: 卖价滑动平均变化率 第10档
+- **EN**: Sliding-mean rate-of-change of ask_10
+- **family / type**: F6 / raw
+- **X column**: 133
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(ask_rate10)'
+feat = raw_input[:, name2idx['ask_rate10']]
+```
+
+**Physical meaning**: 主办方给的 ask_rate10：第 10 档卖侧价格的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.1713%, val=0.4268%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6894348444635436, 0.6491040053512692, 0.14741935402239528, 0.9713125102539423, 0.13675701209294466]
+- PSI max=0.9713125102539423, mean=0.518805545236819
+- KS  max=0.11519310522282658
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0008396602727117134, train→test=0.00560215232144745
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004165890545659418, 0.0013331000059797259, 0.00010974759278357732, 0.0034649139708264384, 0.0009255303880395243, 0.005193176201640044]
+- KS  train→val=0.019308510692617964, train→test=0.02116213947990543
+- verdict: **stable**
+
+### bsize_rate1
+
+- **CN**: 买量滑动平均变化率 第1档
+- **EN**: Sliding-mean rate-of-change of bsize_1
+- **family / type**: F6 / raw
+- **X column**: 134
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate1)'
+feat = raw_input[:, name2idx['bsize_rate1']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate1：第 1 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.06837328652427507, 0.3042874424202796, 0.2542725076582194, 0.02792865064538261, 0.08031399743545238]
+- PSI max=0.3042874424202796, mean=0.14703517693672183
+- KS  max=0.11285999999999996
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.008422199519352712, train→test=0.03415183560356233
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.014445930650274136, 0.0086410944213983, 0.0019043066340044565, 0.001128967751682499, 0.008969011281647064, 0.034942262522491614]
+- KS  train→val=0.02130500000000002, train→test=0.04846
+- verdict: **stable**
+
+### bsize_rate2
+
+- **CN**: 买量滑动平均变化率 第2档
+- **EN**: Sliding-mean rate-of-change of bsize_2
+- **family / type**: F6 / raw
+- **X column**: 135
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate2)'
+feat = raw_input[:, name2idx['bsize_rate2']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate2：第 2 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.03987791666300483, 0.07125409806935179, 0.13981393850917842, 0.08180860913820363, 0.04465025349855279]
+- PSI max=0.13981393850917842, mean=0.07548096317565829
+- KS  max=0.12094749999999999
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.0010452834441950743, train→test=0.013218504239625908
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0038088680727726408, 0.003207003969418732, 0.0008903023998744856, 0.0005050465438418772, 0.0015021701728727313, 0.01216351324216797]
+- KS  train→val=0.008084999999999981, train→test=0.030549999999999966
+- verdict: **stable**
+
+### bsize_rate3
+
+- **CN**: 买量滑动平均变化率 第3档
+- **EN**: Sliding-mean rate-of-change of bsize_3
+- **family / type**: F6 / raw
+- **X column**: 136
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate3)'
+feat = raw_input[:, name2idx['bsize_rate3']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate3：第 3 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.037603360153060664, 0.034505580649148895, 0.12497222137488802, 0.1393488986295251, 0.037624762970640206]
+- PSI max=0.1393488986295251, mean=0.07481096475545258
+- KS  max=0.12144500000000003
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.0003620216998107112, train→test=0.007869905572825898
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0028621842694021397, 0.0023387010427111544, 0.0001630549310925927, 6.814863434274726e-05, 0.0002724873462114819, 0.008972502288331605]
+- KS  train→val=0.006360000000000032, train→test=0.027864999999999918
+- verdict: **stable**
+
+### bsize_rate4
+
+- **CN**: 买量滑动平均变化率 第4档
+- **EN**: Sliding-mean rate-of-change of bsize_4
+- **family / type**: F6 / raw
+- **X column**: 137
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate4)'
+feat = raw_input[:, name2idx['bsize_rate4']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate4：第 4 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04047430278733477, 0.03138866793298938, 0.15848983324999139, 0.19436468893857844, 0.050311099584867396]
+- PSI max=0.19436468893857844, mean=0.09500571849875228
+- KS  max=0.12110749999999992
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.00017290697552477857, train→test=0.007328572460013595
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.003061205945047935, 0.0029089689072011593, 0.000322682127238697, 0.00017550125905627562, 0.0004203166967388586, 0.008291194410264137]
+- KS  train→val=0.006685000000000052, train→test=0.027719999999999967
+- verdict: **stable**
+
+### bsize_rate5
+
+- **CN**: 买量滑动平均变化率 第5档
+- **EN**: Sliding-mean rate-of-change of bsize_5
+- **family / type**: F6 / raw
+- **X column**: 138
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate5)'
+feat = raw_input[:, name2idx['bsize_rate5']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate5：第 5 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04831224140528644, 0.030438808560067445, 0.15959651254026888, 0.22668858755680277, 0.051952573459334676]
+- PSI max=0.22668858755680277, mean=0.10339774470435203
+- KS  max=0.1169675
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.00021305222182035235, train→test=0.009648580693279092
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.001937118132111174, 0.0030449233928684866, 0.0005007075638527875, 4.610995524044626e-05, 8.786406280164077e-05, 0.008453696082583045]
+- KS  train→val=0.008275000000000032, train→test=0.027260000000000062
+- verdict: **stable**
+
+### bsize_rate6
+
+- **CN**: 买量滑动平均变化率 第6档
+- **EN**: Sliding-mean rate-of-change of bsize_6
+- **family / type**: F6 / raw
+- **X column**: 139
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate6)'
+feat = raw_input[:, name2idx['bsize_rate6']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate6：第 6 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0442468085731063, 0.0418419989879739, 0.15948245300961633, 0.27060745973091027, 0.05823539475477199]
+- PSI max=0.27060745973091027, mean=0.11488282301127577
+- KS  max=0.11750499999999997
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=6.708851529230651e-05, train→test=0.007973557737369774
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002467292408270644, 0.0013935715784537477, 0.0002662408734478919, 0.0001689566286901065, 0.0002671999093233722, 0.008403897582943543]
+- KS  train→val=0.00714999999999999, train→test=0.026140000000000052
+- verdict: **stable**
+
+### bsize_rate7
+
+- **CN**: 买量滑动平均变化率 第7档
+- **EN**: Sliding-mean rate-of-change of bsize_7
+- **family / type**: F6 / raw
+- **X column**: 140
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate7)'
+feat = raw_input[:, name2idx['bsize_rate7']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate7：第 7 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04611432754348171, 0.03581878054871799, 0.16301133737225124, 0.29295054098189577, 0.05867396411524289]
+- PSI max=0.29295054098189577, mean=0.11931379011231791
+- KS  max=0.11747749999999998
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0002532472330714633, train→test=0.008041274874691416
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002460510546929977, 0.001882829287210019, 0.00013568557824224288, 6.584644772043122e-05, 0.00010927390435550537, 0.008532893689720246]
+- KS  train→val=0.008530000000000038, train→test=0.025460000000000038
+- verdict: **stable**
+
+### bsize_rate8
+
+- **CN**: 买量滑动平均变化率 第8档
+- **EN**: Sliding-mean rate-of-change of bsize_8
+- **family / type**: F6 / raw
+- **X column**: 141
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate8)'
+feat = raw_input[:, name2idx['bsize_rate8']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate8：第 8 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.05387703465513056, 0.0404330377387421, 0.18917423090896848, 0.32121937234613607, 0.06072390344134725]
+- PSI max=0.32121937234613607, mean=0.13308551581806488
+- KS  max=0.116865
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.000130455333505211, train→test=0.006611540014557564
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0025126826998379988, 0.0011904988366313344, 6.236052842264919e-05, 8.101714674932572e-05, 4.869086861530405e-05, 0.006343521809798386]
+- KS  train→val=0.00680499999999995, train→test=0.02452500000000002
+- verdict: **stable**
+
+### bsize_rate9
+
+- **CN**: 买量滑动平均变化率 第9档
+- **EN**: Sliding-mean rate-of-change of bsize_9
+- **family / type**: F6 / raw
+- **X column**: 142
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate9)'
+feat = raw_input[:, name2idx['bsize_rate9']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate9：第 9 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.054755920705440636, 0.03949977668403502, 0.19034414708363726, 0.32653440760246366, 0.0605107376235231]
+- PSI max=0.32653440760246366, mean=0.13432899793981995
+- KS  max=0.11813000000000007
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0004270637106353824, train→test=0.007547051090164894
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.002357617726835841, 0.0013415292902316652, 8.010476630105668e-05, 0.00014726741661613815, 0.0005643051546100669, 0.006419888121455192]
+- KS  train→val=0.008289999999999909, train→test=0.024824999999999986
+- verdict: **stable**
+
+### bsize_rate10
+
+- **CN**: 买量滑动平均变化率 第10档
+- **EN**: Sliding-mean rate-of-change of bsize_10
+- **family / type**: F6 / raw
+- **X column**: 143
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(bsize_rate10)'
+feat = raw_input[:, name2idx['bsize_rate10']]
+```
+
+**Physical meaning**: 主办方给的 bsize_rate10：第 10 档买侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.06056311878064296, 0.03922051230732261, 0.18657503550519489, 0.34894593874736535, 0.058875613965235926]
+- PSI max=0.34894593874736535, mean=0.13883604386115234
+- KS  max=0.1142675
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0002811449077582339, train→test=0.008179148585052465
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0021568309938600153, 0.001959297849274968, 0.0004431057174152845, 0.0001683246311417991, 0.00013656979730224637, 0.008229315342466528]
+- KS  train→val=0.007940000000000058, train→test=0.02428000000000008
+- verdict: **stable**
+
+### asize_rate1
+
+- **CN**: 卖量滑动平均变化率 第1档
+- **EN**: Sliding-mean rate-of-change of asize_1
+- **family / type**: F6 / raw
+- **X column**: 144
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate1)'
+feat = raw_input[:, name2idx['asize_rate1']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate1：第 1 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0395%, val=0.4235%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.10400675156130704, 0.2850402139069553, 0.248384212295485, 0.03886049459583166, 0.07452423969775346]
+- PSI max=0.2850402139069553, mean=0.15016318241146648
+- KS  max=0.13390803137317675
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.009315986847043756, train→test=0.040218340475638444
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.011139903255727737, 0.014614919518583229, 0.0005492504337038012, 0.004988420481279855, 0.007936744153696672, 0.040066860919375946]
+- KS  train→val=0.02157538700766415, train→test=0.05524878391896962
+- verdict: **stable**
+
+### asize_rate2
+
+- **CN**: 卖量滑动平均变化率 第2档
+- **EN**: Sliding-mean rate-of-change of asize_2
+- **family / type**: F6 / raw
+- **X column**: 145
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate2)'
+feat = raw_input[:, name2idx['asize_rate2']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate2：第 2 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0551%, val=0.4235%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.03845100919166017, 0.021272467438441738, 0.09919325915037365, 0.060894660207535874, 0.024956737233487146]
+- PSI max=0.09919325915037365, mean=0.04895362664429971
+- KS  max=0.10821264401887065
+- verdict: **stable**
+
+**Cross-date**:
+- PSI train→val=3.429626928905104e-05, train→test=0.011719285867932814
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0037116700034586763, 0.004884820659529023, 0.00031296031176732353, 0.00039574528876797755, 0.00013975869252735862, 0.01149596246507827]
+- KS  train→val=0.0064256813987067785, train→test=0.033831219352966846
+- verdict: **stable**
+
+### asize_rate3
+
+- **CN**: 卖量滑动平均变化率 第3档
+- **EN**: Sliding-mean rate-of-change of asize_3
+- **family / type**: F6 / raw
+- **X column**: 146
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate3)'
+feat = raw_input[:, name2idx['asize_rate3']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate3：第 3 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0687%, val=0.4235%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04378178194307565, 0.021991423261845302, 0.13128314297570645, 0.15829293573502912, 0.03937438217609875]
+- PSI max=0.15829293573502912, mean=0.07894473321835105
+- KS  max=0.1073899591179075
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.00015616327185197676, train→test=0.009078140877656049
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004270752875656534, 0.0036131577857497605, 0.0001699088322639891, 0.00017337172187039264, 0.00018591922761902445, 0.009780560229107069]
+- KS  train→val=0.00654960256028958, train→test=0.025653383364602877
+- verdict: **stable**
+
+### asize_rate4
+
+- **CN**: 卖量滑动平均变化率 第4档
+- **EN**: Sliding-mean rate-of-change of asize_4
+- **family / type**: F6 / raw
+- **X column**: 147
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate4)'
+feat = raw_input[:, name2idx['asize_rate4']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate4：第 4 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0753%, val=0.4238%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.03931089941073829, 0.02639511019449546, 0.12877003820577837, 0.20659215014375293, 0.05062892070990803]
+- PSI max=0.20659215014375293, mean=0.09033942373293462
+- KS  max=0.10651754462118901
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=9.704961271751975e-05, train→test=0.008753699966984562
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004285740911032195, 0.003152307041268918, 7.883462626003452e-05, 7.478801182810564e-05, 0.00017036279460494737, 0.007959860869958781]
+- KS  train→val=0.007346520227086595, train→test=0.027254373858433212
+- verdict: **stable**
+
+### asize_rate5
+
+- **CN**: 卖量滑动平均变化率 第5档
+- **EN**: Sliding-mean rate-of-change of asize_5
+- **family / type**: F6 / raw
+- **X column**: 148
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate5)'
+feat = raw_input[:, name2idx['asize_rate5']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate5：第 5 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.082%, val=0.4238%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.046752128271689716, 0.03281257764505423, 0.16154312224609851, 0.23449301904386471, 0.04976181599821647]
+- PSI max=0.23449301904386471, mean=0.10507253264098473
+- KS  max=0.10867104654072314
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=7.069978808316114e-05, train→test=0.008144362439187083
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.003863784726279704, 0.0033455595135432822, 7.635893472219285e-05, 0.00018881228635326454, 8.811553331240932e-05, 0.0070381357973331215]
+- KS  train→val=0.006197878371914767, train→test=0.025619002091537224
+- verdict: **stable**
+
+### asize_rate6
+
+- **CN**: 卖量滑动平均变化率 第6档
+- **EN**: Sliding-mean rate-of-change of asize_6
+- **family / type**: F6 / raw
+- **X column**: 149
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate6)'
+feat = raw_input[:, name2idx['asize_rate6']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate6：第 6 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0902%, val=0.4238%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04848421548433771, 0.025271095193503186, 0.1640648131108354, 0.23985162384556816, 0.05870451236810369]
+- PSI max=0.23985162384556816, mean=0.10727525200046964
+- KS  max=0.1068357446702032
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=2.205210751665378e-05, train→test=0.007377299790376596
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004692118996489131, 0.0028833362349562266, 5.493599444267424e-05, 1.068498026930296e-05, 1.4709320257969955e-05, 0.007684448810075101]
+- KS  train→val=0.006670367472925043, train→test=0.024832253299103657
+- verdict: **stable**
+
+### asize_rate7
+
+- **CN**: 卖量滑动平均变化率 第7档
+- **EN**: Sliding-mean rate-of-change of asize_7
+- **family / type**: F6 / raw
+- **X column**: 150
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate7)'
+feat = raw_input[:, name2idx['asize_rate7']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate7：第 7 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.1002%, val=0.4248%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.050169629730822854, 0.02599107362917605, 0.15611580705758757, 0.26934672182311176, 0.06511038265206773]
+- PSI max=0.26934672182311176, mean=0.11334672297855317
+- KS  max=0.10533606986276689
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.00034488827201959273, train→test=0.007709303698988654
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.00495722710757447, 0.0024381984270527577, 0.00019581332111771578, 0.00012168468039236095, 0.0002936903818911561, 0.007124137887328085]
+- KS  train→val=0.005814780195621871, train→test=0.024374889165828306
+- verdict: **stable**
+
+### asize_rate8
+
+- **CN**: 卖量滑动平均变化率 第8档
+- **EN**: Sliding-mean rate-of-change of asize_8
+- **family / type**: F6 / raw
+- **X column**: 151
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate8)'
+feat = raw_input[:, name2idx['asize_rate8']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate8：第 8 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.1262%, val=0.4255%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0492417290510628, 0.02787830136568225, 0.15885581402724502, 0.28692292383937723, 0.07005908443958277]
+- PSI max=0.28692292383937723, mean=0.11859157054458999
+- KS  max=0.10601621275232298
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.00020726205265933164, train→test=0.007851045743544935
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.004287538888432254, 0.0022013779504759983, 0.0002949227080477308, 6.597865859926639e-05, 0.0005403500673897669, 0.0077477880985403645]
+- KS  train→val=0.0057619327492476335, train→test=0.023653992039452287
+- verdict: **stable**
+
+### asize_rate9
+
+- **CN**: 卖量滑动平均变化率 第9档
+- **EN**: Sliding-mean rate-of-change of asize_9
+- **family / type**: F6 / raw
+- **X column**: 152
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate9)'
+feat = raw_input[:, name2idx['asize_rate9']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate9：第 9 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.1462%, val=0.4268%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.05156239048201906, 0.023127480658226868, 0.15561863257065686, 0.2890510376615625, 0.062176929877784004]
+- PSI max=0.2890510376615625, mean=0.11630729425004985
+- KS  max=0.10605271355676738
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.00046832891714930936, train→test=0.008331610012439624
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0025858781448615305, 0.0021202170960532233, 0.0003662533514033756, 0.00036169541840779375, 0.00039479252586907554, 0.008020902656117539]
+- KS  train→val=0.006451489019754744, train→test=0.022671277696271114
+- verdict: **stable**
+
+### asize_rate10
+
+- **CN**: 卖量滑动平均变化率 第10档
+- **EN**: Sliding-mean rate-of-change of asize_10
+- **family / type**: F6 / raw
+- **X column**: 153
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:N/A (raw, 主办方直接给的 38 个原始字段之一)`
+
+**Formula**: $\mathrm{rate}_t^{(k)} = \frac{\bar{x}_{[t-W:t]}^{(k)} - \bar{x}_{[t-2W:t-W]}^{(k)}}{|\bar{x}_{[t-2W:t-W]}^{(k)}|+\varepsilon}$
+
+**Numpy pseudo**:
+```python
+# raw input: provided by host as column 'idx(asize_rate10)'
+feat = raw_input[:, name2idx['asize_rate10']]
+```
+
+**Physical meaning**: 主办方给的 asize_rate10：第 10 档卖侧挂量的滑动平均变化率（具体窗口主办方未披露，经验上 ~10-20 tick）。买卖侧分开 → 天然不对称：bid_rate 反映吃买盘速度，ask_rate 反映吃卖盘速度。
+
+**NaN handling**:
+- Formula layer: raw 字段，主办方上游做了 +ε denom 兜底；输入侧基本无 NaN。
+- NN pipeline: window-z: nanmean/nanstd → nan_to_num(0) → clip(±10)
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.1713%, val=0.4268%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.051475200228050175, 0.0234794679252461, 0.15276772182049386, 0.30420216866298916, 0.06485083818250456]
+- PSI max=0.30420216866298916, mean=0.11935507936385678
+- KS  max=0.10411826330658491
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.00012124117109075115, train→test=0.008081448357506182
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.003957656976418924, 0.0035520303841099178, 6.449316291461285e-05, 0.00026800587553143287, 5.581274934272719e-05, 0.0071233927371416005]
+- KS  train→val=0.005586246598260458, train→test=0.023377673842593705
+- verdict: **stable**
+
+### F6.2 gofi family (30 features)
+
+### gofi_W5_lvl1
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第1档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=1
+- **family / type**: F6 / derived
+- **X column**: 300
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.13153862343287018, 0.05781547052484843, 0.030420839304697054, 0.1945688958491237, 0.22540474768820798]
+- PSI max=0.22540474768820798, mean=0.12794971535994945
+- KS  max=0.10586249999999997
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.01039066457311599, train→test=0.02088767203757046
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.014384591739397136, 0.01536908446493021, 0.0017554080354322504, 0.005486589414648286, 0.010006353757897818, 0.019884197498834442]
+- KS  train→val=0.014534999999999965, train→test=0.03305999999999998
+- verdict: **stable**
+
+### gofi_W5_lvl2
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第2档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=2
+- **family / type**: F6 / derived
+- **X column**: 301
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0925647466974491, 0.15751944175057978, 0.20813898373348552, 0.0631180476020677, 0.20565552469557377]
+- PSI max=0.20813898373348552, mean=0.1453993488958312
+- KS  max=0.09992000000000001
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.005049072305297191, train→test=0.02310655888159333
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.00929145754194638, 0.011547453411436918, 0.0007253197838926633, 0.003144016532447848, 0.005704902140317245, 0.024623095484962353]
+- KS  train→val=0.015134999999999954, train→test=0.033899999999999986
+- verdict: **stable**
+
+### gofi_W5_lvl3
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第3档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=3
+- **family / type**: F6 / derived
+- **X column**: 302
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.09519752995331202, 0.1671272029644498, 0.27115713893759724, 0.21275182251572128, 0.26243465317309944]
+- PSI max=0.27115713893759724, mean=0.20173366950883595
+- KS  max=0.12137750000000003
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0027638724089345127, train→test=0.019869358994950563
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0068484991025859355, 0.010176192038299654, 0.00124704158733952, 0.0007857608165466521, 0.0019724177212399677, 0.01953182551781019]
+- KS  train→val=0.012220000000000009, train→test=0.037679999999999936
+- verdict: **stable**
+
+### gofi_W5_lvl4
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第4档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=4
+- **family / type**: F6 / derived
+- **X column**: 303
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.10133892047171103, 0.17553211405771696, 0.3630819481749162, 0.34613118434258133, 0.350310351547341]
+- PSI max=0.3630819481749162, mean=0.2672789037188533
+- KS  max=0.14139999999999997
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0016404469857374067, train→test=0.023033377934118655
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.007777154835311793, 0.009820345249499622, 0.0011720805024987523, 0.0006186202795897457, 0.0014334032176116745, 0.02273562868837685]
+- KS  train→val=0.015630000000000033, train→test=0.04541999999999996
+- verdict: **stable**
+
+### gofi_W5_lvl5
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第5档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=5
+- **family / type**: F6 / derived
+- **X column**: 304
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.12104749879777665, 0.20959308420715508, 0.4544183108061547, 0.40735205097040544, 0.354666206225233]
+- PSI max=0.4544183108061547, mean=0.309415430201345
+- KS  max=0.15313500000000002
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0016882365249992447, train→test=0.02320741341127404
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.006914387936371101, 0.010555126876340012, 0.0011999866902884747, 0.0008288268072195672, 0.0018588893987236958, 0.022716687179734123]
+- KS  train→val=0.019345000000000057, train→test=0.04171999999999998
+- verdict: **stable**
+
+### gofi_W5_lvl6
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第6档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=6
+- **family / type**: F6 / derived
+- **X column**: 305
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.10204671934034391, 0.21590176829776547, 0.46820770388453026, 0.5757052971004916, 0.48077730995624357]
+- PSI max=0.5757052971004916, mean=0.3685277597158749
+- KS  max=0.177825
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0033659971219722777, train→test=0.026641950535958782
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0061938900847947585, 0.010583766181825714, 0.0009370783065793431, 0.0009677670257516772, 0.0031658524389511144, 0.027121903761745725]
+- KS  train→val=0.01660000000000006, train→test=0.043035000000000045
+- verdict: **stable**
+
+### gofi_W5_lvl7
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第7档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=7
+- **family / type**: F6 / derived
+- **X column**: 306
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.1275698266212609, 0.2362007581462291, 0.6216976400940729, 0.6897771526094663, 0.5262807848658555]
+- PSI max=0.6897771526094663, mean=0.44030523246737696
+- KS  max=0.191595
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0022636737159530684, train→test=0.02436063266538712
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.006508170306467213, 0.010497920372094552, 0.0008482623578369235, 0.00096200743037913, 0.0023750263053332133, 0.021528653172666164]
+- KS  train→val=0.01841499999999996, train→test=0.043215
+- verdict: **stable**
+
+### gofi_W5_lvl8
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第8档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=8
+- **family / type**: F6 / derived
+- **X column**: 307
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.11658057695279593, 0.23323347703491054, 0.63663680173965, 0.7783985231983549, 0.5401694015572547]
+- PSI max=0.7783985231983549, mean=0.46100375609659316
+- KS  max=0.20015249999999996
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.002795978505366012, train→test=0.021970224528550526
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.006699393150165586, 0.009689051229187659, 0.0007958617108608456, 0.0007280500341728436, 0.003247702963619161, 0.02329621554620592]
+- KS  train→val=0.018584999999999963, train→test=0.04242000000000001
+- verdict: **stable**
+
+### gofi_W5_lvl9
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第9档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=9
+- **family / type**: F6 / derived
+- **X column**: 308
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.12898420229065932, 0.24255209950254833, 0.646034719211696, 0.9024271334206153, 0.6131765151180075]
+- PSI max=0.9024271334206153, mean=0.5066349339087053
+- KS  max=0.20926250000000002
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0037044659004638264, train→test=0.025885126164686748
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.005341070517202201, 0.009420327434317453, 0.000862553241360503, 0.0009552309813018792, 0.0037070149566056964, 0.02461368897980038]
+- KS  train→val=0.01739999999999997, train→test=0.04153499999999999
+- verdict: **stable**
+
+### gofi_W5_lvl10
+
+- **CN**: GOFI 广义订单流不平衡 W=5 第10档
+- **EN**: Generalized Order-Flow Imbalance, window=5, level=10
+- **family / type**: F6 / derived
+- **X column**: 309
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.13896161759671924, 0.24285401951089103, 0.6486943384733089, 0.9713476915348931, 0.668680922954865]
+- PSI max=0.9713476915348931, mean=0.5341077180141355
+- KS  max=0.21593249999999997
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0023075922142930553, train→test=0.02130713557467723
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.005055997605697266, 0.012705694645628715, 0.0005345571636626421, 0.0010745616805341554, 0.0022975404312713934, 0.022230004344766137]
+- KS  train→val=0.01947500000000002, train→test=0.04083999999999999
+- verdict: **stable**
+
+### gofi_W20_lvl1
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第1档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=1
+- **family / type**: F6 / derived
+- **X column**: 310
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.17172936750459267, 0.06336231341302316, 0.02448828553713628, 0.2931374816458566, 0.308564554177717]
+- PSI max=0.308564554177717, mean=0.17225640045566515
+- KS  max=0.12022
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.010485882409844752, train→test=0.017567644514286298
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.013655911341395075, 0.014430376911789482, 0.004726075032238489, 0.003911998657609153, 0.009446896924159003, 0.017322650820633802]
+- KS  train→val=0.017780000000000018, train→test=0.03341499999999997
+- verdict: **stable**
+
+### gofi_W20_lvl2
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第2档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=2
+- **family / type**: F6 / derived
+- **X column**: 311
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.07995542955479092, 0.12861757133455176, 0.08419181866269408, 0.11355693962154463, 0.23960584227571835]
+- PSI max=0.23960584227571835, mean=0.12918552028985994
+- KS  max=0.091815
+- verdict: **mild_drift**
+
+**Cross-date**:
+- PSI train→val=0.008199199224275078, train→test=0.02167931440679589
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.008920490159865898, 0.013509724551506324, 0.002710473918034155, 0.005353054864332097, 0.008775358429724354, 0.02199008785433418]
+- KS  train→val=0.019269999999999954, train→test=0.030100000000000016
+- verdict: **stable**
+
+### gofi_W20_lvl3
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第3档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=3
+- **family / type**: F6 / derived
+- **X column**: 312
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.07943506934997738, 0.14834464214400434, 0.16777489932585518, 0.283107747707735, 0.26077105598553657]
+- PSI max=0.283107747707735, mean=0.1878866829026217
+- KS  max=0.0971725
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.004608137623677946, train→test=0.028252502745990924
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.009535487630183002, 0.009078018467806863, 0.002968972829017923, 0.002782554208824936, 0.003991973535321879, 0.026834860957483313]
+- KS  train→val=0.014419999999999988, train→test=0.03595000000000004
+- verdict: **stable**
+
+### gofi_W20_lvl4
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第4档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=4
+- **family / type**: F6 / derived
+- **X column**: 313
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.07869331756936265, 0.14931361105004787, 0.20676676064989225, 0.45777681379324275, 0.33349229145832493]
+- PSI max=0.45777681379324275, mean=0.2452085589041741
+- KS  max=0.122835
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.006145258250313197, train→test=0.03449122461786259
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.008782634492558894, 0.010105167412315189, 0.0026083987365454068, 0.0035348350792496516, 0.006624981995489008, 0.03299203177047405]
+- KS  train→val=0.015485000000000082, train→test=0.04198999999999997
+- verdict: **stable**
+
+### gofi_W20_lvl5
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第5档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=5
+- **family / type**: F6 / derived
+- **X column**: 314
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.07349620597614788, 0.16117090197479494, 0.26359160107942536, 0.5342735521362904, 0.36727895219969214]
+- PSI max=0.5342735521362904, mean=0.27996224267327013
+- KS  max=0.130715
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.005284059272043889, train→test=0.03832788451426276
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.010552133684779669, 0.010893035173850613, 0.003249767541365808, 0.0035852066485171706, 0.004870938826503257, 0.03501753986235234]
+- KS  train→val=0.018710000000000004, train→test=0.039215
+- verdict: **stable**
+
+### gofi_W20_lvl6
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第6档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=6
+- **family / type**: F6 / derived
+- **X column**: 315
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.06960179189711134, 0.17575535746483212, 0.3386915245263822, 0.7436159051914091, 0.47312266556972826]
+- PSI max=0.7436159051914091, mean=0.3601574489298926
+- KS  max=0.1537125
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.005837630574014387, train→test=0.04565671547502444
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.013009041765291812, 0.013078007706939098, 0.001966343901004529, 0.0035246329294964466, 0.0065368082116763595, 0.044940434514666935]
+- KS  train→val=0.01680499999999996, train→test=0.041590000000000016
+- verdict: **stable**
+
+### gofi_W20_lvl7
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第7档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=7
+- **family / type**: F6 / derived
+- **X column**: 316
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.06212700701085604, 0.17728957372182302, 0.48750609041143467, 0.89961468173359, 0.5685712814118324]
+- PSI max=0.89961468173359, mean=0.43902172685790725
+- KS  max=0.1667975
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.00674546768662902, train→test=0.05101871880639095
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.00884441077739804, 0.014496938617223714, 0.0027450063761210192, 0.002509154502184612, 0.008747101604686313, 0.05048016439086747]
+- KS  train→val=0.017369999999999997, train→test=0.04529
+- verdict: **stable**
+
+### gofi_W20_lvl8
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第8档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=8
+- **family / type**: F6 / derived
+- **X column**: 317
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.0542605821365656, 0.18581584289371633, 0.5089363567451044, 1.018794247786661, 0.7178174420865071]
+- PSI max=1.018794247786661, mean=0.4971248943297109
+- KS  max=0.1778325
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.006179055651126033, train→test=0.04966527853741488
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.009383696540523012, 0.00913921051833362, 0.0017838736871478383, 0.0022187265278074742, 0.005618347554620753, 0.04925598384170172]
+- KS  train→val=0.018589999999999995, train→test=0.049545000000000006
+- verdict: **stable**
+
+### gofi_W20_lvl9
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第9档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=9
+- **family / type**: F6 / derived
+- **X column**: 318
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.05340617604405034, 0.18113237015599382, 0.26550999846795986, 1.0026056961392624, 0.3782039421523074]
+- PSI max=1.0026056961392624, mean=0.37617163659191477
+- KS  max=0.18769500000000003
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.006128063852571154, train→test=0.03506266417344068
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.008819447076638877, 0.012835425370308177, 0.0015444333663662698, 0.0023731806690230777, 0.006910944808139133, 0.039933423333734216]
+- KS  train→val=0.020764999999999978, train→test=0.04613499999999998
+- verdict: **stable**
+
+### gofi_W20_lvl10
+
+- **CN**: GOFI 广义订单流不平衡 W=20 第10档
+- **EN**: Generalized Order-Flow Imbalance, window=20, level=10
+- **family / type**: F6 / derived
+- **X column**: 319
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.04785488469428442, 0.18204465002659004, 0.2706093268207381, 1.0369742927891237, 0.37104422798212255]
+- PSI max=1.0369742927891237, mean=0.3817054764625717
+- KS  max=0.19336249999999996
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0064255906250623674, train→test=0.03726171746701875
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.009210094684210805, 0.016125997320833887, 0.001055103676654621, 0.0020070912360638186, 0.006694332173825041, 0.039483419495724]
+- KS  train→val=0.02475000000000005, train→test=0.047189999999999954
+- verdict: **stable**
+
+### gofi_W60_lvl1
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第1档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=1
+- **family / type**: F6 / derived
+- **X column**: 320
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.22478313669198716, 0.04948999491529894, 0.025285516511089665, 0.39325265678846866, 0.35901423493497153]
+- PSI max=0.39325265678846866, mean=0.21036510796836322
+- KS  max=0.13723999999999992
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.013487597045186695, train→test=0.019695868563545237
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.01872370764450544, 0.014221336483510896, 0.0043723345982318775, 0.004630939307209876, 0.013697116025467282, 0.018034285565771486]
+- KS  train→val=0.019699999999999995, train→test=0.03661000000000003
+- verdict: **stable**
+
+### gofi_W60_lvl2
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第2档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=2
+- **family / type**: F6 / derived
+- **X column**: 321
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.15890521655639564, 0.08660649898472969, 0.05446504372490932, 0.26107734690743756, 0.3003128535550834]
+- PSI max=0.3003128535550834, mean=0.17227339194571112
+- KS  max=0.11458
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.008945042714370983, train→test=0.024755807980768797
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.0130677094783731, 0.01221998661248036, 0.003713243370307951, 0.004989496408121144, 0.008704688829695035, 0.026068566237279392]
+- KS  train→val=0.015220000000000011, train→test=0.027719999999999967
+- verdict: **stable**
+
+### gofi_W60_lvl3
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第3档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=3
+- **family / type**: F6 / derived
+- **X column**: 322
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.14324290797686196, 0.10710775674498957, 0.09959566141340212, 0.4094395498868797, 0.33030865437447954]
+- PSI max=0.4094395498868797, mean=0.2179389060793226
+- KS  max=0.11295500000000001
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.005520819493814, train→test=0.03040768723013857
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.01215983958743204, 0.011673180072651905, 0.005232860230395074, 0.005855691915460452, 0.0053080971188918585, 0.03013912140879528]
+- KS  train→val=0.017045000000000032, train→test=0.040559999999999985
+- verdict: **stable**
+
+### gofi_W60_lvl4
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第4档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=4
+- **family / type**: F6 / derived
+- **X column**: 323
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.13709875818688635, 0.1135517708219681, 0.1242485213747163, 0.6084251676866443, 0.3617875499933856]
+- PSI max=0.6084251676866443, mean=0.26902235361272014
+- KS  max=0.116555
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.006812499477956921, train→test=0.038712310542460764
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.011645518499233837, 0.011163942830355546, 0.004901569293611302, 0.0041654799035423015, 0.007495805256617714, 0.041461008770036334]
+- KS  train→val=0.015375000000000028, train→test=0.04156499999999996
+- verdict: **stable**
+
+### gofi_W60_lvl5
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第5档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=5
+- **family / type**: F6 / derived
+- **X column**: 324
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.12748368222584147, 0.11562589406221953, 0.12850202597985005, 0.6568279039786152, 0.37572554679463943]
+- PSI max=0.6568279039786152, mean=0.2808330106082332
+- KS  max=0.11532749999999999
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.00917386509155471, train→test=0.03991414515941735
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.014192407336517058, 0.010593498113405195, 0.006007237808898609, 0.004346690683236052, 0.010473362712414811, 0.04448460790627254]
+- KS  train→val=0.02155499999999999, train→test=0.04057000000000002
+- verdict: **stable**
+
+### gofi_W60_lvl6
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第6档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=6
+- **family / type**: F6 / derived
+- **X column**: 325
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.10912055653646227, 0.128767240883185, 0.15336590705013092, 0.8118170964062575, 0.40838501908583275]
+- PSI max=0.8118170964062575, mean=0.3222911639923737
+- KS  max=0.11214000000000002
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.007402775613069998, train→test=0.04740153953498071
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.013634671332830882, 0.014329584748052036, 0.004319128684101786, 0.0035016352414755977, 0.008001176396338986, 0.04788432577648971]
+- KS  train→val=0.018830000000000013, train→test=0.042115000000000014
+- verdict: **stable**
+
+### gofi_W60_lvl7
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第7档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=7
+- **family / type**: F6 / derived
+- **X column**: 326
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.09352135271209593, 0.13694931075728212, 0.1776891727110215, 0.8623490825908079, 0.43450464686777523]
+- PSI max=0.8623490825908079, mean=0.34100271312779656
+- KS  max=0.12395999999999996
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.009048526614965424, train→test=0.05077933498115593
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.015765055836383664, 0.0123038716043051, 0.0037538758857992723, 0.003947116400338221, 0.009245332930972077, 0.05134956746790468]
+- KS  train→val=0.021240000000000037, train→test=0.04188500000000006
+- verdict: **stable**
+
+### gofi_W60_lvl8
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第8档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=8
+- **family / type**: F6 / derived
+- **X column**: 327
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.08013521072398111, 0.14815809335980115, 0.19739426355850717, 0.914946877968894, 0.46597912018694404]
+- PSI max=0.914946877968894, mean=0.3613227131596255
+- KS  max=0.13522499999999998
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.00910095572413076, train→test=0.051965996921397445
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.014113696518731934, 0.012480132472542756, 0.003654186794744455, 0.003926433400389362, 0.0103236381087584, 0.05395903968676842]
+- KS  train→val=0.019469999999999987, train→test=0.04883500000000002
+- verdict: **stable**
+
+### gofi_W60_lvl9
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第9档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=9
+- **family / type**: F6 / derived
+- **X column**: 328
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.07626266724470965, 0.160346678036221, 0.21368495572357923, 1.0024990578510748, 0.4734237763895284]
+- PSI max=1.0024990578510748, mean=0.3852434270490226
+- KS  max=0.14511000000000007
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.011557876875131653, train→test=0.0599941679251653
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.013960514032337541, 0.013238015330708125, 0.0034132657615216218, 0.003757370472312058, 0.012438519583769332, 0.06078858800309931]
+- KS  train→val=0.021894999999999998, train→test=0.054094999999999976
+- verdict: **stable**
+
+### gofi_W60_lvl10
+
+- **CN**: GOFI 广义订单流不平衡 W=60 第10档
+- **EN**: Generalized Order-Flow Imbalance, window=60, level=10
+- **family / type**: F6 / derived
+- **X column**: 329
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:395-429 (compute_stage2_batch -> gofi block)`
+
+**Formula**: $e_t^{(k)} = \big[\mathbb{1}(b_t > b_{t-1})\,bs_t - \mathbb{1}(b_t<b_{t-1})\,bs_{t-1} + \mathbb{1}(b_t=b_{t-1})(bs_t-bs_{t-1})\big]\,+\,\big[\mathbb{1}(a_t>a_{t-1})\,as_{t-1} - \mathbb{1}(a_t<a_{t-1})\,as_t - \mathbb{1}(a_t=a_{t-1})(as_t-as_{t-1})\big],\quad \mathrm{gofi}_W^{(k)} = \sum_{i=t-W+1}^{t} e_i^{(k)}$
+
+**Numpy pseudo**:
+```python
+for each level k in 1..10:
+  bid_up = (b > b_lag) * bs; bid_dn = (b < b_lag) * bs_lag
+  bid_eq = (b == b_lag) * (bs - bs_lag)
+  ask_up = (a > a_lag) * as_lag; ask_dn = (a < a_lag) * a_size
+  ask_eq = (a == a_lag) * (a_size - as_lag)
+  e = (bid_up - bid_dn + bid_eq) - (ask_up - ask_dn - ask_eq)
+  gofi_W = e[:, -W:].sum(-1)
+```
+
+**Physical meaning**: Generalized Order-Flow Imbalance：MLOFI 只算【价格档移动+主动成交】产生的净挂量变化，GOFI 额外加上【价格档不变但挂量增减】那一项 (bid_eq, ask_eq)，更完整地刻画 cancel/refill。这就是 F6 ↔ F2 |corr|=0.176 的根源(六族中第二大共线性)。正 = 净 bid-side 增 → 看多；负 = 净 ask-side 增 → 看空。
+
+**NaN handling**:
+- Formula layer: 差分项可能产生 inf (size cast 异常)；np.where(isfinite, v, 0.0) 兜底；无 clip，但典型值在 ±1e6 量级。
+- NN pipeline: window-z 强制规整 → 不会爆炸；nan_to_num(0); clip(±10)。无 window-z 时仅 nan_to_num(0)。
+- LGB pipeline: 不动；LGB 内置 missing routing。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.06187214160698806, 0.17029532118927218, 0.23507468611538332, 0.9609413995542656, 0.49025574735407673]
+- PSI max=0.9609413995542656, mean=0.38368785916399717
+- KS  max=0.1513775
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.015176812548931298, train→test=0.05901428948375365
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.013333698469981014, 0.015289646929845212, 0.001952765342621198, 0.003770966537704215, 0.015800462011032607, 0.06105812005497951]
+- KS  train→val=0.024659999999999904, train→test=0.05199500000000001
+- verdict: **stable**
+
+### F6.3 liq_asym_top5_W (4 features)
+
+### liq_asym_top5_W5
+
+- **CN**: Top-5 流动性对数不对称 W=5
+- **EN**: Top-5 liquidity log-asymmetry, window=5
+- **family / type**: F6 / derived
+- **X column**: 366
+- **KS-drop-11**: YES
+- **code_loc**: `fast_features_batch.py:721-733 (compute_stage5_batch -> liq_asym block)`
+
+**Formula**: $\mathrm{liq\_asym\_top5}_t^W = \log\frac{1 + \sum_{i=t-W+1}^{t}\sum_{k=1}^{5} bsize_i^{(k)}}{1 + \sum_{i=t-W+1}^{t}\sum_{k=1}^{5} asize_i^{(k)}}$
+
+**Numpy pseudo**:
+```python
+bid_top5 = sum(X[:,:,bsize_k] for k=1..5)  # (N, T)
+ask_top5 = sum(X[:,:,asize_k] for k=1..5)
+sb = bid_top5[:, -W:].sum(-1); sa = ask_top5[:, -W:].sum(-1)
+v = np.clip(np.log((1.+sb)/(1.+sa)), -10, 10)
+```
+
+**Physical meaning**: 买卖 top-5 挂量在过去 W tick 累计的 log-比 → 流动性不对称 (log-odds)。正 = 买盘厚于卖盘 → 看多；负 = 卖盘厚 → 看空。+1 偏置保证数值稳定 (size 为 0 时也 well-defined)。
+
+**NaN handling**:
+- Formula layer: log((1+sb)/(1+sa)) — 分子分母 ≥ 1，log 始终 finite；np.where + clip(±10) 兜底。
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.6153446188332825, 0.2522855622147168, 0.5541892707838469, 1.9520515529050713, 1.8052829652770237]
+- PSI max=1.9520515529050713, mean=1.0358307940027882
+- KS  max=0.3362125
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.007646614339056007, train→test=0.007920203968641543
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.04178208950805737, 0.004831345268210215, 0.002866577591158207, 0.02739903945999882, 0.006986583385028624, 0.006450733941656552]
+- KS  train→val=0.034640000000000004, train→test=0.0486049999999999
+- verdict: **stable**
+
+**Notes**: KS-drop 11 之一。W=5 太短 → log-ratio 在 5 tick 内噪声极大、自相关高、跨股分布发散 → 训练时被 KS 滤除。W=20/50/100 更稳，全部保留。
+
+### liq_asym_top5_W20
+
+- **CN**: Top-5 流动性对数不对称 W=20
+- **EN**: Top-5 liquidity log-asymmetry, window=20
+- **family / type**: F6 / derived
+- **X column**: 367
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:721-733 (compute_stage5_batch -> liq_asym block)`
+
+**Formula**: $\mathrm{liq\_asym\_top5}_t^W = \log\frac{1 + \sum_{i=t-W+1}^{t}\sum_{k=1}^{5} bsize_i^{(k)}}{1 + \sum_{i=t-W+1}^{t}\sum_{k=1}^{5} asize_i^{(k)}}$
+
+**Numpy pseudo**:
+```python
+bid_top5 = sum(X[:,:,bsize_k] for k=1..5)  # (N, T)
+ask_top5 = sum(X[:,:,asize_k] for k=1..5)
+sb = bid_top5[:, -W:].sum(-1); sa = ask_top5[:, -W:].sum(-1)
+v = np.clip(np.log((1.+sb)/(1.+sa)), -10, 10)
+```
+
+**Physical meaning**: 买卖 top-5 挂量在过去 W tick 累计的 log-比 → 流动性不对称 (log-odds)。正 = 买盘厚于卖盘 → 看多；负 = 卖盘厚 → 看空。+1 偏置保证数值稳定 (size 为 0 时也 well-defined)。
+
+**NaN handling**:
+- Formula layer: log((1+sb)/(1+sa)) — 分子分母 ≥ 1，log 始终 finite；np.where + clip(±10) 兜底。
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.4398788706247998, 0.2182667689585875, 0.5229105413000491, 1.5242504849596044, 1.4742507843581159]
+- PSI max=1.5242504849596044, mean=0.8359114900402315
+- KS  max=0.2973025
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.0050825464297528725, train→test=0.004883826900189775
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.04950043729891226, 0.004322018814998289, 0.004570563889500777, 0.03101129767772455, 0.005017784894755967, 0.005241286360342629]
+- KS  train→val=0.027455000000000007, train→test=0.03911000000000009
+- verdict: **stable**
+
+### liq_asym_top5_W50
+
+- **CN**: Top-5 流动性对数不对称 W=50
+- **EN**: Top-5 liquidity log-asymmetry, window=50
+- **family / type**: F6 / derived
+- **X column**: 368
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:721-733 (compute_stage5_batch -> liq_asym block)`
+
+**Formula**: $\mathrm{liq\_asym\_top5}_t^W = \log\frac{1 + \sum_{i=t-W+1}^{t}\sum_{k=1}^{5} bsize_i^{(k)}}{1 + \sum_{i=t-W+1}^{t}\sum_{k=1}^{5} asize_i^{(k)}}$
+
+**Numpy pseudo**:
+```python
+bid_top5 = sum(X[:,:,bsize_k] for k=1..5)  # (N, T)
+ask_top5 = sum(X[:,:,asize_k] for k=1..5)
+sb = bid_top5[:, -W:].sum(-1); sa = ask_top5[:, -W:].sum(-1)
+v = np.clip(np.log((1.+sb)/(1.+sa)), -10, 10)
+```
+
+**Physical meaning**: 买卖 top-5 挂量在过去 W tick 累计的 log-比 → 流动性不对称 (log-odds)。正 = 买盘厚于卖盘 → 看多；负 = 卖盘厚 → 看空。+1 偏置保证数值稳定 (size 为 0 时也 well-defined)。
+
+**NaN handling**:
+- Formula layer: log((1+sb)/(1+sa)) — 分子分母 ≥ 1，log 始终 finite；np.where + clip(±10) 兜底。
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.31772157325259637, 0.18208756076615082, 0.4645869934248882, 1.1253960415628288, 1.386164580402946]
+- PSI max=1.386164580402946, mean=0.695191349881882
+- KS  max=0.2766275
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.005720718880909767, train→test=0.0034729755383889607
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.05590607660037185, 0.005522678480021795, 0.003973350807798677, 0.03574231143670487, 0.00531022916865098, 0.0030427063395472922]
+- KS  train→val=0.022350000000000092, train→test=0.03159500000000004
+- verdict: **stable**
+
+### liq_asym_top5_W100
+
+- **CN**: Top-5 流动性对数不对称 W=100
+- **EN**: Top-5 liquidity log-asymmetry, window=100
+- **family / type**: F6 / derived
+- **X column**: 369
+- **KS-drop-11**: no
+- **code_loc**: `fast_features_batch.py:721-733 (compute_stage5_batch -> liq_asym block)`
+
+**Formula**: $\mathrm{liq\_asym\_top5}_t^W = \log\frac{1 + \sum_{i=t-W+1}^{t}\sum_{k=1}^{5} bsize_i^{(k)}}{1 + \sum_{i=t-W+1}^{t}\sum_{k=1}^{5} asize_i^{(k)}}$
+
+**Numpy pseudo**:
+```python
+bid_top5 = sum(X[:,:,bsize_k] for k=1..5)  # (N, T)
+ask_top5 = sum(X[:,:,asize_k] for k=1..5)
+sb = bid_top5[:, -W:].sum(-1); sa = ask_top5[:, -W:].sum(-1)
+v = np.clip(np.log((1.+sb)/(1.+sa)), -10, 10)
+```
+
+**Physical meaning**: 买卖 top-5 挂量在过去 W tick 累计的 log-比 → 流动性不对称 (log-odds)。正 = 买盘厚于卖盘 → 看多；负 = 卖盘厚 → 看空。+1 偏置保证数值稳定 (size 为 0 时也 well-defined)。
+
+**NaN handling**:
+- Formula layer: log((1+sb)/(1+sa)) — 分子分母 ≥ 1，log 始终 finite；np.where + clip(±10) 兜底。
+- NN pipeline: window-z 或 raw + nan_to_num(0)
+- LGB pipeline: 不动；几乎无 NaN。
+
+**Empirical NaN %**:
+- train=0.0%, val=0.0%, test=0.0%
+
+**Cross-stock (sym 0..4)**:
+- PSI by sym: [0.23848935045177438, 0.16178432876266094, 0.3623943568616356, 0.7875203212832921, 1.2755370359205414]
+- PSI max=1.2755370359205414, mean=0.5651450786559808
+- KS  max=0.27505250000000003
+- verdict: **strong_drift**
+
+**Cross-date**:
+- PSI train→val=0.008468895104386902, train→test=0.00292322279549081
+- PSI by 20-day bucket (6 buckets covering date 0-119): [0.07128653457643373, 0.004233019315560071, 0.0051949527834894305, 0.042052763270972175, 0.008548028857078817, 0.002913824070487847]
+- KS  train→val=0.018614999999999993, train→test=0.025679999999999925
+- verdict: **stable**

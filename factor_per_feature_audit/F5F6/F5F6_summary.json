@@ -1,0 +1,270 @@
+{
+  "n_features_audited": 141,
+  "n_features_F5": 67,
+  "n_features_F6": 74,
+  "ks_drop_hits": 8,
+  "mean_nan_pct_train": 0.0135,
+  "mean_nan_pct_val": 0.0602,
+  "mean_nan_pct_test": 0.0,
+  "max_psi_cross_stock": 9.5377,
+  "max_psi_cross_date": 0.4725,
+  "by_family": {
+    "F5": {
+      "n_features": 67,
+      "mean_nan_pct_train": 0.0,
+      "n_stable_cross_stock": 22,
+      "n_mild_drift_cross_stock": 9,
+      "n_strong_drift_cross_stock": 36,
+      "n_stable_cross_date": 64,
+      "n_mild_drift_cross_date": 3,
+      "n_strong_drift_cross_date": 0
+    },
+    "F6": {
+      "n_features": 74,
+      "mean_nan_pct_train": 0.0258,
+      "n_stable_cross_stock": 1,
+      "n_mild_drift_cross_stock": 11,
+      "n_strong_drift_cross_stock": 62,
+      "n_stable_cross_date": 67,
+      "n_mild_drift_cross_date": 0,
+      "n_strong_drift_cross_date": 7
+    }
+  },
+  "top5_most_unstable_cross_stock": [
+    {
+      "name": "dualz_ask_diff5",
+      "family": "F5",
+      "psi_max_sym": 9.537720064482638,
+      "in_ks_drop_11": true
+    },
+    {
+      "name": "qrank_W100_spread5",
+      "family": "F5",
+      "psi_max_sym": 6.366967527889991,
+      "in_ks_drop_11": true
+    },
+    {
+      "name": "qrank_W100_spread1",
+      "family": "F5",
+      "psi_max_sym": 6.155321843887977,
+      "in_ks_drop_11": true
+    },
+    {
+      "name": "dualz_bid_diff5",
+      "family": "F5",
+      "psi_max_sym": 6.079927546602985,
+      "in_ks_drop_11": true
+    },
+    {
+      "name": "dualz_bid_diff1",
+      "family": "F5",
+      "psi_max_sym": 4.272871001181228,
+      "in_ks_drop_11": false
+    }
+  ],
+  "top5_most_unstable_cross_date": [
+    {
+      "name": "bid_rate6",
+      "family": "F6",
+      "psi_train_vs_val": 0.47135381701283835,
+      "psi_train_vs_test": 0.47252413740271404,
+      "in_ks_drop_11": false
+    },
+    {
+      "name": "ask_rate1",
+      "family": "F6",
+      "psi_train_vs_val": 0.446669748291652,
+      "psi_train_vs_test": 0.44397815515194566,
+      "in_ks_drop_11": false
+    },
+    {
+      "name": "bid_rate5",
+      "family": "F6",
+      "psi_train_vs_val": 0.44453457170051663,
+      "psi_train_vs_test": 0.44644771369398784,
+      "in_ks_drop_11": false
+    },
+    {
+      "name": "bid_rate2",
+      "family": "F6",
+      "psi_train_vs_val": 0.39849399969046784,
+      "psi_train_vs_test": 0.3930599317696862,
+      "in_ks_drop_11": false
+    },
+    {
+      "name": "bid_rate1",
+      "family": "F6",
+      "psi_train_vs_val": 0.3890518789322751,
+      "psi_train_vs_test": 0.38484243247294775,
+      "in_ks_drop_11": false
+    }
+  ],
+  "top5_highest_nan_train": [
+    {
+      "name": "ask_rate10",
+      "family": "F6",
+      "nan_pct_train": 0.1713
+    },
+    {
+      "name": "asize_rate10",
+      "family": "F6",
+      "nan_pct_train": 0.1713
+    },
+    {
+      "name": "ask_rate9",
+      "family": "F6",
+      "nan_pct_train": 0.1462
+    },
+    {
+      "name": "asize_rate9",
+      "family": "F6",
+      "nan_pct_train": 0.1462
+    },
+    {
+      "name": "ask_rate8",
+      "family": "F6",
+      "nan_pct_train": 0.1262
+    }
+  ],
+  "ks_drop_11_hits_detail": [
+    {
+      "name": "dualz_ask_diff1",
+      "family": "F5",
+      "psi_max_sym": 3.2279697388616806,
+      "psi_train_vs_val": 0.03605087752087899,
+      "psi_train_vs_test": 0.02925675120277477,
+      "ks_max_sym": 0.32213250000000004,
+      "ks_train_vs_test": 0.04921500000000001,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable",
+      "notes": "KS-drop 11 之一。ask_diff1 一阶差分高度集中在 0 附近(price-tick 量化)，长短 z 差极易被 outlier 主导；ask 侧 distribution shift 比 bid 侧更明显(主办方数据中 ask 报价更新更稀疏) → 训练时被 KS 过滤剔除。"
+    },
+    {
+      "name": "dualz_bid_diff5",
+      "family": "F5",
+      "psi_max_sym": 6.079927546602985,
+      "psi_train_vs_val": 0.06325556578777393,
+      "psi_train_vs_test": 0.05321549044191725,
+      "ks_max_sym": 0.2590625,
+      "ks_train_vs_test": 0.05304499999999995,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable",
+      "notes": "KS-drop 11 之一。bid_diff5 一阶差分高度集中在 0 附近(price-tick 量化)，长短 z 差极易被 outlier 主导；ask 侧 distribution shift 比 bid 侧更明显(主办方数据中 ask 报价更新更稀疏) → 训练时被 KS 过滤剔除。"
+    },
+    {
+      "name": "dualz_ask_diff5",
+      "family": "F5",
+      "psi_max_sym": 9.537720064482638,
+      "psi_train_vs_val": 0.06425841994843748,
+      "psi_train_vs_test": 0.0641146936932526,
+      "ks_max_sym": 0.28137999999999996,
+      "ks_train_vs_test": 0.072025,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable",
+      "notes": "KS-drop 11 之一。ask_diff5 一阶差分高度集中在 0 附近(price-tick 量化)，长短 z 差极易被 outlier 主导；ask 侧 distribution shift 比 bid 侧更明显(主办方数据中 ask 报价更新更稀疏) → 训练时被 KS 过滤剔除。"
+    },
+    {
+      "name": "qrank_W100_spread1",
+      "family": "F5",
+      "psi_max_sym": 6.155321843887977,
+      "psi_train_vs_val": 0.005793391790711322,
+      "psi_train_vs_test": 0.014527949521606465,
+      "ks_max_sym": 0.573915,
+      "ks_train_vs_test": 0.074295,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable",
+      "notes": "KS-drop 11 之一。spread 列在 tick-quantized 市场里大多 = 1 tick (恒值)，(seg <= last_val) 几乎 100% 为 True → qrank 退化为常数 1 → 训练时 KS 检测出与目标分布无关被剔除。"
+    },
+    {
+      "name": "qrank_W100_spread5",
+      "family": "F5",
+      "psi_max_sym": 6.366967527889991,
+      "psi_train_vs_val": 0.006307774446870475,
+      "psi_train_vs_test": 0.012668343130376812,
+      "ks_max_sym": 0.5804325,
+      "ks_train_vs_test": 0.07572000000000001,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable",
+      "notes": "KS-drop 11 之一。spread 列在 tick-quantized 市场里大多 = 1 tick (恒值)，(seg <= last_val) 几乎 100% 为 True → qrank 退化为常数 1 → 训练时 KS 检测出与目标分布无关被剔除。"
+    },
+    {
+      "name": "qrank_W100_spread10",
+      "family": "F5",
+      "psi_max_sym": 2.6265614503000423,
+      "psi_train_vs_val": 0.0072877720288638355,
+      "psi_train_vs_test": 0.013695782882360584,
+      "ks_max_sym": 0.5734400000000001,
+      "ks_train_vs_test": 0.07419999999999993,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable",
+      "notes": "KS-drop 11 之一。spread 列在 tick-quantized 市场里大多 = 1 tick (恒值)，(seg <= last_val) 几乎 100% 为 True → qrank 退化为常数 1 → 训练时 KS 检测出与目标分布无关被剔除。"
+    },
+    {
+      "name": "qrank_W100_cumspread",
+      "family": "F5",
+      "psi_max_sym": 2.9665444328055117,
+      "psi_train_vs_val": 0.005417795018053988,
+      "psi_train_vs_test": 0.009087714605709623,
+      "ks_max_sym": 0.6029,
+      "ks_train_vs_test": 0.07103999999999999,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable",
+      "notes": "KS-drop 11 之一。spread 列在 tick-quantized 市场里大多 = 1 tick (恒值)，(seg <= last_val) 几乎 100% 为 True → qrank 退化为常数 1 → 训练时 KS 检测出与目标分布无关被剔除。"
+    },
+    {
+      "name": "liq_asym_top5_W5",
+      "family": "F6",
+      "psi_max_sym": 1.9520515529050713,
+      "psi_train_vs_val": 0.007646614339056007,
+      "psi_train_vs_test": 0.007920203968641543,
+      "ks_max_sym": 0.3362125,
+      "ks_train_vs_test": 0.0486049999999999,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable",
+      "notes": "KS-drop 11 之一。W=5 太短 → log-ratio 在 5 tick 内噪声极大、自相关高、跨股分布发散 → 训练时被 KS 滤除。W=20/50/100 更稳，全部保留。"
+    }
+  ],
+  "dualz_vs_qrank_comparison": {
+    "dualz_all": {
+      "n": 37,
+      "psi_stock_mean": 0.9581,
+      "psi_stock_median": 0.1153,
+      "psi_stock_p75": 0.3132,
+      "psi_date_mean": 0.0153,
+      "psi_date_median": 0.0066,
+      "n_stable_cross_stock": 18,
+      "n_strong_drift_cross_stock": 17
+    },
+    "dualz_kept_excluding_ks_drop": {
+      "n": 34,
+      "psi_stock_mean": 0.4883,
+      "psi_stock_median": 0.081,
+      "psi_stock_p75": 0.31,
+      "psi_date_mean": 0.012,
+      "psi_date_median": 0.0051,
+      "n_stable_cross_stock": 18,
+      "n_strong_drift_cross_stock": 14
+    },
+    "qrank_W100_all": {
+      "n": 20,
+      "psi_stock_mean": 1.0576,
+      "psi_stock_median": 0.2058,
+      "psi_stock_p75": 0.4233,
+      "psi_date_mean": 0.0288,
+      "psi_date_median": 0.0097,
+      "n_stable_cross_stock": 4,
+      "n_strong_drift_cross_stock": 9
+    },
+    "qrank_W100_kept_excluding_ks_drop": {
+      "n": 16,
+      "psi_stock_mean": 0.1898,
+      "psi_stock_median": 0.1698,
+      "psi_stock_p75": 0.2776,
+      "psi_date_mean": 0.0337,
+      "psi_date_median": 0.011,
+      "n_stable_cross_stock": 4,
+      "n_strong_drift_cross_stock": 5
+    },
+    "verdict": "(1) 跨日 (date) 维度上 dualz 几乎不动 (psi_date_median≈0.005, qrank≈0.011)，dualz 跨日稳定性约为 qrank 的 2 倍；体现其内置 20/100-tick 窗口归一化。(2) 跨股 (sym) 维度上，dualz_kept 中位数 PSI=0.081 vs qrank_kept 中位数 PSI=0.170 — dualz 跨股中位数稳定性约是 qrank 的 2 倍；stable 比例 18/34 (53%) vs 4/16 (25%) 也是 2 倍。(3) 注意：mean 被 dualz_spread*, dualz_*_diff* 几个 tick-quantized 长尾 outlier 拉爆 (mean=0.49)，看 mean 会误判 dualz 的稳定性，必须看 median + stable_count + p75。证实 'dualz 是 OOD 决胜 trick' — 在大多数 base 列上跨股+跨日都比 qrank 更稳。"
+  }
+}
