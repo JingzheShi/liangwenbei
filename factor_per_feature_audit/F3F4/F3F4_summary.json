@@ -1,0 +1,198 @@
+{
+  "family": "F3+F4",
+  "n_features": 74,
+  "counts": {
+    "F3": 45,
+    "F4": 29
+  },
+  "global_metrics": {
+    "max_psi_cross_stock": 1.1444,
+    "max_psi_cross_date": 0.1463,
+    "mean_nan_pct_train": 0.0,
+    "n_ks_drop_hit": 1
+  },
+  "top5_unstable_cross_stock": [
+    {
+      "name": "amount_delta",
+      "family": "F4",
+      "psi_stock_max": 1.1444,
+      "psi_date_max": 0.0627,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "roll_eff_spr_ratio_W100",
+      "family": "F4",
+      "psi_stock_max": 1.0539,
+      "psi_date_max": 0.1463,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "roll_eff_spr_ratio_W30",
+      "family": "F4",
+      "psi_stock_max": 0.8758,
+      "psi_date_max": 0.1045,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "roll_eff_spr_ratio_W50",
+      "family": "F4",
+      "psi_stock_max": 0.8519,
+      "psi_date_max": 0.1097,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "ewma_a0.05_la_intst",
+      "family": "F3",
+      "psi_stock_max": 0.7895,
+      "psi_date_max": 0.0895,
+      "nan_pct_train": 0.0
+    }
+  ],
+  "top5_unstable_cross_date": [
+    {
+      "name": "roll_eff_spr_ratio_W100",
+      "family": "F4",
+      "psi_stock_max": 1.0539,
+      "psi_date_max": 0.1463,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "rv_w50",
+      "family": "F4",
+      "psi_stock_max": 0.4398,
+      "psi_date_max": 0.1392,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "ewma_a0.05_mb_intst",
+      "family": "F3",
+      "psi_stock_max": 0.6442,
+      "psi_date_max": 0.1321,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "ewma_a0.05_ma_intst",
+      "family": "F3",
+      "psi_stock_max": 0.5898,
+      "psi_date_max": 0.1267,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "rv_w20",
+      "family": "F4",
+      "psi_stock_max": 0.4932,
+      "psi_date_max": 0.1227,
+      "nan_pct_train": 0.0
+    }
+  ],
+  "top5_highest_nan_train": [
+    {
+      "name": "lb_intst",
+      "family": "F3",
+      "psi_stock_max": 0.2732,
+      "psi_date_max": 0.0259,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "la_intst",
+      "family": "F3",
+      "psi_stock_max": 0.2411,
+      "psi_date_max": 0.0185,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "mb_intst",
+      "family": "F3",
+      "psi_stock_max": 0.2555,
+      "psi_date_max": 0.036,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "ma_intst",
+      "family": "F3",
+      "psi_stock_max": 0.225,
+      "psi_date_max": 0.0233,
+      "nan_pct_train": 0.0
+    },
+    {
+      "name": "cb_intst",
+      "family": "F3",
+      "psi_stock_max": 0.4264,
+      "psi_date_max": 0.0143,
+      "nan_pct_train": 0.0
+    }
+  ],
+  "top4_intst_stability": [
+    {
+      "name": "ma_intst",
+      "psi_stock_max": 0.225,
+      "psi_stock_by_sym": [
+        0.0694,
+        0.0211,
+        0.225,
+        0.0367,
+        0.0219
+      ],
+      "psi_train_vs_val": 0.0024,
+      "psi_train_vs_test": 0.0199,
+      "ks_train_vs_test": 0.0879,
+      "verdict_cross_stock": "mild_drift",
+      "verdict_cross_date": "stable"
+    },
+    {
+      "name": "mb_intst",
+      "psi_stock_max": 0.2555,
+      "psi_stock_by_sym": [
+        0.0785,
+        0.0346,
+        0.2555,
+        0.045,
+        0.036
+      ],
+      "psi_train_vs_val": 0.0085,
+      "psi_train_vs_test": 0.0332,
+      "ks_train_vs_test": 0.0979,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable"
+    },
+    {
+      "name": "la_intst",
+      "psi_stock_max": 0.2411,
+      "psi_stock_by_sym": [
+        0.1288,
+        0.0526,
+        0.2411,
+        0.0152,
+        0.0433
+      ],
+      "psi_train_vs_val": 0.0039,
+      "psi_train_vs_test": 0.0171,
+      "ks_train_vs_test": 0.0917,
+      "verdict_cross_stock": "mild_drift",
+      "verdict_cross_date": "stable"
+    },
+    {
+      "name": "lb_intst",
+      "psi_stock_max": 0.2732,
+      "psi_stock_by_sym": [
+        0.1257,
+        0.0517,
+        0.2732,
+        0.0511,
+        0.0885
+      ],
+      "psi_train_vs_val": 0.0109,
+      "psi_train_vs_test": 0.0259,
+      "ks_train_vs_test": 0.0909,
+      "verdict_cross_stock": "strong_drift",
+      "verdict_cross_date": "stable"
+    }
+  ],
+  "ks_drop_11_members": [
+    {
+      "name": "roll_eff_spr_ratio_W100",
+      "psi_train_vs_test": 0.1446,
+      "ks_train_vs_test": 0.1747
+    }
+  ]
+}
