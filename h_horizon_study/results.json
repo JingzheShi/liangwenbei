@@ -1,0 +1,17 @@
+{
+  "task": "h_horizon_deep_study_finish",
+  "metrics": {
+    "n_horizon_trained": 5,
+    "n_seeds": 5,
+    "IC_h60_test": 0.14404942573563867,
+    "IC_h5_test": 0.3720071296018591,
+    "IC_h10_test": 0.3202483736170824,
+    "IC_h20_test": 0.25022843610775564,
+    "IC_h40_test": 0.18442088396120207,
+    "sigma_h60_y": 0.0018954399274662137,
+    "sigma_h5_y": 0.0005325215170159936,
+    "net_signal_h60": 7.303703306790871e-05,
+    "net_signal_h5": -1.8981990036526556e-06
+  },
+  "notes": "\u6838\u5fc3\u7ed3\u8bba\uff1a\u77ed h IC \u9ad8\u4e14\u7a33\u5b9a\u4f46 \u03c3 \u592a\u5c0f\u6491\u4e0d\u8fc7 4bp \u6210\u672c\uff0c\u957f h IC \u4f4e\u4f46 \u03c3\u00d7IC \u8db3\u591f\uff1b\u4e0d\u662f\u9884\u6d4b\u529b\u95ee\u9898\uff0c\u662f\u4fe1\u53f7\u5c3a\u5ea6\u95ee\u9898"
+}
