@@ -1,0 +1,28 @@
+% Extra packages and settings for compact cheatsheet PDF
+\usepackage{xcolor}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{longtable, booktabs, array}
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=1.2em, itemsep=0.1em, topsep=0.15em, parsep=0pt}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{0.8ex}{0.4ex}
+\titlespacing*{\subsection}{0pt}{0.6ex}{0.3ex}
+\titlespacing*{\subsubsection}{0pt}{0.4ex}{0.2ex}
+\titleformat{\section}{\normalsize\bfseries}{\thesection}{0.4em}{}
+\titleformat{\subsection}{\small\bfseries}{\thesubsection}{0.4em}{}
+\titleformat{\subsubsection}{\footnotesize\bfseries}{\thesubsubsection}{0.4em}{}
+\linespread{1.0}\selectfont
+\setlength{\parskip}{0.25em}
+\setlength{\parindent}{0pt}
+\AtBeginEnvironment{longtable}{\footnotesize}
+\AtBeginEnvironment{tabular}{\footnotesize}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\scriptsize, breaklines=true, breakatwhitespace=true, columns=flexible}
+\setcounter{secnumdepth}{0}
+\setlength{\tabcolsep}{4pt}
+% Allow wide tables to scale
+\usepackage{adjustbox}
+% Compact blockquote
+\renewenvironment{quote}
+  {\small\list{}{\leftmargin=1em \rightmargin=0.5em}\item\relax}
+  {\endlist}
