@@ -8,3 +8,10 @@ __pycache__/
 .DS_Store
 runs/*/preds.npz
 runs/*/model.pt
+runs_v2/*/preds.npz
+runs_v2/*/model.pt
+runs_v2_pruned/*/preds.npz
+runs_v2_pruned/*/model.pt
+logs_v2/*.log
+logs_v2_pruned/*.log
+logs_v3/*.log
