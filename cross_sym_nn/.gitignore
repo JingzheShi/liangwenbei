@@ -1,0 +1,10 @@
+*.npz
+*.pt
+*.bin
+*.h5
+wandb/
+__pycache__/
+*.pyc
+.DS_Store
+runs/*/preds.npz
+runs/*/model.pt

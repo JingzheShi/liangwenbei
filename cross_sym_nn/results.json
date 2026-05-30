@@ -1,0 +1,32 @@
+{
+  "task": "arch_research_quant_nn",
+  "metrics": {
+    "n_archs_reviewed": 15,
+    "n_archs_top_priority": 5,
+    "n_archs_excluded": 10
+  },
+  "notes": "Top3: SetTransformerISAB > SAE-MLP > DeepSetsEnhanced. 关键发现: (1) 跨sym架构远低于MLP baseline (SymAttn~22 vs MLP~34); (2) 5sym attention信息量有限; (3) SAE-MLP不依赖cross-sym风险最低; (4) ModernTCN/TimeKAN实测完全失败; (5) ISAB排列不变性是最优cross-sym设计",
+  "excluded_archs": [
+    "TimesNet", "iTransformer", "PatchTST", "N-BEATS", "N-HiTS",
+    "ModernTCN (avg 0.77)", "TimeKAN (avg 0.05)",
+    "FT-Transformer (avg 24.63)", "AutoInt (avg 28.86)",
+    "GatedMLP (avg 27.56)", "ResMLP (avg 26.72)",
+    "MLP-Mixer (partial ~30.18)", "Hawkes-NN (stateless violation)"
+  ],
+  "top5_specs": [
+    "SetTransformerISAB: ISAB cross-sym, permutation invariant, d_model=128",
+    "DeepSetsEnhanced: max+mean+std pooling, simplest cross-sym baseline",
+    "SupervisedAutoEncoderMLP: Jane Street 2020 1st architecture, per-sym, recon_alpha=0.3",
+    "GraphAttentionCrossSym: GAT 5-node fully connected, explicit edge weight learning",
+    "FeatureGroupAttentionMLP: 11 semantic feature groups + 2-layer Transformer"
+  ],
+  "baseline_reference": {
+    "MLP_4layer_avg": 34.44,
+    "MLP_deep_avg": 34.17,
+    "FT_Transformer_avg": 24.63,
+    "SymAttentionModel_partial_2seed": 22.5,
+    "CrossConcatMLP_partial_2seed": 5.5,
+    "ModernTCN_avg": 0.77,
+    "TimeKAN_avg": 0.05
+  }
+}
