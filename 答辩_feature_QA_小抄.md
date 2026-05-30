@@ -1,7 +1,7 @@
 # 答辩小抄：Feature 工程 Q&A 速查
 
 > 用于答辩时被老师追问因子细节、跨股 / 跨日泛化、KS-drop-11 的现场速查。
-> 来源：`factor_families_report_v4.pdf` §4 / `ANSWERS_P3_FEATURES.md` §6 / `onepage_v2/sweep_5seed_summary.json` / `ablation_runs/feat_family_progressive/build_partition.py` / `factor_per_feature_audit/MASTER_summary.md`。
+> 来源：`factor_families_report_v4.pdf` §4 / `ANSWERS_P3_FEATURES.md` §6 / `onepage_v2/sweep_5seed_summary.json` / `ablation_runs/feat_family_progressive/build_partition.py` / `factor_per_feature_audit/MASTER_summary.md` / `h_horizon_study/REPORT.md`（5 horizon × 5 seed 实测）。
 
 ---
 
@@ -616,7 +616,7 @@ for each feature column ci in 370:
 
 ## Q4：为什么 h=60 为主线？— horizon 选择的 5 层论证
 
-> 评分规则 $\mathrm{Score} = \max_{h \in \{5, 10, 20, 40, 60\}} \sum_i \mathrm{pnl}^{(h)}_i$（5 个 horizon 取最大），看上去给了 5 个选择，实际上 **只有 h=60 在 OOD 上活下来**。下面 5 层论证为什么。
+> 评分规则 $\mathrm{Score} = \max_{h \in \{5, 10, 20, 40, 60\}} \sum_i \mathrm{pnl}^{(h)}_i$（5 个 horizon 取最大），看上去给了 5 个选择，实际上 **只有 h=60 在 OOD 上最终胜出**。下面 5 层论证为什么。
 
 ### Q4.1 评分公式 + 实测：短 h 在 OOD 上完全失效
 
@@ -637,6 +637,8 @@ iter_002 SchemeC 阶段一次直接对比（同样的 LGB 3-class CE + 多 horiz
 
 **短 h 的 LOSO 看上去好得多（+21.86 vs +6.30），但在 OOD 上立刻原形毕露（−8.64）**。从此后所有调参 / ensemble / 决策焦点全部以 h=60 为主线。
 
+> ⚠️ 注：以上是 iter_002 早期 LOSO 方法学对比。更严谨的 5 horizon × 5 seed 实验（IC 分解、PnL 分解）详见 Q4.3b / Q4.2 / Q4.8，揭示了短 h 失效的**真实机制**（非 IC 低，而是 σ(y_h) 太小撑不过手续费）。
+
 ### Q4.2 信号 / 成本权衡的数学
 
 - **成本项**：$f \cdot |\hat{a}_i - 1| \cdot (mp_{t+h+1} + mp_{t+1})/mp_{t+1} \approx 2f \approx 4 \,\mathrm{bp}$，**与 h 几乎无关**
@@ -645,14 +647,51 @@ iter_002 SchemeC 阶段一次直接对比（同样的 LGB 3-class CE + 多 horiz
 
 $\sqrt{60/5} \approx 3.46$ — **h=60 的信噪比是 h=5 的 3.5 倍**。
 
-### Q4.3 微结构噪声（bid-ask bounce）让短 h 不可学
+**实测 IC × σ vs 成本分解**（5 horizon × 5 seed LGB，test 集，来源：`h_horizon_study/REPORT.md §D`）：
+
+| h | IC_test | $\sigma(y_\mathrm{test})$ | $\mathrm{IC} \times \sigma$ | 单边成本 | net signal/笔 |
+|---:|---:|---:|---:|---:|---:|
+| 5 | 0.372 | $5.33\times10^{-4}$ | **2.0 bp** | 2.0 bp | **≈ 0 bp** |
+| 10 | 0.320 | $7.62\times10^{-4}$ | 2.4 bp | 2.0 bp | +0.4 bp |
+| 20 | 0.250 | $1.10\times10^{-3}$ | 2.7 bp | 2.0 bp | +0.7 bp |
+| 40 | 0.184 | $1.55\times10^{-3}$ | 2.9 bp | 2.0 bp | +0.9 bp |
+| 60 | **0.144** | **$1.90\times10^{-3}$** | **2.7 bp** | 2.0 bp | **+0.7 bp** |
+
+**这才是 h=60 主线的真正原因**：不是 IC 最高（实测反过来：IC 随 h 单调递减），而是 $\mathrm{IC} \times \sigma$ 在 h=60 撑得过 4 bp（round-trip）成本，h=5 时刚好持平。
+
+### Q4.3 微结构噪声（bid-ask bounce）——修正版
 
 高频中间价存在 **bid-ask bounce noise**：成交在 best bid（$b^{(1)}$）和 best ask（$a^{(1)}$）之间来回切换，单 tick Δmid 有 ±tick 的虚假波动，不反映真实方向。
 
-- $h = 5$（≈ 15 秒）：$\Delta mp^{(5)}$ 主要被 bid-ask bounce 主导 → 模型 in-sample 拟合的是 bounce 模式（噪声有短期自相关），不是 alpha → **OOD 上无效**
-- $h = 60$（180 秒）：bounce 已经被时间平均稀释，剩下的是真实方向信号
+**实测数字**（全局 1-lag 自相关，来源：`h_horizon_study/REPORT.md §B`）：
 
-这就是 LOSO h=10 涨到 +21.86 但公榜 −8.64 的根本原因 — 短 h 的"好成绩"是噪声拟合假象。
+- 全局 $\rho = -0.150$（负值 = bounce 信号）
+- sym3 $\rho = -0.23$（最严重），sym2 $\rho = -0.05$（最轻）
+
+> ⚠️ **反直觉发现（旧说法已被实测推翻）**：原先答辩小抄 Q4.3 声称「短 h 模型 in-sample 拟合 bounce → OOD 失效 → IC 低」——**实测正好相反**：
+>
+> - **短 h IC 反而更高**：IC_test(h=5) = 0.372 >> IC_test(h=60) = 0.144
+> - **短 h train-test gap 更小**：h=5 gap = 0.086（最稳），h=60 gap = 0.428（严重 overfit）
+> - 短 h 模型预测力更强，bounce 不是「让短 h 不可学」，而是让 $\sigma(y_h)$ 比 $\sqrt{h}$ 基准略小（负自相关压缩了短 h 的方差），进一步收窄信号空间。
+
+Bounce 的实际作用：负自相关（bounce share ≈ 22%）部分抵消 Δmid 方差，使 $\sigma(y_5) \approx 5.3\times10^{-4}$ 略低于纯 $\sqrt{h}$ 预测，让 h=5 信号更难越过手续费门槛——但模型对短 h 的预测力并未因 bounce 而失效。
+
+### Q4.3b IC by Horizon 完整实测（5 horizon × 5 seed）
+
+来源：`h_horizon_study/REPORT.md §C`，5 horizon × 5 seed LGB L2，359-d schemeP，train 0–79 / val 80–95 / test 96–119
+
+| h | IC(train) | IC(test) | train-test gap |
+|---:|---:|---:|---:|
+| 5 | 0.458 ± 0.020 | **0.372 ± 0.003** | 0.086（最稳） |
+| 10 | 0.447 ± 0.034 | 0.320 ± 0.003 | 0.126 |
+| 20 | 0.460 ± 0.056 | 0.250 ± 0.003 | 0.210 |
+| 40 | 0.516 ± 0.076 | 0.184 ± 0.004 | 0.332 |
+| 60 | 0.572 ± 0.080 | **0.144 ± 0.006** | **0.428（严重 overfit）** |
+
+关键观察：
+1. IC(test) 随 h **单调递减**（短 h 模型逐 tick 预测力更强）
+2. h=60 in-sample IC = 0.572 但 OOD 暴跌到 0.144，train-test gap 最大——h=60 自身也严重 overfit，仅靠 $\sigma(y_{60})$ 足够大才让净信号仍为正
+3. **短 h 不是 IC 低的问题，是 $\sigma(y_h) \propto \sqrt{h}$ 决定的成本可行性问题**
 
 ### Q4.4 LOB 派生因子的时间尺度匹配
 
@@ -675,16 +714,52 @@ $\sqrt{60/5} \approx 3.46$ — **h=60 的信噪比是 h=5 的 3.5 倍**。
 
 ### Q4.6 一句话答辩答案
 
-> **h=60 不是因为它本身特别好，而是因为 5 个 horizon 里其他 4 个在 OOD 上都 broken。** 短 h 的 LOSO 高分是 bid-ask bounce 噪声拟合的假象，公榜上立刻原形毕露；只有 h=60 同时满足：(1) 信号-成本比足够（$\sqrt{h}$ 缩放）、(2) bounce 噪声已被时间平均稀释、(3) LOB 特征时间尺度（$W = 100$ ≈ 5 min）匹配、(4) OOD 透传率稳定（50–80%）。
+> **「h=60 不是因为 IC 最高（实测反过来：h=5 IC=0.37 > h=60 IC=0.14），是因为 $\sigma(y_h) \propto \sqrt{h}$，短 h 的目标变量幅度太小，$\mathrm{IC} \times \sigma \approx 2\,\mathrm{bp}$ 刚好等于单边手续费，net PnL ≈ 0；h=60 的 $\sigma$ 是 h=5 的 3.7×（实测 $1.9\times10^{-3}$ vs $5.3\times10^{-4}$），即使 IC 低，$\mathrm{IC} \times \sigma \approx 2.7\,\mathrm{bp}$ >> 成本，net PnL ≈ +0.7 bp。这不是预测能力问题，是信号尺度问题。」**
 
-### Q4.7 h<60 实战补救：按 $\sqrt{h/60}$ 缩放阈值
+### Q4.7 h<60 实战：$\sqrt{h/60}$ 阈值缩放**实测失败**，h<60 必须单独训练
 
-我们没有对 h<60 单独重训模型（时间不够），实战补救：
+> ⚠️ **旧说法（已被实测推翻）**：原答辩小抄 Q4.7 称「按 $\sqrt{h/60}$ 缩放阈值 → 私榜 h=40 +38.65 #1，说明 h=60 模型有跨 horizon 迁移力」。实测发现：
 
-- 用 h=60 训练好的模型直接输出 $\hat{y}$
-- 阈值 $\theta_{\mathrm{up}}, \theta_{\mathrm{dn}}$ 按 $\sqrt{h/60}$ 缩放（因为 $\Delta mp^{(h)} \propto \sqrt{h}$ → 阈值同步缩放保持触发率不变）
+| h | $\mathrm{scale}\,\sqrt{h/60}$ | h=60 模型缩放 PnL | 专训模型 PnL | $\Delta$ |
+|---:|---:|---:|---:|---:|
+| 5 | 0.289 | **−32.2（破产！）** | +18.6 | +50.8 |
+| 10 | 0.408 | **−14.3** | +25.5 | +39.8 |
+| 20 | 0.577 | +4.4 | +29.7 | +25.2 |
+| 40 | 0.816 | +19.5 | +30.1 | +10.6 |
+| 60 | 1.000 | +22.9 | +22.9 | 0 |
 
-**结果**：私榜 h=40 拿到 **+38.65 (h=40 #1)**，仅略低于私榜 h=60 +41.61（#1）。说明 h=60 训出的模型有跨 horizon 迁移力，简单 $\sqrt{h}$ 阈值缩放即可工作。
+> 数据来源：`h_horizon_study/REPORT.md §F`
+
+**真相**：用 h=60 模型 + $\sqrt{h/60}$ 阈值缩放推到 h < 20 完全破产（h=5 PnL = −32！），与专训该 h 差 +51。所以**实战中 h < 60 必须单独训练，不能简单 $\sqrt{h/60}$ 阈值缩放**。
+
+私榜 h=40 +38.65（#1）实际是因为我们对 h=40 做过单独阈值调优（非简单 $\sqrt{}$ 缩放）。
+
+### Q4.8 实测 PnL 对比：h=40 in-sample 最优，h=60 仍是 OOD 主线
+
+DE-优化阈值后 test 集 PnL（5 seed 平均）：
+
+| h | $\theta_\mathrm{up}$ | $\theta_\mathrm{dn}$ | n_trades | test PnL | per-trade |
+|---:|---:|---:|---:|---:|---:|
+| 5 | 0.00033 | 0.00034 | 92,500 | +18.6 | $+2.01\times10^{-4}$ |
+| 10 | 0.00038 | 0.00032 | 130,691 | +25.5 | $+1.95\times10^{-4}$ |
+| 20 | 0.00036 | 0.00031 | 178,081 | +29.7 | $+1.67\times10^{-4}$ |
+| **40** | **0.00046** | **0.00029** | **193,119** | **+30.1** | $+1.56\times10^{-4}$ |
+| 60 | 0.00063 | 0.00030 | 177,480 | +22.9 | $+1.29\times10^{-4}$ |
+
+> 数据来源：`h_horizon_study/REPORT.md §D`
+
+**In-sample 最优是 h=40（+30.1），不是 h=60（+22.9）**——解释了为何私榜 h=40 +38.65（#1）与 h=60 +41.61（#1）几乎打平。但 h=60 OOD 透传更稳（私榜 #1），实战仍主押 h=60，h=40 兜底。
+
+### Q4 答辩 talking point flow
+
+> **答辩建议流程**（展示顺序 → 对应图/表）：
+>
+> 1. 「我们测试了 5 个时间尺度，发现一个反直觉结果」— 展示 `fig_C_IC_by_horizon.pdf`
+> 2. 「短 h 模型 IC 反而更高（h=5 IC=0.37 vs h=60 IC=0.14），train-test gap 更小，不是 IC 低的问题」
+> 3. 「真正原因」— 展示 Q4.2 新表（IC × σ vs cost）
+> 4. 「$\sigma(y_h) \propto \sqrt{h}$（实测 $h^{0.5007}$），短 h $\sigma$ 太小，net signal ≈ 0」
+> 5. 「h=40 in-sample 最优（+30.1），h=60 OOD 最稳（公榜 +35.64 / 私榜 +41.61 #1）」
+> 6. 「$\sqrt{h/60}$ 阈值缩放对 h < 20 破产，h < 60 必须单独训练」
 
 ---
 
