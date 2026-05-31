@@ -1,0 +1,110 @@
+{
+  "n_features": 50,
+  "ranking_criteria": "score = expected_gain_score * (1/complexity_score) * (1/sym_robustness_concern_score) * (1/date_robustness_concern_score)",
+  "scoring_legend": {
+    "expected_gain": {"low": 1, "medium": 2, "high": 3},
+    "complexity": {"easy": 1, "medium": 2, "hard": 3},
+    "sym_robustness_concern": {"low": 1, "medium": 2, "high": 3},
+    "date_robustness_concern": {"low": 1, "medium": 2, "high": 3}
+  },
+  "n_unique_categories": 6,
+  "top_50_categories_summary": [
+    "Pair Diff (sym_i - sym_j core): 18 features - v6_pairwise alignment, baseline strength",
+    "Cross-Sectional Demean (sym - cross_mean): 14 features - market-neutral signals",
+    "Cross-Sectional Zscore + Rank: 9 features - Numerai/Alpha101 style",
+    "Pair Interaction (multiplicative): 5 features - microprice-pressure composites",
+    "Cross-Impact OFI Pair: 3 features - Cont/Cross-Impact 2023 directly",
+    "Attention/Aggregate Proxy: 1 feature - closed-form attention"
+  ],
+  "implementation_notes_for_worker_b": "Group features into 5-batch outputs (1 batch per anchor sym i). For pair-diff features: produce 10 pair values per sym (each sym paired with 4 others, total 5*4=20 if directional, or 10 unique pairs). For csec features: produce 1 value per sym (5 vals per group). Concat to existing 259-d feat -> total ~259 + 50*5 = ~509d if all, but only pick top-50 priority for first run. Validate sym-robustness via LOSO (leave-one-sym-out) test before final accept.",
+  "top_50": [
+    {"rank": 1, "id": "F003", "name": "sym_pair_diff_mp_t", "category": "relative", "formula": "mp_t[i] - mp_t[j] for all 10 unique pairs", "n_features_generated": 20, "operates_on": ["mp_t"], "priority": "P1", "expected_pnl_gain": "+0.5 to +1.5", "rationale": "v6_pairwise SOTA core: instantaneous mid pair diff drove +1.24 jump over sae_cross_sym. Re-emphasize at all pair levels."},
+    {"rank": 2, "id": "F001", "name": "sym_pair_diff_mid", "category": "relative", "formula": "x[sym=i,mid] - x[sym=j,mid]", "n_features_generated": 20, "operates_on": ["mid_price"], "priority": "P1", "expected_pnl_gain": "+0.3 to +1.0", "rationale": "Baseline pair-diff confirmed by v6 results"},
+    {"rank": 3, "id": "F004", "name": "sym_pair_diff_ofi_W5", "category": "relative", "formula": "OFI_W5[i] - OFI_W5[j]", "n_features_generated": 20, "operates_on": ["ofi_W5"], "priority": "P1", "expected_pnl_gain": "+0.3 to +0.8", "rationale": "Cross-Impact 2023: lagged cross-OFI improves short-horizon forecasts; W5 fastest decay"},
+    {"rank": 4, "id": "F009", "name": "sym_pair_diff_imb1", "category": "relative", "formula": "imb1[i] - imb1[j]", "n_features_generated": 20, "operates_on": ["bid_ask_size_lvl1"], "priority": "P1", "expected_pnl_gain": "+0.3 to +0.7", "rationale": "Top-of-book imbalance is strongest LOB feature; pair diff captures relative pressure (Stoikov microprice)"},
+    {"rank": 5, "id": "F010", "name": "sym_pair_diff_logret_W5", "category": "relative", "formula": "logret_W5[i] - logret_W5[j]", "n_features_generated": 20, "operates_on": ["logret_W5"], "priority": "P1", "expected_pnl_gain": "+0.3 to +0.6", "rationale": "Avellaneda-Lee statistical arbitrage core signal; short-window relative return for mean-reversion"},
+    {"rank": 6, "id": "F002", "name": "sym_pair_diff_wmp", "category": "relative", "formula": "wmp_lvl1[i] - wmp_lvl1[j]", "n_features_generated": 20, "operates_on": ["wmp_lvl1"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.6", "rationale": "Stoikov weighted mid pair diff; relative microprice"},
+    {"rank": 7, "id": "F015", "name": "sym_pair_diff_microprice", "category": "relative", "formula": "microprice[i] - microprice[j]", "n_features_generated": 20, "operates_on": ["microprice"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.6", "rationale": "Stoikov 2017 fair-value (martingale) pair diff; strongest LOB-derived price"},
+    {"rank": 8, "id": "F040", "name": "csec_zscore_imb1", "category": "cross_sectional", "formula": "(imb1[i] - mean(imb1)) / std(imb1)", "n_features_generated": 5, "operates_on": ["imb1"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "Numerai-style cross-sectional z-score on most-informative LOB feature"},
+    {"rank": 9, "id": "F034", "name": "csec_zscore_ofi", "category": "cross_sectional", "formula": "(OFI[i] - mean(OFI)) / std(OFI)", "n_features_generated": 5, "operates_on": ["ofi"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "OFI z-score across 5 sym; captures relative aggressiveness"},
+    {"rank": 10, "id": "F078", "name": "csec_demean_ofi_W5", "category": "cross_sectional", "formula": "OFI_W5[i] - mean(OFI_W5[k] k=0..4)", "n_features_generated": 5, "operates_on": ["ofi_W5"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "Cross-impact residual: removes market-wide OFI commonality"},
+    {"rank": 11, "id": "F079", "name": "csec_demean_ofi_W20", "category": "cross_sectional", "formula": "OFI_W20[i] - mean(OFI_W20[k])", "n_features_generated": 5, "operates_on": ["ofi_W20"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Cross-impact residual W20 horizon"},
+    {"rank": 12, "id": "F031", "name": "csec_mean_mid_dev", "category": "cross_sectional", "formula": "mid[i] - mean(mid[k] for k=0..4)", "n_features_generated": 5, "operates_on": ["mid_price"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "Universal-model market-neutral price signal (Sirignano-Cont 2019)"},
+    {"rank": 13, "id": "F019", "name": "sym_pair_diff_mlofi_lvl3", "category": "relative", "formula": "mlofi_lvl3[i] - mlofi_lvl3[j]", "n_features_generated": 20, "operates_on": ["mlofi_lvl3"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "Deep-book OFI pair diff; MLOFI Xu 2019 captures depth-3 signal"},
+    {"rank": 14, "id": "F102", "name": "pair_OFI_diff_sym_lvl5", "category": "pair_cross_impact", "formula": "sum(OFI_lvl1..5[i]) - sum(OFI_lvl1..5[j])", "n_features_generated": 10, "operates_on": ["ofi_levels"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "Multi-level OFI pair diff (aggregated 5-level)"},
+    {"rank": 15, "id": "F021", "name": "sym_pair_diff_dwap5", "category": "relative", "formula": "wap_lvl5[i] - wap_lvl5[j]", "n_features_generated": 20, "operates_on": ["wap_lvl5"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Level-5 WAP pair diff (deeper than wmp_lvl1)"},
+    {"rank": 16, "id": "F157", "name": "pair_dot_imb_ofi_pair", "category": "pair_interaction", "formula": "imb1[i]*OFI[i] - imb1[j]*OFI[j]", "n_features_generated": 10, "operates_on": ["imb1", "ofi"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "Microprice-pressure composite pair diff; combines top-imb1 + OFI directionality"},
+    {"rank": 17, "id": "F175", "name": "pair_outer_product_OFI_imb", "category": "pair_interaction", "formula": "OFI[i]*imb1[i] - OFI[j]*imb1[j]", "n_features_generated": 10, "operates_on": ["ofi", "imb1"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "Same as F157 alternate formulation; bigger lift expected (Cross-Impact + Stoikov)"},
+    {"rank": 18, "id": "F110", "name": "sym_pair_outer_product_imb_depth", "category": "pair_interaction", "formula": "(imb1[i]*depth[i]) - (imb1[j]*depth[j])", "n_features_generated": 10, "operates_on": ["imb1", "depth"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "Top-of-book size-weighted pressure (Stoikov microprice formulation)"},
+    {"rank": 19, "id": "F195", "name": "pair_OFI_diff_norm_depth", "category": "pair_relative", "formula": "(OFI[i]/depth[i]) - (OFI[j]/depth[j])", "n_features_generated": 10, "operates_on": ["ofi", "depth"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.5", "rationale": "Depth-normalized OFI pair diff (per Cont price impact = OFI/depth)"},
+    {"rank": 20, "id": "F179", "name": "pair_diff_microprice_imb", "category": "pair_relative", "formula": "(microprice[i]-mid[i]) - (microprice[j]-mid[j])", "n_features_generated": 10, "operates_on": ["microprice", "mid"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Microprice excess (microprice - mid) gives microprice adjustment direction; pair diff"},
+    {"rank": 21, "id": "F193", "name": "csec_microprice_minus_avg", "category": "cross_sectional", "formula": "microprice[i] - mean(microprice[0..4])", "n_features_generated": 5, "operates_on": ["microprice"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Microprice market-neutral; commonality removed"},
+    {"rank": 22, "id": "F123", "name": "csec_quantile_rank_OFI_W5", "category": "cross_sectional", "formula": "(rank(OFI_W5[i])-1)/(N-1)", "n_features_generated": 5, "operates_on": ["ofi_W5"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Alpha101-style cross-sectional rank on most-informative LOB feature"},
+    {"rank": 23, "id": "F124", "name": "csec_quantile_rank_imb1", "category": "cross_sectional", "formula": "(rank(imb1[i])-1)/(N-1)", "n_features_generated": 5, "operates_on": ["imb1"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Alpha101 rank on imb1; robust to scale differences"},
+    {"rank": 24, "id": "F049", "name": "csec_rank_wmp_change", "category": "cross_sectional", "formula": "rank(delta_wmp_W5[i]) / 5", "n_features_generated": 5, "operates_on": ["delta_wmp"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Alpha101 rank-delta operator on weighted mid (cross-sectional momentum)"},
+    {"rank": 25, "id": "F047", "name": "csec_rank_returns_W20", "category": "cross_sectional", "formula": "rank(logret_W20[i]) / 5", "n_features_generated": 5, "operates_on": ["logret_W20"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Alpha101/Krauss cross-sectional momentum rank; classic statarb signal"},
+    {"rank": 26, "id": "F062", "name": "csec_neutralized_ret_W5", "category": "cross_sectional", "formula": "logret_W5[i] - mean(logret_W5)", "n_features_generated": 5, "operates_on": ["logret_W5"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Short-window market-neutral return (Avellaneda residual)"},
+    {"rank": 27, "id": "F145", "name": "csec_demean_logret_W5", "category": "cross_sectional", "formula": "logret_W5[i] - mean(logret_W5)", "n_features_generated": 5, "operates_on": ["logret_W5"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Same as F62 (alternative naming); Numerai era-neutralize"},
+    {"rank": 28, "id": "F202", "name": "csec_ts_neutralize_imb1", "category": "cross_sectional", "formula": "imb1[i] demean + zscore (sequential)", "n_features_generated": 5, "operates_on": ["imb1"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Numerai double-neutralize: demean then zscore for stable cross-sym signal"},
+    {"rank": 29, "id": "F201", "name": "csec_ts_neutralize_OFI", "category": "cross_sectional", "formula": "OFI[i] demean + zscore (sequential)", "n_features_generated": 5, "operates_on": ["ofi"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Numerai double-neutralize on OFI; market-neutral relative aggressiveness"},
+    {"rank": 30, "id": "F060", "name": "csec_share_volume", "category": "cross_sectional", "formula": "(bidsz1[i]+asksz1[i]) / sum_k(bidsz1[k]+asksz1[k])", "n_features_generated": 5, "operates_on": ["size"], "priority": "P1", "expected_pnl_gain": "+0.15 to +0.35", "rationale": "Multi-asset commonality / share of total volume"},
+    {"rank": 31, "id": "F085", "name": "csec_demean_microprice", "category": "cross_sectional", "formula": "microprice[i] - mean(microprice)", "n_features_generated": 5, "operates_on": ["microprice"], "priority": "P1", "expected_pnl_gain": "+0.2 to +0.4", "rationale": "Microprice commonality removed"},
+    {"rank": 32, "id": "F108", "name": "sym_pair_outer_product_mid_imb", "category": "pair_interaction", "formula": "(mid[i]-mid[j]) * (imb1[i] + imb1[j])", "n_features_generated": 10, "operates_on": ["mid", "imb1"], "priority": "P2", "expected_pnl_gain": "+0.15 to +0.35", "rationale": "Alpha101 product features: mid-diff scaled by joint pressure"},
+    {"rank": 33, "id": "F109", "name": "sym_pair_outer_product_OFI_spread", "category": "pair_interaction", "formula": "(OFI[i]-OFI[j]) * (spread[i]+spread[j])", "n_features_generated": 10, "operates_on": ["ofi", "spread"], "priority": "P2", "expected_pnl_gain": "+0.15 to +0.35", "rationale": "OFI diff weighted by joint spread (impact scaling)"},
+    {"rank": 34, "id": "F063", "name": "csec_neutralized_ret_inst", "category": "cross_sectional", "formula": "instret[i] - mean(instret)", "n_features_generated": 5, "operates_on": ["inst_logret"], "priority": "P2", "expected_pnl_gain": "+0.15 to +0.4", "rationale": "Instantaneous market-neutral return (Numerai)"},
+    {"rank": 35, "id": "F147", "name": "csec_demean_microprice_imb", "category": "cross_sectional", "formula": "(microprice[i]-mid[i]) - mean over syms", "n_features_generated": 5, "operates_on": ["microprice"], "priority": "P2", "expected_pnl_gain": "+0.15 to +0.35", "rationale": "Microprice excess demeaned"},
+    {"rank": 36, "id": "F168", "name": "csec_market_proxy_OFI", "category": "cross_sectional", "formula": "mean(OFI[0..4]) broadcast", "n_features_generated": 1, "operates_on": ["ofi"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.3", "rationale": "Market-wide OFI factor; useful joint with demean F78-80"},
+    {"rank": 37, "id": "F166", "name": "csec_market_proxy_ret", "category": "cross_sectional", "formula": "equal-weighted mean(logret[0..4]) broadcast", "n_features_generated": 1, "operates_on": ["logret"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.3", "rationale": "Equal-weighted market return proxy (Sirignano-Cont)"},
+    {"rank": 38, "id": "F011", "name": "sym_pair_diff_logret_W20", "category": "relative", "formula": "logret_W20[i] - logret_W20[j]", "n_features_generated": 20, "operates_on": ["logret_W20"], "priority": "P2", "expected_pnl_gain": "+0.15 to +0.4", "rationale": "Medium-window relative momentum (Krauss 2017 stat arb)"},
+    {"rank": 39, "id": "F177", "name": "pair_mid_pct_change_diff", "category": "pair_relative", "formula": "(mid_W5[i]/mid_W30[i]-1) - (mid_W5[j]/mid_W30[j]-1)", "n_features_generated": 10, "operates_on": ["mid"], "priority": "P2", "expected_pnl_gain": "+0.15 to +0.35", "rationale": "Pair short-vs-long momentum diff (accel/decel)"},
+    {"rank": 40, "id": "F067", "name": "pair_OFIcross_W20", "category": "pair_cross_impact", "formula": "OFI_W20[i] term used to predict sym j; expressed as 10 cross terms", "n_features_generated": 10, "operates_on": ["ofi_W20"], "priority": "P2", "expected_pnl_gain": "+0.15 to +0.4", "rationale": "Direct Cross-Impact W20 lagged cross-OFI"},
+    {"rank": 41, "id": "F008", "name": "sym_pair_diff_spread", "category": "relative", "formula": "(ask1[i]-bid1[i]) - (ask1[j]-bid1[j])", "n_features_generated": 20, "operates_on": ["spread"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.3", "rationale": "Liquidity asymmetry pair diff (Roll 1984 + Corwin-Schultz)"},
+    {"rank": 42, "id": "F126", "name": "csec_quantile_rank_realvol", "category": "cross_sectional", "formula": "(rank(RV[i])-1)/(N-1)", "n_features_generated": 5, "operates_on": ["realized_vol"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.3", "rationale": "Alpha101 vol rank cross-section"},
+    {"rank": 43, "id": "F046", "name": "csec_rank_kyleinv", "category": "cross_sectional", "formula": "rank(kyleinv[i]) / 5", "n_features_generated": 5, "operates_on": ["kyleinv"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.3", "rationale": "Alpha101 rank on price impact coefficient"},
+    {"rank": 44, "id": "F165", "name": "csec_signed_rank_ret_W20", "category": "cross_sectional", "formula": "(rank(logret_W20[i])-3)/2 in [-1,1]", "n_features_generated": 5, "operates_on": ["logret_W20"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.3", "rationale": "Centered signed rank (better gradient than 0-1 rank)"},
+    {"rank": 45, "id": "F139", "name": "sym_pair_attention_proxy", "category": "pair_interaction", "formula": "softmax over -|mid[i]-mid[j]| weights for sym j around i", "n_features_generated": 5, "operates_on": ["mid"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.4", "rationale": "Closed-form attention proxy aggregating across 5 sym (cheaper than learned attention)"},
+    {"rank": 46, "id": "F205", "name": "sym_pair_attention_softmax_mid", "category": "pair_interaction", "formula": "sum_j softmax(-|mid[i]-mid[j]|*tau) * (mid[j]-mid[i])", "n_features_generated": 5, "operates_on": ["mid"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.4", "rationale": "Self-attention proxy (closed-form); tau hyperparameter (try 1.0)"},
+    {"rank": 47, "id": "F056", "name": "csec_mean_imb1", "category": "cross_sectional", "formula": "mean(imb1[0..4]) broadcast", "n_features_generated": 1, "operates_on": ["imb1"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.25", "rationale": "Market-wide imbalance proxy"},
+    {"rank": 48, "id": "F081", "name": "csec_demean_realvol", "category": "cross_sectional", "formula": "RV[i] - mean(RV)", "n_features_generated": 5, "operates_on": ["realized_vol"], "priority": "P2", "expected_pnl_gain": "+0.1 to +0.25", "rationale": "Vol commonality removed (post-Optiver-Kaggle)"},
+    {"rank": 49, "id": "F104", "name": "pair_mp_t_diff_minus_old", "category": "pair_lagless_lead_lag", "formula": "mp_t_diff[i,j] - mp_W5_old_diff[i,j]", "n_features_generated": 10, "operates_on": ["mp_t", "mp_old"], "priority": "P2", "expected_pnl_gain": "+0.15 to +0.4", "rationale": "Detrended pair spread divergence (Avellaneda 2010 reversion at the pair level)"},
+    {"rank": 50, "id": "F191", "name": "csec_normalized_imb_pressure", "category": "cross_sectional", "formula": "(imb1[i]*depth[i]) - mean over syms", "n_features_generated": 5, "operates_on": ["imb1", "depth"], "priority": "P2", "expected_pnl_gain": "+0.15 to +0.35", "rationale": "Size-weighted imbalance demeaned (Stoikov microprice + commonality)"}
+  ],
+  "implementation_priority_order": {
+    "P1_first_batch": [
+      "F001", "F002", "F003", "F004", "F009", "F010", "F015", "F019", "F021", "F040",
+      "F034", "F031", "F078", "F079", "F102", "F157", "F175", "F110", "F195", "F179",
+      "F193", "F123", "F124", "F049", "F047", "F062", "F202", "F201", "F060", "F085"
+    ],
+    "P2_second_batch_after_P1_validated": [
+      "F108", "F109", "F063", "F147", "F168", "F166", "F011", "F177", "F067", "F008",
+      "F126", "F046", "F165", "F139", "F205", "F056", "F081", "F104", "F191", "F145"
+    ]
+  },
+  "skip_if_concerned_about": {
+    "high_sym_robustness_concern": [
+      "F014 jshare diff (high)",
+      "F074 kyle ratio (high)",
+      "F149/F150 kyle diff (high)",
+      "F162/F163 quote/trade intensity demean (high)",
+      "F170/F171 frozen pair correlation (high)",
+      "F024/F025 quote/trade rate diff (high)",
+      "F155 jshare demean (high)",
+      "F105/F106 cointegration spread with frozen params (high)"
+    ],
+    "rationale": "These features have high sym_robustness_concern. Avoid in first iteration because v6_pairwise SOTA was achieved with sym-agnostic design. Test in ablation after validation of P1+P2 top 50."
+  },
+  "test_protocol_for_worker_b": {
+    "step_1": "Implement top 30 P1 features. Add to v6_pairwise feat (259d -> ~509d).",
+    "step_2": "Quick smoke test: 1 seed train of v6_pairwise + new feats. Compare to SOTA +37.25.",
+    "step_3": "If smoke test shows +0.3 or better: 5-seed validation. Report new SOTA mean ± std.",
+    "step_4": "If smoke regresses or breaks: investigate sym-robustness. LOSO test (leave-one-sym-out) any feature that contributes.",
+    "step_5": "Iterate: add P2 batch if P1 shows lift. Otherwise stop and report."
+  },
+  "common_pitfalls_to_avoid": [
+    "Sym-specific normalization (e.g. per-sym z-score) violates sym-agnostic constraint",
+    "Frozen cointegration params (F105/F106) require per-pair sym-specific beta — verify safe at test",
+    "DTW/MST graph features (F094-099) only 5 nodes — limited info, hard implementation, low gain",
+    "Lead-lag features that need time-series state (Predictor stateless constraint)",
+    "Avoid stateful features: anything requiring tracking across test batches violates Predictor stateless rule"
+  ]
+}
