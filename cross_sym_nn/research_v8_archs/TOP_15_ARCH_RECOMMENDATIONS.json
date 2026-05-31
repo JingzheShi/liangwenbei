@@ -1,0 +1,376 @@
+{
+  "version": "v8",
+  "date": "2026-05-31",
+  "ranking_criteria": "expected_gain_over_sota * (1/complexity) * (1/risk)",
+  "current_sota": {
+    "arch": "B_no_mirror_v7",
+    "test_pnl_mean": 38.49,
+    "test_pnl_std": 1.67,
+    "n_seeds": 5,
+    "description": "v7 architecture with 40 interaction features, no mirror augmentation"
+  },
+  "already_rejected": [
+    "diff_attn", "gat (basic)", "moe (sym-specific)", "mask_ssl (basic)",
+    "market_adaln", "diff_swiglu", "sym_attn", "FT-Transformer",
+    "iTransformer", "TimesNet", "ModernTCN", "TimeKAN"
+  ],
+  "top_15_archs": [
+    {
+      "rank": 1,
+      "name": "v8_PairformerCrossSym",
+      "class": "PairformerCrossSym",
+      "paper": "arXiv:2510.18870 (Pairmixer) + AlphaFold3 Pairformer",
+      "venue": "arXiv 2025",
+      "core_change": "Add explicit 5×5 pair representation matrix; update via triangle multiplication (Pairmixer) to capture all sym-triplet interactions",
+      "key_math": "pair[i,j] += sum_k gate(pair[i,k]) * pair[k,j]; triangle captures (i,k,j) transitivity",
+      "why_not_rejected": "Different from basic GAT/MHSA: maintains dedicated pair matrix updated via triangle multiplication — fundamentally new information structure",
+      "expected_pnl": "+1.0 to +2.5 over SOTA",
+      "complexity": "medium",
+      "priority": "P1",
+      "param_estimate_k": 150,
+      "training_hooks": {
+        "forward_signature": "def forward(self, x): # (B,5,259) -> (B,5)",
+        "aux_losses": ["recon_loss (existing alpha=0.3)"],
+        "extra_inputs": "none",
+        "notes": "pair matrix init from outer product of encoded sym pairs; triangle update in 1-2 passes"
+      },
+      "implementation_notes": "Init pair[i,j] = Linear(cat(z_i, z_j)); triangle update with gate: split d_pair into [gate|value], compute outer product sum"
+    },
+    {
+      "rank": 2,
+      "name": "v8_SPOPlusLoss",
+      "class": "SPOPlusLoss (loss function change, any model)",
+      "paper": "arXiv:2601.04062 (Smart Predict-then-Optimize) + arXiv:2501.01874 (DFF fine-tuning)",
+      "venue": "arXiv 2026 + AAAI 2025",
+      "core_change": "Replace MSE loss with SPO+ listwise ranking loss that directly optimizes cross-sectional PnL ranking; optionally DFF two-stage: pretrain MSE then fine-tune with SPO+ in trust region",
+      "key_math": "L_SPO+ = -sum_i softmax(y_i/T) * log softmax(pred_i/T); T=0.1 temperature; L_total = alpha*L_MSE + beta*L_SPO+",
+      "why_not_rejected": "This is a training objective change, not architecture — completely orthogonal to all rejected architectures",
+      "expected_pnl": "+0.5 to +1.5 over SOTA",
+      "complexity": "easy",
+      "priority": "P1",
+      "param_estimate_k": 0,
+      "training_hooks": {
+        "forward_signature": "same model, different loss",
+        "aux_losses": ["L_SPO+ = listwise_ranking_loss(pred, target, temp=0.1)"],
+        "extra_inputs": "none",
+        "notes": "Start with alpha=0.7, beta=0.3; warm up MSE for first 20 epochs then add SPO+ loss; use DFF trust region if unstable"
+      },
+      "implementation_notes": "def spo_loss(pred, y, T=0.1): return -(y.softmax(dim=-1) * pred.log_softmax(dim=-1)).sum(-1).mean()"
+    },
+    {
+      "rank": 3,
+      "name": "v8_VIME_MaskSSL",
+      "class": "SAEMLPCrossSymVIME",
+      "paper": "arXiv:2003.08013 (VIME, NeurIPS 2020)",
+      "venue": "NeurIPS 2020 (best tabular SSL 2024)",
+      "core_change": "Add mask estimation auxiliary loss to existing SAE: single linear head predicts which features were corrupted; BCE loss forces encoder to learn feature covariance structure",
+      "key_math": "mask_head: Linear(d_latent=64, n_feat=259); L_mask = BCE(sigmoid(mask_head(z)), mask); L_total = L_pred + 0.3*L_recon + 0.1*L_mask",
+      "why_not_rejected": "mask_ssl (basic) was rejected — that was purely reconstruction without mask estimation. VIME adds MASK PREDICTION as second SSL task, fundamentally different signal",
+      "expected_pnl": "+0.3 to +0.8 over SOTA",
+      "complexity": "easy",
+      "priority": "P1",
+      "param_estimate_k": 17,
+      "training_hooks": {
+        "forward_signature": "def forward(self, x, mask=None): # returns pred, _last_recon_loss, _last_mask_loss",
+        "aux_losses": ["recon_loss alpha=0.3", "mask_bce_loss alpha=0.1"],
+        "extra_inputs": "mask: (B,5,259) bool tensor generated during training with p_mask=0.3",
+        "notes": "Corrupt: x_corrupt = x.clone(); x_corrupt[mask] = x[random_other_samples][mask]; z = encoder(x_corrupt)"
+      },
+      "implementation_notes": "Add self.mask_head = nn.Linear(d_latent, n_feat) to existing model; generate mask before forward pass in trainer"
+    },
+    {
+      "rank": 4,
+      "name": "v8_T2GFeatureGraph",
+      "class": "T2GFeatureEncoder",
+      "paper": "arXiv:2211.16887 (T2G-Former, AAAI 2023 oral)",
+      "venue": "AAAI 2023 (widely cited 2024-2025)",
+      "core_change": "Replace flat MLP per-sym encoder with T2G-Former: automatically estimates feature-to-feature relation graph, performs graph-guided attention over 259 feature tokens per sym",
+      "key_math": "R_ij = sigmoid(q_i^T k_j / sqrt(d)); attention A = softmax(QK^T/sqrt(d) + log(R)); z = A*V then mean-pool over 259 tokens",
+      "why_not_rejected": "T2G-Former is a per-sym FEATURE encoder, not cross-sym attention. Entirely different layer from GAT (which was cross-sym). Works inside each sym before cross-sym step.",
+      "expected_pnl": "+0.5 to +1.5 over SOTA",
+      "complexity": "medium",
+      "priority": "P1",
+      "param_estimate_k": 180,
+      "training_hooks": {
+        "forward_signature": "def forward(self, x): # (B,5,259) -> (B,5,d_latent=64)",
+        "aux_losses": ["recon_loss alpha=0.3 (decode from mean-pooled z)"],
+        "extra_inputs": "none",
+        "notes": "Feature embeddings: embed feature ID (0..258) into d_emb=32; project scalar feature value to d_model=64 via Linear(1, 64); attention masked by learned graph R"
+      },
+      "implementation_notes": "259 tokens per sym per sample — (B*5, 259, 64) self-attention. Use 4 heads, 2 layers. Mean-pool to get (B, 5, 64) per-sym latent."
+    },
+    {
+      "rank": 5,
+      "name": "v8_SetNormCrossSym",
+      "class": "SAEMLPCrossSymSetNorm",
+      "paper": "arXiv:2206.11925 (Set Norm + Equivariant Skip, 2022)",
+      "venue": "arXiv 2022 (active 2024-2025)",
+      "core_change": "Replace LayerNorm in cross-sym attention with Set Norm: normalize each sym's representation RELATIVE TO OTHER SYMS (set-level mean/std), not independently",
+      "key_math": "SetNorm(z_i) = gamma * (z_i - mean_j(z_j)) / std_j(z_j) + beta; mean/std computed over 5-sym set; same params as LayerNorm but set-aware",
+      "why_not_rejected": "Set Norm is a normalization strategy change, not an architecture. Replaces LayerNorm with cross-sym normalized version. Orthogonal to all rejected architectures.",
+      "expected_pnl": "+0.4 to +1.0 over SOTA",
+      "complexity": "easy",
+      "priority": "P1",
+      "param_estimate_k": 95,
+      "training_hooks": {
+        "forward_signature": "same as existing model",
+        "aux_losses": ["recon_loss alpha=0.3"],
+        "extra_inputs": "none",
+        "notes": "Also try: SetNorm on final pred head input; try both pre-norm and post-norm variants"
+      },
+      "implementation_notes": "class SetNorm(nn.Module): mean/std over dim=1 (sym dimension) instead of dim=-1 (feature dimension). Also apply equivariant skip connections: residual z_i = z_i + f_equivariant(z)"
+    },
+    {
+      "rank": 6,
+      "name": "v8_SCARFContrastive",
+      "class": "SAEMLPCrossSymSCARF",
+      "paper": "arXiv:2106.15147 (SCARF, ICLR 2022)",
+      "venue": "ICLR 2022",
+      "core_change": "Add SCARF-style cross-sym contrastive loss: corrupt random features with marginal distribution samples; InfoNCE loss between clean/corrupted representations for same sym",
+      "key_math": "x_corrupt[mask] = x_rand_batch[mask] (not Gaussian); InfoNCE: L = -log(exp(sim(z_i, z_i_corr)/T) / sum_j exp(sim(z_i, z_j)/T)); T=0.1; positives=same-sym clean/corrupt",
+      "why_not_rejected": "SCARF uses marginal distribution corruption (not Gaussian noise) and InfoNCE contrastive loss. Different from basic mask_ssl which only does reconstruction. Contrastive loss is the key addition.",
+      "expected_pnl": "+0.2 to +0.6 over SOTA",
+      "complexity": "easy",
+      "priority": "P1",
+      "param_estimate_k": 95,
+      "training_hooks": {
+        "forward_signature": "def forward(self, x, x_corrupt=None): # x_corrupt generated in trainer",
+        "aux_losses": ["recon_loss alpha=0.3", "infonce_loss beta=0.1"],
+        "extra_inputs": "x_corrupt: (B,5,259) marginal-corrupted version",
+        "notes": "Corruption: for each feature col, with prob p=0.6 sample from that col's empirical distribution across batch. Positive pairs: (z_clean_i, z_corrupt_i). Negatives: all other (sym, sample) pairs in batch."
+      },
+      "implementation_notes": "In collate_fn or before forward: generate x_corrupt by randomly replacing 60% of features with batch-marginal samples. InfoNCE over flattened (B*5) embeddings."
+    },
+    {
+      "rank": 7,
+      "name": "v8_DualAttnTLOB",
+      "class": "DualAttnCrossSymTLOB",
+      "paper": "arXiv:2502.15757 (TLOB 2025)",
+      "venue": "arXiv 2025",
+      "core_change": "Add FEATURE self-attention (over d_latent dimension treating 5 syms as features) orthogonal to existing SYM self-attention; dual attention captures both cross-sym AND cross-feature dependencies",
+      "key_math": "Block: z -> sym-attn(z) -> transpose(d,N) -> feat-attn(z^T) -> transpose back; both attentions applied sequentially; each has 4 heads",
+      "why_not_rejected": "TLOB dual attention is a fundamentally different operation from standard MHSA: it adds a TRANSPOSED attention (features attend over syms) that standard MHSA never computes.",
+      "expected_pnl": "+0.4 to +1.0 over SOTA",
+      "complexity": "easy",
+      "priority": "P1",
+      "param_estimate_k": 110,
+      "training_hooks": {
+        "forward_signature": "same as existing model",
+        "aux_losses": ["recon_loss alpha=0.3"],
+        "extra_inputs": "none",
+        "notes": "Feature attn: (B, d_latent, 5) — attend over 5 syms for each of d_latent features. Use 1 head (5 dim per head). After feat-attn, transpose back. Apply after sym-attn in same block."
+      },
+      "implementation_notes": "class DualAttnBlock: sym_attn(z) then feat_attn(z.T).T; can stack 2 blocks total"
+    },
+    {
+      "rank": 8,
+      "name": "v8_DFFFineTune",
+      "class": "DFF_SPOFineTune (two-stage training)",
+      "paper": "arXiv:2501.01874 (DFF, AAAI 2025)",
+      "venue": "AAAI 2025",
+      "core_change": "Two-stage: (1) pretrain v8 best model with MSE+recon as before; (2) fine-tune final 10 epochs with SPO+ loss subject to trust region constraint on weight change",
+      "key_math": "Stage 2: min L_SPO+(ŷ, y) s.t. ||theta - theta_0||_F <= epsilon; implemented via L2 regularization to theta_0: L_total = L_SPO+ + lambda_trust * ||theta - theta_0||_F^2",
+      "why_not_rejected": "DFF is a POST-TRAINING fine-tuning strategy, not an architecture. Can be applied to any existing v8 model after MSE training.",
+      "expected_pnl": "+0.3 to +1.0 over SOTA (stacks on top of any v8 arch)",
+      "complexity": "easy",
+      "priority": "P1",
+      "param_estimate_k": 0,
+      "training_hooks": {
+        "forward_signature": "same model, second training phase",
+        "aux_losses": ["SPO+ loss", "trust_region L2 to initial weights"],
+        "extra_inputs": "save initial weights theta_0 after MSE training",
+        "notes": "lambda_trust=0.01; fine-tune for 5-10 epochs; use lower LR (1e-5); monitor validation PnL not MSE"
+      },
+      "implementation_notes": "After main training: theta_0 = deepcopy(model.state_dict()); add ||theta-theta_0||_F * lambda to loss in fine-tune phase"
+    },
+    {
+      "rank": 9,
+      "name": "v8_ContextRoutedMoE",
+      "class": "ContextRoutedMoE",
+      "paper": "arXiv:2501.09636 (LLMoE 2025) + MaGNet (2511.00085 2025)",
+      "venue": "arXiv 2025",
+      "core_change": "Replace single per-sym MLP with 6 expert MLPs; routing from CROSS-SYM context (not per-sym input); top-2 routing; experts specialize in market regimes",
+      "key_math": "ctx = mean(cross_sym_attn_output); gate = softmax(W_r * ctx); top-2 experts activated; z = sum_{k in top2} w_k * expert_k(x_sym)",
+      "why_not_rejected": "Previous v6_moe was BROKEN — it had sym-specific routing (violation of sym-agnostic constraint). This version routes from CROSS-SYM context, which is sym-agnostic and correct.",
+      "expected_pnl": "+0.3 to +1.0 over SOTA",
+      "complexity": "medium",
+      "priority": "P2",
+      "param_estimate_k": 200,
+      "training_hooks": {
+        "forward_signature": "def forward(self, x): # same interface",
+        "aux_losses": ["recon_loss alpha=0.3", "load_balance_loss alpha=0.01"],
+        "extra_inputs": "none",
+        "notes": "Load balance: aux_loss = N_experts * sum(f_k * p_k) where f_k=fraction assigned, p_k=mean router prob. Prevents expert collapse. n_experts=6, k=2."
+      },
+      "implementation_notes": "Experts: 6 × nn.Sequential(Linear(259,128), GELU, Linear(128,64)) — same size as existing per-sym encoder. Router: Linear(64, 6)."
+    },
+    {
+      "rank": 10,
+      "name": "v8_OmniGNNMarketNode",
+      "class": "OmniGNNCrossSym",
+      "paper": "arXiv:2510.10775 (OmniGNN 2025)",
+      "venue": "arXiv 2025",
+      "core_change": "Add learnable virtual 'market' node to 5-sym graph; all 5 syms connect to market node; 6-node GAT enables O(1) information propagation (any sym can influence any other in 1 hop)",
+      "key_math": "nodes = cat(z_syms, z_market); z_out = GAT(nodes, full_adjacency)[:5]; z_market = learnable Parameter(d) initialized to zeros",
+      "why_not_rejected": "Basic GAT was rejected as 'borderline' (v6). OmniGNN adds virtual market node which is fundamentally different: it creates a star topology where all syms communicate through a shared hub, not pairwise.",
+      "expected_pnl": "+0.3 to +0.8 over SOTA",
+      "complexity": "easy",
+      "priority": "P2",
+      "param_estimate_k": 98,
+      "training_hooks": {
+        "forward_signature": "same as existing model",
+        "aux_losses": ["recon_loss alpha=0.3"],
+        "extra_inputs": "none",
+        "notes": "Initialize market node embedding randomly; it gets updated via backprop as a global context absorber. Can also try: market node = mean(z_syms) (no extra params)."
+      },
+      "implementation_notes": "Market node added as 6th token in MHSA: z6 = market_embed.expand(B,-1,-1); full_z = cat([z_syms, z6], dim=1); after MHSA, take only first 5"
+    },
+    {
+      "rank": 11,
+      "name": "v8_CRISPAdaptGraph",
+      "class": "CRISPAdaptiveCrossSym",
+      "paper": "arXiv:2510.20868 (CRISP 2025)",
+      "venue": "arXiv 2025",
+      "core_change": "Learn sparse adjacency matrix A (5×5) from per-sym features; A = sigmoid(MLP(cat(z_i,z_j))); sparse via top-k masking; GNN message passing on learned graph",
+      "key_math": "A_ij = sigmoid(W_e * cat(z_i, z_j) + b); A_sparse = top_k(A, k=3) per row; msg_i = sum_j A_sparse[i,j] * z_j; z_i' = z_i + msg_i",
+      "why_not_rejected": "Basic GAT uses fixed attention weights from QK^T. CRISP learns EDGE EXISTENCE (0/1) separately from edge weights, then applies explicit sparsity — different design.",
+      "expected_pnl": "+0.3 to +0.7 over SOTA",
+      "complexity": "medium",
+      "priority": "P2",
+      "param_estimate_k": 100,
+      "training_hooks": {
+        "forward_signature": "same as existing model",
+        "aux_losses": ["recon_loss alpha=0.3", "sparsity_reg alpha=0.001"],
+        "extra_inputs": "none",
+        "notes": "Sparsity reg: L1 on A matrix. Alternative: Gumbel-softmax for differentiable top-k. Try k=2 or k=3 neighbors."
+      },
+      "implementation_notes": "Edge predictor: Linear(d_latent*2, 1) applied to all 5*5=25 pairs; sparse via top-k or threshold"
+    },
+    {
+      "rank": 12,
+      "name": "v8_SEChannelGate",
+      "class": "SEGatedCrossSym",
+      "paper": "SENet (Hu et al. CVPR 2018) adapted for cross-sym 2024",
+      "venue": "CVPR 2018 (adaptation)",
+      "core_change": "Add SE-style channel excitation gate after cross-sym MHSA: squeeze to global context, excite to per-sym importance weights; ultra-lightweight (500 extra params)",
+      "key_math": "ctx = mean(MHSA_output, dim=1); gate = sigmoid(FC2(relu(FC1(ctx)))); shape: d->d/4->5; z_out = MHSA_output * gate.unsqueeze(-1)",
+      "why_not_rejected": "SE-Net is a gating mechanism added ON TOP of MHSA output — not a replacement. Different from all rejected architectures.",
+      "expected_pnl": "+0.2 to +0.5 over SOTA",
+      "complexity": "easy",
+      "priority": "P2",
+      "param_estimate_k": 96,
+      "training_hooks": {
+        "forward_signature": "same as existing model",
+        "aux_losses": ["recon_loss alpha=0.3"],
+        "extra_inputs": "none",
+        "notes": "Stack after cross-sym MHSA. Also try SE over feature dimension (within per-sym encoder): squeeze d_latent to 1, then excite back to d_latent."
+      },
+      "implementation_notes": "class SEGate(nn.Module): FC(d,d//4) -> ReLU -> FC(d//4, 5) -> sigmoid; 500 params total"
+    },
+    {
+      "rank": 13,
+      "name": "v8_SAINTDualAttn",
+      "class": "SAINTCrossSym",
+      "paper": "arXiv:2106.01342 (SAINT, widely cited 2024)",
+      "venue": "arXiv 2021 (SAINT)",
+      "core_change": "Implement SAINT dual attention: alternate between feature-wise attention (within each sym's 259 features) and sym-wise attention (across 5 syms); explicit 2-stage interaction",
+      "key_math": "Stage 1: per-sym (B*5, 259, d) self-attention over features; Stage 2: cross-sym (B, 5, d) self-attention over syms; repeat L=2 times",
+      "why_not_rejected": "SAINT alternates feature AND sample attention — current v7/v8 only has sym-attention. The per-sym feature attention is a completely new component.",
+      "expected_pnl": "+0.3 to +0.8 over SOTA",
+      "complexity": "medium",
+      "priority": "P2",
+      "param_estimate_k": 130,
+      "training_hooks": {
+        "forward_signature": "same as existing model",
+        "aux_losses": ["recon_loss alpha=0.3"],
+        "extra_inputs": "none",
+        "notes": "Feature attention uses feature tokens: embed feature ID (0..258) + project scalar value to d_model. Keep num_feature_tokens=32 (use PCA or random projection to reduce 259→32 feature tokens) for efficiency."
+      },
+      "implementation_notes": "Two transformer blocks: FeatureAttn(B*5, n_feat_tokens, d) then SymAttn(B, 5, d). Stack 2 times."
+    },
+    {
+      "rank": 14,
+      "name": "v8_FactorGraphEncoder",
+      "class": "FactorGraphCrossSym",
+      "paper": "arXiv:2411.18997 (GRU-PFG 2024)",
+      "venue": "arXiv 2024",
+      "core_change": "Build dynamic cross-sym graph from FACTOR SIMILARITY (cosine similarity of encoded sym features); soft adjacency A_ij = cos_sim(z_i, z_j); GNN message passing on this dynamic graph",
+      "key_math": "z = encoder(x); A_ij = dot(normalize(z_i), normalize(z_j)); msg_i = sum_j softmax(A_ij) * z_j; z_out_i = z_i + W * msg_i",
+      "why_not_rejected": "GRU-PFG builds graph from FACTOR FEATURES (not price returns, not fixed adjacency). Dynamic per-sample adjacency based on how similar syms' current features are — fundamentally different from static GAT.",
+      "expected_pnl": "+0.3 to +0.7 over SOTA",
+      "complexity": "easy",
+      "priority": "P2",
+      "param_estimate_k": 95,
+      "training_hooks": {
+        "forward_signature": "same as existing model",
+        "aux_losses": ["recon_loss alpha=0.3"],
+        "extra_inputs": "none",
+        "notes": "Differentiable: A is softmax of cosine similarities. No extra learned params for edge weights (dynamic, from data). Message proj W: Linear(d, d)."
+      },
+      "implementation_notes": "z_norm = F.normalize(z, dim=-1); A = bmm(z_norm, z_norm.T); msg = bmm(softmax(A), z); z_out = z + Linear(msg)"
+    },
+    {
+      "rank": 15,
+      "name": "v8_ReMaskerPretext",
+      "class": "SAEMLPCrossSymReMasker",
+      "paper": "arXiv:2309.13793 (ReMasker, ICLR 2024)",
+      "venue": "ICLR 2024",
+      "core_change": "Replace/augment current Gaussian-noise reconstruction with ReMasker-style re-masking: randomly zero out 30% of features, reconstruct ONLY those features (not all); forces encoder to learn feature correlations from remaining features",
+      "key_math": "mask ~ Bernoulli(p=0.3); x_masked = x * (1-mask); z = encoder(x_masked); recon = decoder(z); L_recon = MSE(recon[mask], x[mask]) / mask.sum() (only masked positions)",
+      "why_not_rejected": "Current reconstruction uses Gaussian noise on ALL features. ReMasker completely zeros out random features and reconstructs only those — fundamentally different: encoder must infer missing features from context.",
+      "expected_pnl": "+0.1 to +0.4 over SOTA",
+      "complexity": "easy",
+      "priority": "P2",
+      "param_estimate_k": 95,
+      "training_hooks": {
+        "forward_signature": "def forward(self, x, mask=None): # mask: (B,5,259) bool",
+        "aux_losses": ["remasker_loss alpha=0.3 (replaces Gaussian recon)"],
+        "extra_inputs": "mask generated in trainer before forward",
+        "notes": "In trainer: mask = torch.rand(x.shape) < 0.3; x_input = x * ~mask; call forward(x_input, mask); compute recon on masked positions only"
+      },
+      "implementation_notes": "Minimal change to existing model: change trainer to generate mask and pass masked input; change recon loss to only compute on masked positions"
+    }
+  ],
+  "implementation_priority_summary": {
+    "P1_must_try": [
+      "v8_PairformerCrossSym (rank 1: novel triplet interactions)",
+      "v8_SPOPlusLoss (rank 2: loss function, zero complexity)",
+      "v8_VIME_MaskSSL (rank 3: +16k params, easy)",
+      "v8_T2GFeatureGraph (rank 4: per-sym feature graph encoder)",
+      "v8_SetNormCrossSym (rank 5: norm change, minimal params)",
+      "v8_SCARFContrastive (rank 6: contrastive loss, easy)",
+      "v8_DualAttnTLOB (rank 7: transposed attention, easy)",
+      "v8_DFFFineTune (rank 8: post-training fine-tune)"
+    ],
+    "P2_good_chance": [
+      "v8_ContextRoutedMoE (rank 9: market-regime routing)",
+      "v8_OmniGNNMarketNode (rank 10: virtual market hub)",
+      "v8_CRISPAdaptGraph (rank 11: sparse learned graph)",
+      "v8_SEChannelGate (rank 12: ultra-lightweight gating)",
+      "v8_SAINTDualAttn (rank 13: feature+sym dual attention)",
+      "v8_FactorGraphEncoder (rank 14: dynamic factor similarity graph)",
+      "v8_ReMaskerPretext (rank 15: better SSL pretext task)"
+    ]
+  },
+  "combo_recommendations": [
+    {
+      "name": "Combo A (lowest complexity, highest expected gain)",
+      "archs": ["v8_SPOPlusLoss", "v8_VIME_MaskSSL", "v8_SetNormCrossSym"],
+      "reasoning": "All three are loss/norm changes requiring zero new architecture — can be stacked with ANY existing v8 model",
+      "expected_pnl": "+1.0 to +2.5 cumulative"
+    },
+    {
+      "name": "Combo B (novel architecture + loss)",
+      "archs": ["v8_PairformerCrossSym", "v8_SPOPlusLoss", "v8_VIME_MaskSSL"],
+      "reasoning": "Pairformer provides novel triplet interactions; SPO+ aligns training objective; VIME adds mask SSL",
+      "expected_pnl": "+1.5 to +4.0 cumulative"
+    },
+    {
+      "name": "Combo C (comprehensive)",
+      "archs": ["v8_T2GFeatureGraph", "v8_DualAttnTLOB", "v8_SetNormCrossSym", "v8_DFFFineTune"],
+      "reasoning": "T2G for per-sym feature graph; DualAttn for orthogonal cross-feature attention; SetNorm for relative normalization; DFF for decision-focused fine-tune",
+      "expected_pnl": "+1.5 to +3.5 cumulative"
+    }
+  ],
+  "notes": "All architectures maintain sym-agnostic constraint (no sym embeddings, no sym-specific params). All are compatible with existing (B,5,259) -> (B,5) interface. SPOPlusLoss and DFFFineTune can be applied on top of any architecture without code changes to the model class itself."
+}
