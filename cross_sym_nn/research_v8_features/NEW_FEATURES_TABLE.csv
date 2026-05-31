@@ -1,0 +1,117 @@
+id,name,category,formula,source,n_inputs,operates_on,expected_gain,complexity,sym_robust,date_robust,priority
+NF001,tick_size_ratio,lob_shape,tick / ((bid1+ask1)/2),LOBFrame Briola 2025 arxiv 2403.09267,1,bid1+ask1,medium,easy,low,low,P1
+NF002,lob_predictability_proxy,lob_shape,1/(1 + spread/(rv_W20+eps)),LOBFrame Briola 2025,1,spread+rv_W20,medium,easy,low,low,P2
+NF003,lob_vol_pct_L1_bid,lob_shape,bidsz1/sum(bidsz1..5),Crypto LOB Wang 2025 arxiv 2506.05764,1,bid_depth_1_5,medium,easy,low,low,P1
+NF004,lob_vol_pct_L1_ask,lob_shape,asksz1/sum(asksz1..5),Crypto LOB Wang 2025 arxiv 2506.05764,1,ask_depth_1_5,medium,easy,low,low,P1
+NF005,lob_entropy_bid,lob_shape,-sum(p_k*log(p_k+eps) for k=1..5) where p_k=bidsz_k/sum(bidsz),Crypto LOB Wang 2025,1,bid_depth_1_5,medium,easy,low,low,P1
+NF006,lob_entropy_ask,lob_shape,-sum(p_k*log(p_k+eps)) where p_k=asksz_k/sum(asksz),Crypto LOB Wang 2025,1,ask_depth_1_5,medium,easy,low,low,P1
+NF007,lob_depth_hhi_bid,lob_shape,sum((bidsz_k/sum_bidsz)^2 for k=1..5),Crypto LOB Wang 2025,1,bid_depth_1_5,low,easy,low,low,P2
+NF008,lob_depth_hhi_ask,lob_shape,sum((asksz_k/sum_asksz)^2 for k=1..5),Crypto LOB Wang 2025,1,ask_depth_1_5,low,easy,low,low,P2
+NF009,lob_depth_centroid_bid,lob_shape,sum(k*bidsz_k for k=1..5)/sum(bidsz_k),TLOB Berti & Kasneci 2025 arxiv 2502.15757,1,bid_depth_1_5,medium,easy,low,low,P1
+NF010,lob_depth_centroid_ask,lob_shape,sum(k*asksz_k for k=1..5)/sum(asksz_k),TLOB Berti & Kasneci 2025,1,ask_depth_1_5,medium,easy,low,low,P1
+NF011,lob_depth_centroid_asym,lob_shape,lob_depth_centroid_bid - lob_depth_centroid_ask,TLOB / Attention-LOB Kolbaek 2024 arxiv 2409.02277,1,bid+ask_depth,medium,easy,low,low,P1
+NF012,lob_L2_L3_imb,lob_shape,((bidsz2-asksz2)+(bidsz3-asksz3))/(bidsz2+asksz2+bidsz3+asksz3),Attention-LOB Kolbaek 2024 arxiv 2409.02277,1,depth_L2_L3,medium,easy,low,low,P1
+NF013,lob_slope_bid,lob_shape,cov([1..5] bidsz_1..5)/var([1..5]) numpy linear regression slope,HLOB ScienceDirect 2024,1,bid_depth_1_5,medium,easy,low,low,P2
+NF014,lob_slope_ask,lob_shape,cov([1..5] asksz_1..5)/var([1..5]),HLOB ScienceDirect 2024,1,ask_depth_1_5,medium,easy,low,low,P2
+NF015,mid_level_vol_ratio_bid,lob_shape,(bidsz3+bidsz4+bidsz5)/(bidsz1+bidsz2+eps),HLOB ScienceDirect 2024,1,bid_depth_1_5,medium,easy,low,low,P2
+NF016,boltzmann_price_L5,lob_shape,sum_k(bid_k*asksz_k+ask_k*bidsz_k for k=1..5)/sum_k(bidsz_k+asksz_k),Boltzmann Price Rola 2025 arxiv 2507.09734,1,full_lob_5lvl,medium,easy,low,low,P2
+NF017,boltzmann_vs_mid,lob_shape,boltzmann_price_L5 - (bid1+ask1)/2,Boltzmann Price Rola 2025,1,full_lob_5lvl,medium,easy,low,low,P2
+NF018,microprice_L3_corr,microprice_advanced,microprice_L1 + a2*(imb2-imb1) + a3*(imb3-imb2) where a_k from training,Blakely 2024 arxiv 2411.13594,1,depth_L1_L3,high,medium,low,low,P1
+NF019,microprice_residual_L1_L3,microprice_advanced,microprice_L3_corr - microprice_L1,Blakely 2024 arxiv 2411.13594,1,depth_L1_L3,high,easy,low,low,P1
+NF020,obi_trade_filtered_W5,lob_filtration,(aggressive_buy_vol_W5 - aggressive_sell_vol_W5)/(total_trade_vol_W5+eps),LOB Filtration Anantha 2025 arxiv 2507.22712,1,trade_volume,high,medium,low,low,P1
+NF021,obi_trade_filtered_W20,lob_filtration,(aggressive_buy_vol_W20 - aggressive_sell_vol_W20)/(total_trade_vol_W20+eps),LOB Filtration Anantha 2025,1,trade_volume,high,medium,low,low,P1
+NF022,ofi_pca1_W5,integrated_ofi,dot(OFI_L1..5_W5 pc1_weights) where pc1 frozen from training,Hybrid VAR-NN OFI 2024 arxiv 2411.08382,1,ofi_levels_1_5,high,medium,low,low,P1
+NF023,ofi_pca2_W5,integrated_ofi,dot(OFI_L1..5_W5 pc2_weights) where pc2 frozen from training,Hybrid VAR-NN OFI 2024 arxiv 2411.08382,1,ofi_levels_1_5,medium,medium,low,low,P2
+NF024,ofi_pca1_residual_W5,integrated_ofi,OFI_W5_L1 - ofi_pca1_W5*pc1_weights[0],Hybrid VAR-NN OFI 2024,1,ofi_levels_1_5,medium,medium,low,low,P2
+NF025,ofi_integrated_expwt_W5,integrated_ofi,sum(exp(-k)*OFI_Lk_W5 for k=1..5)/sum(exp(-k)),Cross-Impact OFI Kolm 2023 QF,1,ofi_levels_1_5,high,easy,low,low,P1
+NF026,ofi_factor_ratio_W5,cross_sectional,OFI_W5[i]/(mean(abs(OFI_W5[0..4]))+eps),Multi-Asset OFI Eisler 2021 QF,1+5,ofi_W5,high,easy,low,low,P1
+NF027,ofi_idiosyncratic_W5,cross_sectional,OFI_W5[i] - mean(OFI_W5[0..4]),Multi-Asset OFI Eisler 2021,1+5,ofi_W5,high,easy,low,low,P1
+NF028,iofi_pca_W5,cross_asset_pca,dot(all 5 syms ofi_pca1_W5 vector pc_cross) first cross-sym PC,Cross-Impact OFI Kolm 2023,5,ofi_all_syms,medium,hard,low,low,P2
+NF029,self_excitation_proxy_W5_W20,hawkes_proxy,OFI_W5[i]/(OFI_W20[i]+eps),Hawkes OFI Coatanlem 2024 arxiv 2408.03594,1,ofi_W5+ofi_W20,medium,easy,low,low,P1
+NF030,csec_self_excitation_zscore,hawkes_proxy,(self_excitation_proxy[i]-mean(self_excitation_proxy))/std(self_excitation_proxy),Hawkes OFI Coatanlem 2024,1+5,ofi_all_syms,medium,easy,low,low,P1
+NF031,fano_factor_bid_W20,hawkes_proxy,var(bid_count_5tick_windows over W20)/mean(bid_count_5tick+eps),Deep Hawkes Kumar 2024 JBFT,1,bid_arrivals,medium,medium,low,low,P1
+NF032,fano_factor_ask_W20,hawkes_proxy,var(ask_count_5tick_windows over W20)/mean(ask_count_5tick+eps),Deep Hawkes Kumar 2024 JBFT,1,ask_arrivals,medium,medium,low,low,P1
+NF033,fano_asymmetry_W20,hawkes_proxy,fano_factor_bid_W20 - fano_factor_ask_W20,Deep Hawkes Kumar 2024 JBFT,1,bid+ask_arrivals,medium,medium,low,low,P1
+NF034,intensity_burst_score,hawkes_proxy,intst_W5/(intst_W60+eps),Hawkes Price Dynamics Zhang 2024 EJF,1,intst,medium,easy,low,low,P2
+NF035,bid_ask_arrival_imbalance_W20,(bid_intst_W5-ask_intst_W5)/(bid_intst_W5+ask_intst_W5+eps),Bitcoin Hawkes LOB 2026 Springer,1,bid+ask_intst,medium,medium,low,low,P1
+NF036,cross_excitation_proxy_W5,hawkes_proxy,intst_W5[i]*intst_W5[j]/(intst_W20[i]*intst_W20[j]+eps) for best pair j,Multivariate Hawkes Caron 2025 arxiv 2502.17723,2,intst,medium,easy,low,low,P2
+NF037,csec_cross_excitation_score,hawkes_proxy,sum_j(cross_excitation_proxy_W5[i j])/4,Multivariate Hawkes Caron 2025,1+5,intst,medium,medium,low,low,P2
+NF038,rv_5tick,realized_vol,sum((logret_k)^2 for k in last 5 ticks),DeepVol Garcia-Lorite & Cont 2024 QF,1,logret,high,easy,low,low,P1
+NF039,rv_acceleration,realized_vol,rv_5tick/(rv_W60+eps),DeepVol Garcia-Lorite & Cont 2024,1,rv_5tick+rv_W60,high,easy,low,low,P1
+NF040,har_vol_composite,realized_vol,(rv_5tick+rv_W20+rv_W60)/3,DeepVol Garcia-Lorite & Cont 2024,1,rv_5tick+rv_W20+rv_W60,high,easy,low,low,P1
+NF041,rv_jump_pos_W20,jump_vol,max(RV_W20-BPV_W20 0)*frac_pos_returns_W20,Positive/Negative Jumps Zhang 2024 JF,1,rv_W20+bpv+logret,medium,medium,low,low,P1
+NF042,rv_jump_neg_W20,jump_vol,max(RV_W20-BPV_W20 0)*frac_neg_returns_W20,Positive/Negative Jumps Zhang 2024 JF,1,rv_W20+bpv+logret,medium,medium,low,low,P1
+NF043,rv_jump_asymmetry_W20,jump_vol,rv_jump_pos_W20 - rv_jump_neg_W20,Positive/Negative Jumps Zhang 2024 JF,1,rv_W20+bpv,medium,medium,low,low,P1
+NF044,parkinson_vol_W20,realized_vol,sqrt(1/(4*log(2))*mean((log(ask_max_k)-log(bid_min_k))^2 per 5-tick subwindow)),Realised Illiquidity AFA 2024,1,ask_max+bid_min,medium,medium,low,low,P2
+NF045,vol_ratio_parkinson_rv,realized_vol,parkinson_vol_W20/(rv_W20+eps),Parkinson/RS AFA 2024 review,1,parkinson_vol+rv_W20,medium,medium,low,low,P2
+NF046,amihud_realized_W20,illiquidity,sum(abs(logret_k)/(tick_volume_k+eps) for k in W20)/W20,Realised Illiquidity AFA 2024,1,logret+volume,medium,medium,low,low,P1
+NF047,amihud_hl_W20,illiquidity,(max(ask_W20)-min(bid_W20))/(total_volume_W20+eps),Realised Illiquidity AFA 2024,1,ask_max+bid_min+volume,medium,easy,low,low,P1
+NF048,csec_amihud_zscore,cross_sectional,(amihud_realized_W20[i]-mean(amihud_W20))/(std(amihud_W20)+eps),ML Liquidity 2025 Int Rev Fin,1+5,amihud,medium,easy,low,low,P1
+NF049,eff_spread_proxy_W5,spread_decomp,2*abs(trade_price_W5-mid_before_trade_W5)/(mid+eps),ML Liquidity 2025 Int Rev Fin,1,trade_price+mid,medium,medium,low,low,P1
+NF050,adverse_selection_W5,spread_decomp,sign_trade*(mid_W5_future-mid_W5_past)/mid_W5,ML Liquidity 2025 Int Rev Fin,1,mid+trade_dir,medium,medium,low,low,P2
+NF051,info_ratio_spread_W20,spread_decomp,eff_spread_proxy_W5/(bid_ask_spread_W20+eps),ML Liquidity 2025 Int Rev Fin,1,eff_spread+spread,medium,medium,low,low,P2
+NF052,ofi_ts_zscore_W5_W60,time_series_norm,(OFI_W5-mean_OFI_W5_over_W60)/(std_OFI_W5_over_W60+eps),Interpretable ML Wallbridge 2023 arxiv 2307.04863,1,ofi_W5+history,high,medium,low,low,P1
+NF053,imb1_ts_zscore_W5_W60,time_series_norm,(imb1-mean_imb1_over_W60)/(std_imb1_over_W60+eps),Interpretable ML Wallbridge 2023,1,imb1+history,high,medium,low,low,P1
+NF054,pin_proxy_W20,toxicity,abs(buy_vol_W20-sell_vol_W20)/(total_vol_W20+eps),PIN Proxy Easley 2024 SSRN,1,trade_volume,high,easy,low,low,P1
+NF055,signed_amt_imb_W20,toxicity,sum(signed_amt[-W20:])/sum(abs(amt[-W20:])),Easley 2024 updated VPIN,1,trade_amount,high,easy,low,low,P1
+NF056,csec_pin_rank,cross_sectional,rank(pin_proxy_W20[i]) among 5 syms,PIN Proxy Easley 2024,1+5,trade_volume,medium,easy,low,low,P2
+NF057,trade_sign_imb_W5,trade_flow,(buy_vol_W5-sell_vol_W5)/(total_vol_W5+eps),Jane Street RTMDF 2024 Kaggle,1,trade_volume,high,easy,low,low,P1
+NF058,trade_sign_imb_W20,trade_flow,(buy_vol_W20-sell_vol_W20)/(total_vol_W20+eps),Jane Street RTMDF 2024 Kaggle,1,trade_volume,high,easy,low,low,P1
+NF059,csec_iqr_norm_ret_W5,cross_sectional,(logret_W5[i]-median(logret_W5))/(IQR(logret_W5)+eps),Jane Street RTMDF 2024,1+5,logret_W5,high,easy,low,low,P1
+NF060,csec_iqr_norm_ofi_W5,cross_sectional,(OFI_W5[i]-median(OFI_W5))/(IQR(OFI_W5)+eps),Jane Street RTMDF 2024,1+5,ofi_W5,high,easy,low,low,P1
+NF061,csec_ofi_iqr_W20,cross_sectional,IQR(OFI_W20[0..4]),When Alpha Breaks 2025 arxiv 2603.13252,5,ofi_W20,medium,easy,low,low,P2
+NF062,csec_rv_iqr_W20,cross_sectional,IQR(RV_W20[0..4]),When Alpha Breaks 2025,5,rv_W20,medium,easy,low,low,P2
+NF063,csec_ofi_alignment_W5,cross_sectional,sum(sign(OFI_W5[k]) for k=0..4)/5,Alpha Decay Crowding 2025 arxiv 2512.11913,5,ofi_W5,medium,easy,low,low,P1
+NF064,csec_ret_alignment_W20,cross_sectional,sum(sign(logret_W20[k]) for k=0..4)/5,Alpha Decay Crowding 2025,5,logret_W20,medium,easy,low,low,P2
+NF065,csec_momentum_zscore_diff,cross_sectional,zscore_xsec(logret_W5[i]) - zscore_xsec(logret_W20[i]),Factor Momentum 2025 App Econ Lett,1+5,logret,medium,easy,low,low,P2
+NF066,ofi_x_spread_W5,feature_interaction,OFI_W5[i]*spread[i],Feature Interactions Beutel 2025 arxiv 2510.04543,1,ofi+spread,high,easy,low,low,P1
+NF067,ofi_x_rv_W20,feature_interaction,OFI_W20[i]*RV_W20[i],Feature Interactions Beutel 2025,1,ofi+rv,high,easy,low,low,P1
+NF068,imb1_x_rv_W20,feature_interaction,imb1[i]*RV_W20[i],Feature Interactions Beutel 2025,1,imb1+rv,high,easy,low,low,P1
+NF069,ofi_depth_interaction_W5,feature_interaction,OFI_W5[i]/(depth_lvl1[i]+eps),T2G-Former Yan 2023 AAAI arxiv 2211.16887,1,ofi+depth,high,easy,low,low,P1
+NF070,spread_depth_interaction,feature_interaction,spread[i]*(bidsz1[i]+asksz1[i]),T2G-Former Yan 2023,1,spread+depth,medium,easy,low,low,P1
+NF071,vol_gated_ofi_W5,feature_interaction,OFI_W5[i]*(1/(1+RV_W20[i])),TFT-GNN Hybrid 2024 MDPI,1,ofi+rv,high,easy,low,low,P1
+NF072,vol_gated_imb1,feature_interaction,imb1[i]*(1/(1+RV_W20[i])),TFT-GNN Hybrid 2024,1,imb1+rv,high,easy,low,low,P1
+NF073,spread_imb_ofi_cascade,feature_interaction,spread[i]*imb1[i]*OFI_W5[i],Tree Pairwise Interactions 2025 arxiv 2508.15678,1,spread+imb+ofi,medium,easy,low,low,P2
+NF074,volume_momentum_interaction,feature_interaction,log(volume_W5+1)*logret_W5[i],CSI300 Attention 2025 MDPI,1,volume+logret,medium,easy,low,low,P2
+NF075,depth_momentum_interaction,feature_interaction,depth_lvl1[i]*logret_W20[i],CSI300 Attention 2025,1,depth+logret,medium,easy,low,low,P2
+NF076,delta_cross_logret_W5_W20,lead_lag,logret_W5[i] - logret_W20[j] for frozen best lead-lag pair j,DeltaLag Zhou 2025 arxiv 2511.00390 ICAIF,2,logret,high,medium,medium,low,P1
+NF077,delta_lag_ofi_W5_W20,lead_lag,OFI_W5[i] - OFI_W20[j] for frozen best lead-lag pair j,DeltaLag Zhou 2025,2,ofi,high,medium,medium,low,P1
+NF078,cross_autocorr_proxy_W10,lead_lag,logret_W5[i]*logret_W5[j]/(std_logret_W20[i]*std_logret_W20[j]+eps) for best pair j,Lead-Lag Huckenfield 2023 JF,2,logret,medium,easy,low,low,P2
+NF079,pair_spread_curvature,pairs_advanced,pair_spread_W5[i j]-2*pair_spread_W15[i j]+pair_spread_W30[i j],Lead-Lag Chinese Futures Zheng 2025 arxiv 2501.03171,2,mid_price,medium,medium,low,low,P2
+NF080,pair_spread_convergence_rate,pairs_advanced,abs(pair_spread_W5[i j])/(abs(pair_spread_W60[i j])+eps),Price Spread DL Pairs 2024 Int Rev Fin,2,mid_price,medium,easy,low,low,P2
+NF081,pair_spread_momentum_ratio,pairs_advanced,(pair_spread_W5-pair_spread_W20)/(abs(pair_spread_W20)+eps),Price Spread DL Pairs 2024,2,mid_price,medium,easy,low,low,P2
+NF082,cross_impact_adj_ofi_W5,cross_asset,OFI_W5[i]+sum_j(gamma_ij*sign(OFI_W5[j])*sqrt(abs(OFI_W5[j]))) gamma_ij frozen,Nonpar Cross-Impact Piquard 2025 arxiv 2510.06879,1+5,ofi,high,medium,low,low,P1
+NF083,self_impact_concave_W5,cross_asset,sign(OFI_W5[i])*sqrt(abs(OFI_W5[i])),Nonpar Cross-Impact Piquard 2025,1,ofi_W5,high,easy,low,low,P1
+NF084,lagged_cross_iofi_W5,cross_asset,ofi_pca1_W5[j] for fixed best lagged-impact pair j (frozen from training),Cross-Impact OFI Kolm 2023 QF,2,ofi_levels,high,medium,medium,low,P1
+NF085,triple_ofi_product_sign,hyperedge,sign(OFI_W5[i])*sign(OFI_W5[j])*sign(OFI_W5[k]) for best frozen triplet j k,Hypergraph Stock ICAIF 2024,3,ofi_W5,medium,easy,low,low,P2
+NF086,hyperedge_ofi_mean_W5,hyperedge,mean(OFI_W5[i j k]) - OFI_W5[i] for frozen best triplet j k,Hypergraph Stock ICAIF 2024,3,ofi_W5,medium,easy,low,low,P2
+NF087,triple_corr_proxy_W20,hyperedge,logret_W20[i]*logret_W20[j]*logret_W20[k]/(std_i*std_j*std_k+eps) for frozen triplet,Functional Hypergraphs PMC 2024,3,logret_W20,medium,medium,low,low,P2
+NF088,ofi_centroid_deviation_W5,cross_sectional,OFI_W5[i] - median(OFI_W5[0..4]),Dynamic Hypergraph 2024 Expert Sys Apps,1+5,ofi_W5,medium,easy,low,low,P2
+NF089,rv_centroid_deviation_W20,cross_sectional,RV_W20[i] - median(RV_W20[0..4]),Dynamic Hypergraph 2024,1+5,rv_W20,medium,easy,low,low,P2
+NF090,sym_vs_sector_ofi_signed,cross_sectional,OFI_W5[i]/abs(sum(OFI_W5[0..4])+eps),HAMAN Hypergraph ACM BIGAI 2024,1+5,ofi_W5,medium,easy,low,low,P2
+NF091,causal_ofi_pair_W5,cross_asset,OFI_W5[i]-OFI_W5[j] when sign(logret_W5[j])==sign(OFI_W5[i]) else 0 for best pair j,Implicit-Causality GNN Zhao 2024,2,ofi+logret,medium,medium,low,low,P2
+NF092,csec_signed_rank_ofi_W5,cross_sectional,(rank(OFI_W5[i])-3)/2 center-normalized rank in[-1 1] for N=5,Robust Hypergraph KBS 2025,1+5,ofi_W5,medium,easy,low,low,P2
+NF093,csec_signed_rank_rv_W20,cross_sectional,(rank(RV_W20[i])-3)/2,Robust Hypergraph KBS 2025,1+5,rv_W20,medium,easy,low,low,P2
+NF094,ofi_pca1_W20,integrated_ofi,dot(OFI_L1..5_W20 pc1_weights) frozen from training,Hybrid VAR-NN OFI 2024 arxiv 2411.08382,1,ofi_levels_1_5,high,medium,low,low,P1
+NF095,quote_update_vs_trade_ratio,hft_activity,n_quote_updates_W5/(n_trades_W5+eps),Worst-Kept Secret HFT 2023 arxiv 2307.15599,1,quote_updates+trades,medium,medium,low,low,P2
+NF096,quote_update_intensity_W5,hft_activity,n_quote_updates_W5/W5,Worst-Kept Secret HFT 2023,1,quote_updates,medium,easy,high,low,P3
+NF097,lob_turnover_rate_W20,hft_activity,n_tob_changes_W20/(depth_W20_avg+eps),Data-Driven HFT 2024 arxiv 2405.08101,1,depth+tob_changes,medium,medium,low,low,P2
+NF098,cancel_submit_ratio_W20,hft_activity,n_cancellations_W20/(n_new_orders_W20+eps),Data-Driven HFT 2024,1,cancel+submit,medium,medium,high,low,P3
+NF099,adverse_selection_indicator,informed_trading,-1*(sign(OFI_W5)!=sign(logret_W5))*1.0 (0 or -1),Market Simulation Adverse Sel 2024 arxiv 2409.12721,1,ofi_W5+logret_W5,medium,easy,low,low,P2
+NF100,maker_fill_adverse_proxy,informed_trading,-sign(OFI_W5[i])*logret_W5[i],Market Simulation Adverse Sel 2024,1,ofi+logret,medium,easy,low,low,P2
+NF101,lob_attention_gini,lob_shape,sum(abs(bidsz_k/sum_bid-1/5) for k=1..5)/2,LiT LOB Transformer 2025 Frontiers,1,bid_depth_1_5,medium,easy,low,low,P2
+NF102,lob_attention_entropy_full,lob_shape,-sum(p_k*log(p_k+eps)) p_k=(bidsz_k+asksz_k)/sum_all k=1..5,LiT LOB Transformer 2025,1,full_lob_5lvl,medium,easy,low,low,P2
+NF103,csec_demean_trade_imb_W5,cross_sectional,trade_sign_imb_W5[i] - mean(trade_sign_imb_W5[0..4]),Jane Street RTMDF 2024 Kaggle,1+5,trade_volume,high,easy,low,low,P1
+NF104,csec_demean_signed_amt_imb,cross_sectional,signed_amt_imb_W20[i] - mean(signed_amt_imb_W20[0..4]),Easley 2024 VPIN updated,1+5,trade_amount,high,easy,low,low,P1
+NF105,csec_demean_amihud_W20,cross_sectional,amihud_realized_W20[i] - mean(amihud_W20),Realised Illiquidity AFA 2024,1+5,amihud,medium,easy,low,low,P2
+NF106,csec_demean_rv_acceleration,cross_sectional,rv_acceleration[i] - mean(rv_acceleration[0..4]),DeepVol Garcia-Lorite 2024,1+5,rv,medium,easy,low,low,P1
+NF107,csec_demean_self_excitation,cross_sectional,self_excitation_proxy_W5_W20[i] - mean(...[0..4]),Hawkes OFI 2024 arxiv 2408.03594,1+5,ofi,medium,easy,low,low,P1
+NF108,csec_iqr_norm_imb1,cross_sectional,(imb1[i]-median(imb1))/(IQR(imb1)+eps),Jane Street RTMDF 2024 style,1+5,imb1,high,easy,low,low,P1
+NF109,pair_ar1_proxy,pairs_advanced,logret_inst[i]*logret_inst[j]/(sqrt(rv_5tick[i]*rv_5tick[j])+eps),Improving Cointegration 2024 Comp Econ,2,logret_inst+rv,medium,easy,low,low,P2
+NF110,pair_spread_half_life_proxy,pairs_advanced,1/(1+abs(pair_ar1_proxy)),Improving Cointegration 2024,2,logret_inst+rv,medium,medium,low,low,P3
+NF111,ofi_x_amihud_W20,feature_interaction,OFI_W5[i]*amihud_realized_W20[i],Feature Interactions + Illiquidity,1,ofi+amihud,high,easy,low,low,P1
+NF112,imb1_x_spread,feature_interaction,imb1[i]*spread[i],Feature Interactions Beutel 2025,1,imb1+spread,medium,easy,low,low,P2
+NF113,microprice_x_ofi_W5,feature_interaction,(microprice[i]-mid[i])*OFI_W5[i],Feature Interactions + Stoikov,1,microprice+ofi,high,easy,low,low,P1
+NF114,csec_demean_vol_gated_ofi,cross_sectional,vol_gated_ofi_W5[i] - mean(vol_gated_ofi_W5[0..4]),TFT-GNN + Eisler 2024,1+5,ofi+rv,high,easy,low,low,P1
+NF115,csec_demean_ofi_integrated_expwt,cross_sectional,ofi_integrated_expwt_W5[i] - mean(ofi_integrated_expwt_W5[0..4]),Cross-Impact OFI Kolm 2023,1+5,ofi_levels,high,easy,low,low,P1
+NF116,csec_demean_microprice_L3,cross_sectional,microprice_L3_corr[i] - mean(microprice_L3_corr[0..4]),Blakely 2024 + Eisler 2021,1+5,depth_L1_L3,high,easy,low,low,P1
