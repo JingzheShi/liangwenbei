@@ -1,0 +1,171 @@
+{
+  "research_version": "v5",
+  "date": "2026-05-31",
+  "current_sota": {
+    "arch": "sae_cross_sym",
+    "val_pnl_mean": 36.35,
+    "val_pnl_std": 0.67,
+    "n_seeds": 5,
+    "n_params": 95000
+  },
+  "top_5_v5_archs": [
+    {
+      "rank": 1,
+      "name": "v5_diff_attn",
+      "class": "DiffAttnCrossSym",
+      "paper": "Differential Transformer, Ye et al., Microsoft/Tsinghua, arxiv 2410.05258, Oct 2024",
+      "description": "Replace cross-sym MHSA with Differential Attention. Two softmax maps subtract → noise cancellation. Lambda is learnable per-head. Directly addresses noisy 5×5 attention weights in financial cross-sym interaction.",
+      "expected_pnl_gain": "+0.5 to +2.0",
+      "expected_pnl_best_case": 38.35,
+      "impl_complexity": "low",
+      "n_params_delta": "+32 (lambda vectors)",
+      "key_change": "Split Q,K into halves; compute (A1 - λ·A2)@V with per-head RMSNorm",
+      "hyperparams": {
+        "d_latent": 32,
+        "d_hidden": 128,
+        "n_heads": 4,
+        "dropout": 0.30,
+        "recon_alpha": 0.3,
+        "noise_sigma": 0.035,
+        "lambda_init": 0.2
+      },
+      "training_notes": "lambda parameters learned via gradient; RMSNorm per head important for stability",
+      "priority": "P1",
+      "n_seeds_recommended": 5
+    },
+    {
+      "rank": 2,
+      "name": "v5_mask_ssl",
+      "class": "MaskSSLCrossSym",
+      "paper": "VIME: Value Imputation and Mask Estimation, Yoon et al., NeurIPS 2020, arxiv 2003.08013",
+      "description": "Add mask estimation pretext task. Random 30% feature corruption → encoder must predict binary mask (which features corrupted). Forces encoder to learn feature co-occurrence patterns, complementary to reconstruction.",
+      "expected_pnl_gain": "+0.3 to +1.0",
+      "expected_pnl_best_case": 37.35,
+      "impl_complexity": "low",
+      "n_params_delta": "+n_feat*d_latent=8288 for mask_head",
+      "key_change": "Add MaskHead (d_latent→n_feat binary) + VIME corruption in forward(); loss += mask_alpha * BCE(mask_pred, mask)",
+      "hyperparams": {
+        "d_latent": 32,
+        "d_hidden": 128,
+        "n_heads": 4,
+        "dropout": 0.30,
+        "recon_alpha": 0.3,
+        "noise_sigma": 0.035,
+        "mask_p": 0.30,
+        "mask_alpha": 0.5
+      },
+      "training_notes": "total_loss += recon_alpha*recon_loss + mask_alpha*bce_loss; log all three",
+      "priority": "P1",
+      "n_seeds_recommended": 5
+    },
+    {
+      "rank": 3,
+      "name": "v5_glu_v_attn",
+      "class": "GLUVCrossSym",
+      "paper": "GLU Attention Improve Transformer, Wang, arxiv 2507.00022, Jul 2025",
+      "description": "GLU-gate the values in cross-sym attention. V_proj outputs 2×d_latent, split and gate: V_out = SiLU(V1)*V2. Forces selective activation of sym-information, compatible with existing attention structure.",
+      "expected_pnl_gain": "+0.3 to +0.8",
+      "expected_pnl_best_case": 37.15,
+      "impl_complexity": "very_low",
+      "n_params_delta": "+d_latent^2=1024 (doubled V projection)",
+      "key_change": "v_proj: d→2d; v_gated = silu(v[:d])*v[d:]; rest unchanged",
+      "hyperparams": {
+        "d_latent": 32,
+        "d_hidden": 128,
+        "n_heads": 4,
+        "dropout": 0.30,
+        "recon_alpha": 0.3,
+        "noise_sigma": 0.035
+      },
+      "training_notes": "Same training setup as sae_cross_sym baseline",
+      "priority": "P1",
+      "n_seeds_recommended": 5
+    },
+    {
+      "rank": 4,
+      "name": "v5_market_adaln",
+      "class": "MarketAdaLNCrossSym",
+      "paper": "MASTER (AAAI 2024) market-guided feature selection + DiT AdaLN-Zero (Peebles 2023)",
+      "description": "After cross-sym attention, compute market context = mean(z_attn, dim=sym). Use AdaLN to derive scale/shift for each sym's latent from market context. Market state modulates per-sym feature importance dynamically.",
+      "expected_pnl_gain": "+0.4 to +1.5",
+      "expected_pnl_best_case": 37.85,
+      "impl_complexity": "medium",
+      "n_params_delta": "+d_latent*2*d_latent=2048 for adaln_proj",
+      "key_change": "ctx=mean(z_attn,dim=1); [scale,shift]=adaln_proj(ctx); z=(1+scale)*LN(z)+shift; AdaLN-Zero init",
+      "hyperparams": {
+        "d_latent": 32,
+        "d_hidden": 128,
+        "n_heads": 4,
+        "dropout": 0.30,
+        "recon_alpha": 0.3,
+        "noise_sigma": 0.035
+      },
+      "training_notes": "AdaLN-Zero init critical: zero-init adaln_proj weights/bias for stable training start",
+      "priority": "P1",
+      "n_seeds_recommended": 5
+    },
+    {
+      "rank": 5,
+      "name": "v5_diff_swiglu",
+      "class": "DiffAttnSwiGLU",
+      "paper": "Combines: Diff Transformer (arxiv 2410.05258) + SwiGLU (Shazeer 2020, arxiv 2002.05202)",
+      "description": "Kitchen-sink combo: Differential Attention in cross-sym layer + SwiGLU FFN in encoder and pred head. If diff_attn alone works well, this adds SwiGLU's gating benefit on top.",
+      "expected_pnl_gain": "+0.8 to +2.5",
+      "expected_pnl_best_case": 38.85,
+      "impl_complexity": "medium",
+      "n_params_delta": "~same total (SwiGLU adjusts d_ff to compensate)",
+      "key_change": "Diff-Attn + SwiGLU encoder [n_feat→2d_hidden→d_latent] + SwiGLU pred head",
+      "hyperparams": {
+        "d_latent": 32,
+        "d_hidden": 128,
+        "n_heads": 4,
+        "dropout": 0.30,
+        "recon_alpha": 0.3,
+        "noise_sigma": 0.035,
+        "lambda_init": 0.2
+      },
+      "training_notes": "Run after v5_diff_attn confirms promise; if diff_attn fails, don't bother",
+      "priority": "P1-conditional",
+      "n_seeds_recommended": 5
+    }
+  ],
+  "additional_archs_p2": [
+    {
+      "rank": 6,
+      "name": "v5_swiglu_sae",
+      "class": "SwiGLUSAECrossSym",
+      "paper": "GLU Variants Improve Transformer, Shazeer 2020, arxiv 2002.05202",
+      "expected_pnl_gain": "+0.2 to +0.6",
+      "impl_complexity": "very_low",
+      "priority": "P2"
+    },
+    {
+      "rank": 7,
+      "name": "v5_content_moe",
+      "class": "ContentMoECrossSym",
+      "paper": "Switch Transformer + Adaptive MoE for Finance 2025",
+      "expected_pnl_gain": "+0.2 to +1.0",
+      "impl_complexity": "medium",
+      "notes": "Higher variance; may overfit at small d_latent=32; try n_experts=3, top_k=2",
+      "priority": "P2"
+    }
+  ],
+  "rejected_archs": [
+    {"name": "TimesNet", "reason": "user-rejected"},
+    {"name": "iTransformer", "reason": "user-rejected"},
+    {"name": "PatchTST", "reason": "user-rejected (time-series)"},
+    {"name": "Hawkes-NN", "reason": "stateless violation"},
+    {"name": "per-sym MoE (sym-index routing)", "reason": "sym-agnostic violation"},
+    {"name": "HATS (graph)", "reason": "requires static stock adjacency matrix, not sym-agnostic"},
+    {"name": "SR-GNN", "reason": "graph requires adjacency, not sym-agnostic"},
+    {"name": "DeepLOB", "reason": "LOB-specific CNN, incompatible feature format"}
+  ],
+  "key_insight": "sae_cross_sym already validated cross-sym attention works (+4.91 vs sae_mlp). The bottleneck is QUALITY of the 5×5 attention (noise in financial signals) + QUALITY of encoder regularization (reconstruction only). Differential Attention cancels attention noise directly; VIME mask estimation forces feature correlation learning. These two orthogonal improvements should be prioritized and combined.",
+  "experiment_schedule": {
+    "phase_1_immediately": ["v5_diff_attn", "v5_mask_ssl"],
+    "phase_2_after_phase1": ["v5_glu_v_attn", "v5_market_adaln"],
+    "phase_3_conditional": ["v5_diff_swiglu", "v5_swiglu_sae", "v5_content_moe"],
+    "best_expected_single_model": "v5_diff_attn OR v5_diff_swiglu",
+    "ensemble_strategy": "best_v5 × 5 + sae_cross_sym × 5 = expected +39~+40"
+  }
+}
