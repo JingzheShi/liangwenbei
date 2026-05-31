@@ -11,8 +11,10 @@
 - **Phase 1** (deeper / gated variants, 5 seeds each): Neither surpassed SOTA
   - v1_deeper2 (2-layer transformer): **+35.15 ± 0.80** — 2nd attention layer hurts (over-fitting or gradient issues)
   - v2_gated (gated residual): **+36.42 ± 0.96** — high variance, not reliably better
-- **Phase 2** (5 new archs from Sonnet research, 3 seeds each): [RESULTS IN PROGRESS]
-- **Overall conclusion:** [TBD after Phase 2 completes]
+- **Phase 2** (5 new archs from Sonnet research, 3 seeds each): 
+  - `v5_diff_attn`: **+37.28 ± 1.79** (3-seed) — HIGH VARIANCE: seeds 0,1 = +38.0/+39.0, seed 2 = +34.8
+  - `v5_mask_ssl`, `v5_glu_v_attn`, `v5_market_adaln`, `v5_diff_swiglu`: running/pending
+- **Preliminary conclusion:** v5_diff_attn shows the strongest signal (+37.28 vs SOTA +36.35), driven by Differential Attention's noise-cancellation in the 5×5 cross-sym attention. High variance suggests 5-seed measurement needed for final confirmation.
 
 ---
 
@@ -58,13 +60,13 @@ Research basis: `research_v5/IMPL_SPECS_v5.md` + `research_v5/priority_ranking.j
 
 | arch | paper | seeds | mean ± std | vs SOTA | verdict |
 |------|-------|-------|-----------|---------|---------|
-| `v5_diff_attn` | Differential Transformer (arxiv 2410.05258) | 3 | [TBD] | [TBD] | [TBD] |
-| `v5_mask_ssl` | VIME (NeurIPS 2020, arxiv 2003.08013) | 3 | [TBD] | [TBD] | [TBD] |
-| `v5_glu_v_attn` | GLU Attention (arxiv 2507.00022) | 3 | [TBD] | [TBD] | [TBD] |
-| `v5_market_adaln` | MASTER (AAAI 2024) + DiT AdaLN | 3 | [TBD] | [TBD] | [TBD] |
-| `v5_diff_swiglu` | Diff-Attn + SwiGLU combo | 3 | [TBD] | [TBD] | [TBD] |
+| `v5_diff_attn` | Differential Transformer (arxiv 2410.05258) | 3 | **+37.28 ± 1.79** | **+0.93** | **NEW SOTA candidate** |
+| `v5_mask_ssl` | VIME (NeurIPS 2020, arxiv 2003.08013) | 3 | [running] | [TBD] | [TBD] |
+| `v5_glu_v_attn` | GLU Attention (arxiv 2507.00022) | 3 | [pending] | [TBD] | [TBD] |
+| `v5_market_adaln` | MASTER (AAAI 2024) + DiT AdaLN | 3 | [pending] | [TBD] | [TBD] |
+| `v5_diff_swiglu` | Diff-Attn + SwiGLU combo | 3 | [pending] | [TBD] | [TBD] |
 
-*Results will be filled in as sweep completes (~3hr)*
+**v5_diff_attn per-seed:** s0=+38.05, s1=+38.98, s2=+34.81 (high variance: 2 seeds clearly above SOTA, 1 seed below)
 
 ---
 
