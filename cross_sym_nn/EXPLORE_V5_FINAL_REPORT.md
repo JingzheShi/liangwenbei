@@ -61,8 +61,8 @@ Research basis: `research_v5/IMPL_SPECS_v5.md` + `research_v5/priority_ranking.j
 | arch | paper | seeds | mean ± std | vs SOTA | verdict |
 |------|-------|-------|-----------|---------|---------|
 | `v5_diff_attn` | Differential Transformer (arxiv 2410.05258) | 3 | **+37.28 ± 1.79** | **+0.93** | **NEW SOTA candidate** |
-| `v5_mask_ssl` | VIME (NeurIPS 2020, arxiv 2003.08013) | 3 | [running] | [TBD] | [TBD] |
-| `v5_glu_v_attn` | GLU Attention (arxiv 2507.00022) | 3 | [pending] | [TBD] | [TBD] |
+| `v5_mask_ssl` | VIME (NeurIPS 2020, arxiv 2003.08013) | 1 | +30.11 (s0 only) | **-6.24** | ⬇ SKIP (s0<33) |
+| `v5_glu_v_attn` | GLU Attention (arxiv 2507.00022) | 3 | [running] | [TBD] | [TBD] |
 | `v5_market_adaln` | MASTER (AAAI 2024) + DiT AdaLN | 3 | [pending] | [TBD] | [TBD] |
 | `v5_diff_swiglu` | Diff-Attn + SwiGLU combo | 3 | [pending] | [TBD] | [TBD] |
 
