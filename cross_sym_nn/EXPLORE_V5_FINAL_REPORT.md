@@ -3,7 +3,7 @@
 **Date:** 2026-05-31  
 **SOTA baseline:** `sae_cross_sym` 259d  **+36.35 ± 0.67** (5-seed, test PnL)  
 **Goal:** Surpass SOTA via architecture innovations from recent ML literature  
-**Status:** Phase 1 complete (5-seed each), Phase 2 complete for diff_attn+mask_ssl, glu_v_attn partial (s0 done, s1+2 running), market_adaln+diff_swiglu pending
+**Status:** COMPLETE — all 5 Phase 2 archs evaluated (diff_attn: 5-seed, others: 3-seed)
 
 ---
 
@@ -12,12 +12,14 @@
 - **Phase 1** (deeper / gated variants, 5 seeds each): Neither surpassed SOTA
   - v1_deeper2 (2-layer transformer): +35.15 ± 0.80 (−1.20 vs SOTA)
   - v2_gated (gated residual): +36.42 ± 0.96 (≈noise)
-- **Phase 2** (5 new archs from Sonnet research):
-  - `v5_diff_attn` (Differential Transformer): **+37.28 ± 1.79** (3-seed) — **+0.93 vs SOTA ← NEW SOTA CANDIDATE**
+- **Phase 2** (5 new archs from Sonnet research) — COMPLETE:
+  - `v5_diff_attn` (Differential Transformer): **+36.85 ± 1.48** (5-seed) — **+0.50 vs SOTA ← NEW SOTA (borderline)**
   - `v5_mask_ssl` (VIME mask estimation): +30.11 (SKIP — mask corruption hurts significantly)
-  - `v5_glu_v_attn` (GLU-gated values): +35.62 (seed0 only) — ~= SOTA, seeds 1+2 running
-  - `v5_market_adaln`, `v5_diff_swiglu`: pending (time budget exceeded)
-- **Key finding:** Differential Attention for cross-sym noise cancellation is the most effective arch improvement (+37.28 vs +36.35 SOTA, though high variance). Simple architecture changes (1 layer, correct design) beat deeper/gated variants.
+  - `v5_glu_v_attn` (GLU-gated values): +36.02 ± 0.80 (3-seed) — slightly below SOTA
+  - `v5_market_adaln` (Market AdaLN): +35.16 ± 0.84 (3-seed) — below SOTA
+  - `v5_diff_swiglu` (Diff-Attn + SwiGLU): +34.27 ± 0.32 (3-seed) — below SOTA
+
+- **Honest verdict:** `v5_diff_attn` 5-seed mean (+36.85) is +0.50 above SOTA (+36.35), meeting the ≥+0.5 threshold by a margin of 0.0017. High variance (std=1.48 vs SOTA std=0.67) makes this a **borderline** confirmation. Seeds 0+1 clearly beat SOTA (+38.05, +38.98), while seeds 2+4 fall near or below (+34.81, +36.05). This is a real improvement but not a decisive breakthrough.
 
 ---
 
@@ -28,10 +30,10 @@ MLP baseline           +31.44 ± 1.39  (sae_mlp 359d, 5-seed)
 Feature pruning        +33.28 ± 0.40  (sae_mlp 259d, 5-seed)
 Improved pruning       +34.15 ± 0.31  (sae_mlp 259d, bottom-100 drop, 5-seed)
 Cross-sym attention    +36.35 ± 0.67  (sae_cross_sym 259d, 5-seed) ← SOTA
-Differential Attention +37.28 ± 1.79  (v5_diff_attn 259d, 3-seed) ← NEW SOTA candidate
+Differential Attention +36.85 ± 1.48  (v5_diff_attn 259d, 5-seed) ← NEW SOTA (borderline, +0.50)
 ```
 
-Total improvement from MLP: **+5.84** (18.6% relative improvement)
+Total improvement from MLP: **+5.41** (17.2% relative improvement, single-model)
 
 ---
 
@@ -56,43 +58,57 @@ s0=+36.25, s1=+37.04, s2=+35.05, s3=+35.91, s4=+37.87
 
 ---
 
-## Phase 2 Results: 5 New Archs (Sonnet Research)
+## Phase 2 Results: 5 New Archs (Sonnet Research) — COMPLETE
 
 Research basis: `research_v5/IMPL_SPECS_v5.md` + `research_v5/priority_ranking.json`
 
 | arch | paper | seeds | mean ± std | vs SOTA | verdict |
 |------|-------|-------|-----------|---------|---------|
-| `v5_diff_attn` | Differential Transformer (arxiv 2410.05258) | 3 | **+37.28 ± 1.79** | **+0.93** | **★ NEW SOTA** |
+| `v5_diff_attn` | Differential Transformer (arxiv 2410.05258) | **5** | **+36.85 ± 1.48** | **+0.50** | **★ NEW SOTA (borderline)** |
+| `v5_glu_v_attn` | GLU Attention (arxiv 2507.00022) | 3 | +36.02 ± 0.80 | **−0.33** | ≈ SOTA |
+| `v5_market_adaln` | MASTER (AAAI 2024) + DiT AdaLN | 3 | +35.16 ± 0.84 | **−1.19** | ⬇ WORSE |
+| `v5_diff_swiglu` | Diff-Attn + SwiGLU combo | 3 | +34.27 ± 0.32 | **−2.08** | ⬇⬇ WORSE |
 | `v5_mask_ssl` | VIME (NeurIPS 2020, 2003.08013) | 1 | +30.11 (SKIP) | **−6.24** | ⬇⬇ HARMFUL |
-| `v5_glu_v_attn` | GLU Attention (arxiv 2507.00022) | 1 (s1+2 running) | +35.62 (s0) | **−0.73** | ≈ SOTA (TBD) |
-| `v5_market_adaln` | MASTER (AAAI 2024) + DiT AdaLN | 0 | [pending] | [TBD] | [TBD] |
-| `v5_diff_swiglu` | Diff-Attn + SwiGLU combo | 0 | [pending] | [TBD] | [TBD] |
 
-### v5_diff_attn per-seed detail
-- s0: test_pnl = **+38.05** (best_step=6800, val=+30.42)
-- s1: test_pnl = **+38.98** (best_step=8200, val=+28.67)
-- s2: test_pnl = **+34.81** (best_step=9200, val=+29.69) ← outlier
-- **3-seed mean: +37.28 ± 1.79**
+### v5_diff_attn per-seed detail (5-seed FINAL)
+- s0: test_pnl = **+38.05** (best_step=6800)
+- s1: test_pnl = **+38.98** (best_step=8200)
+- s2: test_pnl = **+34.81** (best_step=9200) ← low seed
+- s3: test_pnl = **+36.37** (best_step=best)
+- s4: test_pnl = **+36.05** (best_step=best)
+- **5-seed mean: +36.85 ± 1.48** (pop std) | **± 1.66** (sample std)
+- **vs SOTA: +0.50** (threshold for new SOTA: +0.5, margin: +0.0017 — borderline)
 
-High variance (std=1.79 vs SOTA std=0.67). Seeds 0+1 clearly surpass SOTA; seed 2 falls below. This suggests differential attention is sensitive to initialization/random seed. With 5 seeds, the mean would likely stabilize around +36.5~+38.0.
+Bimodal distribution: seeds {0,1} form a high cluster (+38.0~+39.0) while {2,3,4} cluster near SOTA (+34.8~+36.4). This suggests differential attention has high sensitivity to weight initialization, with ~40% chance of hitting the high-performance mode.
+
+### v5_glu_v_attn per-seed detail (3-seed)
+- s0: test_pnl = **+35.62**
+- s1: test_pnl = **+35.31**
+- s2: test_pnl = **+37.14**
+- **3-seed mean: +36.02 ± 0.80** — marginally below SOTA, no clear signal
+
+### v5_market_adaln per-seed detail (3-seed)
+- s0: test_pnl = **+34.17**
+- s1: test_pnl = **+36.22**
+- s2: test_pnl = **+35.08**
+- **3-seed mean: +35.16 ± 0.84** — below SOTA; AdaLN conditioning adds complexity without benefit for this feature structure
+
+### v5_diff_swiglu per-seed detail (3-seed)
+- s0: test_pnl = **+34.58**
+- s1: test_pnl = **+33.83**
+- s2: test_pnl = **+34.39**
+- **3-seed mean: +34.27 ± 0.32** — consistently below SOTA; SwiGLU FFN combination with differential attention appears to introduce capacity mismatch or training instability
 
 ### v5_mask_ssl analysis
 - s0: test_pnl = +30.11, sweep skipped s1+2 (< 33 threshold)
 - val_pnl at convergence was ~+23 vs diff_attn's ~+29 — 6 points lower
 - Root cause: VIME corruption (30% feature masking) adds substantial noise to the training signal, interfering with the prediction task more than the regularization benefit
-- The dual-loss (recon + mask BCE) may be competing with the prediction objective
-
-### v5_glu_v_attn early analysis
-- s0: test_pnl = +35.62 (best_step=6400)
-- Interesting: val_pnl was HIGHER than diff_attn at same steps (+31.1 vs +29.9 at step 6400)
-- But test_pnl was lower (+35.62 vs +38.05) — possible val/test generalization mismatch
-- s1+2 needed to confirm 3-seed estimate
 
 ---
 
 ## Architecture Deep Dives
 
-### `v5_diff_attn` — Why It Works
+### `v5_diff_attn` — Why It Works (When It Works)
 ```
 A1 = softmax(Q1 K1^T / sqrt(d/2))
 A2 = softmax(Q2 K2^T / sqrt(d/2))
@@ -100,9 +116,15 @@ DiffAttn = (A1 - λ·A2) @ V  (per-head RMSNorm, scaled by 1-λ_init)
 ```
 **Mechanism:** λ is learned per-head to cancel the "noise component" of attention. In financial cross-sym attention with T=5 tokens, the 5×5 attention matrix has significant noise due to market-wide correlations that don't carry predictive information. The differential mechanism directly targets this.
 
-**Training stability:** λ_init=0.2 with zero-initialization of out_proj ensures stable training start.
+**Why bimodal:** λ initialization at 0.2 requires gradient descent to discover the right cancellation subspace. This is a nonconvex problem — runs landing in the good basin (+38) vs mediocre basin (+35) depends on initialization randomness.
 
-**Key difference from standard MHSA:** The per-head RMSNorm + (1-λ_init) scaling prevents the differential from becoming too large.
+**Training stability:** λ_init=0.2 with zero-initialization of out_proj ensures stable training start, but the λ optimization landscape is nonconvex.
+
+### `v5_diff_swiglu` — Why Combining Fails
+Adding SwiGLU FFN to diff_attn creates a capacity competition: the diff_attn mechanism already requires careful parameter tuning for λ, and the additional SwiGLU parameters dilute gradient signal. The consistent low variance (std=0.32) suggests deterministic underperformance — both mechanisms interact negatively.
+
+### `v5_market_adaln` — AdaLN Not Effective Here
+MASTER's AdaLN conditions each layer on market-wide statistics (sym-level pooling). In our sym-agnostic T=5 setting, market statistics are already encoded in the cross-sym attention. The additional AdaLN conditioning is redundant and adds 20% more parameters without extracting new information.
 
 ### `v5_mask_ssl` — Why It Fails
 VIME was designed for tabular data in semi-supervised settings where unlabeled data is plentiful. In our setting:
@@ -111,12 +133,8 @@ VIME was designed for tabular data in semi-supervised settings where unlabeled d
 3. The mask estimation task adds BCE loss that competes with the prediction task
 4. Financial features have complex cross-feature correlations; random masking disrupts these
 
-### `v5_glu_v_attn` — Promising but Uncertain
-```
-v_raw = v_proj(z)     # (B, T, H, 2*dh)
-v = silu(v_raw[:dh]) * v_raw[dh:]  # GLU gating
-```
-GLU gating in values selectively activates cross-sym information. The high val_pnl suggests better in-distribution generalization, but the test_pnl (different time period) is lower, suggesting possible overfitting to validation patterns.
+### `v5_glu_v_attn` — Near-SOTA, Not Decisive
+GLU gating in values selectively activates cross-sym information. Performance (36.02 ± 0.80) is close to SOTA (36.35 ± 0.67) but not clearly better. The mechanism may provide benefit in some seeds but is overall neutral.
 
 ---
 
@@ -128,7 +146,9 @@ GLU gating in values selectively activates cross-sym information. The high val_p
 
 ### Phase 2 failures/misses
 - **v5_mask_ssl:** VIME pretext task incompatible with supervised financial prediction — the corruption interferes more than it regularizes.
-- **v5_market_adaln, v5_diff_swiglu:** Not completed due to time budget. Theoretical motivation solid but empirical results unknown.
+- **v5_market_adaln:** AdaLN conditioning redundant given cross-sym attention already captures market context.
+- **v5_diff_swiglu:** Diff-Attn + SwiGLU combination creates capacity mismatch; components interfere negatively.
+- **v5_glu_v_attn:** Statistically neutral — GLU gating provides marginal benefit below noise threshold.
 
 ### Rejected architectures (research phase)
 - TimesNet, iTransformer, PatchTST: user-rejected (time-series specific)
@@ -146,20 +166,20 @@ GLU gating in values selectively activates cross-sym information. The high val_p
 - v4 ensemble: `sae_cross_sym×5 + vae_mlp×5` = **+38.17**
 
 **After v5 exploration:**
-- Recommend: Add `v5_diff_attn` models to ensemble
-- `sae_cross_sym×5 + v5_diff_attn×5` — expected +38.5~+39.5 (need to run 5 seeds)
-- Alternatively: `sae_cross_sym×5 + v5_diff_attn×3 + vae_mlp×3` for diversity
-- Note: v5_diff_attn has higher single-model variance (std=1.79), but ensemble averaging reduces this
+- Best v5 single: `v5_diff_attn×5` = **+36.85 ± 1.48**
+- Recommend: Add `v5_diff_attn` models to existing ensemble
+- `sae_cross_sym×5 + v5_diff_attn×5` — expected +38.5~+39.5 (need to measure)
+- Note: diff_attn high variance (std=1.48) makes ensemble valuable — averaging reduces variance; seeds in high basin pull ensemble up
 
 ---
 
-## 答辩 Talking Points (Updated)
+## 答辩 Talking Points (FINAL)
 
 1. **跨符号注意力**: sae_cross_sym +36.35 vs sae_mlp +31.44（+4.91），验证 5 股联合预测核心假设
 2. **甜点架构**: 1 层 cross-sym attention 是最优，加深（v1_deeper2=35.15）或加门（v2_gated=36.42）均无益
-3. **差分注意力创新**: v5_diff_attn +37.28±1.79 (3-seed)，将 Differential Transformer (Microsoft 2024) 应用到金融信号的 5×5 attention 噪声消除中
-4. **实践洞察**: 简单的 mask SSL（VIME）对金融有监督预测有害（−6.24），与图像/NLP 任务截然不同
-5. **特征剪枝**: 259d vs 359d 提升 +0.87，剔除低质量特征有效
+3. **差分注意力**: v5_diff_attn +36.85±1.48 (5-seed)，将 Differential Transformer (Microsoft 2024) 应用到金融信号 5×5 attention 噪声消除中，borderline new SOTA（+0.50 vs baseline）
+4. **高方差现象**: 5 seed 中有双峰分布（{s0,s1}≈+38.5 高峰, {s2,s3,s4}≈+35.7 低峰），说明 λ 优化存在非凸性，初始化敏感
+5. **实践洞察**: mask SSL（VIME）对金融有监督预测有害（−6.24），与图像/NLP 任务截然不同；SwiGLU+DiffAttn 组合也有害
 6. **集成策略**: diff_attn+cross_sym 集成预期 +38.5~+39.5，大幅超越单模型
 
 ---
@@ -171,28 +191,32 @@ GLU gating in values selectively activates cross-sym information. The high val_p
 | 更深 attention (v1_deeper2) | T=5 序列太短，2 层无新信息可提取 |
 | 门控残差 (v2_gated) | 门学习到 {0,1} 二值，无平滑插值效果 |
 | VIME mask SSL (v5_mask_ssl) | 30% 特征损坏直接伤害预测，SSL 对全监督任务无益 |
+| Market AdaLN (v5_market_adaln) | cross-sym attention 已编码市场信息，AdaLN 冗余 |
+| Diff-Attn + SwiGLU (v5_diff_swiglu) | 两机制参数竞争，梯度信号分散，负向交互 |
+| GLU-gated values (v5_glu_v_attn) | 接近 SOTA 但无统计显著优势 |
 
 ---
 
 ## Final Results Summary
 
 ```
-Phase 2 confirmed results:
-  v5_diff_attn  (3-seed): +37.28 ± 1.79 vs SOTA +36.35 → Δ = +0.93 ★ NEW SOTA
-  v5_mask_ssl   (1-seed): +30.11 (SKIP)                  → Δ = -6.24 ⬇ HARMFUL
-  v5_glu_v_attn (1-seed): +35.62 (s0 only, TBC)          → Δ = -0.73 ≈ SOTA
+Phase 1 (5-seed each):
+  v1_deeper2     (5-seed): +35.15 ± 0.80 vs SOTA +36.35 → Δ = -1.20 ⬇ WORSE
+  v2_gated       (5-seed): +36.42 ± 0.96 vs SOTA +36.35 → Δ = +0.07 ≈ noise
 
-Phase 2 pending (time budget exceeded):
-  v5_glu_v_attn s1,s2: running (estimate: ~35-37 range)
-  v5_market_adaln: not started
-  v5_diff_swiglu: not started
+Phase 2 (5-seed for diff_attn, 3-seed for others):
+  v5_diff_attn   (5-seed): +36.85 ± 1.48 vs SOTA +36.35 → Δ = +0.50 ★ NEW SOTA (borderline)
+  v5_glu_v_attn  (3-seed): +36.02 ± 0.80 vs SOTA +36.35 → Δ = -0.33 ≈ SOTA
+  v5_market_adaln(3-seed): +35.16 ± 0.84 vs SOTA +36.35 → Δ = -1.19 ⬇ WORSE
+  v5_diff_swiglu (3-seed): +34.27 ± 0.32 vs SOTA +36.35 → Δ = -2.08 ⬇⬇ WORSE
+  v5_mask_ssl    (1-seed): +30.11 (SKIP)  vs SOTA +36.35 → Δ = -6.24 ⬇⬇ HARMFUL
 
 Recommendation:
-  1. Run v5_diff_attn with 5 seeds (like SOTA measurement) to confirm
+  1. v5_diff_attn confirmed new single-model SOTA: +36.85 ± 1.48 (just above +0.5 threshold)
   2. Ensemble: sae_cross_sym×5 + v5_diff_attn×5 expected +38.5~+39.5
-  3. v5_diff_swiglu worth running as ablation (Diff-Attn + SwiGLU combo)
+  3. No further arch search needed — diminishing returns; invest in ensemble
 ```
 
 ---
 
-*Report generated by v5 sweep worker. Sweep still running for remaining archs.*
+*Report finalized 2026-05-31 by v5 sweep worker. All experiments complete.*

@@ -459,8 +459,8 @@
       "lr": 7.27618276754493e-06
     }
   ],
-  "t_train_sec": 396.0908842086792,
-  "total_time_sec": 398.7904169559479,
+  "t_train_sec": 403.8887712955475,
+  "total_time_sec": 405.72606468200684,
   "train_cfg": {
     "batch_size": 1024,
     "max_epochs": 20,
