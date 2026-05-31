@@ -1,0 +1,206 @@
+id,name,category,formula,source_type,source,n_inputs,operates_on,expected_gain,implementation_complexity,sym_robustness_concern,date_robustness_concern,notes
+F001,sym_pair_diff_mid,relative,x[sym=i,mid] - x[sym=j,mid] for (i j) in 10 pairs,paper,Avellaneda-Lee 2010 + v6_pairwise SOTA,2,mid_price,high,easy,medium,low,baseline v6_pairwise core; 10 pairs from C(5 2)
+F002,sym_pair_diff_wmp,relative,x[sym=i,wmp_lvl1] - x[sym=j,wmp_lvl1],paper,Stoikov 2017 + v6_pairwise,2,wmp1,high,easy,low,low,WMP carries microprice info; pair diff captures relative micro
+F003,sym_pair_diff_mp_t,relative,mp_t[i] - mp_t[j] (instantaneous mid),paper,v6_pairwise + Cont 2014,2,mp_t,high,easy,low,low,raw instantaneous mid pair diff (driver of v6 SOTA)
+F004,sym_pair_diff_ofi_W5,relative,OFI_W5[i] - OFI_W5[j],paper,Cont-Kukanov-Stoikov 2014 + Cross-Impact 2023,2,ofi_W5,high,easy,low,low,OFI cross diff = cross-impact residual
+F005,sym_pair_diff_ofi_W20,relative,OFI_W20[i] - OFI_W20[j],paper,MLOFI Xu et al 2019,2,ofi_W20,high,easy,low,low,medium horizon OFI pair diff
+F006,sym_pair_diff_ofi_W60,relative,OFI_W60[i] - OFI_W60[j],paper,Cont 2014,2,ofi_W60,medium,easy,low,low,long horizon OFI pair diff
+F007,sym_pair_diff_intst,relative,intst[i] - intst[j],paper,Easley-Lopez-O'Hara 2012 (VPIN),2,intst,medium,easy,medium,low,intensity diff captures trade activity asymmetry
+F008,sym_pair_diff_spread,relative,(ask1[i]-bid1[i]) - (ask1[j]-bid1[j]),paper,Roll 1984 / Corwin-Schultz 2012,2,spread,medium,easy,low,low,liquidity asymmetry
+F009,sym_pair_diff_imb1,relative,imb1[i] - imb1[j] where imb1=(bidsz1-asksz1)/(bidsz1+asksz1),paper,Stoikov 2017 microprice imbalance,2,bid_ask_size_lvl1,high,easy,low,low,top-of-book imbalance pair diff
+F010,sym_pair_diff_logret_W5,relative,logret_W5[i] - logret_W5[j],paper,Avellaneda-Lee 2010 / Krauss 2017,2,logret_W5,high,easy,low,low,short-window pair return diff (mean-reverting signal)
+F011,sym_pair_diff_logret_W20,relative,logret_W20[i] - logret_W20[j],paper,Krauss 2017,2,logret_W20,medium,easy,low,low,medium-window relative momentum
+F012,sym_pair_diff_realvol_W20,relative,RV_W20[i] - RV_W20[j],paper,Barndorff-Nielsen 2004 / Optiver Kaggle,2,realized_vol,medium,easy,medium,low,realized vol asymmetry
+F013,sym_pair_diff_bv_W30,relative,BV_W30[i] - BV_W30[j],paper,Barndorff-Nielsen-Shephard 2004,2,bipower_var,medium,easy,medium,low,bipower variation pair diff
+F014,sym_pair_diff_jshare,relative,jshare[i] - jshare[j],paper,BNS 2006 jump test,2,jump_share,low,easy,high,medium,jump share asymmetry; high sym variance
+F015,sym_pair_diff_microprice,relative,microprice[i] - microprice[j],paper,Stoikov 2017,2,microprice,high,easy,low,low,fair-value pair diff (martingale)
+F016,sym_pair_diff_kyleinv,relative,kyleinv[i] - kyleinv[j],paper,Kyle 1985 / Hasbrouck 1991,2,kyleinv,medium,easy,medium,low,price impact coefficient asymmetry
+F017,sym_pair_diff_tox,relative,ofi_tox[i] - ofi_tox[j],paper,Easley-Lopez-O'Hara 2012,2,vpin_toxicity,medium,easy,medium,low,toxicity asymmetry signal
+F018,sym_pair_diff_depth_lvl5,relative,sum(bidsz_1..5)[i] - sum(bidsz_1..5)[j],paper,Cont-Kukanov-Stoikov 2014,2,bid_size_levels,medium,easy,low,low,5-level depth asymmetry
+F019,sym_pair_diff_mlofi_lvl3,relative,mlofi_lvl3[i] - mlofi_lvl3[j],paper,Xu et al 2019 (MLOFI),2,mlofi_lvl3,high,easy,low,low,deep-book OFI diff (per Cont impact)
+F020,sym_pair_diff_mlofi_lvl5,relative,mlofi_lvl5[i] - mlofi_lvl5[j],paper,Xu et al 2019,2,mlofi_lvl5,medium,easy,low,low,depth-5 OFI diff
+F021,sym_pair_diff_dwap5,relative,wap[i] - wap[j] at level 5,paper,Optiver Kaggle WAP feature,2,wap_lvl5,high,easy,low,low,level-5 WAP pair diff
+F022,sym_pair_diff_dwap_balance,relative,wap_balance[i] - wap_balance[j],paper,Stoikov 2017 + Optiver,2,wmp_balance_12,medium,easy,low,low,WAP balance between top levels diff
+F023,sym_pair_diff_pricelv,relative,(ask_lvl10[i]-bid_lvl10[i]) - same(j),paper,Cont 2014,2,full_book_spread,low,easy,low,low,full-book spread (10-lvl) diff
+F024,sym_pair_diff_quoteRate,relative,quote_rate_per_sec[i] - same[j],paper,Hasbrouck 1991,2,quote_intensity,low,easy,high,medium,quote intensity diff; high sym variance
+F025,sym_pair_diff_tradeRate,relative,trade_rate[i] - trade_rate[j],paper,Easley 2012,2,trade_intensity,low,easy,high,medium,trade rate pair diff
+F026,sym_pair_ratio_mid,relative,log(mid[i] / mid[j]),paper,Engle-Granger / Gatev 2006,2,mid_price,high,easy,medium,low,classic pair-trading log price ratio (cointegration)
+F027,sym_pair_ratio_vol,relative,log(realized_vol[i] / realized_vol[j]),paper,Bollerslev / Engle GARCH,2,realized_vol,medium,easy,medium,low,relative volatility ratio
+F028,sym_pair_ratio_spread,relative,(ask1[i]-bid1[i]) / (ask1[j]-bid1[j]),blog,QuantStrategy.io OB imbalance guide,2,spread,medium,easy,medium,low,relative spread ratio
+F029,sym_pair_ratio_depth,relative,depth_lvl5[i] / depth_lvl5[j],paper,Multi-asset commonality Hasbrouck,2,depth_lvl5,medium,easy,medium,low,liquidity ratio between syms
+F030,sym_pair_ratio_volume,relative,(bidsz1[i]+asksz1[i]) / (bidsz1[j]+asksz1[j]),paper,Alpha101 #5 (rank ratio),2,size_lvl1,medium,easy,medium,low,top-of-book volume ratio (Alpha101 style)
+F031,csec_mean_mid_dev,cross_sectional,mid[i] - mean(mid[k] for k=0..4),paper,Sirignano-Cont 2019 universal,1+5,mid_price,high,easy,low,low,deviation from cross-sym mean (market-neutral pair signal)
+F032,csec_median_mid_dev,cross_sectional,mid[i] - median(mid[0..4]),paper,Avellaneda-Lee 2010,1+5,mid_price,medium,easy,low,low,robust to outliers
+F033,csec_zscore_mid,cross_sectional,(mid[i] - mean(mid)) / (std(mid)+eps),blog,Quantdare zscore standardization,1+5,mid_price,high,easy,medium,low,cross-sectional z-score (Numerai-style)
+F034,csec_zscore_ofi,cross_sectional,(OFI[i] - mean(OFI)) / std(OFI),paper,Cross-Impact 2023,1+5,ofi,high,easy,low,low,z-scored OFI vs market
+F035,csec_zscore_wmp,cross_sectional,(wmp[i] - mean(wmp)) / std(wmp),paper,Stoikov 2017 + zscore,1+5,wmp,medium,easy,low,low,z-scored microprice
+F036,csec_zscore_realvol,cross_sectional,(RV[i] - mean(RV)) / std(RV),paper,Optiver Kaggle FE,1+5,realized_vol,medium,easy,medium,low,vol z-score across 5 sym
+F037,csec_zscore_spread,cross_sectional,(spread[i] - mean(spread)) / std(spread),blog,Quantopian alphalens,1+5,spread,medium,easy,medium,low,liquidity z-score
+F038,csec_zscore_intst,cross_sectional,(intst[i] - mean(intst)) / std(intst),paper,VPIN normalized,1+5,intst,medium,easy,medium,low,intensity z-score
+F039,csec_zscore_depth,cross_sectional,(depth[i] - mean(depth)) / std(depth),blog,Quantopian Pro Workflow,1+5,depth,medium,easy,medium,low,depth z-score
+F040,csec_zscore_imb1,cross_sectional,(imb1[i] - mean(imb1)) / std(imb1),paper,Stoikov microprice + zscore,1+5,imb1,high,easy,low,low,relative imbalance vs market
+F041,csec_rank_mid,cross_sectional,rank(mid[i]) across 5 sym / 5,paper,Alpha101 rank operator,1+5,mid_price,medium,easy,low,low,Alpha101-style cross-sec rank
+F042,csec_rank_ofi_W20,cross_sectional,rank(OFI_W20[i]) / 5,paper,Alpha101 #6 rank correlation,1+5,ofi_W20,medium,easy,low,low,rank of OFI in cross-section
+F043,csec_rank_realvol,cross_sectional,rank(RV[i]) / 5,paper,Alpha101 #22,1+5,realized_vol,medium,easy,low,low,rank of vol cross-sec
+F044,csec_rank_spread,cross_sectional,rank(spread[i]) / 5,paper,Alpha101 #51,1+5,spread,low,easy,low,low,rank of spread (most liquid is rank 0)
+F045,csec_rank_depth,cross_sectional,rank(depth[i]) / 5,paper,Alpha101 #44,1+5,depth,medium,easy,low,low,rank of depth
+F046,csec_rank_kyleinv,cross_sectional,rank(kyleinv[i]) / 5,paper,Alpha101 #71,1+5,kyleinv,low,easy,medium,low,rank of price impact
+F047,csec_rank_returns_W20,cross_sectional,rank(logret_W20[i]) / 5,paper,Alpha101 #9 / Krauss 2017,1+5,logret_W20,high,easy,low,low,cross-sectional momentum rank
+F048,csec_rank_returns_W60,cross_sectional,rank(logret_W60[i]) / 5,paper,Avellaneda 2010 reversion,1+5,logret_W60,medium,easy,low,low,longer-window cross momentum rank
+F049,csec_rank_wmp_change,cross_sectional,rank(delta_wmp_W5[i]) / 5,paper,Alpha101 #3 (rank delta),1+5,delta_wmp,high,easy,low,low,rank of WMP change
+F050,csec_rank_intst,cross_sectional,rank(intst[i]) / 5,paper,Alpha101 #45 (volume rank),1+5,intst,medium,easy,low,low,rank of trade intensity
+F051,csec_argmax_ofi,cross_sectional,argmax_k(OFI[k]) == i ? 1 : 0,paper,Alpha101 ts_argmax style,1+5,ofi,low,easy,low,low,binary indicator: is i the most aggressive buyer?
+F052,csec_argmin_ofi,cross_sectional,argmin_k(OFI[k]) == i ? 1 : 0,paper,Alpha101 ts_argmin,1+5,ofi,low,easy,low,low,binary indicator: most aggressive seller
+F053,csec_std_returns,cross_sectional,std(logret_W20[0..4]) -> scalar broadcast,paper,Hou-Robinson realized cov,5,logret,medium,easy,low,low,market dispersion (volatility regime)
+F054,csec_mean_ofi,cross_sectional,mean(OFI[0..4]) -> scalar broadcast,paper,Cross-Impact 2023,5,ofi,medium,easy,low,low,market-wide OFI (commonality)
+F055,csec_sum_ofi,cross_sectional,sum(OFI[0..4]),paper,Cont multi-asset commonality,5,ofi,medium,easy,low,low,total order flow imbalance
+F056,csec_mean_imb1,cross_sectional,mean(imb1[0..4]),paper,Stoikov 2017,5,imb1,medium,easy,low,low,market-wide imbalance level
+F057,csec_max_minus_min_mid,cross_sectional,max(mid[0..4]) - min(mid[0..4]),paper,Alpha101 #4 (ts_high - ts_low),5,mid_price,low,easy,medium,low,cross-sym mid dispersion
+F058,csec_corr_rank_mid_size,cross_sectional,corr(rank(mid) rank(size)) across 5 sym,paper,Alpha101 #6 (correlation),5,mid+size,low,medium,medium,low,Alpha101-style rank correlation
+F059,csec_max_share_ofi,cross_sectional,OFI[i] / max(|OFI[0..4]|),paper,Cross-Impact 2023 normalize,1+5,ofi,medium,easy,low,low,scaled OFI relative to most active
+F060,csec_share_volume,cross_sectional,(bidsz1[i]+asksz1[i]) / sum_k(bidsz1[k]+asksz1[k]),paper,Multi-asset commonality,1+5,size,medium,easy,low,low,share of total volume
+F061,csec_neutralized_ret_W20,cross_sectional,logret_W20[i] - mean(logret_W20),paper,Numerai signals neutralize,1+5,logret_W20,high,easy,low,low,market-neutral return
+F062,csec_neutralized_ret_W5,cross_sectional,logret_W5[i] - mean(logret_W5),paper,Avellaneda-Lee 2010,1+5,logret_W5,high,easy,low,low,short-window market-neutral
+F063,csec_neutralized_ret_inst,cross_sectional,instret[i] - mean(instret),paper,Numerai signals,1+5,inst_logret,high,easy,low,low,instantaneous market-neutral
+F064,csec_betareg_resid_ret_W20,cross_sectional,logret_W20[i] - beta_i * mean(logret_W20),paper,Hasbrouck VAR price discovery,1+5,logret_W20,medium,medium,medium,low,beta-neutral residual (assumes per-sym beta hard at test);simplified to mean-subtract
+F065,csec_skew_ret,cross_sectional,skew(logret_W20[0..4]),paper,Hou-Engle cross-section,5,logret,low,easy,medium,low,cross-section return skewness
+F066,csec_kurt_ret,cross_sectional,kurtosis(logret_W20[0..4]),paper,Hou-Engle 2002,5,logret,low,easy,medium,low,cross-section kurtosis
+F067,pair_OFIcross_W20,pair_cross_impact,OFI_W20[i] passed to predict sym j's mid change,paper,Cross-Impact OFI 2023,2,ofi_W20,high,medium,low,low,lagged cross-OFI as feature for sym i (modeled as 10 pair cross terms)
+F068,pair_OFIsum_W20,pair_cross_impact,OFI_W20[i] + OFI_W20[j] (joint pressure),paper,Cont commonality,2,ofi_W20,medium,easy,low,low,joint OFI signal in pair
+F069,pair_OFIprod_signed_W20,pair_cross_impact,sign(OFI_W20[i]) * sign(OFI_W20[j]),paper,Cross-Impact,2,ofi_W20,low,easy,low,low,binary co-direction indicator
+F070,pair_imb1_prod,pair_cross_impact,imb1[i] * imb1[j],paper,Alpha101 product features,2,imb1,medium,easy,low,low,interaction of top-imb1 between syms
+F071,pair_imb1_xor,pair_cross_impact,sign(imb1[i]) * sign(imb1[j]),paper,Alpha101 sign,2,imb1,low,easy,low,low,binary alignment of imbalances
+F072,pair_logret_prod,pair_cross_impact,logret_W20[i] * logret_W20[j],paper,Hou-Robinson realized cov,2,logret_W20,medium,easy,medium,low,product = realized covariance (cross sect ts removed)
+F073,pair_logret_inst_prod,pair_cross_impact,logret_inst[i] * logret_inst[j],paper,Hou-Robinson 2004,2,logret_inst,medium,easy,low,low,instant pair cov
+F074,pair_kyle_ratio,pair_cross_impact,kyleinv[i] / (kyleinv[j] + eps),paper,Hasbrouck 1991,2,kyleinv,low,medium,high,medium,impact-coef ratio; high sym variance
+F075,pair_spread_max_min,relative,max(spread[i] spread[j]) / min(spread[i] spread[j]),blog,Quantstrategy.io,2,spread,low,easy,medium,low,relative liquidity gap
+F076,pair_rv_min_max,relative,RV[i] - max(RV[0..4]),paper,Alpha101 ts_max style,1+5,realized_vol,low,easy,medium,low,distance to top vol
+F077,pair_mid_distance,relative,abs(mid[i] - mid[j]) / (mid[i]+mid[j])/2,paper,DTW + scale norm,2,mid_price,low,easy,medium,low,normalized scalar distance
+F078,csec_demean_ofi_W5,cross_sectional,OFI_W5[i] - mean(OFI_W5[k] k=0..4),paper,Cross-Impact OFI 2023,1+5,ofi_W5,high,easy,low,low,market-residual OFI (commonality removed)
+F079,csec_demean_ofi_W20,cross_sectional,OFI_W20[i] - mean(OFI_W20[k]),paper,Cross-Impact 2023,1+5,ofi_W20,high,easy,low,low,market-residual W20 OFI
+F080,csec_demean_ofi_W60,cross_sectional,OFI_W60[i] - mean(OFI_W60[k]),paper,Cont 2014,1+5,ofi_W60,medium,easy,low,low,market-residual W60 OFI
+F081,csec_demean_realvol,cross_sectional,RV[i] - mean(RV),paper,Hou-Engle realized cov,1+5,realized_vol,medium,easy,low,low,vol commonality removed
+F082,csec_demean_bv,cross_sectional,BV[i] - mean(BV),paper,BNS bipower,1+5,bipower_var,medium,easy,low,low,bipower vol commonality
+F083,csec_demean_intst,cross_sectional,intst[i] - mean(intst),paper,VPIN normalized,1+5,intst,medium,easy,medium,low,intensity demean
+F084,csec_demean_spread,cross_sectional,spread[i] - mean(spread),paper,Roll 1984 / Alphalens,1+5,spread,medium,easy,low,low,spread demean
+F085,csec_demean_microprice,cross_sectional,microprice[i] - mean(microprice),paper,Stoikov 2017,1+5,microprice,medium,easy,low,low,microprice demean
+F086,csec_demean_wmp_balance,cross_sectional,wmp_balance[i] - mean(wmp_balance),paper,Stoikov / Optiver,1+5,wmp_balance,medium,easy,low,low,WMP balance demean
+F087,pair_xcorr_OFI_W5_W20,pair_cross_impact,OFI_W5[i] - OFI_W20[j] (lead-lag proxy),paper,DeltaLag 2025,2,ofi,medium,medium,low,low,asymmetric window pair (lead-lag-proxy without time)
+F088,pair_xcorr_ret_W5_W20,pair_cross_impact,logret_W5[i] - logret_W20[j],paper,Lead-lag arbitrage Li-Chen 2025,2,logret,medium,medium,low,low,asym window return diff
+F089,pair_lead_lag_imb_idx,pair_cross_impact,imb1[i]_current vs imb1[j]_using older W,paper,Hayashi-Yoshida lead-lag,2,imb1,low,medium,low,low,asym imb1 (proxy for HY lead-lag)
+F090,csec_mean_ret_lag_W5,cross_sectional,mean(logret_W5[k]) - logret_W5[i] (lead-lag proxy),paper,Sirignano-Cont 2019,1+5,logret_W5,medium,easy,low,low,how much the market leads sym i (in W5)
+F091,csec_share_OFI_per_kyleinv,cross_sectional,OFI[i] / (kyleinv[i]+eps) - mean across syms,paper,Kyle 1985 + commonality,1+5,ofi+kyleinv,medium,medium,medium,low,impact-normalized OFI vs market
+F092,csec_corr_imb1_pair,cross_sectional,pearson(imb1[i] across syms) at this t (cross-sym correlation),paper,Mantegna MST,5,imb1,low,medium,medium,low,instantaneous cross-sym corr (low signal noise)
+F093,pair_corr_static_W,graph,corr coefficient pre-computed offline of returns over W days for each pair (static feat),paper,Mantegna 1999 MST,2,logret_history,medium,medium,low,medium,static cross-corr (frozen at train time); test time use train estimate
+F094,csec_idx_clusterID,graph,sym i's cluster id from MST on training-day correlations (one-hot or embedding),paper,Mantegna 1999,1+5,logret_history,low,medium,medium,medium,static cluster assignment (may be sym=cluster trivially with 5 syms); low gain
+F095,csec_eigvec_lead,graph,first PC weight of sym i in PCA on training-day returns,paper,Avellaneda-Lee 2010 PCA,1+5,logret_history,medium,medium,medium,medium,first eigenvector weight (factor exposure)
+F096,csec_dtw_dist_avg,graph,mean DTW dist of sym i to all other syms (training-precomputed),paper,Sakoe-Chiba DTW + Mhfizt 2024,1+5,logret_history,low,hard,medium,medium,DTW-based similarity feature (frozen at train)
+F097,csec_mst_centrality,graph,degree centrality of sym i in MST built on training-day return corr,paper,Mantegna 1999 / Coletti-Murgia 2016,1+5,logret_history,low,hard,medium,medium,network centrality measure (only 5 nodes = limited info)
+F098,csec_pmfg_eccentricity,graph,eccentricity in PMFG,paper,Tumminello 2005 PMFG,1+5,logret_history,low,hard,medium,medium,planar maximally filtered graph (5 nodes; limited)
+F099,csec_eig_centrality,graph,eigenvector centrality in train correlation graph,paper,Network centrality portfolio 2024,1+5,logret_history,low,hard,medium,medium,5 nodes makes this less informative
+F100,csec_factor_resid_W20,cross_sectional,logret_W20[i] - sum(w_k * logret_W20[k]) k!=i (factor regression resid),paper,Hasbrouck 1995 / Avellaneda 2010,1+5,logret_W20,medium,medium,medium,low,residual after regressing on cross-sym factor
+F101,csec_factor_resid_W60,cross_sectional,logret_W60[i] - market_proxy,paper,Sirignano-Cont 2019,1+5,logret_W60,medium,medium,medium,low,long-window factor residual
+F102,pair_OFI_diff_sym_lvl5,pair_cross_impact,sum(OFI_lvl1..5[i]) - sum(OFI_lvl1..5[j]),paper,MLOFI Xu 2019,2,ofi_levels,high,easy,low,low,multi-level OFI diff (deeper than top-of-book)
+F103,pair_OFI_diff_sym_lvl10,pair_cross_impact,sum(OFI_lvl1..10[i]) - sum(OFI_lvl1..10[j]),paper,MLOFI Xu 2019,2,ofi_levels,medium,easy,low,low,full-book OFI diff
+F104,pair_mp_t_diff_minus_old,pair_lagless_lead_lag,mp_t_diff[i j] - mp_W5_old_diff[i j],paper,Avellaneda 2010 reversion,2,mp_t+mp_old,high,medium,low,low,detrended pair spread (sym i and j path divergence)
+F105,pair_spread_pair_normalized,pair_lagless_lead_lag,(mid[i]-mid[j]) - mean over training-day of (mid[i]-mid[j]),paper,Engle-Granger cointegration,2,mid+train_stats,medium,medium,high,medium,detrend pair spread by historical mean (training-precomputed)
+F106,pair_zscore_cointspread,pair_lagless_lead_lag,((mid[i]-beta*mid[j]) - mu_pair) / sigma_pair where beta mu sigma frozen,paper,Engle-Granger / Gatev 2006,2,mid+train_stats,medium,medium,high,medium,classic cointegration z-score (frozen params at train)
+F107,csec_industry_anchor_proxy,cross_sectional,treat all 5 sym as 1 industry; relative to mean,paper,Numerai industry neutralize,5,raw_feat,medium,easy,low,low,simplest industry neutralize (5 syms = 1 group)
+F108,sym_pair_outer_product_mid_imb,pair_interaction,(mid[i]-mid[j]) * (imb1[i] + imb1[j]),paper,Alpha101 #54 product,2,mid+imb1,medium,easy,low,low,mid-diff scaled by joint pressure
+F109,sym_pair_outer_product_OFI_spread,pair_interaction,(OFI[i]-OFI[j]) * (spread[i]+spread[j]),paper,Alpha101 #7 product,2,ofi+spread,medium,easy,low,low,OFI diff weighted by joint spread
+F110,sym_pair_outer_product_imb_depth,pair_interaction,(imb1[i] * depth[i]) - (imb1[j] * depth[j]),paper,Stoikov 2017 microprice,2,imb1+depth,high,easy,low,low,top-of-book pressure (size-weighted)
+F111,sym_pair_outer_product_ret_vol,pair_interaction,(logret[i]-logret[j]) * (RV[i]+RV[j]),paper,Vol-scaled momentum,2,logret+RV,medium,easy,medium,low,vol-scaled relative return
+F112,pair_OFI_signed_match_W5,pair_cross_impact,1 if sign(OFI_W5[i])==sign(OFI_W5[j]) else 0,paper,Cross-Impact co-direction,2,ofi_W5,low,easy,low,low,co-direction indicator
+F113,pair_OFI_signed_match_W20,pair_cross_impact,1 if sign(OFI_W20[i])==sign(OFI_W20[j]) else 0,paper,Cont commonality,2,ofi_W20,low,easy,low,low,co-direction W20
+F114,csec_top_minus_bottom_OFI,cross_sectional,top1(OFI[0..4]) - bottom1(OFI[0..4]) -> broadcast,paper,Avellaneda long-short signal,5,ofi,low,easy,low,low,cross-sym OFI spread (range)
+F115,csec_dispersion_imb1,cross_sectional,std(imb1[0..4]) -> broadcast,paper,Optiver kaggle vol features,5,imb1,low,easy,low,low,cross-sym imb1 dispersion
+F116,csec_dispersion_OFI,cross_sectional,std(OFI[0..4]) -> broadcast,paper,Cross-Impact dispersion,5,ofi,medium,easy,low,low,OFI dispersion (high when one sym leads)
+F117,csec_disp_ret,cross_sectional,std(logret[0..4]) -> broadcast,paper,Hou-Robinson real covariance,5,logret,medium,easy,low,low,return dispersion (vol regime indicator)
+F118,csec_disp_spread,cross_sectional,std(spread[0..4]) -> broadcast,paper,Roll / Alphalens,5,spread,low,easy,low,low,spread dispersion
+F119,csec_disp_depth,cross_sectional,std(depth[0..4]) -> broadcast,paper,Multi-asset depth,5,depth,low,easy,low,low,depth dispersion
+F120,csec_disp_realvol,cross_sectional,std(RV[0..4]) -> broadcast,paper,Optiver kaggle,5,realized_vol,medium,easy,low,low,vol dispersion
+F121,csec_max_share_OFI_abs,cross_sectional,|OFI[i]| / sum(|OFI[k]|),paper,Cross-Impact share,1+5,ofi,medium,easy,low,low,share of total absolute OFI
+F122,csec_max_share_volume_W20,cross_sectional,volume_W20[i] / sum(volume_W20[k]),paper,Multi-asset commonality,1+5,volume_W20,medium,easy,low,low,share of total W20 trading volume
+F123,csec_quantile_rank_OFI_W5,cross_sectional,(rank(OFI_W5[i])-1)/(N-1) -> [0 1],paper,Alpha101 rank operator,1+5,ofi_W5,high,easy,low,low,quantile rank in cross-section
+F124,csec_quantile_rank_imb1,cross_sectional,quantile rank imb1[i],paper,Alpha101 #5 rank,1+5,imb1,high,easy,low,low,top-imb quantile rank
+F125,csec_quantile_rank_microprice,cross_sectional,quantile rank microprice[i],paper,Alpha101 + Stoikov,1+5,microprice,medium,easy,low,low,microprice rank
+F126,csec_quantile_rank_realvol,cross_sectional,quantile rank RV[i],paper,Alpha101 #22 rank vol,1+5,realized_vol,medium,easy,low,low,vol rank
+F127,csec_quantile_rank_spread,cross_sectional,quantile rank spread[i],paper,Alpha101 #51,1+5,spread,low,easy,low,low,spread rank
+F128,csec_quantile_rank_intst,cross_sectional,quantile rank intst[i],paper,Alpha101 #45,1+5,intst,medium,easy,low,low,intensity rank
+F129,csec_quantile_rank_depth,cross_sectional,quantile rank depth[i],paper,Alpha101 #44,1+5,depth,low,easy,low,low,depth rank
+F130,pair_diff_microprice_rank,pair_cross_rank,rank(microprice[i]) - rank(microprice[j]),paper,Alpha101 rank diff,2,microprice,medium,easy,low,low,rank-space pair diff (robust)
+F131,pair_diff_OFI_rank,pair_cross_rank,rank(OFI[i]) - rank(OFI[j]),paper,Alpha101 rank delta,2,ofi,high,easy,low,low,rank-OFI pair diff
+F132,pair_diff_RV_rank,pair_cross_rank,rank(RV[i]) - rank(RV[j]),paper,Alpha101 rank vol,2,realized_vol,medium,easy,low,low,rank-vol diff
+F133,csec_orderbook_skew,cross_sectional,sum_k(OFI[k]*sign(k-i)) (asymmetric weighted),paper,Cross-Impact directional,5,ofi,low,medium,medium,medium,position-aware OFI weighting (assumes sym order matters - careful)
+F134,csec_market_kappa,cross_sectional,kurtosis(OFI[0..4]) -> broadcast,paper,Hou-Engle,5,ofi,low,easy,low,low,OFI kurtosis (extreme event indicator)
+F135,csec_HHI_OFI,cross_sectional,sum_k (OFI[k]/sum_OFI)^2 -> concentration index,paper,Multi-asset Herfindahl,5,ofi,low,easy,low,low,HHI concentration of OFI
+F136,csec_HHI_volume,cross_sectional,sum_k (volume[k]/total_volume)^2,paper,Multi-asset commonality,5,volume,low,easy,low,low,volume concentration
+F137,pair_diff_ofi_tox_W5,pair_relative,ofi_tox_W5[i] - ofi_tox_W5[j],paper,VPIN 2012,2,ofi_tox,medium,easy,medium,low,toxicity diff (W5)
+F138,pair_diff_ofi_tox_W20,pair_relative,ofi_tox_W20[i] - ofi_tox_W20[j],paper,VPIN 2012,2,ofi_tox,medium,easy,medium,low,toxicity diff (W20)
+F139,sym_pair_attention_proxy,pair_interaction,softmax over -|mid[i]-mid[j]| weights for sym j around i,paper,Attention-Based MA-MIDPRED 2024 ICAIF,5,mid_price,medium,medium,low,low,closed-form attention proxy (avoid learning)
+F140,sym_pair_attention_OFI,pair_interaction,softmax(-|OFI[i]-OFI[j]|) * OFI[j] -> aggregate signal,paper,Attention MA-MIDPRED 2024,5,ofi,medium,medium,low,low,attention-weighted OFI aggregation
+F141,pair_diff_logspread_normalized,pair_relative,log(spread[i]) - log(spread[j]),paper,Roll 1984 + log,2,spread,low,easy,medium,low,log spread diff (scale-invariant)
+F142,pair_ratio_RV_pair,pair_relative,RV[i] / (RV[j]+eps),paper,GARCH cross-asset Engle,2,realized_vol,low,easy,medium,low,vol ratio
+F143,csec_iqr_OFI,cross_sectional,IQR(OFI[0..4]) -> broadcast,paper,Robust dispersion,5,ofi,low,easy,low,low,IQR-based dispersion (outlier-robust)
+F144,csec_mad_OFI,cross_sectional,MAD(OFI[0..4]) -> broadcast,paper,Robust dispersion,5,ofi,low,easy,low,low,MAD-based dispersion
+F145,csec_demean_logret_W5,cross_sectional,logret_W5[i] - mean(logret_W5),paper,Numerai era-neutralize,1+5,logret_W5,high,easy,low,low,short-window market-neutral return
+F146,csec_demean_logret_W60,cross_sectional,logret_W60[i] - mean(logret_W60),paper,Avellaneda mean-reversion,1+5,logret_W60,medium,easy,low,low,long-window neutral
+F147,csec_demean_microprice_imb,cross_sectional,(microprice[i]-mid[i]) - mean over syms,paper,Stoikov 2017,1+5,microprice,medium,easy,low,low,microprice-mid gap demeaned
+F148,pair_diff_wap_balance_12,pair_relative,wap_balance_12[i] - wap_balance_12[j],paper,Stoikov / Optiver WAP balance,2,wmp_balance,medium,easy,low,low,WAP balance diff (already a feature; pair diff)
+F149,pair_diff_kyle_W50,pair_relative,Kyle_W50[i] - Kyle_W50[j],paper,Kyle 1985,2,kyle_W50,low,easy,high,medium,Kyle lambda diff; high sym variance flagged
+F150,pair_diff_kyle_W100,pair_relative,Kyle_W100[i] - Kyle_W100[j],paper,Kyle 1985,2,kyle_W100,low,easy,high,medium,Kyle W100 diff (sym-fragile)
+F151,csec_demean_wmp_balance_lvl,cross_sectional,wmp_lvl5[i] - mean(wmp_lvl5),paper,Stoikov microprice,1+5,wmp_lvl5,medium,easy,low,low,deep-level WMP demean
+F152,csec_demean_imb1,cross_sectional,imb1[i] - mean(imb1),paper,Stoikov + commonality,1+5,imb1,high,easy,low,low,imb1 commonality removed
+F153,csec_demean_kyleinv,cross_sectional,kyleinv[i] - mean(kyleinv),paper,Kyle inv + commonality,1+5,kyleinv,low,easy,medium,low,kyleinv commonality removed
+F154,csec_demean_BV_W30,cross_sectional,BV_W30[i] - mean(BV_W30),paper,BNS bipower + commonality,1+5,bipower_W30,medium,easy,low,low,bipower commonality removed
+F155,csec_demean_jshare_W30,cross_sectional,jshare_W30[i] - mean(jshare_W30),paper,BNS 2006 jump,1+5,jshare,low,easy,high,medium,jshare commonality (jshare is noisy across syms)
+F156,csec_demean_roll_spr,cross_sectional,roll_eff_spr[i] - mean(roll_eff_spr),paper,Roll 1984 + commonality,1+5,roll_eff,low,easy,medium,low,Roll spread commonality
+F157,pair_dot_imb_ofi_pair,pair_interaction,imb1[i]*OFI[i] - imb1[j]*OFI[j],paper,Stoikov+Cont composite,2,imb1+ofi,high,easy,low,low,microprice-pressure pair diff
+F158,pair_dot_depth_ofi_pair,pair_interaction,depth[i]*OFI[i] - depth[j]*OFI[j],paper,Cont 2014 size-weighted,2,depth+ofi,medium,easy,low,low,depth-scaled OFI diff
+F159,pair_OFI_strength_norm,pair_interaction,OFI[i]/depth[i] - OFI[j]/depth[j],paper,Cross-Impact normalized,2,ofi+depth,medium,easy,low,low,depth-normalized OFI diff
+F160,pair_OFI_pressure_pair,pair_interaction,(OFI[i]/depth[i]) * (OFI[j]/depth[j]),paper,Stoikov microprice,2,ofi+depth,medium,easy,low,low,joint pressure
+F161,pair_mp_change_match,pair_interaction,sign(delta_mid_W5[i])==sign(delta_mid_W5[j]) ? 1:0,paper,Lead-lag binary,2,delta_mid,low,easy,low,low,co-direction of recent mid changes
+F162,csec_demean_quote_intensity,cross_sectional,quote_int[i] - mean(quote_int),paper,Hasbrouck VAR,1+5,quote_intensity,low,easy,high,medium,sym-variable; check robust
+F163,csec_demean_trade_intensity,cross_sectional,trade_int[i] - mean(trade_int),paper,Easley 2012,1+5,trade_intensity,low,easy,high,medium,trade rate demeaned
+F164,csec_winsorized_zscore_ret,cross_sectional,winsorize(logret[i] [-3 3]) then z-score,blog,Numerai best practice,1+5,logret,medium,easy,medium,low,outlier-robust z-score
+F165,csec_signed_rank_ret_W20,cross_sectional,(rank(logret_W20[i])-(N+1)/2)/(N/2) -> [-1 1],paper,Alpha101 signed rank,1+5,logret_W20,medium,easy,low,low,centered signed rank
+F166,csec_market_proxy_ret,cross_sectional,equal-weighted mean(logret[0..4]) -> broadcast,paper,Sirignano-Cont 2019 universal,5,logret,medium,easy,low,low,equal-weighted market return proxy
+F167,csec_market_proxy_ret_volwt,cross_sectional,volume-weighted mean(logret[0..4]) -> broadcast,paper,Hou-Robinson cov,5,logret+volume,medium,easy,medium,low,VW market return proxy
+F168,csec_market_proxy_OFI,cross_sectional,mean(OFI[0..4]) -> broadcast,paper,Cross-Impact 2023,5,ofi,medium,easy,low,low,market OFI proxy
+F169,csec_market_proxy_imb1,cross_sectional,mean(imb1[0..4]) -> broadcast,paper,Stoikov + commonality,5,imb1,medium,easy,low,low,market imb1 proxy
+F170,sym_pair_corr_OFI_W20,pair_lagless,corr coefficient(OFI_W20[i] OFI_W20[j]) over training-day frozen,paper,Cross-Impact correlation,2,ofi_W20+train,low,medium,high,medium,frozen pair corr (might be too sym-fragile and require careful train)
+F171,sym_pair_corr_ret_W20,pair_lagless,frozen training-period corr(logret_W20[i] logret_W20[j]) -> scalar,paper,Mantegna correlation,2,logret_W20+train,low,medium,high,medium,frozen pair corr
+F172,csec_intersection_imb_dir,cross_sectional,sum_k(sign(imb1[k])==sign(imb1[i]))/5,paper,Co-direction frequency,1+5,imb1,low,easy,low,low,fraction of syms with same imb direction as i
+F173,csec_intersection_OFI_dir,cross_sectional,sum_k(sign(OFI[k])==sign(OFI[i]))/5,paper,Cross-Impact co-direction,1+5,ofi,medium,easy,low,low,fraction of syms with same OFI direction
+F174,pair_diff_log_volume_W20,pair_relative,log(vol_W20[i]+1) - log(vol_W20[j]+1),paper,Multi-asset volume,2,volume_W20,medium,easy,low,low,log-volume pair diff
+F175,pair_outer_product_OFI_imb,pair_interaction,OFI[i]*imb1[i] - OFI[j]*imb1[j],paper,Cross-Impact + Stoikov,2,ofi+imb1,high,easy,low,low,signed pressure pair diff
+F176,csec_inv_kyle_normalized,cross_sectional,kyleinv[i] / mean(kyleinv) - 1,paper,Kyle + normalize,1+5,kyleinv,low,easy,medium,low,relative impact coef (multiplicative)
+F177,pair_mid_pct_change_diff,pair_relative,(mid_W5[i]/mid_W30[i]-1) - (mid_W5[j]/mid_W30[j]-1),paper,Momentum diff Avellaneda,2,mid,medium,easy,low,low,pair short-vs-long momentum diff
+F178,csec_skew_OFI,cross_sectional,skew(OFI[0..4]) -> broadcast,paper,Cross-Impact higher-moment,5,ofi,low,easy,low,low,OFI skewness
+F179,pair_diff_microprice_imb,pair_relative,(microprice[i]-mid[i]) - (microprice[j]-mid[j]),paper,Stoikov 2017,2,microprice+mid,high,easy,low,low,microprice excess gap pair diff
+F180,csec_microprice_excess_demean,cross_sectional,(microprice[i]-mid[i]) - mean over syms,paper,Stoikov + commonality,1+5,microprice+mid,high,easy,low,low,microprice excess demeaned
+F181,csec_volume_pressure,cross_sectional,asksz1[i]*(asksz1[i]>0) - bidsz1[i]*(bidsz1[i]>0) demeaned across syms,paper,Stoikov,1+5,size,medium,easy,low,low,size pressure demean
+F182,pair_diff_ofitox_share,pair_relative,ofi_tox[i]/sum_k ofi_tox[k] - ofi_tox[j]/sum_k ofi_tox[k],paper,VPIN cross share,2+5,ofi_tox,low,medium,medium,low,toxicity share diff
+F183,csec_relative_factor_share,cross_sectional,OFI[i]*spread[i] - mean(OFI[k]*spread[k]),paper,Stoikov + commonality,1+5,ofi+spread,medium,medium,low,low,impact*liquidity demeaned
+F184,csec_winsorized_imb,cross_sectional,winsorize(imb1[i] [-1 1]) then z-score,blog,Numerai best practice,1+5,imb1,medium,easy,low,low,robust imb z-score
+F185,csec_log_volume_share,cross_sectional,log(volume[i]+1)/log(sum_k(volume[k])+1),paper,Multi-asset commonality,1+5,volume,medium,easy,low,low,log-volume share
+F186,pair_diff_VWAP_W20,pair_relative,VWAP_W20[i] - VWAP_W20[j],paper,Avellaneda VWAP,2,vwap_W20,medium,easy,medium,low,VWAP pair diff
+F187,csec_mean_VWAP_dev,cross_sectional,VWAP[i] - mean(VWAP),paper,Avellaneda 2010,1+5,vwap,medium,easy,medium,low,VWAP commonality removed
+F188,csec_relret_vwap,cross_sectional,(mid[i]-VWAP[i]) - mean over syms,paper,Avellaneda mean reversion,1+5,mid+vwap,medium,easy,medium,low,relative price vs VWAP commonality
+F189,pair_mid_div_VWAP,pair_relative,(mid[i]-VWAP[i]) - (mid[j]-VWAP[j]),paper,Avellaneda 2010,2,mid+vwap,medium,easy,medium,low,relative price-vs-VWAP gap diff
+F190,csec_sum_OFI_per_W5,cross_sectional,OFI_W5[i] / sum_k OFI_W5[k] (signed share),paper,Cross-Impact share,1+5,ofi_W5,medium,easy,low,low,signed share of cross-sym OFI
+F191,csec_normalized_imb_pressure,cross_sectional,(imb1[i]*depth[i]) - mean over syms,paper,Stoikov 2017,1+5,imb1+depth,high,easy,low,low,size-weighted imbalance demeaned
+F192,pair_share_volume_W,pair_relative,(volume[i] / (volume[i]+volume[j])) - 0.5,paper,Multi-asset commonality,2,volume,medium,easy,medium,low,relative volume share between i and j
+F193,csec_microprice_minus_avg,cross_sectional,microprice[i] - equal_weight_mean(microprice[0..4]),paper,Stoikov 2017,1+5,microprice,high,easy,low,low,microprice market-neutral
+F194,csec_logret_W5_minus_factor,cross_sectional,logret_W5[i] - alpha[i] - beta[i]*market_proxy (alpha beta frozen),paper,Hasbrouck 1995 / Sirignano 2019,1+5,logret_W5,medium,medium,medium,medium,factor-model residual (frozen beta = sym-specific concern; use beta=1)
+F195,pair_OFI_diff_norm_depth,pair_relative,(OFI[i]/depth[i]) - (OFI[j]/depth[j]),paper,Cont 2014 normalized,2,ofi+depth,high,easy,low,low,depth-normalized OFI pair diff
+F196,pair_OFI_diff_norm_volume,pair_relative,(OFI_W20[i]/volume_W20[i]) - (OFI_W20[j]/volume_W20[j]),paper,Cross-Impact normalized,2,ofi+volume,medium,easy,medium,low,volume-normalized OFI diff
+F197,csec_neutralized_logret_minus_eta,cross_sectional,logret[i] - mean(logret) when |mean(logret)| > eta else 0,paper,Numerai denoising,1+5,logret,low,medium,low,low,thresholded market-residual (denoise)
+F198,sym_pair_corr_proxy_inst,pair_lagless,sign(logret_inst[i]) * sign(logret_inst[j]) (instantaneous return co-direction),paper,Lead-lag binary proxy,2,logret_inst,low,easy,low,low,coarse pair co-move binary
+F199,csec_mean_excess_ret,cross_sectional,logret[i] - vol_weighted_mean(logret),paper,Vol-weighted market proxy,1+5,logret+vol,medium,easy,medium,low,vol-weighted market-neutral
+F200,csec_relative_strength,cross_sectional,rank(logret_W20[i]) - rank(logret_W60[i]) (acc/dec),paper,Alpha101 momentum diff,1+5,logret,medium,easy,low,low,relative strength change (acceleration)
+F201,csec_ts_neutralize_OFI,cross_sectional,OFI[i] - mean over syms then z-score across syms,paper,Numerai double-neutralize,1+5,ofi,high,easy,low,low,demean + zscore (Numerai-style)
+F202,csec_ts_neutralize_imb1,cross_sectional,imb1[i] demean+zscore,paper,Numerai + Stoikov,1+5,imb1,high,easy,low,low,demean + zscore imb1
+F203,csec_ts_neutralize_microprice,cross_sectional,microprice excess demean+zscore,paper,Numerai + Stoikov,1+5,microprice,high,easy,low,low,demean + zscore microprice
+F204,sym_pair_diff_microprice_pair,pair_relative,microprice[i] - microprice[j],paper,Stoikov 2017,2,microprice,high,easy,low,low,microprice pair diff (raw)
+F205,sym_pair_attention_softmax_mid,pair_interaction,sum_j softmax(-|mid[i]-mid[j]|*tau) * (mid[j]-mid[i]),paper,Self-attention proxy (closed-form),5,mid,low,medium,low,low,closed-form attention over sym (5 sym; not learned)
