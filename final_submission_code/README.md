@@ -2,21 +2,22 @@
 
 ## 概述
 
-本代码库完整复现 **第二届"良文杯"** SOTA 提交 `submission_050911_iter019_v2N_50plus50_optimized_fullhorizon.zip`，平台得分 **+35.64**（h=60 列，5 horizon 取最优）。
+本代码库复现 **第二届"良文杯"** 最终提交 `submission_T188v2_50plus50_fullhorizon.zip`（h=60 列，5 horizon 取最优）。
 
 ### 模型结构
 
 - **50 NN**（T87 SPO+ DFL）：每个 seed 独立完成 T81-style L2 预训练（dates 0-79，val dates 80-95，早停）后，T170 协议 SPO+ 决策焦点微调（全数据 M7 dates 0-119，固定 11 epoch）。
 - **50 LGB**（T75 回归）：5 个 HP 配置 × 10 seeds，M7 全数据重训，目标为 Δmid 回归，num_boost_round=330。
-- **集成**：简单均值（w_NN=1.0, w_LGB=1.5），per-sym beta conformal abstain band。
+- **集成**：简单加权均值（w_NN=1.0, w_LGB=1.5）。
+- **决策**：sym-agnostic 非对称 EV gate（`pred > thr_up` → long；`pred < -thr_dn` → short；否则 flat）。
 - **全 horizon 发射**：h=5/10/20/40 共享 h=60 ensemble 的预测，阈值按 sqrt(H/60) 缩放；h=60 直接使用原始阈值。平台取 5 horizon 最优计分，添加短 horizon 只会保持或提升总分。
 
-### 平台得分
+### 阈值配置
 
-| horizon | 策略 | 平台 PnL |
-|---------|------|---------|
-| h=60 | 主 ensemble（thr_up=0.0003, thr_dn=0.000216） | **+35.64** (SOTA) |
-| h=5/10/20/40 | share_with=60，sqrt 缩放阈值 | 不影响 h=60 得分 |
+| horizon | thr_up | thr_dn | 备注 |
+|---------|--------|--------|------|
+| h=60 | 0.0003 | 0.000216 | 主 ensemble，DE 搜索得到 |
+| h=5/10/20/40 | scaled | scaled | share_with=60，× sqrt(H/60) |
 
 ---
 
@@ -69,7 +70,7 @@ data/
 # 第一个参数：data_dir；第二个参数：CUDA device ID（默认 0）
 ```
 
-产物：`outputs/submission_050911_iter019_v2N_50plus50_optimized_fullhorizon.zip`（约 148 MB）
+产物：`outputs/submission_T188v2_50plus50_fullhorizon.zip`（约 148 MB）
 
 ---
 
@@ -193,8 +194,8 @@ cd ./outputs/pkg && zip -qr ../submission.zip .
 
 | 文件 | 说明 |
 |------|------|
-| `Predictor.py` | 主推理类，批量化 NN ensemble + LGB 集成 + conformal abstain |
-| `thresholds.json` | h=60 阈值（SOTA）+ h=5/10/20/40 share_with=60 |
+| `Predictor.py` | 主推理类，批量化 NN ensemble + LGB 集成 + EV gate 决策 |
+| `thresholds.json` | h=60 阈值 + h=5/10/20/40 share_with=60 缩放阈值 |
 | `config.json` | 154 维原始特征列表 |
 | `fast_features.py` | 单窗口特征计算（Predictor 调用） |
 | `fast_features_batch.py` | 批量特征计算（特征构建阶段使用） |
@@ -212,13 +213,13 @@ cd ./outputs/pkg && zip -qr ../submission.zip .
 4. **LGB 推理**：50 个 booster 各预测 Δmid，取均值 `pred_lgb`
 5. **NN 推理**：使用 `_BatchedMLPEnsemble` 将 50 个 MLP 合并为一次 torch.bmm 前向（CPU 或 CUDA 自动选择），取均值 `pred_nn`
 6. **集成**：`pred = (1.0 × pred_nn + 1.5 × pred_lgb) / 2.5`
-7. **全 horizon 发射**：对每个 horizon 查找 thresholds.json，如有 `share_with`，用 h=60 的预测值；阈值已按 sqrt(H/60) 缩放
-8. **Conformal abstain**：`eff_thr_up = thr_up + beta_sym × sigma_sym`；若 |pred| 在带内则 action=1
+7. **全 horizon 发射**：对每个 horizon 查找 thresholds.json，如有 `share_with`，复用 src horizon 的预测值；阈值已按 sqrt(H/60) 缩放
+8. **EV gate 决策**：`action = 2 if pred > thr_up; 0 if pred < -thr_dn; 1 otherwise`（sym-agnostic）
 
 **Constraint compliance**：
 - `date` 字段从不使用
 - 无跨调用 state（每次 predict 完全独立）
-- sym 仅用于 conformal beta 查找（不输入模型，OOD sym 使用默认值）
+- 模型与决策层完全 sym-agnostic（sym 字段不参与任何计算）
 
 ---
 
@@ -227,10 +228,11 @@ cd ./outputs/pkg && zip -qr ../submission.zip .
 | 决策 | 原因 |
 |------|------|
 | M7 全数据重训 | 平台 +34.44 vs 早停 +28.16（+5.51），GBDT 全数据安全 |
-| 50+50 mega ensemble | 相比 5+5 降低方差；平台 +35.64 vs +34.64（+1.00） |
+| 50+50 mega ensemble | 相比 5+5 降低方差；OOD distribution shift 上 variance reduction 兑现 |
 | SPO+ DFL Phase 2 | 对齐 PnL 梯度；平台 +28.16 vs L2-only +19.23（+8.93） |
-| h=5/10/20/40 share_with=60 | 不引入新模型，阈值缩放；max(5 horizon) 评分只升不降 |
-| conformal per-sym abstain | sym=1/2/3 各有最优 beta；总体 +0.77 |
+| 非对称 EV gate (thr_up≠thr_dn) | DE 搜索在 LOSO-equiv val set 上独立优化双侧门槛，捕获模型预测正偏差 |
+| h=5/10/20/40 share_with=60 | 不引入新模型，阈值按 sqrt(H/60) 缩放；max(5 horizon) 评分只升不降 |
+| sym-agnostic 决策层 | 严格遵循硬约束 #3："sym 0-4 但可能含训练外股票"；模型与 wrapper 均不依赖 sym ID |
 | aug_a 随机特征缩放 | 等效数据增广，提高泛化；0.8-1.2 均匀缩放 |
 
 ---
@@ -239,13 +241,13 @@ cd ./outputs/pkg && zip -qr ../submission.zip .
 
 - **无 GPU 平台**：requirements.txt 使用 CPU-only torch，推理时 NN ensemble 在 CPU 运行（约 500ms per batch）
 - **训练权重不含**：本仓库不含 100 个已训练模型文件（太大，~5 GB）；用户需重新训练
-- **硬约束**：平台评测时 date=0，sym 可能含训练外股票——这两点已在 Predictor.py 中处理
+- **硬约束**：平台评测时 date=0，sym 可能含训练外股票——两点均不影响本提交（模型与决策层均完全 sym-agnostic）
 
 ---
 
 ## 引用 / 致谢
 
-本工作基于良文杯官方 mmpc_demo 基线，经过 192 个实验迭代优化。
+本工作基于良文杯官方 mmpc_demo 基线，经过多轮迭代优化。
 核心方法参考：
 - T75 LightGBM Δmid 回归（iter_013 突破）
 - T81 MLP L2 预训练协议

@@ -45,11 +45,14 @@ steps = [
     # label,             delta,   domain ('start','feat','model','ens')
     ("起点\nNN raw + L2",          None,    "start"),    # +0.52
     ("+ window-$z$\n(OOD)",       +22.88,  "feat"),     # ->23.40
-    ("+ 多尺度 OFI (F2)",          +2.57,   "feat"),     # ->25.97
-    ("+ 订单流强度 (F3)",          +3.59,   "feat"),     # ->29.56
-    ("+ 不对称性 (F6)",            +4.64,   "feat"),     # ->34.20
-    ("+ 镜像增强",                 +2.41,   "feat"),     # ->36.61
-    ("+ NN×LGB\n(5+5) 集成",       +0.51,   "ens"),      # ->37.12
+    ("+ F1 LOB 派生",              -0.07,   "feat"),     # ->23.33
+    ("+ F2 多尺度 OFI",            +2.57,   "feat"),     # ->25.90
+    ("+ F3 订单流",                +3.59,   "feat"),     # ->29.49
+    ("+ F4 微结构波动",            -0.51,   "feat"),     # ->28.98
+    ("+ F5 窗口统计",              +0.70,   "feat"),     # ->29.68
+    ("+ F6 不对称性",              +4.64,   "feat"),     # ->34.32
+    ("+ 镜像增强",                 +0.83,   "feat"),     # ->35.15
+    ("+ NN×LGB\n(5+5) 集成",       +1.97,   "ens"),      # ->37.12
     ("+ ETUD 阈值",                +0.78,   "ens"),      # ->37.90
     ("+ SPO+ DFL",                +3.54,   "ens"),      # ->41.44
     ("+ 50×50 HP cycling",        +0.14,   "ens"),      # ->41.58
@@ -78,23 +81,23 @@ bar_w = 0.62
 def _band(x_left, x_right, color, label):
     ax.axvspan(x_left, x_right, color=color, alpha=0.55, zorder=0)
 
-_band(-0.5,            0 + bar_w/2 + 0.05, "#f4f4f4", "start")
-_band(0 + bar_w/2 + 0.05, 5 + bar_w/2 + 0.05, BG_FEAT, "feature")
-_band(5 + bar_w/2 + 0.05, 9 + bar_w/2 + 0.05, BG_ENS,  "ens")
-_band(9 + bar_w/2 + 0.05, 10.6,              "#f4f4f4", "total")
+_band(-0.5,                       0 + bar_w/2 + 0.05, "#f4f4f4", "start")
+_band(0 + bar_w/2 + 0.05,         8 + bar_w/2 + 0.05, BG_FEAT, "feature")
+_band(8 + bar_w/2 + 0.05,        12 + bar_w/2 + 0.05, BG_ENS,  "ens")
+_band(12 + bar_w/2 + 0.05,       13.6,                "#f4f4f4", "total")
 
 # Domain top labels
-ax.text((0 + bar_w/2 + 0.05 + 5 + bar_w/2 + 0.05) / 2, 47.2,
+ax.text((0 + bar_w/2 + 0.05 + 8 + bar_w/2 + 0.05) / 2, 47.2,
         "Feature 域", ha="center", va="center",
         fontsize=11.5, color=C_FEAT, fontweight="bold")
-ax.text((5 + bar_w/2 + 0.05 + 9 + bar_w/2 + 0.05) / 2, 47.2,
+ax.text((8 + bar_w/2 + 0.05 + 12 + bar_w/2 + 0.05) / 2, 47.2,
         "Ensemble & Execution 域", ha="center", va="center",
         fontsize=11.5, color=C_ENS, fontweight="bold")
 
 # Vertical separators
-ax.axvline(0 + bar_w/2 + 0.05, color="#888", lw=0.5, linestyle="--", zorder=1)
-ax.axvline(5 + bar_w/2 + 0.05, color="#888", lw=0.8, linestyle="--", zorder=1)
-ax.axvline(9 + bar_w/2 + 0.05, color="#888", lw=0.8, linestyle="--", zorder=1)
+ax.axvline(0 + bar_w/2 + 0.05,  color="#888", lw=0.5, linestyle="--", zorder=1)
+ax.axvline(8 + bar_w/2 + 0.05,  color="#888", lw=0.8, linestyle="--", zorder=1)
+ax.axvline(12 + bar_w/2 + 0.05, color="#888", lw=0.8, linestyle="--", zorder=1)
 
 # ---- Bars ----
 # start
@@ -105,13 +108,15 @@ ax.text(x[0], cum[0] + 0.7, f"+{cum[0]:.2f}",
 # delta bars
 dom_color = {"feat": C_FEAT, "model": C_MODEL, "ens": C_ENS, "start": C_START}
 # stagger annotation y-offset to prevent overlap on small deltas
-y_offset_extra = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0,
-                  6: 1.6, 7: 0.0, 8: 0.0, 9: 1.6}
+y_offset_extra = {i: 0.0 for i in range(len(deltas))}
+# small-delta annotations stagger
+for i in (2, 5, 12):  # F1 -0.07, F4 -0.51, 50x50 +0.14
+    y_offset_extra[i] = 1.4
 for i in range(1, n):
     d = deltas[i]
     bottom = cum[i - 1] if d >= 0 else cum[i]
     height = abs(d)
-    color = dom_color[domains[i]]
+    color = "#2a2a2a" if d < 0 else dom_color[domains[i]]
     ax.bar(x[i], height, bottom=bottom, color=color, width=bar_w,
            edgecolor="white", zorder=3)
     sign = "+" if d >= 0 else "-"
@@ -140,7 +145,7 @@ ax.hlines(cum[-1], n - 1 + bar_w/2, total_x - bar_w/2,
 # Labels
 labels_total = labels + ["最终\nTest PnL"]
 ax.set_xticks(list(x) + [total_x])
-ax.set_xticklabels(labels_total, rotation=0, fontsize=8.8, linespacing=1.12)
+ax.set_xticklabels(labels_total, rotation=22, ha="right", fontsize=7.8, linespacing=1.12)
 
 ax.set_ylabel("Test PnL  (h = 60)", fontsize=11.5)
 ax.set_title("关键 trick 增益 waterfall —— 按领域上色：Feature → Ensemble & Execution",

@@ -23,6 +23,7 @@ import os
 import sys
 import time
 from datetime import datetime, timezone
+from typing import Dict, List
 
 import numpy as np
 import torch
@@ -75,6 +76,60 @@ def regr_target(mp_t, mp_th):
 def fee_eff(mp_t, mp_th):
     return (FEE * ((mp_th.astype(np.float64) + 1.0) + (mp_t.astype(np.float64) + 1.0))
             / (mp_t.astype(np.float64) + 1.0)).astype(np.float32)
+
+
+def bidask_mirror_apply(X: np.ndarray, names: List[str]) -> np.ndarray:
+    """Bid/ask-symmetric feature mirroring (used when --mirror-flip is on).
+
+    Swaps the bid<->ask leg of every paired LOB column (price levels, sizes,
+    order-flow strength/indicator/acceleration, top-of-book aggregates) and
+    sign-flips the scalar imbalance column. The label-flip side (y_reg -> -y_reg,
+    y_cls 0<->2) is applied by the caller. Columns whose pair is missing (e.g.
+    half of a dualz_* pair was dropped by KS) are left untouched.
+    """
+    swap: Dict[int, int] = {}
+    sign_flip = set()
+    name_to_idx = {n: i for i, n in enumerate(names)}
+
+    def add_pair(a: str, b: str) -> None:
+        if a in name_to_idx and b in name_to_idx:
+            i, j = name_to_idx[a], name_to_idx[b]
+            swap[i] = j
+            swap[j] = i
+
+    for k in range(1, 11):
+        add_pair(f"bid{k}", f"ask{k}")
+        add_pair(f"bsize{k}", f"asize{k}")
+        add_pair(f"bid_diff{k}", f"ask_diff{k}")
+        add_pair(f"bid_rate{k}", f"ask_rate{k}")
+        add_pair(f"bsize_rate{k}", f"asize_rate{k}")
+    add_pair("avgbid", "avgask")
+    add_pair("totalbsize", "totalasize")
+    add_pair("bid_mean", "ask_mean")
+    add_pair("bsize_mean", "asize_mean")
+    add_pair("lb_intst", "la_intst")
+    add_pair("mb_intst", "ma_intst")
+    add_pair("cb_intst", "ca_intst")
+    add_pair("lb_ind", "la_ind")
+    add_pair("mb_ind", "ma_ind")
+    add_pair("cb_ind", "ca_ind")
+    add_pair("lb_acc", "la_acc")
+    add_pair("mb_acc", "ma_acc")
+    add_pair("cb_acc", "ca_acc")
+    if "imbalance" in name_to_idx:
+        sign_flip.add(name_to_idx["imbalance"])
+
+    Xm = X.copy()
+    seen = set()
+    for a, b in swap.items():
+        key = (a, b) if a < b else (b, a)
+        if key in seen:
+            continue
+        seen.add(key)
+        Xm[:, a], Xm[:, b] = X[:, b].copy(), X[:, a].copy()
+    for i in sign_flip:
+        Xm[:, i] = -X[:, i]
+    return Xm
 
 
 class MLPRegr(nn.Module):
@@ -172,6 +227,7 @@ def main():
     ap.add_argument("--no-wandb", action="store_true")
     ap.add_argument("--skip-phase1", action="store_true",
                     help="Skip Phase 1 if anchor checkpoint already exists")
+    ap.add_argument("--mirror-flip", action="store_true")
     args = ap.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
@@ -248,6 +304,15 @@ def main():
         X_va = val_d["X"][:, keep_idx]
         y_regr_va = regr_target(val_d["mp_t"], val_d[f"mp_t{H}"])
         del val_d
+
+        if args.mirror_flip:
+            Xm = bidask_mirror_apply(X_tr, feat_names)
+            X_tr = np.concatenate([X_tr, Xm], axis=0)
+            del Xm
+            y_regr_tr = np.concatenate([y_regr_tr, -y_regr_tr], axis=0)
+            y_cls_tr = np.concatenate(
+                [y_cls_tr, (2 - y_cls_tr).clip(0, 2).astype(np.int64)], axis=0)
+            print(f"  mirror-flip aug: train rows doubled to {len(X_tr):,}", flush=True)
 
         print(f"  n_train={len(X_tr):,}  n_val={len(X_va):,}", flush=True)
 
@@ -396,6 +461,16 @@ def main():
 
     y_regr_all = regr_target(mp_t_all, mp_th_all)
     fee_all = fee_eff(mp_t_all, mp_th_all)
+
+    if args.mirror_flip:
+        Xm_all = bidask_mirror_apply(X_all, feat_names)
+        X_all = np.concatenate([X_all, Xm_all], axis=0)
+        del Xm_all
+        y_regr_all = np.concatenate([y_regr_all, -y_regr_all], axis=0)
+        y_cls_all = np.concatenate(
+            [y_cls_all, (2 - y_cls_all).clip(0, 2).astype(np.int64)], axis=0)
+        fee_all = np.concatenate([fee_all, fee_all], axis=0)
+        print(f"  mirror-flip aug (Phase 2 M7): rows doubled to {len(X_all):,}", flush=True)
 
     nan_mask = np.isnan(X_all)
     if nan_mask.any():

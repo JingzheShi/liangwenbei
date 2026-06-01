@@ -1,28 +1,22 @@
-"""Predictor for T188v3: T188v2 (50 NN + 50 LGB) with optimized NN ensemble inference.
+"""Predictor for T188v2 (50 NN + 50 LGB) with batched NN ensemble inference.
 
-T188v2 baseline: iter_018 v1 stack + per-sym beta abstain wrapper.
-T188v3 change: _MLPNumpy sequential loop (50×) replaced by _BatchedMLPEnsemble — all 50
-  NNs run in one batched torch bmm forward pass (CUDA if available, else CPU).
-  Outputs match T188v2 within float32 precision (~1e-6 typical, 1e-4 max).
+Architecture: 50 LightGBM regression boosters (T75 family) + 50 small MLPs
+  ([359 -> 256 -> 128 -> 64 -> 1], T87 SPO+ DFL). All 50 NNs run in one batched
+  torch bmm forward pass (CUDA if available, else CPU).
 
-  pred_lgb = mean over 50 LightGBM regression boosters (T75 family)
-  pred_nn  = mean over 50 small MLPs ([359 -> 256 -> 128 -> 64 -> 1], T87 SPO+ DFL)
+Decision rule (asymmetric EV gate, sym-agnostic):
+  pred_lgb = mean over 50 LightGBM boosters
+  pred_nn  = mean over 50 MLPs
   pred     = (w_nn * pred_nn + w_lgb * pred_lgb) / (w_nn + w_lgb), w_nn=1.0, w_lgb=1.5
-
-per-sym calibrated abstain band on top of asymmetric EV gate:
-  effective_thr_up = thr_up + beta_sym * sigma_sym
-  effective_thr_dn = thr_dn + beta_sym * sigma_sym
-  pred > effective_thr_up  -> action 2 (long)
-  pred < -effective_thr_dn -> action 0 (short)
-  else                      -> action 1 (flat)
+  pred > thr_up  -> action 2 (long)
+  pred < -thr_dn -> action 0 (short)
+  else            -> action 1 (flat)
 
 Compliance with CRITICAL_CONSTRAINTS.md:
-  - sym is read from input DataFrame ONLY for per-sym beta lookup (allowed: not fed
-    to model.forward; sym ID range 0..4 per platform spec, fallback for OOD IDs)
   - date never used
+  - sym never used (model forward and decision layer are both sym-agnostic)
   - No cross-call state held on `self` (each predict() call is independent)
-  - sym-agnostic FORWARD: NN/LGB features only use 100-tick LOB window; standardization
-    statistics are GLOBAL (computed from train data, no per-sym)
+  - Feature standardization statistics are GLOBAL (computed from train data, no per-sym)
   - W <= 100 for every rolling feature
   - Stateless / shuffle-invariant: no row order dependency, no buffers
 """
@@ -207,21 +201,6 @@ class Predictor:
             tcfg = json.load(f)
         self._horizons: List[Dict] = tcfg["horizons"]
 
-        # Conformal wrapper config
-        cw = tcfg.get("conformal_wrapper", {"enabled": False})
-        self._cw_enabled = bool(cw.get("enabled", False))
-        self._cw_band: Dict[int, float] = {}
-        self._cw_default_band = 0.0
-        if self._cw_enabled:
-            psb = cw.get("per_sym_beta", {})
-            pss = cw.get("per_sym_sigma", {})
-            for k_str, b in psb.items():
-                k = int(k_str)
-                s = float(pss.get(k_str, 0.0))
-                self._cw_band[k] = float(b) * s
-            self._cw_default_band = float(cw.get("default_beta_for_ood", 0.16)) * \
-                                     float(cw.get("default_sigma_for_ood", 4.0e-4))
-
         self._col_idx: Dict[str, int] = dict(self._raw_col_to_idx)
         if "midprice1" in self._raw_col_to_idx:
             self._col_idx["midprice"] = self._raw_col_to_idx["midprice1"]
@@ -252,15 +231,6 @@ class Predictor:
             self._weights[H] = (float(hcfg.get("w_nn", 1.0)),
                                 float(hcfg.get("w_lgb", 1.0)))
 
-    def _gate_with_band(self, pred_dmid: np.ndarray, hcfg: Dict,
-                        band_per_row: np.ndarray) -> np.ndarray:
-        thr_up = float(hcfg.get("thr_up", 2.0e-4))
-        thr_dn = float(hcfg.get("thr_dn", 2.0e-4))
-        out = np.full(pred_dmid.shape[0], 1, dtype=np.int64)
-        out[pred_dmid > (thr_up + band_per_row)] = 2
-        out[pred_dmid < -(thr_dn + band_per_row)] = 0
-        return out
-
     @staticmethod
     def _ev_gate_predict(pred_dmid: np.ndarray, hcfg: Dict) -> np.ndarray:
         thr_up = float(hcfg.get("thr_up", 2.0e-4))
@@ -288,21 +258,6 @@ class Predictor:
 
         return np.concatenate([raw_last, extras_kept], axis=1)
 
-    def _extract_band_per_row(self, batches: List[pd.DataFrame]) -> np.ndarray:
-        """Look up beta * sigma per row using sym from the LAST tick of each window."""
-        B = len(batches)
-        out = np.full(B, self._cw_default_band, dtype=np.float64)
-        for i, df in enumerate(batches):
-            if "sym" not in df.columns:
-                continue
-            try:
-                s = int(df["sym"].iloc[-1])
-            except (ValueError, TypeError, IndexError):
-                continue
-            if s in self._cw_band:
-                out[i] = self._cw_band[s]
-        return out
-
     @staticmethod
     def _ensemble_predict_lgb(boosters: List[lgb.Booster], X: np.ndarray) -> np.ndarray:
         if len(boosters) == 1:
@@ -319,11 +274,6 @@ class Predictor:
         feats = self._compute_batch_features(batches)
         B = feats.shape[0]
         out = np.ones((B, 5), dtype=np.int64)
-
-        if self._cw_enabled:
-            band_per_row = self._extract_band_per_row(batches)
-        else:
-            band_per_row = np.zeros(B, dtype=np.float64)
 
         # Cache pred_dmid per source horizon so share_with reuses computation
         pred_cache: Dict[int, np.ndarray] = {}
@@ -357,10 +307,7 @@ class Predictor:
                 pred_dmid = (stacked * ws_arr).sum(axis=0) / ws_arr.sum()
                 pred_cache[src_H] = pred_dmid
 
-            if self._cw_enabled:
-                actions = self._gate_with_band(pred_dmid, hcfg, band_per_row)
-            else:
-                actions = self._ev_gate_predict(pred_dmid, hcfg)
+            actions = self._ev_gate_predict(pred_dmid, hcfg)
             out[:, HORIZON_TO_IDX[H]] = actions
         return out.tolist()
 

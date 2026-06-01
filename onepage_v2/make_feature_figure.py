@@ -52,6 +52,21 @@ dim_pcts = [100.0 * c / total_dims for c in dim_counts]
 corr = np.array(summary["block_corr"])
 top10 = summary["top10_factors"]
 
+# raw / 派生 split per family (from factor_families_report/results.json v3)
+raw_v_der = {
+    "F1 LOB派生":    {"n_raw": 94, "n_der": 11, "gain_raw": 5.327, "gain_der": 0.196},
+    "F2 多尺度OFI":  {"n_raw":  0, "n_der": 50, "gain_raw": 0.000, "gain_der": 0.750},
+    "F3 订单流强度": {"n_raw": 18, "n_der": 27, "gain_raw": 3.958, "gain_der": 0.835},
+    "F4 微结构波动": {"n_raw":  2, "n_der": 27, "gain_raw": 0.006, "gain_der": 1.020},
+    "F5 窗口统计":   {"n_raw":  0, "n_der": 67, "gain_raw": 0.000, "gain_der": 0.708},
+    "F6 不对称性":   {"n_raw": 40, "n_der": 34, "gain_raw": 0.396, "gain_der": 0.468},
+}
+total_gain = sum(v["gain_raw"] + v["gain_der"] for v in raw_v_der.values())  # ≈ 13.664
+dim_raw_pcts  = [raw_v_der[k]["n_raw"] / total_dims * 100 for k in family_labels]
+dim_der_pcts  = [raw_v_der[k]["n_der"] / total_dims * 100 for k in family_labels]
+gain_raw_pcts = [raw_v_der[k]["gain_raw"] / total_gain * 100 for k in family_labels]
+gain_der_pcts = [raw_v_der[k]["gain_der"] / total_gain * 100 for k in family_labels]
+
 # ---------- palette: F1 = onepage lblue, others tone-coordinated ----------
 # lblue is RGB(40,120,210); use a custom 6-family palette
 palette = {
@@ -71,9 +86,9 @@ fig = plt.figure(figsize=(W_IN, H_IN), dpi=300)
 
 gs = fig.add_gridspec(
     1, 3,
-    width_ratios=[1.30, 1.05, 1.20],
-    left=0.15, right=0.99, top=0.90, bottom=0.08,
-    wspace=0.65,
+    width_ratios=[1.10, 0.85, 1.90],
+    left=0.13, right=0.99, top=0.86, bottom=0.16,
+    wspace=1.05,
 )
 
 FS_TITLE = 7.0
@@ -85,22 +100,41 @@ FS_TICK = 6.0
 ax1 = fig.add_subplot(gs[0, 0])
 y = np.arange(len(family_labels))[::-1]  # F1 at top
 bar_h = 0.36
-# dim%
-b1 = ax1.barh(y + bar_h / 2, dim_pcts, height=bar_h,
-              color=colors, alpha=0.45, edgecolor="none", label="维度占比")
-# gain%
-b2 = ax1.barh(y - bar_h / 2, gain_pcts, height=bar_h,
-              color=colors, alpha=1.0, edgecolor="none", label="LGB gain%")
-# annotate values
-for i, (yi, dp, gp, dc) in enumerate(zip(y, dim_pcts, gain_pcts, dim_counts)):
-    ax1.text(dp + 1.0, yi + bar_h / 2, f"{dc}维", va="center", fontsize=FS_VAL, color="#333333")
-    ax1.text(gp + 1.0, yi - bar_h / 2, f"{gp:.1f}%", va="center", fontsize=FS_VAL,
-             color="#333333", fontweight="bold" if gp > 30 else "normal")
+# dim%: stacked [raw (alpha 0.65) | 派生 (alpha 0.20)]
+ax1.barh(y + bar_h / 2, dim_raw_pcts, height=bar_h,
+         color=colors, alpha=0.65, edgecolor="none")
+ax1.barh(y + bar_h / 2, dim_der_pcts, left=dim_raw_pcts, height=bar_h,
+         color=colors, alpha=0.20, edgecolor="none")
+# gain%: stacked [raw (alpha 1.0) | 派生 (alpha 0.40)]
+ax1.barh(y - bar_h / 2, gain_raw_pcts, height=bar_h,
+         color=colors, alpha=1.0, edgecolor="none")
+ax1.barh(y - bar_h / 2, gain_der_pcts, left=gain_raw_pcts, height=bar_h,
+         color=colors, alpha=0.40, edgecolor="none")
+# annotate "n_raw+n_der" at end of dim bar; "gain%" at end of gain bar
+for i, yi in enumerate(y):
+    fl = family_labels[i]
+    nr, nd = raw_v_der[fl]["n_raw"], raw_v_der[fl]["n_der"]
+    dim_tot = dim_raw_pcts[i] + dim_der_pcts[i]
+    g_tot = gain_raw_pcts[i] + gain_der_pcts[i]
+    # F1 row (top): prefix with label so encoding is explicit; F2-F6 stay compact
+    if i == 0:
+        dim_txt = f"维度 {nr}+{nd}"
+        g_txt = f"重要性 {g_tot:.1f}%"
+    else:
+        dim_txt = f"{nr}+{nd}"
+        g_txt = f"{g_tot:.1f}%"
+    ax1.text(dim_tot + 1.0, yi + bar_h / 2, dim_txt,
+             va="center", fontsize=FS_VAL, color="#333333")
+    ax1.text(g_tot + 1.0, yi - bar_h / 2, g_txt,
+             va="center", fontsize=FS_VAL, color="#333333",
+             fontweight="bold" if g_tot > 30 else "normal")
 ax1.set_yticks(y)
 ax1.set_yticklabels(short_labels, fontsize=FS_TICK)
-ax1.set_xlim(0, max(max(gain_pcts), max(dim_pcts)) * 1.35)
+ax1.set_xlim(0, max(max(gain_pcts), max(dim_pcts)) * 1.55)
 ax1.set_xticks([])
-ax1.set_title("家族结构（维度 / 贡献）", fontsize=FS_TITLE, pad=2.5, fontweight="bold")
+ax1.set_xlabel("上行 = 维度数 (raw+派生)  /  下行 = 重要性 (%)",
+               fontsize=5.0, color="#555555", labelpad=2)
+ax1.set_title("家族结构\n(深=raw, 浅=派生)", fontsize=FS_TITLE, pad=1.5, fontweight="bold")
 for sp in ["top", "right", "bottom"]:
     ax1.spines[sp].set_visible(False)
 ax1.spines["left"].set_color("#888888")
@@ -108,13 +142,8 @@ ax1.spines["left"].set_linewidth(0.6)
 ax1.tick_params(axis="y", length=0, pad=1)
 # tiny legend
 from matplotlib.patches import Patch
-leg_handles = [
-    Patch(facecolor="#7a7a7a", alpha=0.45, label="维度占比"),
-    Patch(facecolor="#7a7a7a", alpha=1.0, label="gain%"),
-]
-ax1.legend(handles=leg_handles, fontsize=5.5, loc="lower right",
-           frameon=False, handlelength=1.0, handletextpad=0.4, borderpad=0.0,
-           labelspacing=0.15)
+# no explicit legend; raw/派生 encoding is described in the title
+# (depth gradient is self-evident in the bars)
 
 # ============ Panel 2: Top-10 factors ============
 ax2 = fig.add_subplot(gs[0, 1])
@@ -131,7 +160,7 @@ ax2.set_xlim(0, max(gains) * 1.22)
 ax2.set_yticks(yy)
 ax2.set_yticklabels(names, fontsize=FS_VAL, family="monospace")
 ax2.set_xticks([])
-ax2.set_title("Top-10 因子（按家族着色）", fontsize=FS_TITLE, pad=2.5, fontweight="bold")
+ax2.set_title("Top-10 因子\n(按家族着色)", fontsize=FS_TITLE, pad=1.5, fontweight="bold")
 for sp in ["top", "right", "bottom"]:
     ax2.spines[sp].set_visible(False)
 ax2.spines["left"].set_color("#888888")

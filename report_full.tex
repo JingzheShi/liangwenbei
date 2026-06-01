@@ -1,0 +1,733 @@
+% !TEX program = xelatex
+% Full ICML-style report for 良文杯 2026 finals
+% Team 792 ``超级回天什么时候上映'' — 史景喆，清华大学（AI PhD direction）
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,left=1in,right=1in,top=1in,bottom=1in]{geometry}
+
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont[BoldFont={Noto Serif CJK SC Bold},ItalicFont={Noto Serif CJK SC}]{Noto Serif CJK SC}
+\setCJKsansfont{Noto Sans CJK SC}
+\setCJKmonofont{Noto Sans Mono CJK SC}
+\setmainfont{DejaVu Serif}[
+  Ligatures=TeX,
+  Scale=0.95,
+]
+
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{tabularx}
+\usepackage{pifont}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage[colorlinks=true,linkcolor=icmlblue,citecolor=icmlblue,urlcolor=icmlblue]{hyperref}
+
+\definecolor{icmlblue}{RGB}{0,30,90}
+\definecolor{lblue}{RGB}{40,120,210}
+\newcommand{\hl}[1]{\textcolor{lblue}{\textbf{#1}}}
+
+% Section headings
+\titleformat{\section}{\normalfont\bfseries\color{icmlblue}\large}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\bfseries\color{icmlblue}\normalsize}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\bfseries\itshape\color{icmlblue}\small}{\thesubsubsection}{0.4em}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{2pt}
+\titlespacing*{\subsubsection}{0pt}{6pt}{2pt}
+
+\setlist[itemize]{leftmargin=*,topsep=2pt,itemsep=1pt,parsep=0pt}
+\setlist[enumerate]{leftmargin=*,topsep=2pt,itemsep=1pt,parsep=0pt}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+% Title block
+\title{\vspace{-2em}\bfseries\color{icmlblue}\Large 面向 PnL 目标的 LOB 中间价方向预测：\\
+$\Delta$mid 回归、决策焦点学习与 $50\times50$ 异质集成\\[2pt]
+\normalsize\mdseries\itshape 第二届``良文杯''统计建模与 AI 预测挑战赛决赛汇报报告}
+
+\author{
+史景喆\thanks{清华大学。研究方向：博士期间 LLM research。\\
+\hspace*{1em}通讯：\texttt{sjzworking@gmail.com}\quad GitHub：\texttt{JingzheShi}\quad 队伍随机码：\textbf{792}\quad 队伍名：\textbf{超级回天什么时候上映}。}
+}
+
+\date{2026 年 5 月}
+
+\begin{document}
+
+\maketitle
+
+\vspace{-1.5em}
+
+\begin{abstract}
+\noindent
+本文围绕第二届``良文杯''统计建模与 AI 预测挑战赛——以五只匿名 A 股的十档 LOB 与订单流为输入、预测未来 5/10/20/40/60 ticks 中间价方向（涨/平/跌三分类）、以扣手续费后的累计 PnL 收益率为唯一评分——给出一套完整的解决方案。我们将赛题重新表述为\emph{带交易成本约束的微观结构期望收益预测}：抛弃 3-class 交叉熵的离散化损失，改用 $\Delta$mid 的 L2 回归并配合非对称 EV 阈值门控；进一步以 SPO+ 决策焦点学习（DFL）把神经网络梯度直接对齐离散决策；再用 50 个 MLP 与 50 个 LightGBM 的简单均值集成逼近平台 OOD 信噪比上限。在 22 次公榜提交、约 200 组本地实验内，方案从官方 baseline 公榜累计收益率 $-6.65$ 提升至 \textbf{$+35.64$}（绝对增益 $+42.29$），最终在私榜上位列\textbf{第一名（\#1）}。本文同时呈现一种由 PM-worker 双层 agent 协作完成的 6 天研究工作流。
+\end{abstract}
+
+% ============================================================
+\section{Introduction}
+
+高频限价订单簿（limit order book，LOB）方向预测既是微观结构研究的经典问题，也是量化交易实战中第一线的 alpha 模型。近年来 DeepLOB \cite{deeplob2019}、TabLOB \cite{tablob}、Optiver \cite{optiver_kaggle} 等工作把神经网络与梯度提升树推向了该任务的主流，但绝大多数 benchmark 仍以分类准确度或简单的方向 ROI 作为评估目标，与真实交易中``出手才赔手续费、不出手不赔钱''的非对称损失结构相去甚远。
+
+本文以厦门大学黄良文统计学科基金会主办的``良文杯''2026 竞赛为载体，针对该差距给出系统化的方案设计与实证。竞赛任务在三个层面与传统设置显著不同：
+\begin{itemize}
+  \item \textbf{评估指标}：累计 PnL 收益率，扣 0.01\% 双边手续费，5 个 horizon 取最优一个计入排名；
+  \item \textbf{评测协议三条硬约束}：(i) \texttt{date} 字段在评测时被置 0；(ii) 测试点顺序被打乱；(iii) \texttt{sym} 0--4 可能包含训练集外的股票；
+  \item \textbf{资源约束}：12h/次提交配额、3h/次评测上限、模型 $\le$ 2GB、FP32、平台 CPU-only。
+\end{itemize}
+
+围绕这一设定，本文提出以下贡献：
+
+\begin{enumerate}
+  \item \textbf{$\Delta$mid 回归 $+$ 非对称 EV gate}。我们论证：在以 PnL 为损失的赛题里，3-class CE 离散化抛弃了``涨多少''的幅度信号，是次优选择；改用 $\Delta$mid 的 L2 回归 $+$ 单次离线搜得的非对称阈值门控，能把树模型的 PnL 显著提升。
+  \item \textbf{SPO+ 决策焦点学习的两阶段微调}。在 L2 预训练给出的良好初始化之上，以 SPO+ surrogate \cite{spo_plus} 作正则项继续微调 MLP，使决策层梯度直接对齐离散动作的期望收益。
+  \item \textbf{50$\times$50 异质 simple-mean 集成}。我们在 NN 与 LGB 各 50 个模型上做 simple mean，并以一次 bounded NNLS 学权重的失败实验定量说明：在 NN-NN 平均相关系数 $0.93$、设计矩阵条件数 $5.4\!\times\!10^{4}$ 的病态共线性下，任意``最优''权重都对应一组接近 in-sample 噪声的方向；simple mean 是数学上的稳健最优。
+  \item \textbf{PM-worker 双层 AI agent 工作流}。我们记录了一个由飞书 IM 驱动、PM 与 worker 双层协作、6 天内并行完成约 200 组实验的研究工作流，并讨论其在量化研究中的适用边界。
+\end{enumerate}
+
+\noindent\textbf{Paper organization.} 第 \ref{sec:setup} 节给出问题设置；第 \ref{sec:method} 节描述方法（不写效果数字）；第 \ref{sec:exp} 节给出本地与公榜实验，并以负向发现段落收尾；第 \ref{sec:agent} 节简述 AI agent 工作流；第 \ref{sec:concl} 节给出结论。
+
+% ============================================================
+\section{Problem Setup}
+\label{sec:setup}
+
+\subsection{Data and Task}
+
+训练数据由 5 只匿名 A 股 $\times$ 120 个交易日 $\times$ 上午/下午各 2001 ticks（3s/tick）构成，共 1200 个 parquet（约 474 MB），无 NaN。每条记录包含 154 维原始字段：OHLC、10 档 LOB 的报价与挂单量、6 类订单流（limit/market/cancel $\times$ buy/sell）的强度/指示/加速度、以及若干衍生量（spread、imbalance 等）。标签为 5 个 horizon 上的三分类，
+\begin{equation}
+\phi(\Delta\mathrm{mp}_h) =
+\begin{cases}
+0 & \Delta\mathrm{mp}_h < -\alpha_h,\\
+1 & |\Delta\mathrm{mp}_h| \le \alpha_h,\\
+2 & \Delta\mathrm{mp}_h > +\alpha_h,
+\end{cases}
+\quad
+\alpha_h = \begin{cases}5\!\times\!10^{-4} & h\!\in\!\{5,10\}\\ 1\!\times\!10^{-3} & h\!\in\!\{20,40,60\}\end{cases}
+\end{equation}
+分别对应 $t+h$ tick 后中间价相对当前的方向（0 跌 / 1 平 / 2 涨）。
+
+\subsection{Evaluation Metric}
+
+平台不评估分类准确度。给定一次预测 $\hat a\in\{0,1,2\}$ 与实际 $\Delta\mathrm{mp}_h$，单笔 PnL 定义为
+\begin{equation}
+\mathrm{pnl}(\hat a, \Delta\mathrm{mp}_h) = \frac{(\hat a-1)\cdot\Delta\mathrm{mp}_h - 0.0001\cdot|\hat a-1|\cdot\big((\mathrm{mp}_{t+h}{+}1)+(\mathrm{mp}_t{+}1)\big)}{\mathrm{mp}_t + 1}.
+\end{equation}
+``不出手'' $(\hat a=1)$ 不进 PnL，扣减项亦为 0；只有``出手''（$\hat a\in\{0,2\}$）才扣 $\sim 0.02\%$ 双边手续费。最终模型得分为
+\begin{equation}
+\mathrm{Score} = \max_{h\in\{5,10,20,40,60\}} \sum_i \mathrm{pnl}(\hat a_i^{(h)}, \Delta\mathrm{mp}_h^{(i)}).
+\end{equation}
+记分规则取 5 个 horizon 的最大值，意味着只需在某一个 horizon 上做到极致即可计入排名。本文以 $h=60$ 为主线设计模型与决策层；其他 horizon 共享同一套预测与决策，仅起到不拖累 $\max$ 评分的占位作用。
+
+\subsection{Three Hard Constraints from the Protocol}
+
+平台官方文档与项目内部审计（\texttt{CRITICAL\_CONSTRAINTS.md}）明确：
+\begin{itemize}
+  \item \textbf{C1：日期不可用}。\texttt{date} 字段在评测时一律置 0；任何日历日特征（星期效应、季末效应、首/末日）均不可用。
+  \item \textbf{C2：测试点顺序被打乱}。\texttt{Predictor.predict} 必须 stateless——不得维护任何跨调用 / 跨 batch / 跨 sample 的隐式状态；任何 per-batch 自适应统计（TTA、TTT、自适应阈值、跨截面排序）均结构性失效。
+  \item \textbf{C3：sym 可能含训练外股票}。\texttt{sym} 名义上 0--4，但同一 ID 在测试时可能映射到与训练集不同的标的。任何 \texttt{nn.Embedding(num\_sym=5)} 或 per-sym normalization 都会在 OOD sym 上失效甚至抛错。
+\end{itemize}
+
+\subsection{Design Principles}
+\label{sec:principles}
+
+基于以上约束，我们在项目伊始固化了三条设计原则，它们贯穿全文方法选择：
+
+\begin{description}[leftmargin=1.5em,style=nextline]
+\item[(P1)~Correctness — 无数据污染] 训练样本严格不含未来 tick；超参与决策层参数不在测试段重搜；推理期所有常量（阈值、归一化、$\sigma_s$、$\beta_s$）在训练阶段一次性算好。
+\item[(P2)~Effectiveness — 损失对齐 PnL] 直接以期望收益为优化目标而非以分类正确率为优化目标；用 SPO+ DFL 把神经网络梯度桥接到离散动作的期望收益。
+\item[(P3)~Generalizability — 时间 OOD 与 sym-agnostic 同时保] 所有归一化均在 100-tick 窗口内进行（C3 友好）；通过 bid/ask 镜像与涨/跌互换增强强制模型学到方向对称表示；集成异质化以降低 OOD 方差；以平台公榜为唯一 OOD ground truth，本地分数仅用于候选筛选。
+\end{description}
+
+% ============================================================
+\section{Methodology}
+\label{sec:method}
+
+本文最终系统由以下组件构成：(i) 一组 sym-agnostic、窗口内归一化的 359 维特征；(ii) 一个 4 层 MLP 与 LightGBM 的双族基模型；(iii) 对 MLP 的两阶段 SPO+ 决策焦点微调；(iv) 一个 50$\times$50 的异质 simple-mean 集成；(v) 一个非对称 EV gate 的执行层。本节按顺序描述五个组件，不写效果数字。
+
+\subsection{Feature Engineering}
+\label{sec:feature}
+
+\paragraph{六大家族，359 维。}
+我们以 154 维原始字段为底，叠加 216 维派生量、再丢弃 11 个对 train/test 分布偏移敏感的列（按 KS 检验筛除），得到 SchemeP 共 359 维特征。家族构成如下：
+
+\begin{itemize}
+  \item \textbf{LOB 派生}（约 30 维）：midprice、spread、bid\_diff、ask\_diff、imbalance 与微价格 \cite{microprice}；
+  \item \textbf{多尺度订单流不平衡（OFI）}（约 50 维）：MLOFI、EWMA-OFI 多 $\alpha$ 滤波、Kyle $\lambda$ rolling \cite{ofi,kyle1985,deepofi}，窗长 $W\!\in\!\{5,20,50,100\}$；
+  \item \textbf{订单流强度}（约 30 维）：6 类订单的 \texttt{intst/ind/acc} 与 cancel pressure（参 VPIN 信息毒性视角 \cite{vpin}）；
+  \item \textbf{微结构波动}（约 25 维）：signed RV、bipower variation \cite{bns_bipower}、Roll spread \cite{roll1984}、vol-burst；
+  \item \textbf{窗口统计}（约 60 维）：100-tick 窗口内的 z-score、dual z-score、quantile rank；
+  \item \textbf{不对称性}（约 30 维）：bid/ask 不对称、top-5 流动性不对称、GOFI、EWMA residual。
+\end{itemize}
+
+\paragraph{窗口内 z-score 归一化（sym-agnostic）。}
+所有统计量在每个 100-tick 切片内做自适应 z-score。这一选择同时服务于 (P3) 与 C3：跨 sym 的分布差异完全被切片内归一化吸收，模型不再依赖任何 per-sym 统计量。我们曾尝试全局 z-score（全训练集 mean/std），在跨 sym 留一验证上明显劣于窗口内归一化，且对 OOD sym 不鲁棒。
+
+\paragraph{方向对称增强。}
+我们引入 \texttt{aug\_a} 增强：在训练时把每个样本与其``bid/ask 互换且 label 反转''的镜像样本拼接，将训练集扩大 $2\times$。物理上，LOB 在 bid/ask 互换且标签反向后对应同一个市场状态——强制模型学到方向对称表示能显著降低单方向（涨或跌）的预测偏差。该单一 trick 是项目早期最大的边际增益来源之一。
+
+\paragraph{\texttt{amount\_delta} 局部 log1p。}
+唯一未被官方归一化的字段 \texttt{amount\_delta}（量级 $10^3$--$10^6$）在被送入 \texttt{raw\_last} 列时做保号 log 变换 $v\mapsto\operatorname{sign}(v)\cdot\log(1+|v|)$，压缩重尾。其下游派生量（Kyle inv、signed dvol 等）已含内建归一化，沿用原始量级。
+
+\subsubsection*{Why this design}
+特征工程的关键不在``想到的越多越好''，而在``全部 sym-agnostic 且窗口内可算''。在三条硬约束下，跨截面（Alpha101 系列 \cite{alpha101}）与跨日历（time-of-day、星期效应）特征被结构性排除；唯一剩余的 alpha 空间是 100-tick 窗口内的微观结构。三分类标签亦排除了跨样本依赖的方法（如 López de Prado 的三障碍 / triple-barrier 标注 \cite{triple_barrier}），因评测协议 C2 禁止任何跨样本状态。
+
+% ----------------------------------------------------------
+\subsection{Base Models}
+\label{sec:base}
+
+\paragraph{NN：4-layer MLP。}
+模型结构为 $359 \to 256 \to 128 \to 64 \to 1$ 的 MLP，每层加 LayerNorm + GELU + Dropout（约 120k 参数）。我们选择 LayerNorm 而非 BatchNorm 是 C2 的直接后果：BatchNorm 在打乱顺序的测试 batch 上会泄露 batch 统计，LayerNorm 在 sample 级别做归一化、严格 stateless。我们刻意不使用 RNN/Transformer/CNN 等具有跨 tick 时序记忆的结构——窗口内特征工程已把 100-tick 时序信息蒸馏为 aggregate features，更深更复杂的架构在本任务上反而带来 in-sample 拟合膨胀（详见 \S\ref{sec:negative}）。这一观察与近期 tabular DL 文献相符：在适当训练下纯 MLP 已能在 LOB \cite{tlob_mlplob} 与表格数据 \cite{tabular_dl_simple} 上达到 SOTA。
+
+\paragraph{LGB：L2 回归 LightGBM。}
+LightGBM \cite{lightgbm} 以 \texttt{objective=regression\_l2} 训练 $\Delta$mid 的 L2 回归，目标定义为
+\begin{equation}
+\label{eq:label}
+y = \frac{\mathrm{mp}_{t+60} - \mathrm{mp}_t}{\mathrm{mp}_t + 1},
+\end{equation}
+分母中 $+1$ 防除零（中间价单位已无量纲化、量级 $10^{-3}$）。我们以 h=60 的三分类标签频率倒数作为样本权重（class-balanced），使少数类（涨/跌样本）在 L2 回归损失中获得更高梯度——直觉上，决策边界附近的稀疏正样本远比``平''样本更值得拟合。
+
+\subsection{Decision-Focused Fine-tuning with SPO+}
+\label{sec:dfl}
+
+直接以 PnL 为损失训练 NN 会失败：式 (2) 的 PnL 在 $\hat a\in\{0,1,2\}$ 上分段不连续，裸梯度方向不一致。我们采用 SPO+ \cite{spo_plus} 的 surrogate gradient 作为决策焦点学习（DFL）信号，并采用两阶段训练：
+
+\begin{description}[leftmargin=1.5em,style=nextline]
+\item[Phase 1：L2 预训练] 在 walk-forward 的 train 段（date 0--79）以式 \eqref{eq:label} 的 L2 回归目标训练，在 val 段（date 80--95）早停。
+\item[Phase 2：SPO+ DFL 微调] 在 Phase 1 的权重上 warm-start，以
+\begin{equation}
+\label{eq:dfl}
+L \;=\; \underbrace{\frac{1}{N}\sum_i w_i (\hat y_i - y_i)^2}_{\text{L2 anchor}} \;+\; \lambda\cdot\underbrace{\frac{1}{N}\sum_i w_i\cdot\ell_{\mathrm{SPO+}}(\hat y_i, y_i)}_{\text{decision focal}}
+\end{equation}
+继续微调 11 epoch（$\lambda=30$，lr$=3\!\times\!10^{-5}$）。这里 $\ell_{\mathrm{SPO+}}$ 是 SPO+ 在我们 1D 三动作决策（buy/flat/sell）下的标量改写，$w_i$ 为同 Phase 1 的 class-balanced 权重。
+\end{description}
+
+\paragraph{Explicit form of $\ell_{\mathrm{SPO+}}$.}
+我们把通用的 SPO+ surrogate \cite{spo_plus} 在本任务（单标量预测 $\hat y$、真实 $\Delta$mid $y$、对称单边手续费率 $f$、三个离散动作 $z\in\{-1,0,+1\}$ 对应 sell/flat/buy）下展开为闭式。给定 $y$，oracle 决策（用真实 $y$ 计算的最优动作）为
+\begin{equation}
+\label{eq:zstar}
+z^{\star}(y) \;=\; \operatorname{sign}(y)\cdot\mathbf{1}\!\big[\,|y|>f\,\big]
+\;=\;
+\begin{cases} +1, & y > f,\\[-1pt] -1, & y < -f,\\[-1pt] 0, & |y|\le f,\end{cases}
+\end{equation}
+本项目实际使用的 SPO+ 损失则为
+\begin{equation}
+\label{eq:spop}
+\ell_{\mathrm{SPO+}}(\hat y, y;\,f)
+\;=\;
+\underbrace{\operatorname{ReLU}\!\big(|2\hat y - y| - f\big)}_{\text{(i) decision-margin hinge}}
+\;-\;
+\underbrace{z^{\star}(y)\,(2\hat y - y)}_{\text{(ii) oracle-pull linear}}
+\;+\;
+\underbrace{f\cdot |z^{\star}(y)|}_{\text{(iii) constant offset}}.
+\end{equation}
+
+\paragraph{Interpretation.}
+式 \eqref{eq:spop} 的三项各自承担如下角色：(i) $\operatorname{ReLU}(|2\hat y - y| - f)$ 是\emph{决策一致性的 hinge}——只在 $|2\hat y - y|$ 越过 fee 带 $f$ 后才贡献梯度，结构上避免在 fee 带内对极小 $\Delta$mid 过拟合；(ii) 线性项 $-z^{\star}(y)\,(2\hat y - y)$ 将预测向 oracle 决策方向拉，是 SPO+ 的主梯度信号；(iii) $f\cdot |z^{\star}(y)|$ 是只依赖 $y$ 的常数 offset，不影响梯度但保证 $z^{\star}=0$ 时损失退化为单边 hinge $\operatorname{ReLU}(|2\hat y - y| - f)$——这正是 ``oracle 选择不出手则只惩罚 pred 越界'' 的期望行为。L2 anchor $(\hat y - y)^2$ 与 $\ell_{\mathrm{SPO+}}$ 量级相差约 $10^{3}$（L2 squared scale $\sim 10^{-7}$，SPO+ linear scale $\sim 10^{-4}$），$\lambda=30$ 由 sweep $\lambda\in\{1,10,30,100,300\}\times\mathrm{lr}\in\{10^{-5},3\!\times\!10^{-5},10^{-4},3\!\times\!10^{-4}\}$ 选出，使两项在反向传播上贡献同量级、决策项占主导。
+该 surrogate 是直接以 PnL 为优化目标的 DFL 范式 \cite{spo_plus,moody_saffell} 在本任务下的具体落地。
+
+\subsubsection*{Why two-stage with an L2 anchor}
+Phase 1 的 L2 预训练给出量纲与 $\Delta$mid 一致的 pred 初始化；若没有 L2 anchor、直接以 SPO+ 微调，pred 会被 surrogate 梯度推到极值并失去与真实期望收益的标度对应。我们曾尝试直接以 GMADL、Quantile、Huber 等若干``近似 PnL''的损失替代两阶段方案，均不超过本节方案。
+
+\subsection{Heterogeneous Ensemble}
+\label{sec:ens}
+
+\paragraph{50$\times$50 Simple Mean.}
+最终系统由 50 个 MLP 与 50 个 LightGBM 组成。NN 一侧采用 12 种 HP 组合（学习率 $\times$ Dropout $\times$ batch size 的笛卡尔积 $3\!\times\!4\!\times\!3=12$），每组合循环复用 $\sim 4$ 个随机种子；LGB 一侧采用 5 组手工 HP（在 \texttt{feature\_fraction}、\texttt{bagging\_fraction}、\texttt{num\_leaves} 与 $\lambda_{L_2}$ 上扰动）$\times$ 10 个种子。族内 simple mean、跨族加权 $w_{NN}{=}1.0$、$w_{LGB}{=}1.5$，权重在项目早期的一次小网格搜索后冻结，之后所有提交不再调整。最终集成预测为
+\begin{equation}
+\hat p \;=\; \frac{w_{NN}\cdot\overline{f_{NN}(\phi)} + w_{LGB}\cdot\overline{g_{LGB}(\phi)}}{w_{NN}+w_{LGB}}.
+\end{equation}
+
+\paragraph{Why not learn ensemble weights.}
+NN-NN 模型间平均相关系数为 $0.93$，LGB-LGB 为 $0.84$，将 $100$ 列 model output 视为设计矩阵 $X\in\mathbb{R}^{N\times100}$ 时，其在 holdout 段上的条件数约 $5.4\!\times\!10^{4}$。在如此严重的共线性下，任意``最优''权重 $w^* = (X^\top X)^{-1} X^\top y$ 都依赖于 $X^\top X$ 的近奇异方向，等价于在 in-sample 噪声上做小信号比拟合。一次 bounded NNLS 学权重的实验在 in-sample (val+test) 上得到 PnL $+180/+194$（val/test ratio $1.075$，几乎可疑地相似），但公榜上反而退步至 $-4.64$ vs.\ simple-mean SOTA。该实验定量地证伪了``OOF 上学集成权重在 OOD 上更优''的假设。在共线性结构下，simple mean 是数学上 OOD 友好的稳健最优——它不依赖任何 $X^\top X$ 求逆，且对单个 base learner 的方差不敏感。
+
+\subsection{Execution: Expected-Value Gate}
+\label{sec:exec}
+
+\paragraph{Asymmetric EV Gate.}
+给定集成预测 $\hat p$（量纲与 $\Delta\mathrm{mid}/\mathrm{mp}_t$ 一致），执行层以非对称阈值门控生成离散动作：
+\begin{equation}
+\label{eq:evgate}
+\hat a =
+\begin{cases}
+2 & \hat p > +\theta_{\text{up}},\\
+0 & \hat p < -\theta_{\text{dn}},\\
+1 & \text{otherwise}.
+\end{cases}
+\end{equation}
+最终冻结的全局阈值为 $(\theta_{\text{up}}, \theta_{\text{dn}}) = (3.00\!\times\!10^{-4},\ 2.16\!\times\!10^{-4})$，由一次性的 2D 差分进化在 OOF 上搜出后冻结；比值约 $1.39$ 反映训练样本的轻微涨偏。一旦定下，跨所有后续提交均不再 re-tune——任何``再 DE 一次''的尝试都被 OOF 上学决策参数的过拟合证据按住（详见 \S\ref{sec:negative}）。
+
+\paragraph{Stateless Predictor.}
+\texttt{Predictor.predict(batches)} 在每次调用内部建立一个局部 \texttt{pred\_cache}，跨调用 0 状态。所有归一化常数（\texttt{feat\_mean}, \texttt{feat\_std}, \texttt{target\_scale}）皆为训练时算好的 \texttt{.json} 常量，inference 仅 load 不重算；任意 NaN/Inf 落到 $0$ 兜底；OOD sym 直接走全局阈值。算法 \ref{alg:predict} 列出执行链条。
+
+\begin{algorithm}[t]
+\caption{Stateless inference (one call to \texttt{Predictor.predict}).}
+\label{alg:predict}
+\begin{algorithmic}[1]
+\REQUIRE batch $\{X^{(b)}\}_{b=1}^B$, each $X^{(b)}\in\mathbb{R}^{100\times d_{raw}}$; constants $\theta_{\text{up}}, \theta_{\text{dn}}$; ensembles $\mathcal{E}_{NN}, \mathcal{E}_{LGB}$.
+\STATE Build 359-d feature vector $\phi^{(b)}$ from $X^{(b)}$ (window-z, log1p on \texttt{amount\_delta} raw\_last, NaN $\to 0$). \hfill // \S\ref{sec:feature}
+\STATE $p_{NN} \leftarrow \mathrm{mean}_{f\in\mathcal{E}_{NN}} f(\phi)$; \quad $p_{LGB} \leftarrow \mathrm{mean}_{g\in\mathcal{E}_{LGB}} g(\phi)$. \hfill // batched bmm in Torch
+\STATE $\hat p^{(b)} \leftarrow (1.0\cdot p_{NN} + 1.5\cdot p_{LGB}) / 2.5$. \hfill // \S\ref{sec:ens}
+\STATE Apply EV gate \eqref{eq:evgate} with $(\theta_{\text{up}}, \theta_{\text{dn}})$ to obtain $\hat a^{(b)}\in\{0,1,2\}$. \hfill // \S\ref{sec:exec}
+\RETURN $\{\hat a^{(b)}\}_b$ broadcast across $h\in\{5,10,20,40,60\}$. \hfill // shape $(B, 5)$, identical columns
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection*{Why a walk-forward ``full-data retrain''}
+我们在最终模型上引入一个``M7''步骤：将训练日期由 \texttt{train 0--79 / val 80--95} 推到 \texttt{date 0--119} 全量数据，并把训练步数固定为 walk-forward 早停得到的 \texttt{best\_iter}$\times 1.1$ 安全系数。直觉上，离测试期最近的 30 个交易日是 OOD 兑现增益最大的样本，但同时也是最容易``看 val 调''的样本——M7 的作法在丢失早停信号的同时获取这部分样本的训练贡献。在我们的实验里，M7 对 GBDT 的边际收益显著大于对 NN：LGB 从头训，新样本直接进树；NN 由于 Phase 1 + DFL 微调已基本收敛，M7 的增量基本饱和。
+
+% ============================================================
+\section{Experiments}
+\label{sec:exp}
+
+\subsection{Evaluation Protocol}
+\label{sec:protocol}
+
+本项目末期采用两种本地评估，按时间维度由 OOD 紧缩到 in-sample：
+
+\begin{itemize}
+  \item \textbf{V4 walk-forward} \cite{walk_forward}：将训练日期切为 \texttt{train 0--79 / val 80--95 / test 96--119}；val 段提供早停信号，test 段作为 OOF 评分段，代理时间 OOD 行为。该 protocol 与本项目 DE 阈值搜索同源，是项目中段所有方法选择的本地依据。
+  \item \textbf{Holdout in-sample}：M7 全数据重训之后，\texttt{date 0--119} 均进入训练集，已不存在与 in-sample 隔离的本地 holdout；在 \texttt{date 96--119} 上的评分含 in-sample 污染，绝对值不可信，仅作\emph{相对 delta} 参考。
+\end{itemize}
+
+\paragraph{Public board as the only OOD ground truth.}
+两层本地评估都不能给出无偏的 OOD 估计：V4 walk-forward 仍可能被 val 段早停过拟合，holdout in-sample 直接含训练样本。因此本项目自始至终以平台公榜为唯一可信的 OOD 裁判：若本地 delta 与公榜 delta 反向，一律以公榜为准；本地评估仅用于候选筛选与方向判断。一个反复出现的副产物是，\emph{看似干净的 OOF 上反复搜决策层参数}（DE/NNLS/calibrator）会在公榜上系统性退步，这一现象贯穿 \S\ref{sec:abl} 与 \S\ref{sec:negative}。
+
+\subsection{Ablation Study}
+\label{sec:abl}
+
+本节首先给出一张\textbf{统一 evaluation 协议（V4 walk-forward）下的大 ablation 表}（Table \ref{tab:abl_unified}），把 NN 渐进 (1--12)、LGB 渐进 (13--15)、Ensemble (16--20) 三条路径放在同一切分下逐行可比；随后按\emph{设计领域}（design area）分别给出更细粒度的消融（Tables \ref{tab:abl_feat}--\ref{tab:abl_exec}）。后者每个表内不同行可能跨不同 evaluation setting（LOSO 5-fold / LOSO-equivalent 442k / V4 walk-forward / holdout in-sample / public board），最后一列 \textbf{Eval} 显示该行所采用的 setting；表内可比较的是\emph{同一设计维度上的相对 delta}，跨表的绝对值并不可比。失败案例归入 \S\ref{sec:negative}，本节表中仅在与最终系统决策直接相关时列出。
+
+% ------ Master unified V4 walk-forward ablation (matches one-page summary) ------
+\begin{table}[!htbp]
+\centering
+\caption{\textbf{统一 V4 walk-forward 大 ablation：NN 渐进 (1--12)、LGB 渐进 (13--15)、Ensemble (16--20)。}
+所有行同切分：train date 0--79、val 80--95 用于早停与阈值搜索、test 96--119 仅做最终评分（未参与任何调参）。Rows 1--14 报 5 seeds 的 mean $\pm$ std；row 15 LGB M7 retrain 报 50 seeds 的 mean $\pm$ std；ensemble 行已为多种子聚合结果。Rows 1--12 由\textbf{统一实现}重跑（固定 HP lr=$3{\times}10^{-4}$, dropout 0.10, batch 4096, class-balanced weights, multiplicative noise, AdamW $+$ CosineAnnealingLR, grad clip 5.0）。Ensemble 用 $\hat p = (1.0\overline{\hat p}_{\mathrm{NN}} + 1.5\overline{\hat p}_{\mathrm{LGB}})/2.5$；执行层默认对称阈值，\hl{Execution Threshold Up/Down (ETUD)} 行额外搜索一对非对称阈值。Row 18$\to$19 单独添加 \hl{SPO+ DFL fine-tune}（$+3.54$），row 19$\to$20 扩 $5{+}5\to50{+}50$ HP cycling 集成（$+0.14$, HP 多样性主要在 5$+$5 已饱和）。SOTA = row 20 $= +41.58$。}
+\label{tab:abl_unified}
+\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.10}
+\small
+\begin{tabularx}{\textwidth}{@{}c >{\raggedright\arraybackslash}X r r@{}}
+\toprule
+\# & Setting & Test PnL ($h{=}60$) & $\Delta$ \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{\color{icmlblue}NN path — 154 raw $\to$ 6 家族渐进 $\to$ 359 (NN backbone, 主线)}} \\
+1 & NN 154 raw + 分类 Loss (3-class CE)                                              & $+0.69 \pm 0.13$  & --- \\
+2 & NN 154 raw + \hl{L2 regression Loss}                                              & $+0.52 \pm 0.48$  & $-0.17$ \\
+3 & NN 154 raw + L2 + \hl{window-$z$}（输入归一化）                                    & $+23.40 \pm 1.90$ & $+22.88$ \\
+4 & $+$ \hl{LOB 派生} Feature                                                          & $+23.33 \pm 1.54$ & $-0.07$ \\
+5 & $+$ \hl{多尺度 OFI} Feature                                                        & $+25.90 \pm 1.98$ & $+2.57$ \\
+6 & $+$ \hl{订单流强度} Feature                                                        & $+29.49 \pm 1.38$ & $+3.59$ \\
+7 & $+$ \hl{微结构波动} Feature                                                        & $+28.98 \pm 3.00$ & $-0.51$ \\
+8 & $+$ \hl{窗口统计} Feature                                                          & $+29.68 \pm 1.17$ & $+0.70$ \\
+9 & $+$ \hl{不对称性} Feature (370-d Feat)                                             & $+34.32 \pm 1.60$ & $+4.64$ \\
+10 & $+$ \hl{drop 11 feature w. KS 检验} (359-d Feat)                                  & $+32.75 \pm 0.69$ & $-1.57$ \\
+11 & $+$ \hl{买卖镜像数据增强} (bid/ask flip, 强制方向对称)                            & $+35.15 \pm 1.41$ & $+2.41$ \\
+12 & $+$ \hl{稳健归一化} (sign-log1p on raw\_last)                                     & $+34.44 \pm 1.39$ & $-0.72$ \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{\color{icmlblue}LGB path（参考）}} \\
+13 & \hl{LGB} 154 raw + 分类 Loss (3-class CE)                                       & $+21.95 \pm 1.16$ & --- \\
+14 & \hl{LGB} 359-d Feature + \hl{L2 regression Loss}                                  & $+26.58 \pm 0.96$ & $+4.63$ \\
+15 & $+$ \hl{train+val 全数据重训 (M7 retrain, $\times 1.1$ rounds)}                   & $+30.88 \pm 1.09$ & $+4.30$ \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{\color{icmlblue}Ensemble — NN $\times$ LGB（359-d, M7-retrained 基模型）}} \\
+16 & (1$+$1) NN(row 12 backbone$\to$M7) $+$ LGB(row 15)                                                       & $+36.32$ & --- \\
+17 & \hl{(5$+$5, 1 HP $\times$ 5 seeds)} NN(M7) $+$ LGB(M7, HP$_0$)                                            & $+37.12$ & $+0.80$ \\
+18 & (5$+$5) $+$ \hl{Execution Threshold Up/Down (ETUD)}                                                       & $+37.90$ & $+0.78$ \\
+19 & (5$+$5) $+$ \hl{(SPO$+$ DFL)} $+$ ETUD                                                                    & $+41.44$ & $+3.54$ \\
+20 & (5$+$5)$\to$\hl{(50$+$50, 5 HP $\times$ 10 seeds)} NN(SPO, \hl{HP cycling}) $+$ LGB(\hl{HP cycling}) $+$ ETUD (SOTA) & $+41.58$ & $+0.14$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Reading the unified table.}
+单一最大 trick 在 row 2$\to$3：把 raw 154 维 + window-$z$ 归一化喂入 NN，让 PnL 从 $+0.52$ 跃升到 $+23.40$（$\Delta+22.88$）——这是项目里唯一一个能让``完全不能用''变成``能用''的开关，呼应方法论小节的 (P3)：所有归一化都被压在 100-tick 窗口内、跨 stock 分布差异被吸收。其余六大家族叠加的累积红利在 row 3$\to$9 总和 $+10.92$，体现因子工程的稳健增量。模型侧（rows 13$\to$15）把 NN 换成 LGB、把 CE 换成 L2 回归、再做 M7 全数据重训，单 LGB 在测试集上达到 $+30.88$。集成层（rows 16$\to$20）的关键发现是：（i）5$+$5 简单平均相比 1$+$1 多 $+0.80$；（ii）非对称阈值 ETUD 多 $+0.78$；（iii）SPO+ DFL fine-tune 让 NN 与 LGB 互补再多 $+3.54$；（iv）5$+$5 $\to$ 50$+$50 的 HP cycling 仅再多 $+0.14$——HP 多样性在 5$+$5 已基本饱和，但平台 OOD 上仍兑现了非零正收益（公榜 $+0.78$ 的额外稳健性，详见 \S\ref{sec:lb}）。
+
+% ------ Table 1: Features ------
+\begin{table}[!htbp]
+\centering
+\caption{\textbf{Feature engineering.} Window-internal $z$-score normalization on the SchemeC backbone (most representative feature-side trick).}
+\label{tab:abl_feat}
+\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.15}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{3.6cm} >{\raggedright\arraybackslash}p{3.6cm}@{}}
+\toprule
+Setting & Local PnL ($h{=}60$) & Eval \\
+\midrule
+Baseline SchemeC, no window-internal $z$-score (T5a) & $+11.11$ & LOSO 5-fold \\
+$+$ Window-internal $z$-score normalization, SchemeD1 ($W{=}100$, T7) & $+13.91$ ($\Delta+2.80$) & LOSO 5-fold \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Takeaway.}
+窗口内 $z$-score 归一化是特征侧最干净的单 trick 红利（$+2.80$）：所有特征只用 100-tick 窗口内统计量缩放，天然满足 sym-agnostic 约束（C3），避免跨股票 mean/std 泄漏，同时也让 sym=2 类高方差段从负翻正。
+
+% ------ Table 2: Augmentation ------
+\begin{table}[!htbp]
+\centering
+\caption{\textbf{Augmentation.} Direction-symmetric augmentation on the SchemeC backbone (most representative augmentation trick).}
+\label{tab:abl_aug}
+\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.15}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{3.6cm} >{\raggedright\arraybackslash}p{3.6cm}@{}}
+\toprule
+Setting & Local PnL ($h{=}60$) & Eval \\
+\midrule
+Single seed, no augmentation (T2) & $+6.30$ & LOSO 5-fold \\
+$+$ Bid/ask mirror $+$ label flip (T25--T28) & $+9.67$ ($\Delta+3.37$) & LOSO 5-fold \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Takeaway.}
+LOB 在 bid/ask 互换且 label 反向后对应同一市场状态——强制模型学到方向对称表示直接降低单方向预测偏差，单 trick 贡献 $+3.37$，是项目早期最干净的边际收益。
+
+% ------ Table 3: Models & training ------
+\begin{table}[!htbp]
+\centering
+\caption{\textbf{Model architecture and training strategy.} Step-by-step contribution of the three model-side decisions: NN $+$ LGB heterogeneous ensembling with SPO+ DFL, M7 full-data retrain, and 50$\times$50 scale-up.}
+\label{tab:abl_model}
+\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.15}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{2.6cm} >{\raggedleft\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{2.2cm}@{}}
+\toprule
+Setting & Local PnL & Public PnL & Eval \\
+\midrule
+LightGBM L2 alone (T75)                                                              & LOSO-eq $+36.23$ & $+19.23$                       & LOSO-eq $+$ public \\
+$+$ SPO+ DFL NN $+$ LGB simple-mean ensemble (T87 $+$ T75)                           & LOSO-eq $+40.09$ & $+28.16$ ($\Delta+8.93$)       & LOSO-eq $+$ public \\
+$+$ M7 walk-forward full-data retrain (T140 LGB $+$ T170 NN)                         & ---              & $+34.64$ ($\Delta+6.48$)       & public \\
+$+$ 50-NN $\times$ 50-LGB heterogeneous simple-mean ensemble (T188v2)                & ---              & $+35.64$ ($\Delta+1.00$, SOTA) & public \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Takeaway.}
+模型侧的三步收益依次为：SPO+ DFL 让 NN 与 LGB 的预测结构互补，集成后公榜 $+8.93$；M7 全数据重训把 96--119 这 30 个 OOD-邻近日期吃进训练（LGB 增量 $+5.51$ 是大头，NN 已在 SPO+ 阶段收敛），$\Delta+6.48$；50$\times$50 把 HP 多样性放大至 12 个组合，靠 variance reduction 在 OOD 上多出稳定的 $+1.00$（5$\times$5 → 50$\times$50；继续扩到 150$\times$150 反而 $-1.05$）。
+
+% ------ Table 4: Regression target ------
+\begin{table}[!htbp]
+\centering
+\caption{\textbf{Regression target / loss.} The single largest jump of the project: 3-class CE $\to$ $\Delta$mid L2 regression $+$ asymmetric EV gate.}
+\label{tab:abl_target}
+\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.15}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{2.6cm} >{\raggedleft\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{2.2cm}@{}}
+\toprule
+Setting & Local PnL & Public PnL & Eval \\
+\midrule
+3-class CE $+$ high-confidence threshold gate (iter\_002, T5b)                       & LOSO $h{=}60$ $+6.30$ & $+4.07$ & LOSO $+$ public \\
+$\Delta$mid L2 regression $+$ asymmetric EV gate (iter\_013, T75)                    & LOSO-eq $+36.23$ & $+19.23$ ($\Delta+15.16$) & LOSO-eq $+$ public \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Takeaway.}
+赛题 PnL 对预测幅度非线性敏感，三分类把幅度信号离散化掉了；把 label 改为 $\Delta$mid 回归并用非对称 EV gate 解码，是整个项目最大的单步跃升（公榜 $\Delta+15.16$）。
+
+% ------ Table 5: Execution / decision layer ------
+\begin{table}[!htbp]
+\centering
+\caption{\textbf{Execution / decision layer.} Symmetric $k$-scaled threshold vs.\ asymmetric decoupled $(\theta_{\text{up}}, \theta_{\text{dn}})$ tuned by 2D DE on LOSO-eq.}
+\label{tab:abl_exec}
+\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.15}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedleft\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{2.2cm}@{}}
+\toprule
+Setting & Local PnL & Eval \\
+\midrule
+Symmetric EV gate, $k\!\cdot\!\overline{|\hat y|}$ ($k{=}1.25$, T62)                                                       & LOSO-eq $+33.72$ & LOSO-eq \\
+Asymmetric decoupled $(\theta_{\text{up}}, \theta_{\text{dn}})$ via 2D DE on LOSO-eq (T75/T76, iter\_013)                  & LOSO-eq $+36.23$ ($\Delta+2.51$) & LOSO-eq \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Takeaway.}
+解耦 $(\theta_{\text{up}}, \theta_{\text{dn}})$ 匹配评测窗口内的非对称收益分布；通过 2D DE 在 LOSO-eq 上一次性搜出后冻结，整条提交链（iter\_013 → T188v2）再未 re-tune，是该任务下最稳的工作流。
+
+% ------ Table 6: Alternative GBDT / NN architectures ------
+\begin{table}[!htbp]
+\centering
+\caption{\textbf{Alternative GBDT / NN architectures.} Alternative model families tried during the project; none was retained in the final pipeline. References for the deep architectures cited in the Takeaway.}
+\label{tab:abl_alt}
+\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.15}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{1.4cm} >{\raggedright\arraybackslash}p{3.0cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{4.6cm} >{\raggedright\arraybackslash}p{1.6cm}@{}}
+\toprule
+Tag & Alternative & Local outcome & Why not chosen & Eval \\
+\midrule
+T18                & XGBoost L2 regression$^{\dagger}$                                                & LOSO ceiling $\approx +22$, parity with LightGBM            & 同族 GBDT 无明显增益；LightGBM 在 1.47M $\times$ 226 cache 上 GPU 训练快 $\sim 3.2\!\times$。                                                                & LOSO 5-fold \\
+T17 / T89          & CatBoost L2 5-seed$^{\dagger}$                                                   & LOSO $+40.13$, NN--CB corr $\approx 0.77$                   & 与 MLP 主线高度共线，集成不带来 variance reduction；iter\_016 含 CatBoost 的 4-way 公榜 $-3.08$ vs.\ iter\_015。                                              & LOSO-eq $+$ public \\
+T95                & GRU 2-layer (100-tick raw input)$^{\ddagger}$                                    & iter\_016 4-way (含 GRU) LOSO $+43.71$                       & 公榜 $+25.08$（$-3.08$ vs.\ iter\_015 $+28.16$）；hidden state 在短 horizon 上过拟合，与 C2 shuffle 协议风险叠加。                                              & LOSO-eq $+$ public \\
+T172 / T187        & GroupTransformer (feature-grouped attention, $d_{\text{model}}{=}64$, CLS)$^{\ddagger}$ & Holdout in-sample $+149.91$ alone, $+164.71$ in best stack & 训练含 96--119 测试日期，无独立 OOD 验证；新架构 M7 retrain 风险高，PM 主动\emph{未提交}。                                                                          & Holdout (in-sample 污染) \\
+T184 / T185        & Deep raw-tick CNN ($100\!\times\!154$ window)$^{\ddagger}$                       & In-sample 数字看似好，OOD 未验证                            & T186 verdict \texttt{architecture\_doesn't\_fit}：100-tick 时序信息已被 aggregate features 蒸馏，conv 无补充。                                                  & Holdout (in-sample 污染) \\
+T19                & MLP $+$ extra dropout / weight-decay sweep                                       & LOSO 与 iter\_002 持平                                       & 单纯 regularization 未撬动 LOSO；项目后续 capacity 留给损失重写（$\Delta$mid 回归 / SPO+ DFL）。                                                                & LOSO 5-fold \\
+\bottomrule
+\end{tabularx}
+
+\vspace{2pt}\footnotesize
+\raggedright
+$^{\dagger}$ 同族 GBDT 替代方案。\quad
+$^{\ddagger}$ 与本文 MLP$+$LGB 异构、在 LOB 文献中常见的深度时序架构；可对照 TransLOB \cite{translob}、TabL / C-TabL \cite{tabl_ctabl}、TLOB / MLPLOB \cite{tlob_mlplob}、FT-Transformer \cite{ft_transformer} 等公开结果。
+\end{table}
+
+\paragraph{Takeaway.}
+同族 GBDT（XGBoost / CatBoost）在我们的特征 / 协议下与 LightGBM 持平，且与 NN 主线相关性高（NN-CB corr $0.77$）——不能为集成提供方差减少红利，反而在含 CatBoost 的 4-way ensemble 上让公榜退步 $-3.08$（T89 in iter\_016）。深度时序架构（GRU / GroupTransformer / Deep CNN）在 100-tick aggregate-feature 框架下普遍出现 \emph{in-sample 高、OOD 退}的模式：T184/T185 直接被 T186 verdict 判定 \texttt{architecture\_doesn't\_fit}；T172 / T187 holdout in-sample 高达 $+164.71$ 但训练已含测试日期，PM 主动未提交。这一观察与近期 MLPLOB / TLOB \cite{tlob_mlplob} 报告的 \emph{简单 MLP 在 LOB 上可达 SOTA} 一致：当特征工程已把窗口时序蒸馏为 aggregate features 时，更深的时序结构主要在 in-sample 噪声上获利。最终我们把 NN 一族冻结在 4 层 MLP $+$ SPO+ DFL，不再追加深度时序结构。
+
+\subsection{Leaderboard Results}
+\label{sec:lb}
+
+表 \ref{tab:lb} 汇总公榜与私榜成绩。本队在私榜上位列 \#1。
+
+\begin{table}[t]
+\centering
+\caption{Overall leaderboard. Team \textbf{792 - ``超级回天什么时候上映''}.}
+\label{tab:lb}
+\setlength{\tabcolsep}{8pt}\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}l c c@{}}
+\toprule
+Leaderboard & Score (h=60 cumulative PnL) & Rank \\
+\midrule
+Public (公榜)  & $+35.64$ & ---      \\
+Private (私榜) & \textit{(value pending official release)}$^{\ddagger}$ & \textbf{\#1 / $N^{*}$} \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}\footnotesize
+\raggedright
+$^{*}$ $N$ 为参赛队伍总数，以组委会公布为准。\quad
+$^{\ddagger}$ 私榜分数由组委会在公榜窗口结束后 1--2 个交易日跑出（取每队公榜最后一次有效提交），本文付印时尚未由组委会公开。
+\end{table}
+
+\subsection{Engineering Notes}
+\label{sec:eng}
+
+\noindent\textbf{特征构造 58$\times$ 加速。}
+项目早期连续三次提交因特征计算超过 3h 限时被拒。\texttt{iter\_010 (T61)} 把 Python for-loop 重写为 NumPy/Pandas 向量化（含 EWMA 与 quantile rank），254 min $\to$ 4.5 min。这是整个项目第一个让``任何提交成为可能''的工程节点。
+
+\noindent\textbf{50-NN 推理 186$\times$ 加速。}
+将 50 个 MLP 的权重堆叠为 $\mathbb{R}^{50\times d_{out}\times d_{in}}$ 张量，单次 \texttt{torch.bmm} 替代 50 次顺序 NumPy 前向，per-1024 batch 由 1509 ms 降至 8.1 ms。最终 442k 行 e2e 推理 15.4 min $\to$ 4.6 min。
+
+\noindent\textbf{提交包 CPU-only。}
+最终提交包使用 \texttt{torch==2.5.1+cpu} 与 CPU LightGBM。GPU 仅在训练期使用（含 LightGBM GPU 版的 $3.2\times$ 训练加速）。
+
+\subsection{Discussion and Negative Findings}
+\label{sec:negative}
+
+我们在项目过程中验证了一批最初看似有希望、最终未入选最终系统的方向。下面按主题给出最具教学价值的几条，作为 LOB 方向预测任务的负向证据。
+
+\begin{itemize}
+  \item \textbf{Learning decision parameters on the same data used for selection overfits.} 对 4D 阈值 $(\theta_{\text{up}}, \theta_{\text{dn}}, \mathrm{margin}, \mathrm{weight})$ 的差分进化重搜（iter\_016）与 bounded NNLS 学集成权重（T192）均在本地 OOF / in-sample holdout 上显示正向 delta，但在公榜上分别退步 $-3.08$（vs.\ iter\_015）与 $-4.64$（vs.\ T188v2 SOTA）。结构上，本项目从始至终未拿到一份与本地 OOF 同时独立于公榜的第二份 OOD 数据，因此任何在 OOF 上参数化拟合决策层 / 权重的策略都缺乏可验证的泛化保证。
+  \item \textbf{Deeper sequence architectures inflate in-sample but do not transfer.} 我们实现并训练了 GroupTransformer（T172）、深度 raw-tick CNN（T184/T185）与 GRU（T95）多个变体（详细对比见表 \ref{tab:abl_alt}）；在 holdout in-sample 上得到极高分值（部分 $+150$ 以上），但因 100-tick 时序信息已被特征工程蒸馏为 aggregate features，更复杂的架构主要在 in-sample 噪声上获利，OOD 风险高于已经收敛的 MLP$+$LGB 组合 \cite{translob,tabl_ctabl,ft_transformer,tlob_mlplob}。这与``特征工程已吸收时序''的整体设计互为印证。
+  \item \textbf{Per-batch adaptive statistics are structurally invalid under shuffled-order evaluation (C2).} TTA、AR-TTT、自适应阈值、跨截面 Alpha101 等所有依赖 batch 内样本间相互信息的方法在打乱顺序的评测环境下表现均显著为负——这是约束 C2 在六个独立实验上的可重复负面证据。
+  \item \textbf{Calibration before a PnL-sensitive gate hurts.} 在已经做 $\Delta$mid 回归的 ensemble 上叠加 isotonic / Platt 校准或 stacking 层，均带来本地小幅正、公榜持平或微负。当损失对预测幅度敏感时，破坏单调排序质量的校准方法（如经典温度缩放 \cite{temperature_scaling}）不胜过未校准的回归 pred。
+  \item \textbf{Alternative ensemble schemes did not beat heterogeneous simple mean.} 我们考虑过 snapshot ensembles \cite{snapshot_ensembles} 与 stochastic weight averaging (SWA) \cite{swa} 等``在同一训练轨迹内取多个 checkpoint''的方法，但本任务的瓶颈不是 NN 收敛轨迹的 mode 覆盖，而是 NN-NN 间 $0.93$ 的方差耦合——在异质 LGB$+$NN simple mean 已经吃掉跨族 variance reduction 的前提下，同族 checkpoint averaging 的边际收益被同族高相关性压平。
+\end{itemize}
+
+\paragraph{A known numerical inconsistency.}
+诚实起见，我们标注方法层一处未完全闭环的数值问题：NN 训练时使用 \texttt{nn.GELU}（默认 erf 实现），而推理时使用 \texttt{F.gelu(approximate='tanh')}；数值偏差在 $|x|>1$ 区间为 $10^{-4}$ 量级，叠加 4 层后理论上可能 flip 极少数边界 action。该差异在本项目 SOTA 上的实测影响很小，作为未来工作仍值得修复。
+
+% ============================================================
+\section{An AI-Agent-Augmented Research Workflow}
+\label{sec:agent}
+
+\begin{figure}[!ht]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{fig_a_public_pnl.pdf}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{fig_b_local_pnl.pdf}
+\end{minipage}
+\caption{Agent 开发节奏图（Karpathy autoresearch 风格）。\textbf{左}：21 次公榜提交时间线，baseline $-6.65$ 到 SOTA $+35.64$，蓝点为 8 个新高 kept 节点。\textbf{右}：85 个本地实验时间线，橙色为同 eval 内 16 个新高 kept，灰色点为未提升；marker 形状区分 eval 类型（圆 = V4 walk-forward, 方块 = LOSO-eq, 三角 = LOSO 5-fold, 星 = in-sample）。两图共同体现 Manager-Worker 双层 agent 的研究节奏。}
+\label{fig:agent_timeline}
+\end{figure}
+
+\subsection{Manager-Worker System Design}
+
+整个研究过程由一个双层的 AI agent 系统驱动：
+
+\begin{description}[leftmargin=1.5em,style=nextline]
+\item[PM agent（主线程）] 把研究问题拆为若干可独立执行的子任务，向 worker 派发；每个 worker prompt 头部强制注入 \texttt{CRITICAL\_CONSTRAINTS.md} §1 的三条硬约束；PM 不在主线程中执行训练或大规模计算，从而把上下文留给研究决策本身。
+\item[Worker agent（执行层）] 每个 worker 拿到一份自包含的任务描述（含工作目录、目标、产出格式），独立完成特征构造、模型训练、ablation 或代码审计；产出写入 \texttt{worker-progress.json} 与 \texttt{results.json}，同时所有训练用 WandB 记录。
+\end{description}
+
+单批最多 8 个 worker 并行。所有 worker 的代码改动以 GitHub 私有仓库为单一真相源，提交粒度细到 T 实验编号，便于回滚与跨实验对照。
+
+\subsection{Human-AI Division of Labor}
+
+我们在项目结束时回看，发现人类时间的实际分布与传统手写代码的研究项目显著不同：
+\begin{itemize}
+  \item \textbf{Interface time}（人类与系统的交互界面）：飞书 IM : VS Code $\approx$ 8 : 2。绝大多数研究决策（任务派发、结果审阅、方向调整）在 IM 里完成，IDE 仅用于代码 review 与少量手工补丁。
+  \item \textbf{Task time}（人类时间的去向）：目标定义 : 方法分配 : 编码 $\approx$ 5 : 4 : 1。人类时间从``写代码''显著迁移到``定义问题与验证假设''。
+  \item \textbf{Agent 承担}：paper / patent 调研、idea brainstorming、validity checking、coding、文档生成与提炼。
+\end{itemize}
+
+\subsection{Lessons for Quantitative Research with AI Agents}
+
+从本次实践我们抽出三条经验性原则：
+\begin{enumerate}
+  \item \textbf{Agent 对``宽且浅''的工作特别有效}，例如批量调研、按已知约束并行 ablation、跨实验数字的归并与表格化。
+  \item \textbf{Agent 对``窄且深''的研究决策仍依赖人类先验}。在我们的项目里，关于``决策层参数不在 OOF 上学''、``公榜是唯一 OOD 裁判''、``in-sample val/test ratio 1.075 是危险信号''这类判断，全部由人类作出；agent 在没有这类先验注入时容易被 in-sample 数字误导。
+  \item \textbf{硬约束必须以``协议''形式写入每个 worker 的 prompt}。本项目中 \texttt{CRITICAL\_CONSTRAINTS.md} 的三条约束如果在某个 worker 启动时未被注入，worker 可能在不知情的情况下产出违反平台协议的设计（例如把 sym 加入 LightGBM 特征列）。``约束即合同''是 agent 驱动研究的必要工程实践。
+\end{enumerate}
+
+% ============================================================
+\section{Conclusion}
+\label{sec:concl}
+
+本文以``良文杯''2026 决赛任务为载体，提出并验证了一套以 PnL 损失为对齐目标的 LOB 方向预测方案。核心是把 3-class 分类范式重写为 $\Delta$mid 的 L2 回归 $+$ 非对称 EV gate，再以 SPO+ DFL 把神经网络梯度桥接至离散动作的期望收益，最后以 50$\times$50 的异质 simple-mean 集成把可学习的集成权重严格约束在不学的稳健最优形式。与之伴随的若干负向结论——OOF 上学决策参数普遍过拟合、深度时序架构 in-sample 涨而 OOD 退、per-batch 自适应在打乱顺序下结构性失效、PnL-敏感任务上的事前校准退步——共同构成对``该用什么 / 不该用什么''的可复制经验。
+
+方法的最终效果是公榜从基线 $-6.65$ 提升至 $+35.64$（增益 $+42.29$），私榜位列 \#1。我们同时报告了一种由 PM-worker 双层 agent 驱动、在 6 天内并行完成约 200 组实验的研究工作流，并讨论其在量化研究中的适用边界与局限。未来工作包括：修复 \texttt{GELU} 训练/推理一致性、在更细分的 OOD sym 与时间 OOD 切片上做系统性鲁棒性评估、并探索由可信的第二份 OOD 数据驱动的决策层学习（这是本项目内未能闭环的方向）。
+
+% ============================================================
+\section*{Acknowledgements}
+
+感谢厦门大学经济学院、黄良文统计学科基金会与 AITOPIA 联合主办本届竞赛，提供了高质量的微观结构数据集与严谨的评测协议。感谢平台运营团队对评测协议三条硬约束的清晰说明，使本文的设计原则能够建立在确定的契约之上。
+
+% ============================================================
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+
+\bibitem{deeplob2019}
+Zihao Zhang, Stefan Zohren, and Stephen Roberts.
+\newblock {\em DeepLOB: Deep Convolutional Neural Networks for Limit Order Books}.
+\newblock IEEE Transactions on Signal Processing, 2019.
+
+\bibitem{spo_plus}
+Adam~N. Elmachtoub and Paul Grigas.
+\newblock {\em Smart ``Predict, then Optimize''}.
+\newblock Management Science, 2022.
+
+\bibitem{lightgbm}
+Guolin Ke, Qi Meng, Thomas Finley, et al.
+\newblock {\em LightGBM: A Highly Efficient Gradient Boosting Decision Tree}.
+\newblock NeurIPS, 2017.
+
+\bibitem{ofi}
+Rama Cont, Arseniy Kukanov, and Sasha Stoikov.
+\newblock {\em The Price Impact of Order Book Events}.
+\newblock Journal of Financial Econometrics, 2014.
+
+\bibitem{kyle1985}
+Albert~S. Kyle.
+\newblock {\em Continuous Auctions and Insider Trading}.
+\newblock Econometrica, 1985.
+
+\bibitem{optiver_kaggle}
+Optiver Realized Volatility Prediction (Kaggle competition winners' solutions).
+\newblock 2021--2023.
+
+\bibitem{walk_forward}
+Marcos~L\'opez de Prado.
+\newblock {\em Advances in Financial Machine Learning}.
+\newblock Wiley, 2018.
+
+\bibitem{tablob}
+Kaiyuan Liu, Wei Shen, and Ying Liu.
+\newblock {\em TabLOB: A Tabular Transformer for Limit Order Book Prediction}.
+\newblock 2023.
+
+\bibitem{translob}
+James Wallbridge.
+\newblock {\em TransLOB: Transformers for Limit Order Books}.
+\newblock arXiv:2003.00130, 2020.
+
+\bibitem{tabl_ctabl}
+Dat~Thanh Tran, Martin Magris, Juho Kanniainen, Moncef Gabbouj, and Alexandros Iosifidis.
+\newblock {\em Temporal Attention-Augmented Bilinear Network for Financial Time-Series Data Analysis}.
+\newblock IEEE Transactions on Neural Networks and Learning Systems, 2018.
+
+\bibitem{tlob_mlplob}
+Leonardo Berti et al.
+\newblock {\em TLOB and MLPLOB: Dual Attention and a Simple MLP for Limit Order Book Forecasting}.
+\newblock arXiv:2502.15757, 2025.
+
+\bibitem{deepofi}
+Petter~N. Kolm, Jeremy Turiel, and Nicholas Westray.
+\newblock {\em Deep Order Flow Imbalance: Extracting Alpha at Multiple Horizons from the Limit Order Book}.
+\newblock Mathematical Finance, 2023.
+
+\bibitem{ft_transformer}
+Yury Gorishniy, Ivan Rubachev, Valentin Khrulkov, and Artem Babenko.
+\newblock {\em Revisiting Deep Learning Models for Tabular Data}.
+\newblock NeurIPS, 2021.
+
+\bibitem{tabular_dl_simple}
+Yury Gorishniy, Ivan Rubachev, and Artem Babenko.
+\newblock {\em On Embeddings for Numerical Features in Tabular Deep Learning}.
+\newblock NeurIPS, 2022.
+
+\bibitem{roll1984}
+Richard Roll.
+\newblock {\em A Simple Implicit Measure of the Effective Bid-Ask Spread in an Efficient Market}.
+\newblock Journal of Finance, 1984.
+
+\bibitem{microprice}
+Sasha Stoikov.
+\newblock {\em The Microprice: A High-Frequency Estimator of Future Prices}.
+\newblock Quantitative Finance, 2018.
+
+\bibitem{vpin}
+David Easley, Marcos~M. L\'opez de Prado, and Maureen O'Hara.
+\newblock {\em Flow Toxicity and Liquidity in a High-Frequency World}.
+\newblock Review of Financial Studies, 2012.
+
+\bibitem{bns_bipower}
+Ole~E. Barndorff-Nielsen and Neil Shephard.
+\newblock {\em Power and Bipower Variation with Stochastic Volatility and Jumps}.
+\newblock Journal of Financial Econometrics, 2004.
+
+\bibitem{alpha101}
+Zura Kakushadze.
+\newblock {\em 101 Formulaic Alphas}.
+\newblock Wilmott Magazine, 2016 (arXiv:1601.00991).
+
+\bibitem{moody_saffell}
+John Moody and Matthew Saffell.
+\newblock {\em Reinforcement Learning for Trading Systems and Portfolios}.
+\newblock Journal of Forecasting, 1998.
+
+\bibitem{snapshot_ensembles}
+Gao Huang, Yixuan Li, Geoff Pleiss, Zhuang Liu, John~E. Hopcroft, and Kilian~Q. Weinberger.
+\newblock {\em Snapshot Ensembles: Train 1, Get M for Free}.
+\newblock ICLR, 2017.
+
+\bibitem{swa}
+Pavel Izmailov, Dmitrii Podoprikhin, Timur Garipov, Dmitry Vetrov, and Andrew~G. Wilson.
+\newblock {\em Averaging Weights Leads to Wider Optima and Better Generalization}.
+\newblock UAI, 2018.
+
+\bibitem{temperature_scaling}
+Chuan Guo, Geoff Pleiss, Yu Sun, and Kilian~Q. Weinberger.
+\newblock {\em On Calibration of Modern Neural Networks}.
+\newblock ICML, 2017.
+
+\bibitem{triple_barrier}
+Marcos~L\'opez de Prado.
+\newblock {\em The Triple-Barrier Method (Chapter 3, Advances in Financial Machine Learning)}.
+\newblock Wiley, 2018.
+
+\end{thebibliography}
+
+% ============================================================
+\section*{Contact}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{姓名}：史景喆（Shi Jingzhe）
+  \item \textbf{院系}：清华大学，研究方向：博士期间 LLM research
+  \item \textbf{邮箱}：\texttt{sjzworking@gmail.com}
+  \item \textbf{GitHub}：\href{https://github.com/JingzheShi}{\texttt{JingzheShi}}
+  \item \textbf{队伍}：792 - 超级回天什么时候上映
+\end{itemize}
+
+\noindent\emph{I will do LLM research in my doctoral process; please feel free to contact me.}
+
+\end{document}

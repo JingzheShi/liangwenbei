@@ -208,3 +208,143 @@ rounds (the old row 11 method, 30.03 PnL) is not a documented project recipe.)
 **SOTA**: Row 12, **test h=60 PnL = 36.64** on the V4 walk-forward holdout (dates 96–119).
 
 Total wall-clock for rerun: ~6 min on RTX 3090 (LGB GPU-accelerated; 8 rows + 1 fulltrain).
+
+---
+
+## REORGANIZED TABLE (post-followup) — LGB path + NN path
+
+**Motivation**: Q1–Q5 follow-up experiments showed that window-z / mirror flip /
+log1p are **NN-specific tricks**, not LGB-specific. The previous big table
+presented them as a 5-step "LGB feature engineering" sequence (rows 6–8), which
+is misleading: window-z is ~0 on LGB and absolutely critical on NN, mirror flip
+is slightly negative on LGB and slightly positive on NN, log1p is +0.96 on LGB
+(barely noise) and +0.69 on NN. The reorganized table stops the LGB path at
+"359-d drop-11 + LGB L2" (row 5) and then **branches into the NN path**, where
+each NN-specific aug is shown in isolation on its own path.
+
+**3 new NN runs** (V4 walk-forward, 0–79 train / 80–95 val ES / 96–119 test;
+WandB project `liangwenbei-ablation-reorganize`):
+
+| New row | WandB name | augs                       | feat_dim | best_ep | Val PnL | **Test PnL** |
+|---------|------------|----------------------------|----------|---------|---------|--------------|
+| 6       | `r6_nn_base_noaug` | none (no wz, no mirror, no log1p) | 359 | 8       | 2.7972  | **3.5626**   |
+| 7       | `r7_nn_wz`         | + window-z                 | 359 | 1       | 26.5014 | **33.5610**  |
+| 8       | `r8_nn_wz_mirror`  | + window-z + mirror        | 359 | 1       | 26.7854 | **34.2430**  |
+
+(Row 9 from existing `r09_nn_l2_359` = window-z + mirror + log1p, val 26.23, test **34.9306**.)
+
+All 3 use the **same HP as row 9**: AdamW lr 3e-4, batch 4096, dropout 0.10,
+LayerNorm + GELU, 25 epochs max with patience 6, target_scale = train(y_reg).std.
+Cache `ablation_runs/cache_log1p` (370-d SchemeP with amount_delta baked-log1p);
+drop-11 applied at training time inside `train_nn_ablation.py`.
+
+### Reorganized 12-row table
+
+| # | Setting                                            | Test PnL | Δ vs prev | Path     |
+|---|----------------------------------------------------|----------|-----------|----------|
+| 1 | 154 raw + LGB CE (3-class)                         | 22.40    | —         | LGB      |
+| 2 | 154 raw + LGB regression L2                        | 19.14    | −3.26     | LGB      |
+| 3 | 226-d SchemeC + LGB L2                             | 24.50    | +5.36     | LGB      |
+| 4 | 370-d SchemeP (no drop) + LGB L2                   | 31.40    | +6.90     | LGB      |
+| 5 | 359-d SchemeP (drop 11) + LGB L2                   | 27.84    | −3.56     | LGB      |
+| 6 | NN MLP L2 on 359-d, no augs (backbone switch)      | **3.56** | (switch)  | NN       |
+| 7 | row 6 + window-z                                   | 33.56    | **+30.00**| NN       |
+| 8 | row 7 + mirror flip                                | 34.24    | +0.68     | NN       |
+| 9 | row 8 + log1p rawlast (= old row 9)                | 34.93    | +0.69     | NN       |
+| 10| row 9 + SPO+ DFL fine-tune                         | 30.19    | −4.74     | NN       |
+| 11| NN+SPO + LGB (1+1) ensemble, sym EV                | **36.64**(SOTA) | +6.45 | Ensemble |
+| 12| NN+SPO + LGB (1+1) ensemble, asym EV (2D DE)       | 36.53    | −0.11     | Ensemble |
+
+**Key narrative changes vs the original 13-row table:**
+
+1. **LGB path stops at row 5.** Old rows 6/7/8 (LGB + window-z / + mirror / +
+   log1p) move to a footnote in `ablation_followup.md` (Q3) since they are all
+   within ±2.5 PnL of row 5 and do not meaningfully improve LGB.
+2. **Row 6 (new) is the NN backbone switch with all augs OFF.** Test PnL = 3.56
+   shows that an MLP trained on raw-scale 359-d features without standardization
+   essentially fails to learn (best epoch = 8, val PnL = 2.80). This is the
+   reference point for the NN path.
+3. **Row 7 (new) +window-z gives +30.00 PnL on NN** (3.56 → 33.56). This is the
+   single largest delta in the entire table — confirming Q3 follow-up
+   (`onepage_v2/ablation_followup.md §Q3`) that window-z is NN-critical, not
+   LGB-specific.
+4. **Rows 8/9 mirror & log1p each add ~+0.7 PnL on NN** (single-seed noise
+   level but consistently positive; in the 50-seed ensemble these compound to
+   the project's window-z + mirror + log1p stack).
+5. **Old row 8.5 (NN no mirror, with log1p+wz) removed** — it was an
+   "interleaved" check that overlapped with the new row 7/8 isolation.
+6. **Old rows 11 (LGB fulltrain) and 13 (asym, now 12) renumbered**; row 11
+   already removed from the public table per the projhp rerun's overfit finding.
+
+WandB run links:
+- Row 6 (new): `r6_nn_base_noaug` (project `liangwenbei-ablation-reorganize`)
+- Row 7 (new): `r7_nn_wz`
+- Row 8 (new): `r8_nn_wz_mirror`
+- Row 9 (existing): `r09_nn_l2_359` from project `liangwenbei-ablation-rerun`
+- Row 10 (existing): `r10_nn_spo_359`
+- Rows 11/12 (existing): `r12_nnspo_lgb_sym` / `r13_nnspo_lgb_asym`
+
+The one-page TeX summary (`onepage_v2/one_page_summary.tex`) has been
+updated with this reorganized 12-row table, three subsection separators
+("LGB path", "NN path", "Ensemble"), and a caption note explaining
+the window-z criticality on NN.
+
+---
+
+## 2026-05-26 12:45  V18: NN feature path (4 rows) + 5+5 ensembles (3 rows)
+
+Added 7 new rows to the big ablation table (now 18 rows total):
+
+### NN feature path (rows 6-9) [NEW]
+| # | Setting | Test PnL |
+|---|---|---|
+| 6 | NN 154 raw + CE (high-conf gate)          | +0.61  |
+| 7 | NN 154 raw + L2 (sym EV)                  | +0.79  |
+| 8 | NN 154 raw + L2 + window-z                | +26.70 |
+| 9 | NN 370-d (no drop) + L2 + window-z        | +35.06 |
+
+Key narrative: row 7→8 (add window-z) gives **+25.91 PnL** — confirms window-z
+NN-critical (LGB on the same step is ±0.2). Row 6→7 (CE→L2) marginal.
+Row 9 (no-drop) beats row 10 (drop-11 = 33.56) by +1.50, mirroring LGB's
+row 4 (no-drop = 31.40) > row 5 (drop = 27.84) gap of +3.56.
+
+### NN augmentation path (rows 10-13) [renumbered]
+Renumber of old rows 6-9 (which now becomes 10-13). Same values; row 10 is
+the 359-d (drop-11) starting point for augmentation; rows 11/12 add mirror /
+log1p; row 13 adds SPO+.
+
+### Ensemble (rows 14-18) [3 NEW]
+| # | Setting | Test PnL |
+|---|---|---|
+| 14 | (1+1) NN+SPO + LGB, sym EV     | +36.64 (old SOTA)   |
+| 15 | (1+1) NN+SPO + LGB, asym EV    | +36.53              |
+| 16 | (5+5) NN (no SPO) + LGB, sym  | +36.07              |
+| 17 | (5+5) NN (no SPO) + LGB, asym | +36.19              |
+| 18 | **(5+5) NN+SPO + LGB, asym**  | **+37.73 (new SOTA)** |
+
+The 5+5 multi-seed ensembles confirm 1+1 is not lucky:
+- F (no-SPO sym, 36.07) matches row 14 (1+1 sym, 36.64) within seed noise.
+- H (5+5 +SPO asym, 37.73) **beats** row 14 by +1.09, showing multi-seed
+  stabilizes SPO's val PnL spike (38.94 val vs 36.78 1-seed val) and
+  validates the asym EV gate when val is reliable.
+
+### Components added/reused
+- **A/B/C/D (NN feature path)**: new runs with `train_nn_ablation_v2.py`
+  (adds `--objective {l2,ce}` head + raw154 cache prefix auto-detection).
+- **5 NN no-SPO seeds**: new — `ablation_runs/followup_q5/nn_nosp_seeds/`,
+  row 12 recipe (359-d + window-z + mirror + log1p, Phase 1 only).
+- **5 NN +SPO seeds**: reused — `ablation_runs/followup_q5/nn_seeds/`.
+- **5 LGB seeds**: reused — `ablation_runs/followup_q5/lgb_seeds/`.
+- **Ensemble**: new `ablation_runs/ensemble_55_ablation.py` — within-family
+  simple mean, cross-family weighted mean (1.0:1.5), sym or asym DE gate
+  bounded to [0.7×, 1.5×] of sym threshold.
+
+WandB project: `liangwenbei-ablation-bigger`. Runs:
+- `rA_nn_ce_154raw`, `rB_nn_l2_154raw`, `rC_nn_l2_154_wz`, `rD_nn_l2_370_wz`
+- `nn_nosp_s{1..5}` (5 NN no-SPO seeds)
+- `nF_55_nosp_sym`, `nG_55_nosp_asym`, `nH_55_sp_asym`
+
+### PDF
+`one_page_summary.pdf` (1 page, A4, ~230 KB). All 18 rows fit; caption
+explains the 4-band structure (LGB path / NN feature path / NN aug path /
+Ensemble).

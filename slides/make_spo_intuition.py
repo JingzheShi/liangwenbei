@@ -51,14 +51,9 @@ ax.set_title("Phase 1：L2 回归预训练 —— 光滑二次型，逼近真值
 ax.set_ylim(-0.6, 12)
 ax.set_xticks([-f, 0, f, y_true, 2 * f])
 ax.set_xticklabels(["−f", "0", "+f", "y", "+2f"])
-ax.text(y_true + 0.08, 0.5, "真实 y", color="#001E5A", fontsize=9)
 ax.legend(loc="upper right", fontsize=9, frameon=False)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
-ax.annotate(r"$\hat{y}\to y$ 时梯度→0," "\n但决策可能仍错",
-            xy=(0.3, 1.69), xytext=(-2.7, 6.5),
-            fontsize=9, color="#555",
-            arrowprops=dict(arrowstyle="->", color="#888", lw=0.8))
 
 # ---------- BOTTOM : SPO+ ----------
 ax = axes[1]
@@ -79,10 +74,6 @@ ax.set_xticklabels(["−f", "0", "+f", "y", "+2f"])
 ax.legend(loc="upper right", fontsize=9, frameon=False)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
-ax.annotate("过门槛 +f 后梯度才放缓\n→ 对齐离散动作期望收益",
-            xy=(1.2, 0.65), xytext=(-2.7, 7.0),
-            fontsize=9, color="#555",
-            arrowprops=dict(arrowstyle="->", color="#888", lw=0.8))
 
 plt.tight_layout()
 plt.savefig("/root/projects/liangwenbei_workdir/slides/spo_intuition.pdf",

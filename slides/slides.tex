@@ -1,10 +1,10 @@
 % !TEX program = xelatex
-% 5-minute beamer slides v2 for 第二届"良文杯" finals
+% 5-minute beamer slides v2 for 第二届``良文杯'' finals
 % Author: 史景喆 (清华大学)
 % Public LB #1 / Private LB #1
 %
 % v2 changes (per PM feedback):
-%   1. Title: drop full team-name line; keep "史景喆（清华）".
+%   1. Title: drop full team-name line; keep ``史景喆（清华）''.
 %   2. Factor engineering: rich 2-col (6 families detail + Feature_Img).
 %   3. SPO+: vertical figure + Phase 1/2 emphasis + 2 benefits.
 %   4. Ensemble & Execution merged on 1 slide with top progression hl.
@@ -54,15 +54,12 @@
 \setbeamerfont{frametitle}{series=\bfseries,size=\large}
 \setbeamerfont{footline}{size=\tiny}
 
-% slim footline: short author label only
+% slim footline: short author label + page number
 \setbeamertemplate{footline}{%
   \leavevmode%
   \hbox{%
-    \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.25ex,dp=1ex,leftskip=1.2ex]{author in head/foot}%
-      \scriptsize 史景喆（清华）%
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
-      \scriptsize 良文杯 2026 决赛 ·\ 公榜\,\#1\,·\,私榜\,\#1%
+    \begin{beamercolorbox}[wd=.84\paperwidth,ht=2.25ex,dp=1ex,leftskip=1.2ex]{author in head/foot}%
+      \scriptsize 792-史景喆-清华大学%
     \end{beamercolorbox}%
     \begin{beamercolorbox}[wd=.16\paperwidth,ht=2.25ex,dp=1ex,rightskip=1.2ex]{date in head/foot}%
       \hfill\scriptsize \insertframenumber{}\,/\,\inserttotalframenumber%
@@ -83,6 +80,10 @@
 \usepackage{tikz}
 \usepackage{xcolor}
 \usepackage{pifont}
+\usepackage{url}
+\usepackage{colortbl}
+\definecolor{tabularbg}{RGB}{226,238,253}
+\definecolor{seqbg}{RGB}{255,236,217}
 
 % ---------- Highlight macros ----------
 \newcommand{\hl}[1]{\textcolor{lblue}{\textbf{#1}}}
@@ -96,7 +97,7 @@
 \subtitle{$\Delta$mid 回归\,$+$\,SPO+ 决策焦点学习\,$+$\,$50\!\times\!50$ 异质集成}
 \author{史景喆}
 \institute{\small 清华大学}
-\date{\small 第二届"良文杯"统计建模与 AI 预测挑战赛\,·\,决赛汇报}
+\date{\small 第二届``良文杯''统计建模与 AI 预测挑战赛\,·\,决赛汇报}
 
 \begin{document}
 
@@ -106,37 +107,49 @@
 \begin{frame}[plain]
   \vfill
   \begin{center}
-    {\Large\bfseries\color{icmlblue} 面向 PnL 目标的 LOB 中间价方向预测}\\[6pt]
-    {\large $\Delta$mid 回归 \,$+$\, SPO+ 决策焦点学习 \,$+$\, $50\!\times\!50$ 异质集成}\\[20pt]
+    {\Large\bfseries\color{icmlblue} 良文杯：比赛方案 \,\&\, 基于 AI Agent 的研究方案}\\[24pt]
 
     \begin{tikzpicture}
       \draw[lblue, line width=1.2pt] (0,0) -- (8,0);
     \end{tikzpicture}\\[14pt]
 
-    {\Large \textbf{史景喆}\,（清华）}\\[24pt]
+    {\Large 792 队\,\,\textbf{史景喆}（清华大学\,-\,超级回天什么时候上映队）}\\[24pt]
 
     \begin{tikzpicture}
-      \node[draw=icmlblue, line width=0.9pt, fill=icmlblue!5,
-            inner sep=10pt, rounded corners=3pt] {
-        \begin{minipage}{0.78\textwidth}
+      \node[draw=icmlblue, line width=1.0pt, fill=icmlblue!5,
+            inner sep=12pt, rounded corners=4pt] {
+        \begin{minipage}{0.62\textwidth}
           \centering
-          \large
-          公榜 $-6.65 \to$ \rhl{$+35.64$}\,\, （baseline 之上增益 \rhl{$+42.29$}）\\[4pt]
-          \textbf{公榜 \#1\,\,\textbar\,\,私榜 \#1}（$h{=}60$）\,\textbar\,\, $h{=}40$ 私榜亦第一
+          \Large
+          私榜累计收益率 \,\rhl{$+41.61$}\,\,\textbf{\#1}
         \end{minipage}
       };
     \end{tikzpicture}
-
-    \vspace{14pt}
-    {\footnotesize 第二届"良文杯"统计建模与 AI 预测挑战赛 · 决赛汇报}
   \end{center}
   \vfill
 \end{frame}
 
 % =========================================================
-% Slide 2 — Problem & Scoring
+% Slide 2 — Section divider: 比赛方案
 % =========================================================
-\begin{frame}{Problem 与评分 —— 带交易成本的「期望收益预测」题}
+\begin{frame}[plain]
+  \vfill
+  \begin{center}
+    \begin{tikzpicture}
+      \draw[lblue, line width=1.2pt] (0,0) -- (8,0);
+    \end{tikzpicture}\\[24pt]
+    {\Huge\bfseries\color{icmlblue} 第一部分：比赛方案}\\[36pt]
+    \begin{tikzpicture}
+      \draw[lblue, line width=1.2pt] (0,0) -- (8,0);
+    \end{tikzpicture}
+  \end{center}
+  \vfill
+\end{frame}
+
+% =========================================================
+% Slide 3 — Problem & Scoring
+% =========================================================
+\begin{frame}{问题设定与评分 —— 带交易成本的「期望收益预测」题}
   \begin{columns}[T,onlytextwidth]
     \column{0.50\textwidth}
     \textbf{\color{icmlblue}数据}
@@ -154,16 +167,18 @@
     \end{itemize}
 
     \column{0.46\textwidth}
-    \begin{block}{\color{accred}评测端 3 条硬约束（违反 = 0 分）}
-      \scriptsize
-      \begin{enumerate}\setlength{\itemsep}{2pt}
-        \item \textbf{\texttt{date} 被置 0}\,\,---\,\,不能当 feature
-        \item \textbf{测试点顺序被打乱}\,\,---\,\,Predictor 无跨调用 state
-        \item \textbf{sym 0--4 可能含训练外股票}\,\,---\,\,模型必须 \textbf{sym-agnostic}：不用 sym embedding / per-sym 归一化 / per-sym 模型
+    \begin{block}{\color{accred}\large 评测端 3 条硬约束}
+      \normalsize
+      \begin{enumerate}\setlength{\itemsep}{4pt}
+        \item \textbf{\texttt{date} 被置 0}
+        \item \textbf{测试点顺序被打乱}
+        \item \textbf{sym 0--4 可能含训练外股票} $\Rightarrow$ \textbf{sym-agnostic}
       \end{enumerate}
     \end{block}
-    \vspace{4pt}
-    {\footnotesize\itshape 这 3 条约束塑造了所有后续设计 —— 特别是 \hl{window-$z$} 归一化与 \hl{simple-mean 集成}。}
+    \vspace{6pt}
+    \begin{center}\normalsize
+      \hl{正确性} \,$\cdot$\, \hl{有效性} \,$\cdot$\, \hl{范化性}
+    \end{center}
   \end{columns}
 \end{frame}
 
@@ -173,47 +188,81 @@
 \begin{frame}{方案 Pipeline 一览}
   \vspace{-2pt}
   \begin{center}
-    \includegraphics[width=0.82\linewidth,height=0.70\textheight,keepaspectratio]{Pipeline_Img.png}
-  \end{center}
-  \vspace{-4pt}
-  \begin{center}\footnotesize
-  Data $\to$ \hl{6 家族 Feature (359 维)} $\to$ \hl{NN(MLP) + LGB(L2 回归)} 异质 Model
-  $\to$ Ensemble $\to$ Execution (\hl{ETUD 阈值学习}) $\to$ Label
+    \includegraphics[width=0.92\linewidth,height=0.80\textheight,keepaspectratio]{Pipeline_Img.png}
   \end{center}
 \end{frame}
 
 % =========================================================
-% Slide 4 — Factor engineering (rich, 2-col)
+% Slide — Local Evaluation Setup
 % =========================================================
-\begin{frame}{因子工程：六大家族 —— F1 + F3 合计占 LGB gain \hl{75.5\%}}
-  \vspace{-6pt}
+\begin{frame}{本地 Evaluation 设置}
+  \vspace{2pt}
+  \begin{center}
+    \setlength{\tabcolsep}{6pt}\renewcommand{\arraystretch}{1.20}
+    \footnotesize
+    \begin{tabular}{@{}>{\centering\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{5.0cm}>{\raggedright\arraybackslash}p{5.2cm}@{}}
+      \toprule
+      \textbf{Eval setting} & \textbf{划分方式} & \textbf{OOD 维度 \& 用途} \\
+      \midrule
+      \rowcolor{tabularbg}\hl{Train-Val-Test} &
+        Train 日期 0--79 / Val 80--95 / Test 96--119\,\,(单一切分,\,严格时间顺序) &
+        日期 OOD\,;\,early stop + 阈值搜索在 val\,；test 完全冻结\,(\textbf{zero-tune})\,，最终评分 \\
+      \midrule
+      \rowcolor{seqbg}\hl{LOSO-date} &
+        \textbf{K-fold by date}:\,120 天划成 K 块\,(\,K{=}5 或合并 442k 样本),\,每折训练其它 K-1 块、eval 留出块 &
+        日期 OOD\,;\,stock 全部 in-sample\,；用于早期特征筛选,\,OOF 预测拼接 \\
+      \midrule
+      \rowcolor{seqbg}\hl{LOSO-stock} &
+        \textbf{5-fold by stock}:\,5 只股票各做 1 fold,\,训练用其余 4 只\,$\times$\,所有 120 天,\,eval 留出 1 只\,$\times$\,所有日期 &
+        股票 OOD\,；验证 \textbf{sym-agnostic} 假设\,(评测时可能含训练外股票) \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+  \vspace{6pt}
+  \begin{center}\footnotesize\itshape
+    PPT 与表格里报的 PnL，若未特别说明，均为 \hl{Train-Val-Test} setting 下的 Test PnL。
+  \end{center}
+\end{frame}
+
+% =========================================================
+% Slide — Factor engineering (rich, 2-col)
+% =========================================================
+\begin{frame}{因子工程：六大家族 (105+50+45+29+67+74 = 370 → KS drop 11 → \hl{359 维})}
+  \vspace{2pt}
   \begin{columns}[T,onlytextwidth]
-    \column{0.58\textwidth}
-    \scriptsize
-    \begin{itemize}\setlength{\itemsep}{1pt}\setlength{\topsep}{0pt}\setlength{\parsep}{0pt}
-      \item \hl{F1 LOB 派生}\,\,(105 维,\,\rhl{gain 40.4\%})\\
-        \tiny 10 档 bid/ask 价+量、OHLC、\textbf{WMP 微价格}、\texttt{bid\_diff}/\texttt{ask\_diff}\,;\,\emph{snapshot 表示,\,F2--F6 派生底座}
-      \item \hl{F2 多尺度 OFI}\,\,(50 维,\,gain 5.5\%)\\
-        \tiny MLOFI / EWMA-OFI 多 $\alpha$ / Kyle $\lambda$ rolling $W{=}5/20/50/100$\,;\,\emph{5--100 tick 多窗口订单流不平衡}
-      \item \hl{F3 订单流强度}\,\,(45 维,\,\rhl{gain 35.1\%})\\
-        \tiny 6 类事件 \texttt{lb/la/mb/ma/cb/ca} $\times$ \texttt{intst/ind/acc} + EWMA + cancel\,;\,\emph{撮合层多空压力,\,\rhl{Top-4 因子全在此族}（\texttt{ma\_intst} gain $0.90$ 全特征第一）}
-      \item \hl{F4 微结构波动}\,\,(29 维,\,gain 7.5\%)\\
-        \tiny signed RV / bipower / Roll spread / vol-burst + \texttt{volume\_delta}\,;\,\emph{波动放大$\to$方向转折概率上升}
-      \item \hl{F5 窗口统计}\,\,(67 维,\,gain 5.2\%)\\
-        \tiny 100-tick z-score / dual-z / quantile rank\,;\,\emph{单族贡献低,\,\rhl{与所有族 $|\rho|{\le}0.07$,\,OOD 稳健性 anchor}}
-      \item \hl{F6 不对称性}\,\,(74 维,\,gain 6.3\%)\\
-        \tiny bid/ask rate L1--L10 + bsize/asize rate + GOFI + EWMA residual\,;\,\emph{买卖侧异质性}
+    \column{0.52\textwidth}
+    \vspace{6pt}
+    \tiny
+    \begin{itemize}\setlength{\itemsep}{2pt}\setlength{\topsep}{0pt}\setlength{\parsep}{0pt}
+      \item \hl{F1 LOB 派生} (94 raw + 11 派生 = 105 维, \rhl{gain 40.4\%})\\
+        OHLC, 10 档 bid/ask 价+挂单量, agg (avgbid/avgask/total*size), 4 mean, \texttt{midprice$_k$}, \texttt{spread$_k$}, \textbf{WMP 微价格} (Stoikov 2014): $\frac{a\cdot bs + b\cdot as}{bs+as}$, \texttt{bid\_diff/ask\_diff} 档内梯度 ── \emph{snapshot 表示, F2--F6 衍生底座}
+      \item \hl{F2 多尺度 OFI} (0 raw + 50 派生, gain 5.5\%)\\
+        \textbf{MLOFI} (Cont 2014, 多档 10$\times$3 $W$): $e_t^{(k)} = \mathbf{1}_{b\uparrow}\,bs - \mathbf{1}_{b\downarrow}\,bs^{-} + \cdots$, 窗口求和, $W\in\{5,20,60\}$ \\
+        \textbf{EWMA-OFI} 多 $\alpha\in\{0.05,0.1,0.3,0.5\}$\,;\,\textbf{Kyle} $\lambda$ rolling \& \textbf{反 Kyle}\,$\frac{\Delta amt}{\sqrt[3]{|\Delta amt|\sigma}+\varepsilon}$
+      \item \hl{F3 订单流强度} (18 raw + 27 派生, \rhl{gain 35.1\%})\\
+        6 类事件 \texttt{l/m/c b/a} (limit/market/cancel × buy/sell) × \texttt{intst/ind/acc} 18 原始 + EWMA-intst 24 + cancel pressure 3 ── \emph{撮合层多空压力,\,\rhl{Top-4 全在此族}: \texttt{ma\_intst}=0.945, \texttt{mb\_intst}=0.860, \texttt{la/lb\_intst}=0.6}
+      \item \hl{F4 微结构波动} (2 raw + 27 派生, gain 7.5\%)\\
+        \texttt{volume/amount\_delta} (sign-log1p 重尾压制), signed RV $\sum r^2$, bipower $\sum|r_i||r_{i+1}|$, \textbf{Roll spread} $2\sqrt{-\text{cov}(r_t, r_{t-1})}$, vol-burst (短窗口/长窗口 vol 比) ── \emph{波动放大$\to$方向转折}
+      \item \hl{F5 窗口统计} (0 raw + 67 派生, gain 5.2\%)\\
+        100-tick \textbf{z-score} $(x-\mu)/\sigma$, \textbf{dual-z} (两窗口比), \textbf{quantile rank} 窗口内分位, sym-agnostic ── \emph{单族 gain 低但与所有族 $|\rho|{\le}0.07$,\,\rhl{OOD 稳健性 anchor}}
+      \item \hl{F6 不对称性} (40 raw + 34 派生, gain 6.3\%)\\
+        bid/ask rate L1--L10 (报价更新率), bsize/asize rate (挂单变化率), \textbf{GOFI} (Generalized OFI 含 cancel), EWMA residual (买卖侧不对称残差) ── \emph{买卖侧异质性}
     \end{itemize}
 
-    \column{0.40\textwidth}
-    \vspace{-2pt}
+    \column{0.46\textwidth}
+    \vspace{-4pt}
     \begin{center}
-      \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{Feature_Img.pdf}
+      \begin{tabular}{@{}cc@{}}
+        \includegraphics[width=0.49\linewidth]{Feature_family.pdf} &
+        \includegraphics[width=0.49\linewidth]{Feature_ablation.pdf} \\[-2pt]
+        \includegraphics[width=0.49\linewidth]{Feature_rawder.pdf} &
+        \includegraphics[width=0.49\linewidth]{Feature_top10.pdf}
+      \end{tabular}
     \end{center}
   \end{columns}
-  \vspace{-2pt}
+  \vspace{-4pt}
   \begin{center}\tiny\itshape
-    \hl{F1 + F3 = 75.5\% gain} 是预测主力\,;\,\hl{F5} 与其他族近正交（$|\rho|{\le}0.07$）\,$\Rightarrow$\,\textbf{OOD 红利的"方差源去相关"通道}\,。
+    \hl{F1+F3 = 75.5\% gain}（主力）\,;\,\hl{F5} 与全族近正交（$|\rho|{\le}0.07$）= OOD 方差源去相关\,;\,\textbf{3 类预处理}: window-z (\rhl{+22.88 PnL}) / 镜像增强 (+2.41) / sign-log1p (重尾)\,。
   \end{center}
 \end{frame}
 
@@ -230,8 +279,7 @@
       \,\,$\Rightarrow$ 训练外股票也能 zero-shot
       \begin{center}
         \vspace{2pt}
-        \rhl{$+22.88$ PnL}\\
-        \scriptsize{(单 trick 最大跃升)}
+        \rhl{$+22.88$ PnL}
       \end{center}
     \end{block}
     \column{0.33\textwidth}
@@ -254,98 +302,102 @@
       \]
       \,\,$\Rightarrow$ NN/LGB 梯度数值稳定\\[3pt]
       \,\,$\Rightarrow$ LGB 大幅受益, NN 中性
-      \begin{center}
-        \vspace{2pt}
-        \scriptsize\itshape (与 F5/F6 一同贡献)
-      \end{center}
     \end{block}
   \end{columns}
   \vspace{6pt}
   \begin{center}
     \footnotesize\itshape
-    共同主题：\textbf{在输入侧让模型"看不见"非平稳分布偏移}\,，这是 OOD 上能稳的根本。
+    主题：\textbf{在输入侧让模型``看不见''非平稳分布偏移}\,—— \hl{范化性}的根本。
   \end{center}
 \end{frame}
 
 % =========================================================
 % Slide 6 — Models (A): NN arch comparison
 % =========================================================
-\begin{frame}{模型工程 (A)：NN 架构对比 —— \emph{为什么用 4-layer MLP，不用更复杂的}}
+\begin{frame}{模型工程 (A)：NN 架构 —— 纯 MLP 的设计启示}
+  \vspace{-4pt}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.50\textwidth}
+    \scriptsize
+    \textbf{\color{icmlblue}本任务的 4 个客观属性}
+    \begin{enumerate}\setlength{\itemsep}{1pt}
+      \item 数据集小（5 stock $\times$ 120 day）
+      \item 训练/测试股票可能切换，\textbf{难利用跨股票信息}
+      \item 评测时\textbf{只能用 100 ticks 窗口信息}
+      \item 因子已充分蒸馏潜在信息，\textbf{MLP 非线性已足够}
+    \end{enumerate}
+
+    \column{0.46\textwidth}
+    \scriptsize
+    \textbf{\color{icmlblue}从而推断}
+    \begin{enumerate}\setlength{\itemsep}{1pt}
+      \item 复杂\hl{时序}架构 (CNN/RNN/TCN) 用处小（只 100 ticks，因子已聚合）
+      \item 复杂\hl{跨通道}架构 (Transformer) 发挥空间小（跨 stock 信息难用）
+      \item 复杂架构容易\rhl{过拟合}小数据
+    \end{enumerate}
+  \end{columns}
   \vspace{-2pt}
+  \begin{center}\footnotesize
+    $\Rightarrow$ 只用 4-layer MLP；实验也表明换更复杂架构都\textbf{没有更好}。
+  \end{center}
+
+  \vspace{2pt}
   \begin{center}
-    \setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.20}
-    \footnotesize
-    \begin{tabular}{@{}lrlr@{}}
+    \setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.05}
+    \scriptsize
+    \begin{tabular}{@{}lrlp{4.4cm}@{}}
       \toprule
-      \textbf{架构} & \textbf{参数量} & \textbf{Test PnL ($h{=}60$)} & \textbf{备注} \\
+      \textbf{架构} & \textbf{参数量} & \textbf{Test PnL ($h{=}60$, V4)} & \textbf{备注} \\
       \midrule
-      \rhl{MLP (主线)}    & 134k  & \rhl{$+34.44 \pm 1.39$}\,\,(5 seeds) & 4-layer $[256/128/64]$ \\
-      ResMLP             & 1.15M & $+26.72 \pm 3.96$\,\,(5 seeds)        & 加深 + residual,\,高方差\,(-7.7 PnL) \\
-      MLP-Mixer          & 2.08M & $+30.18$\,\,(2 seeds, \texttt{best\_ep=0}) & 参数量大反而 in-sample 过拟合 \\
-      FT-Transformer     & --    & \textbf{OOM}\,(batch 2048,\,16 GiB)    & 359-token 全 attention 炸显存 \\
+      \rowcolor{tabularbg}\rhl{MLP (主线, 4-layer)} & 134k  & \rhl{$+34.44 \pm 1.39$}\,\,(5 s) & 表格类 $[256/128/64]$ \\
+      \rowcolor{tabularbg}AutoInt                  & 1.12M & $+32.98$\,\,(1 s)                 & 表格类 feature attention \\
+      \rowcolor{tabularbg}MLP-Mixer (4-layer)       & 2.08M & $+30.18$\,\,(2 s)                 & 表格类 ep 0 即过拟合 \\
+      \rowcolor{tabularbg}GatedMLP                 & 274k  & $+27.56 \pm 2.07$\,\,(5 s)        & 表格类 gate 无增益 \\
+      \rowcolor{tabularbg}ResMLP                   & 1.15M & $+26.72 \pm 3.88$\,\,(5 s)        & 表格类 高方差 \\
+      \rowcolor{tabularbg}FT-Transformer (flashattn) & 16k & $+24.18 \pm 3.35$\,\,(2 s)         & 表格类 attn 无增益 \\
+      \midrule
+      \rowcolor{seqbg}TimeMixer                  & 274k  & $+31.44 \pm 1.47$\,\,(5 s)        & 时序类 \\
+      \rowcolor{seqbg}ModernTCN                  & 56k   & $+0.77 \pm 0.84$\,\,(5 s)         & 时序类 conv 无法学 \\
+      \rowcolor{seqbg}TimeKAN                    & 29k   & $+0.04 \pm 0.08$\,\,(5 s)         & 时序类 KAN 无法学 \\
       \bottomrule
     \end{tabular}
   \end{center}
 
-  \vspace{4pt}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.55\textwidth}
-    \scriptsize
-    \textbf{\color{icmlblue}观察}
-    \begin{itemize}\setlength{\itemsep}{1pt}
-      \item 100-tick 时序信息已被 aggregate features 蒸馏（\texttt{intst/OFI/RV}\dots）\,$\Rightarrow$ raw-tick conv/attention \rhl{in-sample 高,\,OOD 退}
-      \item T184 TickTransformer / T185 hybrid CNN：V4 验证 MSE drop $0\%$,\,verdict \texttt{architecture\_doesn't\_fit}
-      \item T172 GroupTransformer in-sample $+149.91$,\,但训练含测试日期污染,\,\textbf{PM 主动未提交}
-    \end{itemize}
-
-    \column{0.42\textwidth}
-    \scriptsize
-    \begin{block}{\color{icmlblue}与近期文献一致}
-      \scriptsize
-      \textbf{TLOB / MLPLOB} (Zhang et al.\ 2024,\,\emph{When MLPs beat the LOB Transformers})\,—— 当窗口时序已被 aggregate feature 蒸馏，\textbf{纯 MLP 在 LOB 上可达 SOTA}。\\[2pt]
-      与我们观察一致 $\Rightarrow$ 最终冻结 \hl{4-layer MLP $+$ SPO+ DFL}。
-    \end{block}
-  \end{columns}
+  \vspace{2pt}
+  \begin{center}\tiny
+    \textbf{文献佐证}：TLOB/MLPLOB (Zhang 2024) —— 复杂模型在某些表格场景下并不显著优于 MLP \,;\,
+    Scaling Law for TS Forecasting (Shi et al.\ NeurIPS 24') —— 数据 \& 回看长度限制 TS 模型上限\,。
+  \end{center}
 \end{frame}
 
 % =========================================================
 % Slide 7 — Models (B): GBDT same-family comparison
 % =========================================================
-\begin{frame}{模型工程 (B)：GBDT 同族对比 —— \emph{为什么用 LightGBM,\,不用 XGBoost / CatBoost}}
+\begin{frame}{模型工程 (B)：GBDT 同族对比 —— \emph{相同 setting 下不同 GBDT}}
   \vspace{-2pt}
   \begin{center}
-    \setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.25}
+    \setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.15}
     \scriptsize
-    \begin{tabular}{@{}p{2.4cm}p{2.4cm}p{4.0cm}p{4.3cm}@{}}
+    \begin{tabular}{@{}p{3.0cm}p{4.0cm}p{5.0cm}@{}}
       \toprule
-      \textbf{GBDT} & \textbf{Eval} & \textbf{结果} & \textbf{为什么没选} \\
+      \textbf{GBDT} & \textbf{Test PnL ($h{=}60$)} & \textbf{备注} \\
       \midrule
-      \rhl{LightGBM (主线)}           & V4 walk-forward   & \rhl{$+30.88 \pm 1.09$} (50 seed M7) & GPU 训快 $\sim\!3.2\times$,\,L2 + 359 维 SchemeP \\
-      XGBoost L2 (T18)               & LOSO 5-fold       & ceiling $\approx +22$,\,parity LGB      & 同族无增益,\,速度劣 \\
-      CatBoost L2 5-seed (T17/T89)   & LOSO-eq + 公榜     & LOSO $+40.13$,\,NN--CB corr $0.77$       & 与 NN 主线\rhl{高度共线}\,;\,iter\_016 公榜 $-3.08$ \\
+      \rhl{LightGBM L2}  & \rhl{$+26.58 \pm 0.96$}\,\,(5 seeds) & 359-d Feature, L2 回归 + class-balanced \\
+      XGBoost L2         & $+28.22 \pm 0.66$\,\,(5 seeds)        & \texttt{tree\_method=gpu\_hist},\,同 setting,\,与 LGB 持平 \\
+      CatBoost L2        & $+26.67 \pm 2.23$\,\,(5 seeds)        & 同 setting,\,与 LGB 持平,\,方差较大 \\
       \bottomrule
     \end{tabular}
   \end{center}
+  \vspace{1pt}
+  \begin{center}\tiny\itshape
+    相同 walk-forward setting + 同 359-d SchemeP feature + L2 target + 镜像增强 + window-z, 只换 GBDT 库；\\
+    实际尝试将 XGBoost 并入 $50{+}50$ 集成,\,公榜累计收益率\textbf{并无提升},\,故最终主线仍只保留 LightGBM。
+  \end{center}
 
   \vspace{6pt}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.50\textwidth}
-    \scriptsize
-    \textbf{\color{icmlblue}核心观察}
-    \begin{itemize}\setlength{\itemsep}{1pt}
-      \item GBDT 同族都 \textbf{saturate 在 LightGBM L2 + 359 维 SchemeP} 这个组合
-      \item CatBoost \emph{看似强}（LOSO $+40.13$）但 NN--CB corr $0.77$,\,\textbf{加进 ensemble 反伤公榜 $-3.08$}（共线性,\,无方差减少红利）
-      \item XGBoost L2 与 LightGBM L2 持平,\,但 \texttt{gpu\_hist} 速度劣
-    \end{itemize}
-
-    \column{0.46\textwidth}
-    \scriptsize
-    \begin{block}{\color{icmlblue}为什么 L2 而不是 3-class CE?}
-      \scriptsize
-      回归保留\textbf{连续置信度}\,，ETUD 阈值层在执行侧二次决策\,；分类把信息提前 collapse,\,且费率门槛 $f$ 不在 loss 里。\\[2pt]
-      \,\,$\Rightarrow$ L2 $+$ ETUD 是 \rhl{决策延后绑定}的最简实现。
-    \end{block}
-  \end{columns}
+  \begin{center}\scriptsize
+    \textbf{\color{icmlblue}观察}：\textbf{GBDT 三家基本差不多}（LGB $\approx$ XGB $\approx$ CatBoost），库选择不是瓶颈。
+  \end{center}
 \end{frame}
 
 % =========================================================
@@ -363,10 +415,9 @@
     \textbf{\color{icmlblue}两阶段训练流程}
     \begin{enumerate}\setlength{\itemsep}{2pt}
       \item \hl{Phase 1 —— L2 回归预训练}\\
-        \scriptsize 目标 $y=(\mathrm{mp}_{t+60}-\mathrm{mp}_t)/(\mathrm{mp}_t+1)$\,；\,光滑二次损失,\,逼近真值,\,提供\textbf{良好初值}
+        \scriptsize 目标 $y=(\mathrm{mp}_{t+60}-\mathrm{mp}_t)/(\mathrm{mp}_t+1)$
       \item \hl{Phase 2 —— SPO+ joint finetune}\\
-        \scriptsize warm-start,\,\textbf{全量数据}(train+val,\,0--119) L2 $+$ SPO+ surrogate 联合优化\\
-        \scriptsize lr $3{\times}10^{-5}$,\,11 ep,\,$\lambda{=}30$
+        \scriptsize warm-start,\,\textbf{全量数据}(train+val,\,0--119) SPO+ 联合优化
     \end{enumerate}
 
     \vspace{2pt}
@@ -378,13 +429,13 @@
     \vspace{1pt}
     \textbf{\color{icmlblue}两个好处}
     \begin{itemize}\setlength{\itemsep}{1pt}
-      \item \hl{(1) SPO+}\,—— 梯度从"预测准"对齐到"PnL 高"\,；让 NN 明确感知\textbf{执行端的非对称买卖 reward}（费率门槛 $f$ 处的 kink）
-      \item \hl{(2) 全量数据 finetune}\,—— Phase 2 在 train+val 0--119 上做（与 \textbf{M7 retrain 同思路}），把验证集数据收回训练
+      \item \hl{(1) 对齐买卖 PnL}
+      \item \hl{(2) 全数据 Data scaling}
     \end{itemize}
 
     \vspace{1pt}
     \begin{center}
-      \rhl{$+3.54$ PnL}\,\,（最大单一训练 trick 增益）
+      \rhl{$+3.54$ PnL}
     \end{center}
   \end{columns}
 \end{frame}
@@ -393,35 +444,17 @@
 % Slide 9 — Ensemble + Execution merged (with top progression hl)
 % =========================================================
 \begin{frame}{集成 \& 执行：$50\!\times\!50$ simple-mean $+$ ETUD 非对称阈值}
-  \vspace{-4pt}
-  % top progression highlight
-  \begin{center}
-    \footnotesize
-    \fcolorbox{icmlblue!50}{icmlblue!5}{%
-      \begin{minipage}{0.96\textwidth}
-        \centering
-        \textbf{Onepage Table 1 行 17$\to$20 累计进展}:\,\,
-        $(5{+}5)$ ensemble $+37.12$ \,$\to$\, $+$\hl{ETUD} $37.90$ \,$\to$\, $+$\hl{SPO+} $41.44$ \,$\to$\, $+$\hl{$50{\times}50$ HP cycling} \rhl{$41.58$ (SOTA)}
-      \end{minipage}}
-  \end{center}
-  \vspace{2pt}
-
+  \vspace{-2pt}
   \begin{columns}[T,onlytextwidth]
     \column{0.52\textwidth}
     \begin{block}{\hl{50 NN $+$ 50 LGB 异质集成}}
-      \scriptsize
-      5 组 HP $\times$ 10 seed = 50 NN + 50 LGB\\
-      \textbf{simple mean，不学权重}\,;\,跨族权重 \hl{NN $:$ LGB $=$ 1.0 $:$ 1.5}\\[3pt]
-      为什么？\\
-      \,\,$\bullet$ NN--NN avg $|\rho|=0.93$,\,LGB--LGB $0.84$\\
-      \,\,$\bullet$ 设计矩阵条件数 $5.4{\times}10^{4}$（病态共线）\\
-      \,\,$\bullet$ bounded NNLS 本地涨,\,公榜 \rhl{$-4.64$}\\[3pt]
-      \textbf{OOD 上 simple mean 是稳健最优}
+      \footnotesize
+      $50 = 5\text{HP} \times 10\text{seed}$\,;\,simple mean\,;\,\\跨族 \hl{$w_{\mathrm{NN}}:w_{\mathrm{LGB}} = 1.0 : 1.5$}
     \end{block}
 
     \column{0.46\textwidth}
     \begin{block}{\hl{ETUD —— 非对称执行阈值}}
-      \scriptsize
+      \footnotesize
       \vspace{-4pt}
       \[
       \hat a =
@@ -432,16 +465,47 @@
       \end{cases}
       \]
       \vspace{-2pt}
-      \rhl{$\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$}\,,\,\,\rhl{$\theta_{\mathrm{dn}}{=}2.16{\times}10^{-4}$}\\[2pt]
-      \textbf{ratio $0.8$ 约束 2D DE 搜索},\,验证集冻结\\
-      不对称匹配训练样本正向漂移\\
-      $\Rightarrow$ 避免 wide-DE 在 OOF 上过拟合
+      \hl{$\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$}\,,\,\,\hl{$\theta_{\mathrm{dn}}{=}2.16{\times}10^{-4}$}
     \end{block}
   \end{columns}
+
   \vspace{2pt}
-  \begin{center}\scriptsize\itshape
-    决策参数\textbf{不在 OOF 上学权重}\,，只在执行侧用 1 个二维阈值搜——OOD 上"简单 = 稳健"的延伸。
-  \end{center}
+  \begin{columns}[T,onlytextwidth]
+    %% LEFT: 5-seed HP scan -- val/test mismatch motivates ensemble
+    \column{0.44\textwidth}
+    \begin{center}\scriptsize
+    \textbf{\color{icmlblue}超参搜索 OOD 不一定靠谱：Val Test Gap}\\[1pt]
+    \setlength{\tabcolsep}{3pt}
+    \begin{tabular}{@{}cccc@{}}
+    \toprule
+    seed & lr / dropout / batch & val PnL & test PnL \\
+    \midrule
+    1 & $10^{-4}$ / 0.05 / 2048 & \hl{$44.58$} & $35.09$ \\
+    2 & $3{\cdot}10^{-4}$ / 0.10 / 4096 & $39.07$ & $36.94$ \\
+    3 & $10^{-3}$ / 0.15 / 8192 & $34.38$ & $37.34$ \\
+    4 & $10^{-4}$ / 0.20 / 2048 & $34.52$ & \hl{$37.80$} \\
+    5 & $3{\cdot}10^{-4}$ / 0.05 / 4096 & $38.78$ & $33.47$ \\
+    \bottomrule
+    \end{tabular}
+    \end{center}
+
+    %% RIGHT: ensemble size sweep (enlarged -- more important)
+    \column{0.54\textwidth}
+    \begin{center}\footnotesize
+    \textbf{\color{icmlblue}集成规模 vs 公榜累计收益率}\\[2pt]
+    \setlength{\tabcolsep}{6pt}\renewcommand{\arraystretch}{1.15}
+    \begin{tabular}{@{}lcc@{}}
+    \toprule
+    规模 & HP\,$\times$\,seed & 公榜 PnL \\
+    \midrule
+    $5{+}5$ & $1 \times 5$ & $+34.64$ \\
+    $50{+}50$ & \hl{$5 \times 10$} & \rhl{$+35.64$ (SOTA)} \\
+    $150{+}150$ & $15 \times 10$ & $+34.59$ \\
+    \bottomrule
+    \end{tabular}\\[2pt]
+    {\scriptsize\itshape $5\!\to\!50$ HP cycling 上榜 $+1.00$；继续扩到 $15$ HP 反退 $-1.05$。}
+    \end{center}
+  \end{columns}
 \end{frame}
 
 % =========================================================
@@ -450,18 +514,15 @@
 \begin{frame}{大消融 waterfall —— 按领域上色：\textcolor{featblue}{Feature} $\to$ \textcolor{ensgreen}{Ensemble \& Execution}}
   \begin{center}
     \vspace{-4pt}
-    \includegraphics[width=0.98\linewidth]{waterfall.pdf}
-  \end{center}
-  \vspace{-8pt}
-  \begin{center}\scriptsize
-    \textbf{3 个高 ROI trick}\,\,：\hl{window-$z$ +22.88}（Feature/OOD）\,·\,\hl{F6 不对称性 +4.64}（Feature）\,·\,\hl{SPO+ DFL +3.54}（Ensemble\&Exec）
+    \includegraphics[width=0.98\linewidth]{waterfall.pdf}\\[2pt]
+    {\footnotesize\itshape PnL 为本地测试集结果}
   \end{center}
 \end{frame}
 
 % =========================================================
 % Slide 11 — Leaderboard
 % =========================================================
-\begin{frame}{Leaderboard —— 公榜 \#1 / 私榜 \#1 / $h{=}40$ 私榜亦第一}
+\begin{frame}{Leaderboard —— 私榜 \#1（$h{=}60$）/ $h{=}40$ \#1}
   \vspace{-4pt}
   \begin{center}
     \setlength{\tabcolsep}{6pt}\renewcommand{\arraystretch}{1.15}
@@ -470,44 +531,191 @@
       \toprule
       榜单 & $h$ & 准确率 & 召回率 & F$_{0.5}$ & 单次收益率 & \textbf{累计收益率 (评分)} \\
       \midrule
-      \textbf{公榜} & 60 & 0.3233 & 0.3177 & 0.3222 & $1.91{\times}10^{-4}$ & \rhl{\textbf{35.64}}\,\,(\textbf{\#1}) \\
+      \textbf{公榜} & 60 & 0.3233 & 0.3177 & 0.3222 & $1.91{\times}10^{-4}$ & \rhl{\textbf{35.64}} \\
       \textbf{私榜} & 60 & 0.3122 & 0.3390 & 0.3172 & $2.39{\times}10^{-4}$ & \rhl{\textbf{41.61}}\,\,(\textbf{\#1}) \\
-      \textbf{私榜} & 40 & 0.2712 & 0.4062 & 0.2905 & $1.94{\times}10^{-4}$ & \rhl{\textbf{38.65}}\,\,(\textbf{$h{=}40$ 第一}) \\
+      \textbf{私榜} & 40 & 0.2712 & 0.4062 & 0.2905 & $1.94{\times}10^{-4}$ & \rhl{\textbf{38.65}}\,\,(\textbf{$h{=}40$ \#1}) \\
       \bottomrule
     \end{tabular}
   \end{center}
   \vspace{6pt}
+  \begin{center}\footnotesize
+    研究针对 $h{=}60$\,;\,$h{<}60$\,: $\theta(h') = \sqrt{h/60} \cdot \theta(60)$
+  \end{center}
+\end{frame}
+
+% =========================================================
+% Slide — Section divider: 基于 AI Agent 的研究方案
+\begin{frame}[plain]
+  \vfill
+  \begin{center}
+    \begin{tikzpicture}
+      \draw[lblue, line width=1.2pt] (0,0) -- (8,0);
+    \end{tikzpicture}\\[24pt]
+    {\Huge\bfseries\color{icmlblue} 第二部分：AI Agent 如何辅助量化比赛实战}\\[36pt]
+    \begin{tikzpicture}
+      \draw[lblue, line width=1.2pt] (0,0) -- (8,0);
+    \end{tikzpicture}
+  \end{center}
+  \vfill
+\end{frame}
+
+% Slide — Agent timeline (Karpathy-style)
+\begin{frame}{我\,$+$\,我的 Agent 系统的开发节奏 —— 6 天\,/\,100$+$ 轮实验\,/\,20 次公榜}
   \begin{columns}[T,onlytextwidth]
-    \column{0.55\textwidth}
-    \footnotesize
-    \begin{itemize}\setlength{\itemsep}{2pt}
-      \item 本文研究主线 $h{=}60$，模型/损失/特征/阈值\textbf{全部围绕 $h{=}60$ 优化}
-      \item $h{<}60$ 不重新训练、不重新调参\,，只按 $\sqrt{h/60}$ 简单缩放阈值
-      \item 即便如此 $h{=}40$ 仍取该 horizon 第一（$+38.65$）
+    \column{0.50\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{fig_b_local_pnl.pdf}
+    \column{0.50\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{fig_a_public_pnl.pdf}
+  \end{columns}
+  \vspace{2pt}
+  \begin{center}\footnotesize
+    \textbf{辅助 Agent 将研究节奏从天加速到小时}
+  \end{center}
+\end{frame}
+
+% =========================================================
+% Slide 15 — AI Agent 设计初衷 + 实现方案
+% =========================================================
+\begin{frame}{AI Agent 研究系统：设计初衷 \& 实现方案}
+  \vspace{-4pt}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.40\textwidth}
+    \textbf{\color{icmlblue}设计初衷}
+    \begin{itemize}\setlength{\itemsep}{6pt}
+      \item {\footnotesize \hl{正确性}}
+      \item {\footnotesize \hl{高效性}}
+      \item {\footnotesize \hl{可追溯性}}
     \end{itemize}
-    \column{0.42\textwidth}
-    \footnotesize\itshape
-    \,\,准确率/召回率/F$_{0.5}$ 针对涨/跌出手类 (label$\in\{0,2\}$)\,，\\
-    \,\,"不出手"不计；评分 $=$ 累计收益率。
+    \vspace{6pt}
+    \textbf{\color{icmlblue}实现方案}
+    \begin{itemize}\setlength{\itemsep}{3pt}
+      \item {\footnotesize \hl{Claude Code} based agent\,—\,\hl{on server}}
+      \item {\footnotesize \hl{Manager-Worker} 架构\,—\,\hl{单 Manager 易追踪管理、多 worker 可高效并行}}
+      \item {\footnotesize \hl{周期唤醒消息}\,—\,\hl{Always On}}
+      \item {\footnotesize \hl{IM（飞书）}主交互界面 (IM first)}
+      \item {\footnotesize 版本管理 \& 记录 \& 可视化:\,
+        \raisebox{-2.5pt}{\includegraphics[height=10pt]{github_logo.png}}\,GitHub\,
+        \raisebox{-2.5pt}{\includegraphics[height=9pt]{wandb_logo.png}}\,
+        \texttt{vast.ai}\,/\,HF}
+    \end{itemize}
+
+    \column{0.58\textwidth}
+    \vspace{-2pt}
+    \begin{center}
+      {\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{1.0pt}%
+       \fcolorbox{black!45}{white}{\includegraphics[width=\linewidth,height=0.78\textheight,keepaspectratio]{feishu_tool_2.png}}}\\[1pt]
+      {\tiny\itshape \textbf{Agent 全天候跑在服务器上；飞书 IM 随时随地（手机 \& 电脑）作为主交互界面}；GitHub/WandB 实验 log 作为辅助版本管理、实验理解和可视化工具；IDE (VS Code) 仅作代码审查 review\,。}
+    \end{center}
+  \end{columns}
+  \vfill
+  \begin{center}\scriptsize\itshape
+    6 天：100+ 轮实验,\,200+ commit,\,20 次提交
+  \end{center}
+\end{frame}
+
+% =========================================================
+% Slide 16 — Agent 能做 / 人需要做
+% =========================================================
+\begin{frame}{分工：Agent 可以做 vs.\ 人需要做}
+  \vspace{-4pt}
+  \begin{center}
+  \begin{tikzpicture}[
+    every node/.style={font=\footnotesize},
+    aibox/.style={draw=lblue, fill=lblue!12, line width=1pt, rounded corners=4pt,
+                  minimum width=4.2cm, minimum height=0.85cm, align=center},
+    humanbox/.style={draw=accred, fill=accred!10, line width=1pt, rounded corners=4pt,
+                     minimum width=4.2cm, minimum height=0.85cm, align=center},
+    hdr/.style={font=\bfseries\large},
+  ]
+    % Headers
+    \node[hdr, lblue]  (h1) at (-3.3, 4.2) {\Large $\blacktriangleright$\ Agent 可以做};
+    \node[hdr, accred] (h2) at ( 3.3, 4.2) {\Large $\blacktriangleleft$\ 人需要做};
+
+    % AI side (left)
+    \node[aibox] (a1) at (-3.3, 3.2) {\textbf{调研}\\[-2pt]\scriptsize paper search · brainstorm};
+    \node[aibox] (a2) at (-3.3, 2.0) {\textbf{实现 Coding}\\[-2pt]\scriptsize 特征 · 训练 · ablation 脚本};
+    \node[aibox] (a3) at (-3.3, 0.8) {\textbf{给建议}\\[-2pt]\scriptsize validity check · bug review};
+
+    % Human side (right)
+    \node[humanbox] (h_b1) at ( 3.3, 3.2) {\textbf{给定边界}\\[-2pt]\scriptsize sym-agnostic · 防数据污染 · OOD 警告};
+    \node[humanbox] (h_b2) at ( 3.3, 2.0) {\textbf{定义问题}\\[-2pt]\scriptsize 决策问题（非 3-class 分类）};
+    \node[humanbox] (h_b3) at ( 3.3, 0.8) {\textbf{拆分方向}\\[-2pt]\scriptsize 因子 → 模型 → 集成 → 反思 → 正确性};
+    \node[humanbox] (h_b4) at ( 3.3,-0.4) {\textbf{搭建验证}\\[-2pt]\scriptsize V4 + LOSO · 平台公榜作 OOD 裁判};
+
+    % Center connection: human directs AI
+    \draw[->, line width=1.2pt, accred!70] (h_b2.west) -- node[above, font=\scriptsize, accred]{定方向} (a2.east);
+
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+% =========================================================
+% Slide 17 — 使用习惯变更：时间分配 + 人机交互
+% =========================================================
+\begin{frame}{使用习惯变更：时间分配 \& 人机交互}
+  \vspace{2pt}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.62\textwidth}
+    \textbf{\color{icmlblue}我的时间分配（打比赛）}\\[6pt]
+    \begin{center}
+      \footnotesize
+      \setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.25}
+      \begin{tabular}{@{}lcccc@{}}
+        \toprule
+        阶段 & 想方向 & 调研\&想 idea & 实现 idea & 反思 \\
+        \midrule
+        以前（前 Agent 时代） & 1 & 4 & 4 & 1 \\
+        现在（Agent 时代） & \rhl{6} & \hl{1} & \hl{1} & \rhl{2} \\
+        \bottomrule
+      \end{tabular}
+    \end{center}
+    \vspace{4pt}
+    {\scriptsize\itshape 人类时间从``写代码''显著迁移到``定义问题 + 反思决策''。}
+
+    \column{0.36\textwidth}
+    \textbf{\color{icmlblue}人机交互}
+    \begin{itemize}\setlength{\itemsep}{6pt}
+      \item {\footnotesize \hl{飞书 IM : VS Code = 8 : 2}}
+      \item {\footnotesize \hl{目标定义 : 方法分配 : 编码 = 5 : 4 : 1}}
+      \item {\footnotesize Agent 承担:\,paper / brainstorm / coding / validity check / doc 生成}
+    \end{itemize}
   \end{columns}
 \end{frame}
 
 % =========================================================
-% Slide 12 — Takeaways
+% Slide — Takeaways
 % =========================================================
-\begin{frame}{Takeaways —— 5 条对未来 LOB 实盘有迁移价值的经验}
-  \vspace{2pt}
-  \begin{enumerate}\setlength{\itemsep}{6pt}
-    \item \hl{sym-agnostic 是硬约束，不是"建议"}\,\,---\,\,任何 sym embedding / per-sym 归一化 / per-sym 模型都会被评测端打散。\textbf{在输入侧（window-$z$）解决，比在模型侧绕路简单 10 倍}。
+\begin{frame}{Takeaways: Agent 时代的量化（比赛）}
+  \vspace{14pt}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.50\textwidth}
+    \begin{minipage}[t]{\linewidth}
+    \begin{center}
+      \textbf{\color{icmlblue}\Large 量化侧}
+    \end{center}
+    \vspace{8pt}
+    \begin{enumerate}\setlength{\itemsep}{18pt}
+      \item {\Large\hl{Find the Right Axis to Scale}}
+      \item {\Large\hl{Ask the Right Question}}
+      \item {\Large\hl{Ensure Right Verifications}}
+    \end{enumerate}
+    \end{minipage}
 
-    \item \hl{决策焦点学习给 $+3.54$ PnL}\,\,---\,\,把 L2 回归改 SPO+ 决策焦点 surrogate，让梯度真正对齐执行端的离散动作期望收益。\textbf{评分函数本身就是 loss，最好的 loss 是 surrogate of scoring}。
-
-    \item \hl{OOD 上 simple mean $>$ learned weights}\,\,---\,\,基模型平均 corr 0.84/0.93、设计矩阵病态共线下，bounded NNLS 本地涨而公榜 $-4.64$。\textbf{决策参数不要在 OOF 上学}。
-
-    \item \hl{F1 + F3 = 75.5\% 的 LGB gain}\,\,---\,\,LOB 派生 + 订单流强度是绝大多数 alpha 的载体；F2/F4/F5/F6 是\textbf{方差源去相关而非均值源}。
-
-    \item \hl{窗口 + 镜像 + 稳健归一化}\,\,---\,\,三个看似"小"的预处理一起，把 NN 从 $+0.52$ 抬到 $+34$；\textbf{特征工程的复利远超模型架构选择}。
-  \end{enumerate}
+    \column{0.48\textwidth}
+    \hspace*{2.8cm}\begin{minipage}[t]{\dimexpr\linewidth-2.8cm\relax}
+    \begin{center}
+      \textbf{\color{icmlblue}\Large Agent 侧}
+    \end{center}
+    \vspace{8pt}
+    \begin{enumerate}\setlength{\itemsep}{18pt}
+      \item {\Large\hl{正确性}}
+      \item {\Large\hl{高效性}}
+      \item {\Large\hl{可追溯性}}
+    \end{enumerate}
+    \end{minipage}
+  \end{columns}
 \end{frame}
 
 % =========================================================
@@ -516,25 +724,23 @@
 \begin{frame}[plain]
   \vfill
   \begin{center}
-    {\Large\bfseries\color{icmlblue} 谢谢评委 \& 良文杯组委会}\\[18pt]
+    {\large 792 队\,\,\textbf{史景喆}\,\,清华大学\,\,\textbar\,\,私榜累计收益率\,\rhl{$+41.61$}\,\,\textbf{\#1}}\\[18pt]
 
-    \begin{tikzpicture}
-      \draw[lblue, line width=1.2pt] (0,0) -- (8,0);
-    \end{tikzpicture}\\[14pt]
+    {\Huge\bfseries\color{icmlblue} 感谢厦门大学、AITOPIA、组委会、}\\[8pt]
+    {\Huge\bfseries\color{icmlblue} 评委和老师们、所有同学们！}\\[28pt]
 
-    \begin{tabular}{rl}
-      \small 累计收益率 (公榜)：& \rhl{\large $+35.64$}\,\,（\textbf{\#1}）\\
-      \small 累计收益率 (私榜)：& \rhl{\large $+41.61$}\,\,（\textbf{\#1}）\\
-      \small 起点 baseline：& \small $-6.65$\,\,$\Rightarrow$\,\,净增益 \rhl{$+42.29$}\\
-    \end{tabular}\\[18pt]
-
-    {\small 史景喆 （清华大学）}\\[6pt]
-    {\footnotesize\itshape 代码开源\,:\,\,\texttt{github.com/JingzheShi/liangwenbei}}
+    \setlength{\tabcolsep}{14pt}\renewcommand{\arraystretch}{1.0}
+    \begin{tabular}{@{}>{\centering\arraybackslash}p{4.3cm}>{\centering\arraybackslash}p{4.3cm}>{\centering\arraybackslash}p{4.3cm}@{}}
+      \includegraphics[width=2.6cm]{qrcode_github_liangwenbei.jpg} &
+      \includegraphics[width=2.6cm]{qrcode_personal.jpg} &
+      \includegraphics[width=2.6cm]{qrcode_personal_en.jpg} \\[3pt]
+      {\footnotesize 代码 (GitHub)} & {\footnotesize 个人主页（中文）} & {\footnotesize Personal Page (Eng)} \\
+      {\tiny\color{lblue} \url{https://github.com/JingzheShi/liangwenbei}} &
+      {\tiny\color{lblue} \url{https://jingzheshi.github.io/index_cn.html}} &
+      {\tiny\color{lblue} \url{https://jingzheshi.github.io/}} \\
+    \end{tabular}
   \end{center}
   \vfill
-  \begin{center}\tiny\color{black!55}
-    References:\,\, Cont \& Kukanov (2014) OFI\,\,·\,\,Stoikov (2014) WMP\,\,·\,\,Elmachtoub \& Grigas (2022) SPO+\,\,·\,\,Zhang et al.\,(2024) TLOB/MLPLOB
-  \end{center}
 \end{frame}
 
 \end{document}

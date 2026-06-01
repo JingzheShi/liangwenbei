@@ -1,6 +1,6 @@
 % !TEX program = xelatex
 % Single-side, single-page A4 summary for 良文杯 2026 finals
-% Team 792 "超级回天什么时候上映" — 史景喆，清华大学
+% Team 792 ``超级回天什么时候上映'' — 史景喆，清华大学
 % Content distilled from report_full.tex (Features / Model / Results only)
 \documentclass[10pt,twocolumn]{article}
 
@@ -65,11 +65,11 @@
 
 \twocolumn[{%
 \centering
-{\large\bfseries\color{icmlblue}面向 PnL 目标的 LOB 中间价方向预测：$\Delta$mid 回归 $+$ SPO+ 决策焦点学习 $+$ $50\!\times\!50$ 异质集成}\par
+{\large\bfseries\color{icmlblue}私榜第一名队伍报告：比赛方案 \,\&\, 基于 AI Agent 的研究方案}\par
 \vspace{1pt}
-{\footnotesize\itshape 第二届"良文杯"统计建模与 AI 预测挑战赛\,\textemdash\,汇报摘要}\par
+{\footnotesize\itshape 第二届``良文杯''统计建模与 AI 预测挑战赛\,\textemdash\,汇报摘要}\par
 \vspace{2pt}
-{\scriptsize 随机码 \textbf{792} \,\textbar\, 队伍：\textbf{超级回天什么时候上映} \,\textbar\, 作者：\textbf{史景喆}（清华大学）\,\textbar\, 公榜 $-6.65 \to$ \textcolor{accred}{\textbf{$+35.64$}}（增益 \textcolor{accred}{\textbf{$+42.29$}}），\textbf{公榜 \#1}，私榜 \textbf{\#1}（待组委会公布分数）}\par
+{\scriptsize 随机码 \textbf{792} \,\textbar\, 队伍：\textbf{超级回天什么时候上映} \,\textbar\, 作者：\textbf{史景喆}（清华大学）\,\textbar\, \textbf{私榜累计收益率 \textcolor{accred}{$41.61$}}，公榜与私榜均为决赛参赛队伍\textcolor{accred}{\textbf{第一}}}\par
 \vspace{3pt}
 }]
 
@@ -81,13 +81,13 @@
 
 \section{摘要}
 
-我们将赛题理解为：在少量股票样本上训练、在其他股票上预测的、带有交易成本的期望收益预测问题；研究过程紧盯\textbf{正确性、有效性、范化性}。最终方案以因子工程 + L2 $\Delta$mid 回归 + SPO+ 决策焦点学习 (DFL) + 50 NN $\times$ 50 LightGBM 异质集成构成，\textbf{公榜累计收益率 $+35.6$（baseline $-6.7$），公榜与私榜均为决赛参赛队伍第一}。
+我将赛题理解为：在少量股票样本上训练、在其他股票上预测的、带有交易成本的期望收益预测问题；研究过程紧盯\textbf{正确性、有效性、范化性}。最终方案以因子工程 + L2 $\Delta$mid 回归 + SPO+ 决策焦点学习 (DFL) + 50 NN $\times$ 50 LightGBM 异质集成构成，\textcolor{accred}{\textbf{公榜、私榜为决赛参赛队伍第一名}}。
 
-我们同时基于 Claude Code 的 Agent Harness 构建了 Manager-Worker 多 Agent 架构、并集成至飞书 IM，实现\textbf{正确性、高效性、可追溯性}的 Coding Agent 研究流程：一周内完成约 200 组本地实验、约 200 次 commit。代码开源于 \url{https://github.com/JingzheShi/liangwenbei}。
+我同时基于 Claude Code 的 Agent Harness 构建了 Manager-Worker 多 Agent 架构、并集成至飞书 IM，实现\textbf{正确性、高效性、可追溯性}的 Coding Agent 研究流程：一周内完成约 200 组本地实验、约 200 次 commit。代码开源于 \url{https://github.com/JingzheShi/liangwenbei}。
 
 \begin{center}
 \vspace{-3pt}
-\includegraphics[width=\linewidth]{Pipeline_Img.png}\\[2pt]
+\includegraphics[width=0.82\linewidth]{Pipeline_Img.png}\\[2pt]
 \begin{minipage}{0.97\linewidth}
 \scriptsize\itshape
 Fig.~1：方案 pipeline 概览——Data $\to$ 6 家族 Feature $\to$ NN(MLP) 与 LGB(L2 回归) 异质 Model $\to$ Ensemble $\to$ Execution（ETUD 阈值学习）$\to$ Label。
@@ -107,32 +107,32 @@ Fig.~1：方案 pipeline 概览——Data $\to$ 6 家族 Feature $\to$ NN(MLP) �
 
 % =========================================================
 \section{因子工程}
-以 154 维原始字段为底，叠加 216 维派生量、按 KS 检验丢弃 11 个分布偏移敏感列，得到 SchemeP 共 359 维，分六大家族：
+以 154 维原始字段为底叠加 216 维派生量、KS 检验丢 11 列得 SchemeP 359 维。六大家族（raw $+$ 派生）：
 \begin{itemize}
   \setlength{\itemsep}{0pt}
-  \item \hlA{LOB 派生}（$\sim$30 维）：midprice / spread / imbalance / 微价格；
-  \item \hlA{多尺度 OFI}（$\sim$50 维）：MLOFI / EWMA-OFI 多 $\alpha$ / Kyle $\lambda$ rolling, $W\!\in\!\{5,20,50,100\}$；
-  \item \hlA{订单流强度}（$\sim$30 维）：6 类订单 \texttt{intst/ind/acc} $+$ cancel pressure；
-  \item \hlA{微结构波动}（$\sim$25 维）：signed RV / bipower / Roll / vol-burst；
-  \item \hlA{窗口统计}（$\sim$60 维）：100-tick z-score / dual-z / quantile rank；
-  \item \hlA{不对称性}（$\sim$30 维）：bid/ask asymmetry / GOFI / EWMA residual。
+  \item \hlA{LOB 派生}（94$+$11$=$105 维）：OHLC / 10 档 bid・ask 价 + 挂单量 / aggregate / midprice / spread / WMP；
+  \item \hlA{多尺度 OFI}（0$+$50$=$50 维）：MLOFI / EWMA-OFI 多 $\alpha$ / Kyle $\lambda$, $W\!\in\!\{5,20,50,100\}$；
+  \item \hlA{订单流强度}（18$+$27$=$45 维）：6 类订单 \texttt{intst/ind/acc} + EWMA-intst + cancel pressure；
+  \item \hlA{微结构波动}（2$+$27$=$29 维）：volume/amount\_delta + signed RV / bipower / Roll / vol-burst；
+  \item \hlA{窗口统计}（0$+$67$=$67 维）：100-tick z-score / dual-z / quantile rank；
+  \item \hlA{不对称性}（40$+$34$=$74 维）：bid/ask rate L1--L10 + bsize/asize rate + GOFI / EWMA residual。
 \end{itemize}
 三类关键预处理：
 \begin{itemize}
   \setlength{\itemsep}{0pt}
   \item \hlA{window-$z$ score}（输入归一化）——所有统计量在 100-tick 切片内自适应归一化，跨 stock 分布差异被窗口吸收；
-  \item \hlA{买卖镜像数据增强}——样本与"bid/ask 互换 $+$ 标签反转"的镜像拼接，训练集 $\times 2$，强制方向对称；
+  \item \hlA{买卖镜像数据增强}——样本与``bid/ask 互换 $+$ 标签反转''的镜像拼接，训练集 $\times 2$，强制方向对称；
   \item \hlA{稳健归一化}（重尾压制）——对 \texttt{amount\_delta}（$10^3$--$10^6$ 量级）做保号 log：$v\mapsto\operatorname{sign}(v)\log(1{+}|v|)$。
 \end{itemize}
 
 \begin{center}
-\vspace{-2pt}
-\includegraphics[width=\linewidth]{Feature_Img.pdf}\\[1pt]
+\vspace{-3pt}
+\includegraphics[width=0.95\linewidth]{Feature_Img.pdf}\\[1pt]
 \begin{minipage}{0.97\linewidth}
 \scriptsize\itshape
-Fig.~2：因子工程概览。\textbf{左}：六家族维度占比（浅）与 LGB gain\% 贡献（深）——\hl{F1+F3 共 75.5\%} 占主导；\textbf{中}：Top-10 因子全部落在 F3 订单流强度（4）与 F1 LOB 派生（6）；\textbf{右}：家族间 |corr| block-mean，F5 窗口统计与其它族均接近正交（$\leq 0.07$），为 OOD 稳健性提供 anchor。
+Fig.~2：\textbf{左} 六家族维度占比（浅）/ LGB gain\%（深），\hl{F1+F3 = 75.5\%}；\textbf{中} Top-10 全在 F3(4) + F1(6)；\textbf{右} 家族间 |corr| block-mean，F5 与其他族 $\leq 0.07$ 近正交。
 \end{minipage}
-\vspace{-2pt}
+\vspace{-3pt}
 \end{center}
 
 % =========================================================
@@ -161,20 +161,11 @@ L = (\hat y{-}y)^2 + \lambda\,\ell_{\mathrm{SPO+}},\quad \lambda{=}30,\ \mathrm{
 
 % =========================================================
 \section{执行侧}
-\hlC{非对称阈值 (ETUD)}：集成预测 $\hat y$ 通过非对称 EV gate 解码为离散动作：
-\[
-\hat a = \begin{cases}
-+1\,(\text{买}), & \hat y > +\theta_{\mathrm{up}},\\[-1pt]
--1\,(\text{卖}), & \hat y < -\theta_{\mathrm{dn}},\\[-1pt]
-\phantom{+}0\,(\text{不出手}), & \text{otherwise.}
-\end{cases}
-\]
-$\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$、$\theta_{\mathrm{dn}}{=}2.16{\times}10^{-4}$ 由验证集 2D DE 搜出后冻结，两者不对称以匹配训练样本的正向漂移偏差。
+\hlC{非对称阈值 (ETUD)}：集成预测 $\hat y$ 通过非对称 EV gate 解码为离散动作 $\hat a \in \{-1, 0, +1\}$：当 $\hat y > \theta_{\mathrm{up}}$ 时买入、$\hat y < -\theta_{\mathrm{dn}}$ 时卖出、否则不出手。$\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$、$\theta_{\mathrm{dn}}{=}2.16{\times}10^{-4}$ 由验证集 2D DE 搜出后冻结，两者不对称以匹配训练样本的正向漂移偏差。
 
 % =========================================================
 \section{实验结果}
 
-所有实验按时间切分：训练集为 date 0--79，验证集 80--95 用于早停与阈值搜索，测试集 96--119 仅做最终评分（未参与任何调参）。单模型行报 5 个随机种子的 mean $\pm$ std；ensemble 行已为多种子聚合结果。
 
 \begin{center}
 \setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{0.92}
@@ -186,13 +177,13 @@ $\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$、$\theta_{\mathrm{dn}}{=}2.16{\tim
 \multicolumn{4}{@{}l}{\textit{\color{icmlblue}Neural Network path}} \\
 1 & NN 154 raw + 分类 Loss (3-class CE)                                                       & $+0.69{\scriptscriptstyle\,\pm 0.13}$ & --- \\
 2 & NN 154 raw + \hlB{L2 regression Loss}                                                  & $+0.52{\scriptscriptstyle\,\pm 0.48}$ & $-0.17$ \\
-3 & NN 154 raw + L2 + \hlA{window-$z$}（输入归一化）                                          & $+23.40{\scriptscriptstyle\,\pm 1.90}$ & $+22.88$ \\
-4 & + \hlA{LOB 派生} Feature                                                                & $+23.33{\scriptscriptstyle\,\pm 1.54}$ & $-0.07$ \\
-5 & + \hlA{多尺度 OFI} Feature                                                              & $+25.90{\scriptscriptstyle\,\pm 1.98}$ & $+2.57$ \\
-6 & + \hlA{订单流强度} Feature                                                              & $+29.49{\scriptscriptstyle\,\pm 1.38}$ & $+3.59$ \\
-7 & + \hlA{微结构波动} Feature                                                              & $+28.98{\scriptscriptstyle\,\pm 3.00}$ & $-0.51$ \\
-8 & + \hlA{窗口统计} Feature                                                                & $+29.68{\scriptscriptstyle\,\pm 1.17}$ & $+0.70$ \\
-9 & + \hlA{不对称性} Feature (370-d Feat)                                                   & $+34.32{\scriptscriptstyle\,\pm 1.60}$ & $+4.64$ \\
+3 & NN 154 raw + L2 + \hlA{window-$z$}                                                       & $+23.40{\scriptscriptstyle\,\pm 1.90}$ & $+22.88$ \\
+4 & + \hlA{LOB 派生} (+11 F1 派生)                                                          & $+23.33{\scriptscriptstyle\,\pm 1.54}$ & $-0.07$ \\
+5 & + \hlA{多尺度 OFI} (+50 F2 整族)                                                        & $+25.90{\scriptscriptstyle\,\pm 1.98}$ & $+2.57$ \\
+6 & + \hlA{订单流强度} (+27 F3 派生)                                                        & $+29.49{\scriptscriptstyle\,\pm 1.38}$ & $+3.59$ \\
+7 & + \hlA{微结构波动} (+32 F4 派生 + 杂项)                                                  & $+28.98{\scriptscriptstyle\,\pm 3.00}$ & $-0.51$ \\
+8 & + \hlA{窗口统计} (+63 F5 整族)                                                          & $+29.68{\scriptscriptstyle\,\pm 1.17}$ & $+0.70$ \\
+9 & + \hlA{不对称性} (+34 F6 派生)                                                          & $+34.32{\scriptscriptstyle\,\pm 1.60}$ & $+4.64$ \\
 10 & + \hlA{drop 11 Feature w. KS 检验} (359-d Feat)                                         & $+32.75{\scriptscriptstyle\,\pm 0.69}$ & $-1.57$ \\
 11 & + \hlA{买卖镜像数据增强} (bid/ask flip, 强制方向对称)                                    & $+35.15{\scriptscriptstyle\,\pm 1.41}$ & $+2.41$ \\
 12 & + \hlA{稳健归一化} (sign-log1p on raw\_last)                                            & $+34.44{\scriptscriptstyle\,\pm 1.39}$ & $-0.72$ \\
@@ -210,7 +201,7 @@ $\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$、$\theta_{\mathrm{dn}}{=}2.16{\tim
 20 & \hlC{(50$+$50, HP cycling)} NN(SPO$+$ DFL) $+$ LGB $+$ ETUD & $\textbf{+41.58}$ & $+0.14$ \\
 \bottomrule
 \end{tabularx}
-\captionof{table}{控制变量消融实验：使用提供的数据进行训练/验证/测试集划分，所有指标在测试集上报告。Row 1--15 由5次相同超参数实验估算测试集PnL和不确定度，Row 16--20 为多模型集成。本表格主要目的为清晰展示各特征、模型、训练方法的增益，并非公榜/私榜成绩，也不完全符合我的研究顺序。}
+\captionof{table}{所有实验按时间切分：训练集 date 0--79，验证集 80--95 用于早停与阈值搜索，测试集 96--119 仅做最终评分（未参与任何调参）。\textbf{Row 3 已含 4 族 raw；row 4--9 每行只加该家族派生部分。}本表展示增益，不等于公榜/私榜成绩。}
 \end{center}
 
 \begin{center}
@@ -220,20 +211,35 @@ $\theta_{\mathrm{up}}{=}3.00{\times}10^{-4}$、$\theta_{\mathrm{dn}}{=}2.16{\tim
 \toprule
 榜单 & $h$ & 准确率 & 召回率 & F$_{0.5}$ & 单次收益率 & 累计收益率\,(=评分) & 决赛参赛队伍排名 \\
 \midrule
-公榜 & $60$ & $0.3233$ & $0.3177$ & $0.3222$ & $1.91{\times}10^{-4}$ & $\mathbf{35.64}$ & \textbf{\#1} \\
+公榜 & $60$ & $0.3233$ & $0.3177$ & $0.3222$ & $1.91{\times}10^{-4}$ & $\mathbf{35.64}$ & --- \\
 私榜 & $60$ & $0.3122$ & $0.3390$ & $0.3172$ & $2.39{\times}10^{-4}$ & $\mathbf{41.61}$ & \textbf{\#1} \\
-私榜 & $40$ & $0.2712$ & $0.4062$ & $0.2905$ & $1.94{\times}10^{-4}$ & $\mathbf{38.65}$ & \textbf{$h{=}40$ 第一} \\
+私榜 & $40$ & $0.2712$ & $0.4062$ & $0.2905$ & $1.94{\times}10^{-4}$ & $\mathbf{38.65}$ & \textbf{$h{=}40$ \#1} \\
 \bottomrule
 \end{tabularx}
 \scriptsize
-\captionof{table}{\textbf{Leaderboard.} 本队（792）公榜（$h{=}60$）与私榜（$h{=}60$、$h{=}40$）均第一。准确率/召回率/F$_{0.5}$ 针对涨/跌出手类（label$\in\{0,2\}$，"平"不出手不计）；模型评分 $=$ 累计收益率。\textbf{本文以 $h{=}60$ 为主线研究}（模型、损失、特征、决策层均围绕 $h{=}60$ 优化）；$h{<}60$ 仅共享 $h{=}60$ 回归预测、并按 $\sqrt{h/60}$ 简单缩放阈值（不重新训练、不重新调参），其中 $h{=}40$ 私榜亦获该 horizon 第一（$+38.65$）。}
+\captionof{table}{\textbf{Leaderboard.} 本队 792 私榜 ($h{=}60$、$h{=}40$) 均 \#1。出手类指 label$\in\{0,2\}$；评分 $=$ 累计收益率。\textbf{$h{=}60$ 为主线}，$h{<}60$ 原计划重新训练并按 $\sqrt{h/60}$ 缩放阈值；\textbf{实战未重训，仅简单缩放阈值，仍取得 $h{=}40$ \#1}（$+38.65$）。}
 \end{center}
 
-\section{Coding Agent 在量化中的使用}
+\section{基于 AI Agent 的研究方案}
 
-\paragraph{系统设计。}基于 Claude Code Agent Harness 构建 Manager-Worker 双层架构并集成至飞书 IM：(i) IM 直连，手机/电脑通过飞书与 Agent 交互；(ii) Manager-Worker 分层，Worker 细节不污染 Manager 上下文；(iii) GitHub + WandB 版本/可视化管理。
+\paragraph{设计初衷。} (1) \hl{正确性}（Correctness）—— 无数据泄露、无未来函数、严格遵守平台硬约束；(2) \hl{高效性}（Efficiency）—— 多 Agent 可并行推进互不干扰；(3) \hl{可追溯性}（Traceability）—— 人与 Agent 可随时查看实验结果、代码的历史版本。
 
-\paragraph{经验。}(1) Agent 对\emph{宽且浅}工作高效（批量 ablation/归并）；(2) \emph{窄且深}决策仍依赖人类先验（"决策参数不在 OOF 上学"、"公榜是唯一 OOD 裁判"）；(3) \textbf{硬约束须以协议形式注入 worker prompt}——\texttt{CRITICAL\_CONSTRAINTS.md} 未注入 worker 可能违反平台协议。一周 200 组实验 / 200 commit，公榜 $-6.7 \to +35.6$。
+\paragraph{实现方案。}(1) \hl{Claude Code based agent on server}（agent 部署在远端服务器，与本地 IDE 解耦）；(2) \hl{Manager--Worker 架构}（单 manager 易追踪，多 worker 高效并行，单批 $\le 8$）；(3) \hl{周期唤醒消息（Always On）}（研究节奏不依赖人在线）；(4) \hl{IM（飞书）主交互界面}（IM-first，手机+电脑全天候）；(5) 版本管理\,\&\,记录\,\&\,可视化工具集成：\textbf{GitHub}（代码）+ \textbf{WandB}（实验）+ \texttt{vast.ai}（GPU）+ HuggingFace。
+
+\begin{center}
+\vspace{-3pt}
+\begin{minipage}{0.49\linewidth}\centering
+\includegraphics[width=\linewidth]{fig_b_local_pnl.pdf}
+\end{minipage}\hfill
+\begin{minipage}{0.49\linewidth}\centering
+\includegraphics[width=\linewidth]{fig_a_public_pnl.pdf}
+\end{minipage}\\[1pt]
+\begin{minipage}{0.97\linewidth}
+\scriptsize\itshape
+Fig.~3：\textcolor{accred}{\textbf{仅 7 天内，100$+$ 轮本地实验，达到公榜/私榜决赛参赛第一名}}。左：143 个本地实验时间线；右：21 次公榜提交时间线（baseline $-6.65 \to$ SOTA $+35.64$，7 个新高）。
+\end{minipage}
+\vspace{-2pt}
+\end{center}
 
 
 
